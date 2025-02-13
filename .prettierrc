@@ -1,0 +1,10 @@
+{
+  "singleQuote": true,
+  "parser": "typescript",
+  "semi": true,
+  "useTabs": false,
+  "tabWidth": 4,
+  "printWidth": 120,
+  "arrowParens": "always",
+  "plugins": ["prettier-plugin-tailwindcss"]
+}
