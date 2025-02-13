@@ -2,19 +2,49 @@
   "name": "meta-cloud-api",
   "private": true,
   "scripts": {
-    "build": "turbo build",
+    "prepare": "husky",
+    "cz": "cz",
     "dev": "turbo dev",
+    "build": "turbo build",
     "lint": "turbo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "format": "turbo format",
     "clean": "rm -rf node_modules && turbo clean"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.6.1",
+    "@commitlint/config-conventional": "^19.6.0",
+    "@commitlint/cz-commitlint": "^19.6.1",
+    "@commitlint/types": "^19.5.0",
+    "commitizen": "^4.3.1",
+    "eslint": "^9.18.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.3.0",
     "prettier": "^3.5.0",
+    "prettier-plugin-tailwindcss": "^0.6.10",
     "turbo": "^2.4.2",
     "typescript": "5.7.3"
   },
   "packageManager": "pnpm@10.0.0",
   "engines": {
     "node": ">=18"
+  },
+  "lint-staged": {
+    "**/*.{ts,tsx}": [
+      "prettier --write --ignore-unknown"
+    ],
+    "./apps/playground/**/*.{ts,tsx}": [
+      "pnpm --filter playground lint"
+    ],
+    "./apps/www/**/*.{ts,tsx}": [
+      "pnpm --filter www lint"
+    ],
+    "./packages/ui/**/*.{ts,tsx}": [
+      "pnpm --filter ui lint"
+    ]
+  },
+  "config": {
+    "commitizen": {
+      "path": "@commitlint/cz-commitlint"
+    }
   }
 }
