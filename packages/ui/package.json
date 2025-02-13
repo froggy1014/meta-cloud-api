@@ -8,7 +8,7 @@
     "./code": "./src/code.tsx"
   },
   "scripts": {
-    "lint": "eslint . --max-warnings 0",
+    "lint": "eslint \"**/*.{ts,tsx}\" --fix --max-warnings 0",
     "generate:component": "turbo gen react-component",
     "typecheck": "tsc --noEmit"
   },
@@ -19,7 +19,7 @@
     "@types/node": "^22.13.0",
     "@types/react": "19.0.8",
     "@types/react-dom": "19.0.3",
-    "eslint": "^9.20.0",
+    "eslint": "^9.20.1",
     "typescript": "5.7.3"
   },
   "dependencies": {
