@@ -1,0 +1,27 @@
+# Add 'enhancement' label to any PR where the head branch name starts with `feature/`
+enhancement:
+  - head-branch: ["^feature/"]
+
+# Add 'bug' label to any PR where the head branch name starts with `fix/`
+bug:
+  - head-branch: ["^fix/"]
+
+# Add 'hotfix' label to any PR where the head branch name starts with `hotfix/`
+hotfix:
+  - head-branch: ["^hotfix/"]
+
+# Add 'chore' label to any PR where the head branch name starts with `chore/`, `test/`, `build/`
+chore:
+  - head-branch: ["^chore/", "^test/", "^build/"]
+
+# Add 'cicd' label to any PR where the head branch name starts with `ci/`
+ci/cd:
+  - head-branch: ["^ci/"]
+
+# Add 'documentation' label to any PR where the head branch name starts with `docs/`
+documentation:
+  - head-branch: ["^docs/"]
+
+# Add 'release' label to any PR that is opened against the `main` branch
+release:
+  - base-branch: "main"
