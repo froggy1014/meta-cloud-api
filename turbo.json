@@ -14,13 +14,12 @@
     "lint": {
       "dependsOn": ["^lint"]
     },
+    "typecheck": {
+      "dependsOn": ["^typecheck"]
+    },
     "format": {
       "dependsOn": ["^format"]
     },
-    "check-types": {
-      "dependsOn": ["^check-types"]
-    },
-
     "clean": {
       "cache": false,
       "persistent": true
