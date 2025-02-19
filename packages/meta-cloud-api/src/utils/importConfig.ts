@@ -6,6 +6,7 @@ const LIB_NAME = 'UTILS';
 const LOG_LOCAL = false;
 const LOGGER = new Logger(LIB_NAME, process.env.DEBUG === 'true' || LOG_LOCAL);
 const DEFAULT_BASE_URL = 'graph.facebook.com';
+const DEFAULT_APIVersion = 'v22.0';
 const DEFAULT_LISTENER_PORT = 3000;
 const DEFAULT_MAX_RETRIES_AFTER_WAIT = 30;
 const DEFAULT_REQUEST_TIMEOUT = 20000;
@@ -37,7 +38,7 @@ export const importConfig = (senderNumberId?: number) => {
         [WabaConfigEnum.AppSecret]: process.env.M4D_APP_SECRET || '',
         [WabaConfigEnum.PhoneNumberId]: senderNumberId || parseInt(process.env.WA_PHONE_NUMBER_ID || ''),
         [WabaConfigEnum.BusinessAcctId]: process.env.WA_BUSINESS_ACCOUNT_ID || '',
-        [WabaConfigEnum.APIVersion]: process.env.CLOUD_API_VERSION || '',
+        [WabaConfigEnum.APIVersion]: process.env.CLOUD_API_VERSION || DEFAULT_APIVersion,
         [WabaConfigEnum.AccessToken]: process.env.CLOUD_API_ACCESS_TOKEN || '',
         [WabaConfigEnum.WebhookEndpoint]: process.env.WEBHOOK_ENDPOINT || '',
         [WabaConfigEnum.WebhookVerificationToken]: process.env.WEBHOOK_VERIFICATION_TOKEN || '',
