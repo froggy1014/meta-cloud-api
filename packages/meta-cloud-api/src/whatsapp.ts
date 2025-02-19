@@ -1,13 +1,6 @@
-if (process.env.NODE_ENV !== 'production' || process.env.TS_NODE_DEV === 'true') {
-    import('dotenv').then((dotenv) => dotenv.config());
-}
-
 import { WabaConfigType } from './types/config';
-
 import * as SDKEnums from './types/enums';
-
 import Logger from './logger';
-
 import MessagesAPI from './api/messages';
 
 import { importConfig } from './utils/importConfig';
