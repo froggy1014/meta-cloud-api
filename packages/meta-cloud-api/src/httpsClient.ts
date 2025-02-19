@@ -1,15 +1,8 @@
-import { IncomingMessage } from 'http';
-import { request, Agent } from 'https';
-import {
-    HttpsClientClass,
-    HttpsClientResponseClass,
-    RequestHeaders,
-    RequestData,
-    ResponseHeaders,
-    ResponseJSONBody,
-} from './types/httpsClient';
+import { Agent } from 'https';
+import fetch, { type BodyInit, HeadersInit, Response, Headers } from 'node-fetch';
 import Logger from './logger';
 import { HttpMethodsEnum } from './types/enums';
+import { HttpsClientClass, HttpsClientResponseClass, ResponseHeaders, ResponseJSONBody } from './types/httpsClient';
 
 const LIB_NAME = 'HttpsClient';
 const LOG_LOCAL = false;
@@ -31,70 +24,44 @@ export default class HttpsClient implements HttpsClientClass {
         hostname: string,
         port: number,
         path: string,
-        method: string,
-        headers: RequestHeaders,
+        method: HttpMethodsEnum,
+        headers: HeadersInit,
         timeout: number,
-        requestData?: RequestData,
+        body?: BodyInit | null,
     ): Promise<HttpsClientResponseClass> {
         const agent = this.agent;
 
-        return new Promise<HttpsClientResponseClass>((resolve, reject) => {
-            const req = request({
-                hostname: hostname,
-                port: port,
-                path: path,
-                method: method,
-                agent: agent,
-                headers: headers,
-            });
+        const url = `https://${hostname}:${port}${path}`;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
 
-            LOGGER.log({
-                hostname: hostname,
-                port: port,
-                path,
+        try {
+            const response = await fetch(url, {
                 method,
-                agent,
                 headers,
+                body,
+                agent,
+                signal: controller.signal,
             });
+            LOGGER.log(`${method} : ${url} - ${JSON.stringify(response)}`);
 
-            req.setTimeout(timeout, () => {
-                // TODO: Handle timeout error with error handler CB and custom error code
-                req.destroy();
-            });
-
-            req.on('response', (resp) => {
-                resolve(new HttpsClientResponse(resp));
-            });
-
-            req.on('error', (error) => {
-                reject(error);
-            });
-
-            req.once('socket', (socket) => {
-                if (socket.connecting) {
-                    socket.once('secureConnect', () => {
-                        LOGGER.log(requestData);
-                        if (method === HttpMethodsEnum.Post || method == HttpMethodsEnum.Put) req.write(requestData);
-                        req.end();
-                    });
-                } else {
-                    if (method === HttpMethodsEnum.Post || method == HttpMethodsEnum.Put) req.write(requestData);
-                    req.end();
-                }
-            });
-        });
+            clearTimeout(timeoutId);
+            return new HttpsClientResponse(response);
+        } catch (error) {
+            throw error;
+        }
     }
 }
 
 export class HttpsClientResponse implements HttpsClientResponseClass {
-    resp: IncomingMessage;
+    res: Response;
     respStatusCode: number;
     respHeaders: ResponseHeaders;
 
-    constructor(resp: IncomingMessage) {
-        this.resp = resp;
-        this.respStatusCode = resp.statusCode || 400;
-        this.respHeaders = resp.headers || {};
+    constructor(resp: Response) {
+        this.res = resp;
+        this.respStatusCode = resp.status;
+        this.respHeaders = Object.fromEntries(resp.headers.entries());
     }
 
     statusCode(): number {
@@ -105,25 +72,16 @@ export class HttpsClientResponse implements HttpsClientResponseClass {
         return this.respHeaders;
     }
 
-    rawResponse(): IncomingMessage {
-        return this.resp;
+    rawResponse(): Response {
+        return this.res;
     }
 
     async responseBodyToJSON(): Promise<ResponseJSONBody> {
-        return new Promise((resolve, reject) => {
-            let response = '';
-
-            this.resp.setEncoding('utf8');
-            this.resp.on('data', (chunk) => {
-                response += chunk.toString();
-            });
-            this.resp.once('end', () => {
-                try {
-                    resolve(JSON.parse(response));
-                } catch (err) {
-                    reject(err);
-                }
-            });
-        });
+        try {
+            return (await this.res.json()) as ResponseJSONBody;
+        } catch (err) {
+            // TODO Error Handling
+            throw new Error('Failed to parse response body to JSON: ' + (err as Error).message);
+        }
     }
 }

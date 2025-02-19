@@ -1,15 +1,7 @@
-/**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- * All rights reserved.
- *
- * This source code is licensed under the license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
 import HttpsClient from './httpsClient';
 import Logger from './logger';
 import type { HttpMethodsEnum } from './types/enums';
-import type { RequestHeaders } from './types/httpsClient';
+import type { HeadersInit } from 'node-fetch';
 import type { RequesterClass } from './types/request';
 
 const LIB_NAME = 'REQUESTER';
@@ -44,8 +36,8 @@ export default class Requester implements RequesterClass {
         this.userAgent = userAgent;
     }
 
-    buildHeader(contentType: string): RequestHeaders {
-        const headers: RequestHeaders = {
+    buildHeader(contentType: string): HeadersInit {
+        const headers: HeadersInit = {
             'Content-Type': contentType,
             Authorization: `Bearer ${this.accessToken}`,
             'User-Agent': this.userAgent,

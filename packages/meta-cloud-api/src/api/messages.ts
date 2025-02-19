@@ -1,6 +1,6 @@
 import type { WabaConfigType } from '../types/config';
 import { ComponentTypesEnum, HttpMethodsEnum, MessageTypesEnum, WabaConfigEnum } from '../types/enums';
-import type { RequestData } from '../types/httpsClient';
+
 import * as m from '../types/messages';
 import type { RequesterClass, RequesterResponseInterface } from '../types/request';
 import BaseAPI from './base';
@@ -42,7 +42,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
         return body;
     }
 
-    send(body: RequestData): Promise<RequesterResponseInterface<m.MessagesResponse>> {
+    send(body: BodyInit | null): Promise<RequesterResponseInterface<m.MessagesResponse>> {
         return this.client.sendRequest(
             this.commonMethod,
             this.commonEndpoint,
