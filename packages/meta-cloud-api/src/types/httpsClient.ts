@@ -12,7 +12,7 @@ export declare class HttpsClientResponseClass {
     statusCode: () => number;
     headers: () => ResponseHeaders;
     rawResponse: () => Response;
-    responseBodyToJSON: () => Promise<ResponseJSONBody>;
+    json: () => Promise<ResponseJSONBody>;
 }
 
 export declare class HttpsClientClass {

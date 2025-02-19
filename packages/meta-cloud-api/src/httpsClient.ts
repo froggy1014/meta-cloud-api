@@ -76,7 +76,7 @@ export class HttpsClientResponse implements HttpsClientResponseClass {
         return this.res;
     }
 
-    async responseBodyToJSON(): Promise<ResponseJSONBody> {
+    async json(): Promise<ResponseJSONBody> {
         try {
             return (await this.res.json()) as ResponseJSONBody;
         } catch (err) {

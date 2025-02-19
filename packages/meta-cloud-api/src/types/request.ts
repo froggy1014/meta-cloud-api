@@ -24,7 +24,7 @@ export interface GeneralHeaderInterface {
 }
 
 export interface RequesterResponseInterface<T> {
-    responseBodyToJSON: () => Promise<T>;
+    json: () => Promise<T>;
 }
 
 export declare class RequesterClass {
