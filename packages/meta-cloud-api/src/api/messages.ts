@@ -42,7 +42,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
         return body;
     }
 
-    send(body: BodyInit | null): Promise<RequesterResponseInterface<m.MessagesResponse>> {
+    private send(body: BodyInit | null): Promise<RequesterResponseInterface<m.MessagesResponse>> {
         return this.client.sendRequest(
             this.commonMethod,
             this.commonEndpoint,
