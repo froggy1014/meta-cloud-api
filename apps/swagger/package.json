@@ -5,7 +5,7 @@
   "main": "dist/api/index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/api/index.js",
+    "start": "nodemon src/app.ts",
     "dev": "nodemon --exec ts-node src/app.ts",
     "clean": "rm -rf dist node_modules"
   },

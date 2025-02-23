@@ -1,7 +1,7 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsDoc from 'swagger-jsdoc';
-import messageRoutes from '../src/routes/message';
+import messageRoutes from './routes/message';
 
 import dotenv from 'dotenv';
 
@@ -36,11 +36,11 @@ const swaggerDocs = swaggerJsDoc(swaggerOptions);
 
 app.use('/swagger-ui', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-app.use('/swagger.json', (req, res) => {
+app.use('/swagger.json', (req: Request, res: Response) => {
     res.json(swaggerDocs);
 });
 
-app.get('/', (req, res) => {
+app.get('/', (req: Request, res: Response) => {
     res.redirect('/swagger-ui');
 });
 
