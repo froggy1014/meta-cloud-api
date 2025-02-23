@@ -35,7 +35,7 @@ const options = {
             },
         ],
     },
-    apis: [path.join(__dirname, 'src', 'routes', '*.js'), path.join(__dirname, 'src', 'spec', '*.yaml')],
+    apis: [path.join(__dirname, '..', 'src', 'routes', '*.js'), path.join(__dirname, '..', 'src', 'spec', '*.yaml')],
 };
 console.log(
     "🚀 ~ options.path.join(__dirname, 'src', 'routes', '*.js':",
