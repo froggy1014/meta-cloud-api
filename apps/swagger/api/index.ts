@@ -42,9 +42,7 @@ app.use('/swagger.json', (req: Request, res: Response) => {
     res.json(swaggerDocs);
 });
 
-app.get('/', (req: Request, res: Response) => {
-    res.redirect('/swagger-ui');
-});
+app.get('/', (req, res) => res.send('Express on Vercel'));
 
 app.listen(PORT, () => console.log(`Server ready on port ${PORT}.`));
 
