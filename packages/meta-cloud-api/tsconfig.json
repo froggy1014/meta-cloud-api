@@ -1,0 +1,29 @@
+{
+    "$schema": "https://json.schemastore.org/tsconfig",
+    "compilerOptions": {
+        "declaration": true,
+        "declarationMap": true,
+        "esModuleInterop": true,
+        "incremental": false,
+        "isolatedModules": true,
+        "lib": ["es2022", "DOM", "DOM.Iterable"],
+        "moduleDetection": "force",
+        "noUncheckedIndexedAccess": true,
+        "resolveJsonModule": true,
+        "strict": true,
+        "target": "ES2022",
+        "baseUrl": "./",
+        "outDir": "dist",
+        "module": "ES2020",
+        "moduleResolution": "bundler",
+        "allowJs": true,
+        "checkJs": true,
+        "types": ["node"],
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "skipLibCheck": false
+    },
+    "include": ["src/**/*"],
+    "exclude": ["node_modules", "dist"]
+}
+  
