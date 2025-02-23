@@ -2,7 +2,7 @@
   "name": "meta-cloud-api-swagger",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/src/app.js",
+  "main": "dist/app.js",
   "scripts": {
     "start": "node dist/app.js",
     "build": "tsc --project ./tsconfig.json && cp -r src/spec dist",
