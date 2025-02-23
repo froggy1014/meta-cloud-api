@@ -4,8 +4,8 @@
   "description": "",
   "main": "dist/src/app.js",
   "scripts": {
-    "build": "tsc",
-    "start": "node dist/src/app.js",
+    "start": "node dist/app.js",
+    "build": "tsc --project ./tsconfig.json && cp -r src/spec dist",
     "dev": "nodemon --exec ts-node src/app.ts",
     "clean": "rm -rf dist node_modules"
   },

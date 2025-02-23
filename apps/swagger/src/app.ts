@@ -4,6 +4,7 @@ import swaggerJsDoc from 'swagger-jsdoc';
 // import messageRoutes from './routes/message';
 
 import dotenv from 'dotenv';
+import path from 'path';
 
 dotenv.config();
 
@@ -34,10 +35,14 @@ const options = {
             },
         ],
     },
-    apis: ['./src/routes/message.ts', './src/spec/message.spec.yaml'],
+    apis: [
+        path.join(__dirname, 'routes', '*.js'), // TS가 JS로 컴파일되므로 .js
+        path.join(__dirname, 'spec', '*.yaml'),
+    ],
 };
 
 const swaggerDocs = swaggerJsDoc(options);
+console.log('🚀 ~ swaggerDocs:', swaggerDocs);
 
 app.use(
     '/api-docs',
