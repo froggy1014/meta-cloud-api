@@ -3,10 +3,16 @@
       "target": "ES6",
       "module": "commonjs",
       "outDir": "./dist",
-      "rootDir": "./src",
+      "rootDir": ".",
       "strict": true,
-      "esModuleInterop": true
+      "esModuleInterop": true,
+      "baseUrl": ".",
+      "paths": {
+        "@/*": ["./*"]
+      },
+      "typeRoots": ["./node_modules/@types"],
+      "types": ["node", "express"]
     },
-    "include": ["src/**/*"],
+    "include": ["src/**/*", "api/**/*"],
     "exclude": ["node_modules", "dist"]
   }

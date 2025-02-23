@@ -84,6 +84,9 @@ importers:
 
   apps/swagger:
     dependencies:
+      dotenv:
+        specifier: ^16.4.7
+        version: 16.4.7
       express:
         specifier: ^4.21.2
         version: 4.21.2
@@ -93,6 +96,9 @@ importers:
       swagger-jsdoc:
         specifier: ^6.2.8
         version: 6.2.8(openapi-types@12.1.3)
+      swagger-ui-dist:
+        specifier: ^5.19.0
+        version: 5.19.0
       swagger-ui-express:
         specifier: ^5.0.1
         version: 5.0.1(express@4.21.2)
@@ -109,15 +115,12 @@ importers:
       '@types/swagger-ui-express':
         specifier: ^4.1.7
         version: 4.1.7
-      dotenv:
-        specifier: ^16.4.7
-        version: 16.4.7
       nodemon:
         specifier: ^3.1.9
         version: 3.1.9
       typescript:
-        specifier: ^4.5.4
-        version: 4.9.5
+        specifier: ^5.7.3
+        version: 5.7.3
 
   apps/www:
     dependencies:
@@ -7304,11 +7307,6 @@ packages:
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
       typescript: '>=4.8.4 <5.8.0'
-
-  typescript@4.9.5:
-    resolution: {integrity: sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==}
-    engines: {node: '>=4.2.0'}
-    hasBin: true
 
   typescript@5.6.3:
     resolution: {integrity: sha512-hjcS1mhfuyi4WW8IWtjP7brDrG2cuDZukyrYrSauoXGNgx0S7zceP07adYkJycEr56BOUTNPzbInooiN3fn1qw==}
@@ -16684,8 +16682,6 @@ snapshots:
       typescript: 5.7.3
     transitivePeerDependencies:
       - supports-color
-
-  typescript@4.9.5: {}
 
   typescript@5.6.3: {}
 
