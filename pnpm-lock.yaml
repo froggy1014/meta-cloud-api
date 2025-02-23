@@ -99,9 +99,6 @@ importers:
       swagger-ui-express:
         specifier: ^5.0.1
         version: 5.0.1(express@4.21.2)
-      typescript:
-        specifier: ^5.7.3
-        version: 5.7.3
     devDependencies:
       '@types/express':
         specifier: ^4.17.21
@@ -118,6 +115,9 @@ importers:
       nodemon:
         specifier: ^3.1.9
         version: 3.1.9
+      typescript:
+        specifier: ^5.7.3
+        version: 5.7.3
 
   apps/www:
     dependencies:
