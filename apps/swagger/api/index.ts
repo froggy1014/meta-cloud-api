@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 8080;
 const app = express();
 app.use(express.json());
 
-app.use('/swagger-ui', express.static(path.join(__dirname, '../node_modules/swagger-ui-dist')));
+app.use('/swagger-ui-assets', express.static(path.join(__dirname, '../node_modules/swagger-ui-dist')));
 
 // Swagger setupVERCEL_URL
 const swaggerOptions = {
@@ -37,7 +37,14 @@ const swaggerOptions = {
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 
-app.use('/swagger-ui', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+app.use(
+    '/swagger-ui',
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerDocs, {
+        customCssUrl: '/swagger-ui-assets/swagger-ui.css',
+        customSiteTitle: 'Meta Cloud API',
+    }),
+);
 
 app.use('/swagger.json', (req: Request, res: Response) => {
     res.json(swaggerDocs);
