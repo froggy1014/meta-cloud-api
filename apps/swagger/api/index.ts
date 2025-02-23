@@ -14,14 +14,13 @@ app.use(express.json());
 
 app.use('/swagger-ui-assets', express.static(path.join(__dirname, '../node_modules/swagger-ui-dist')));
 
-// Swagger setupVERCEL_URL
-const swaggerOptions = {
-    swaggerDefinition: {
+const options = {
+    definition: {
         openapi: '3.0.0',
         info: {
             title: 'Meta Cloud API',
             version: '1.0.0',
-            description: 'API documentation',
+            description: 'API Documentation for Meta Cloud',
         },
         servers: [
             {
@@ -29,13 +28,18 @@ const swaggerOptions = {
                     process.env.NODE_ENV === 'production'
                         ? `https://${process.env.VERCEL_URL}`
                         : 'http://localhost:8080',
+                description: 'Production server',
+            },
+            {
+                url: 'http://localhost:8080',
+                description: 'Local server',
             },
         ],
     },
     apis: ['./dist/src/routes/*.js', './dist/src/spec/*.spec.yaml'],
 };
 
-const swaggerDocs = swaggerJsDoc(swaggerOptions);
+const swaggerDocs = swaggerJsDoc(options);
 
 app.use(
     '/swagger-ui',
@@ -45,7 +49,6 @@ app.use(
         customSiteTitle: 'Meta Cloud API',
     }),
 );
-
 app.use('/swagger.json', (req: Request, res: Response) => {
     res.json(swaggerDocs);
 });
