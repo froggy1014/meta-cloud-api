@@ -1,15 +1,17 @@
 import express from 'express';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsDoc from 'swagger-jsdoc';
-import messageRoutes from './routes/message';
+import messageRoutes from '../src/routes/message';
+
 import dotenv from 'dotenv';
 
 dotenv.config();
 
+const PORT = process.env.PORT || 8080;
 const app = express();
 app.use(express.json());
 
-// Swagger setup
+// Swagger setupVERCEL_URL
 const swaggerOptions = {
     swaggerDefinition: {
         openapi: '3.0.0',
@@ -44,7 +46,6 @@ app.get('/', (req, res) => {
 
 app.use('/messages', messageRoutes);
 
-const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
