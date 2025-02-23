@@ -7,7 +7,7 @@
  */
 
 export declare class WhatsAppClass {
-    constructor(senderNumberId?: number);
+    constructor(senderNumberId?: number, accessToken?: string);
     updateTimeout(ms: number): boolean;
     updateSenderNumberId(phoneNumberId: number): boolean;
     updateAccessToken(accessToken: string): boolean;

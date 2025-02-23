@@ -15,15 +15,15 @@ const headerPrefix = 'WA_SDK';
 
 export default class WhatsApp implements WhatsAppClass {
     config: WabaConfigType;
-    // sdkVersion: Readonly<semanticVersionString>;
+
     requester: Readonly<Requester>;
 
     readonly messages: MessagesAPI;
 
     static readonly Enums = SDKEnums;
 
-    constructor(senderNumberId?: number) {
-        this.config = importConfig(senderNumberId);
+    constructor(senderNumberId?: number, accessToken?: string) {
+        this.config = importConfig(senderNumberId, accessToken);
         this.requester = new Requester(
             this.config[SDKEnums.WabaConfigEnum.BaseURL],
             this.config[SDKEnums.WabaConfigEnum.APIVersion],

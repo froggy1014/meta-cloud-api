@@ -69,11 +69,6 @@ export enum WabaConfigEnum {
     Debug = 'DEBUG',
 }
 
-export enum WabaRequiredConfigEnum {
-    APIVersion = 'CLOUD_API_VERSION',
-    AccessToken = 'CLOUD_API_ACCESS_TOKEN',
-}
-
 export const enum ConversationTypesEnum {
     BusinessInitiated = 'business_initiated',
     CustomerInitiated = 'customer_initiated',
