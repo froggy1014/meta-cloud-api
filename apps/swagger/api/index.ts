@@ -4,6 +4,7 @@ import swaggerJsDoc from 'swagger-jsdoc';
 import messageRoutes from '../src/routes/message';
 
 import dotenv from 'dotenv';
+import path from 'path';
 
 dotenv.config();
 
@@ -11,7 +12,7 @@ const PORT = process.env.PORT || 8080;
 const app = express();
 app.use(express.json());
 
-console.log(process.env.VERCEL_URL);
+app.use('/swagger-ui', express.static(path.join(__dirname, '../node_modules/swagger-ui-dist')));
 
 // Swagger setupVERCEL_URL
 const swaggerOptions = {
