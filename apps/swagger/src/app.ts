@@ -20,7 +20,7 @@ const swaggerOptions = {
         },
         servers: [
             {
-                url: process.env.VERCEL_URL || 'http://localhost:3000',
+                url: process.env.VERCEL_URL || 'http://localhost:8080',
             },
         ],
     },
@@ -28,11 +28,11 @@ const swaggerOptions = {
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
-app.use('/swagger-ui', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 app.use('/messages', messageRoutes);
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
