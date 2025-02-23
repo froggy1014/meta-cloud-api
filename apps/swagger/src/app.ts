@@ -20,7 +20,10 @@ const swaggerOptions = {
         },
         servers: [
             {
-                url: process.env.VERCEL_URL || 'http://localhost:8080',
+                url:
+                    process.env.NODE_ENV === 'production'
+                        ? `https://${process.env.VERCEL_URL}`
+                        : 'http://localhost:8080',
             },
         ],
     },
@@ -28,7 +31,16 @@ const swaggerOptions = {
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
-app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
+app.use('/swagger-ui', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
+app.use('/swagger.json', (req, res) => {
+    res.json(swaggerDocs);
+});
+
+app.get('/', (req, res) => {
+    res.redirect('/swagger-ui');
+});
 
 app.use('/messages', messageRoutes);
 
