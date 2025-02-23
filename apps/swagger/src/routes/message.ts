@@ -1,5 +1,4 @@
 import express from 'express';
-
 import dotenv from 'dotenv';
 import { whatsappAuth } from '../middleware/whatsappAuth';
 import { createMessageHandler } from '../middleware/whatsappMessageHandler';
