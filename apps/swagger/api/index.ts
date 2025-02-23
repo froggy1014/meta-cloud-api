@@ -37,6 +37,14 @@ const options = {
     },
     apis: [path.join(__dirname, 'src', 'routes', '*.js'), path.join(__dirname, 'src', 'spec', '*.yaml')],
 };
+console.log(
+    "🚀 ~ options.path.join(__dirname, 'src', 'routes', '*.js':",
+    path.join(__dirname, 'src', 'routes', '*.js'),
+);
+console.log(
+    "🚀 ~ options.path.join(__dirname, 'src', 'spec', '*.yaml':",
+    path.join(__dirname, 'src', 'spec', '*.yaml'),
+);
 
 const swaggerDocs = swaggerJsDoc(options);
 console.log('🚀 ~ swaggerDocs:', swaggerDocs);
