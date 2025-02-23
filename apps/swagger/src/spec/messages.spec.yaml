@@ -8,6 +8,16 @@ servers:
   - url: http://localhost:3000
 
 components:
+  securitySchemes:
+    PhoneNumberID:
+      type: apiKey
+      in: header
+      name: X-PHONE-NUMBER-ID
+    AccessToken:
+      type: apiKey
+      in: header
+      name: X-ACCESS-TOKEN
+
   schemas:
     MessagesResponse:
       type: object
@@ -668,6 +678,9 @@ components:
 paths:
   /messages/audio:
     post:
+      security:
+        - PhoneNumberID: []
+        - AccessToken: []
       summary: Send an audio message
       tags: [Messages]
       requestBody:
@@ -704,6 +717,9 @@ paths:
 
   /messages/contacts:
     post:
+      security:
+        - PhoneNumberID: []
+        - AccessToken: []
       summary: Send a contacts message
       tags: [Messages]
       requestBody:
@@ -821,6 +837,9 @@ paths:
 
   /messages/document:
     post:
+      security:
+        - PhoneNumberID: []
+        - AccessToken: []
       summary: Send a document message
       tags: [Messages]
       requestBody:
@@ -878,6 +897,9 @@ paths:
 
   /messages/image:
     post:
+      security:
+        - PhoneNumberID: []
+        - AccessToken: []
       summary: Send an image message
       tags: [Messages]
       requestBody:
@@ -930,6 +952,9 @@ paths:
 
   /messages/interactive:
     post:
+      security:
+        - PhoneNumberID: []
+        - AccessToken: []
       summary: Send an interactive message
       tags: [Messages]
       requestBody:
@@ -1104,6 +1129,9 @@ paths:
 
   /messages/location:
     post:
+      security:
+        - PhoneNumberID: []
+        - AccessToken: []
       summary: Send a location message
       tags: [Messages]
       requestBody:
@@ -1161,6 +1189,9 @@ paths:
 
   /messages/sticker:
     post:
+      security:
+        - PhoneNumberID: []
+        - AccessToken: []
       summary: Send a sticker message
       tags: [Messages]
       requestBody:
@@ -1208,6 +1239,9 @@ paths:
 
   /messages/template:
     post:
+      security:
+        - PhoneNumberID: []
+        - AccessToken: []
       summary: Send a template message
       tags: [Messages]
       requestBody:
@@ -1382,6 +1416,9 @@ paths:
 
   /messages/text:
     post:
+      security:
+        - PhoneNumberID: []
+        - AccessToken: []
       summary: Send a text message
       tags: [Messages]
       requestBody:
@@ -1416,6 +1453,9 @@ paths:
 
   /messages/video:
     post:
+      security:
+        - PhoneNumberID: []
+        - AccessToken: []
       summary: Send a video message
       tags: [Messages]
       requestBody:
