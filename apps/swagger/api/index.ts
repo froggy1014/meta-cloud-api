@@ -35,10 +35,7 @@ const options = {
             },
         ],
     },
-    apis: [
-        path.join(__dirname, 'routes', '*.js'), // TS가 JS로 컴파일되므로 .js
-        path.join(__dirname, 'spec', '*.yaml'),
-    ],
+    apis: [path.join(__dirname, 'src', 'routes', '*.js'), path.join(__dirname, 'src', 'spec', '*.yaml')],
 };
 
 const swaggerDocs = swaggerJsDoc(options);
@@ -65,3 +62,5 @@ app.listen(PORT, () => console.log(`Server ready on port ${PORT}.`));
 // app.listen(PORT, () => {
 //     console.log(`Server is running on port ${PORT}`);
 // });
+
+module.exports = app;

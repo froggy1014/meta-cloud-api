@@ -2,15 +2,16 @@
   "name": "meta-cloud-api-swagger",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/app.js",
+  "main": "dist/api/index.js",
   "scripts": {
-    "start": "node dist/app.js",
-    "build": "tsc --project ./tsconfig.json && cp -r src/spec dist",
+    "start": "node dist/api/index.js",
+    "build": "tsc --project ./tsconfig.json && cp -r src/spec dist/src",
     "dev": "nodemon --exec ts-node src/app.ts",
     "clean": "rm -rf dist node_modules"
   },
   "keywords": [],
   "author": "",
+  "packageManager": "pnpm@10.0.0",
   "license": "ISC",
   "dependencies": {
     "dotenv": "^16.4.7",
