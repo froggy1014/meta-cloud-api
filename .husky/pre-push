@@ -1,7 +1,7 @@
 # Start of Selection
 # Get the current branch name
 BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
-BRANCH_REGEX='^(feature|fix|hotfix|chore|refactor|test|docs|ci|build)\/[a-z0-9-]+$|^dev$'
+BRANCH_REGEX='^(feat|fix|hotfix|chore|refactor|test|docs|ci|build)\/[a-z0-9-]+$|^dev$'
 
 # Check if the branch name matches the defined regex
 if ! [[ $BRANCH_NAME =~ $BRANCH_REGEX ]]; then
@@ -10,7 +10,7 @@ if ! [[ $BRANCH_NAME =~ $BRANCH_REGEX ]]; then
    echo "Please rename your branch using:"
    echo "git branch -m <CATEGORY>/<SUBJECT> or git branch -m <CATEGORY>/<ISSUENUMBER>-<SUBJECT>"
    echo 
-   echo "CATEGORY: feature, fix, hotfix, chore, refactor, test, docs, ci, build"
+   echo "CATEGORY: feat, fix, hotfix, chore, refactor, test, docs, ci, build"
    echo
    exit 1
 fi
