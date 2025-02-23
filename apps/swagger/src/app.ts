@@ -34,7 +34,7 @@ const options = {
             },
         ],
     },
-    apis: ['./src/routes/message.js', './src/spec/message.spec.yaml'],
+    apis: ['./src/routes/message.ts', './src/spec/message.spec.yaml'],
 };
 
 const swaggerDocs = swaggerJsDoc(options);
