@@ -5,8 +5,12 @@
       "outDir": "./dist",
       "rootDir": ".",
       "strict": true,
-      "esModuleInterop": true
+      "esModuleInterop": true,
+      "baseUrl": ".",
+      "paths": {
+        "@/*": ["./*"]
+      }
     },
-    "include": ["src/**/*"],
+    "include": ["src/**/*", "api/**/*"],
     "exclude": ["node_modules", "dist"]
   }
