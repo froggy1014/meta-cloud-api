@@ -11,7 +11,6 @@
   },
   "keywords": [],
   "author": "",
-  "packageManager": "pnpm@10.0.0",
   "license": "ISC",
   "dependencies": {
     "dotenv": "^16.4.7",
