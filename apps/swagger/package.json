@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/api/index.js",
   "scripts": {
-    "build": "tsc --outDir dist && cp -r ./src/spec ./dist/src/",
+    "build": "tsc --outDir dist && cp -r src/spec dist/src/",
     "start": "node dist/api/index.js",
     "dev": "nodemon --exec ts-node api/index.ts",
     "clean": "rm -rf dist node_modules"
