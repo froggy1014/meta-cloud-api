@@ -1,18 +1,17 @@
 import express, { Request, Response } from 'express';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsDoc from 'swagger-jsdoc';
-import messageRoutes from '../src/routes/message';
+// import messageRoutes from './routes/message';
 
 import dotenv from 'dotenv';
 import path from 'path';
 
 dotenv.config();
 
+const CSS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.min.css';
 const PORT = process.env.PORT || 8080;
 const app = express();
 app.use(express.json());
-
-app.use('/swagger-ui-assets', express.static(path.join(__dirname, '../node_modules/swagger-ui-dist')));
 
 const options = {
     definition: {
@@ -36,19 +35,28 @@ const options = {
             },
         ],
     },
-    apis: ['dist/src/routes/*.js', 'dist/src/spec/*.spec.yaml'],
+    apis: [path.join(__dirname, '..', 'src', 'routes', '*.js'), path.join(__dirname, '..', 'src', 'spec', '*.yaml')],
 };
+console.log(
+    "🚀 ~ options.path.join(__dirname, 'src', 'routes', '*.js':",
+    path.join(__dirname, 'src', 'routes', '*.js'),
+);
+console.log(
+    "🚀 ~ options.path.join(__dirname, 'src', 'spec', '*.yaml':",
+    path.join(__dirname, 'src', 'spec', '*.yaml'),
+);
 
 const swaggerDocs = swaggerJsDoc(options);
+console.log('🚀 ~ swaggerDocs:', swaggerDocs);
 
 app.use(
-    '/swagger-ui',
+    '/api-docs',
     swaggerUi.serve,
     swaggerUi.setup(swaggerDocs, {
-        customCssUrl: '/swagger-ui-assets/swagger-ui.css',
-        customSiteTitle: 'Meta Cloud API',
+        customCssUrl: CSS_URL,
     }),
 );
+
 app.use('/swagger.json', (req: Request, res: Response) => {
     res.json(swaggerDocs);
 });
@@ -62,3 +70,5 @@ app.listen(PORT, () => console.log(`Server ready on port ${PORT}.`));
 // app.listen(PORT, () => {
 //     console.log(`Server is running on port ${PORT}`);
 // });
+
+module.exports = app;
