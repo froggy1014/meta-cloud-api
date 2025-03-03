@@ -4,9 +4,9 @@
   "description": "",
   "main": "dist/api/index.js",
   "scripts": {
-    "start": "node dist/api/index.js",
+    "start": "node dist/index.js",
     "build": "tsc --project ./tsconfig.json && cp -r src/spec dist/src",
-    "dev": "nodemon --exec ts-node src/app.ts",
+    "dev": "nodemon --exec ts-node index.ts",
     "clean": "rm -rf dist node_modules"
   },
   "keywords": [],
@@ -17,7 +17,7 @@
     "express": "^4.21.2",
     "meta-cloud-api": "workspace:*",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "4.6.2"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",

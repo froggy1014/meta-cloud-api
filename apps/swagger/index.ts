@@ -4,12 +4,12 @@ import swaggerJsDoc from 'swagger-jsdoc';
 // import messageRoutes from './routes/message';
 
 import dotenv from 'dotenv';
-import path from 'path';
 
 dotenv.config();
 
 const CSS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.min.css';
 const PORT = process.env.PORT || 8080;
+
 const app = express();
 app.use(express.json());
 
@@ -19,7 +19,7 @@ const options = {
         info: {
             title: 'Meta Cloud API',
             version: '1.0.0',
-            description: 'API Documentation for Meta Cloud',
+            description: 'API Documentation for Meta Cloud API',
         },
         servers: [
             {
@@ -35,19 +35,10 @@ const options = {
             },
         ],
     },
-    apis: [path.join(__dirname, '..', 'src', 'routes', '*.js'), path.join(__dirname, '..', 'src', 'spec', '*.yaml')],
+    apis: ['src/**/*.js', 'src/**/*.yaml'],
 };
-console.log(
-    "🚀 ~ options.path.join(__dirname, 'src', 'routes', '*.js':",
-    path.join(__dirname, 'src', 'routes', '*.js'),
-);
-console.log(
-    "🚀 ~ options.path.join(__dirname, 'src', 'spec', '*.yaml':",
-    path.join(__dirname, 'src', 'spec', '*.yaml'),
-);
 
 const swaggerDocs = swaggerJsDoc(options);
-console.log('🚀 ~ swaggerDocs:', swaggerDocs);
 
 app.use(
     '/api-docs',
@@ -62,7 +53,6 @@ app.use('/swagger.json', (req: Request, res: Response) => {
 });
 
 app.get('/', (req, res) => res.send('Express on Vercel'));
-
 app.listen(PORT, () => console.log(`Server ready on port ${PORT}.`));
 
 // app.use('/messages', messageRoutes);
