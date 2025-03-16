@@ -1,5 +1,5 @@
 import { Agent } from 'https';
-import fetch, { type BodyInit, HeadersInit, Response, Headers } from 'node-fetch';
+
 import Logger from './logger';
 import { HttpMethodsEnum } from './types/enums';
 import { HttpsClientClass, HttpsClientResponseClass, ResponseHeaders, ResponseJSONBody } from './types/httpsClient';
@@ -29,8 +29,6 @@ export default class HttpsClient implements HttpsClientClass {
         timeout: number,
         body?: BodyInit | null,
     ): Promise<HttpsClientResponseClass> {
-        const agent = this.agent;
-
         const url = `https://${hostname}:${port}${path}`;
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -40,7 +38,7 @@ export default class HttpsClient implements HttpsClientClass {
                 method,
                 headers,
                 body,
-                agent,
+
                 signal: controller.signal,
             });
             LOGGER.log(`${method} : ${url} - ${JSON.stringify(response)}`);

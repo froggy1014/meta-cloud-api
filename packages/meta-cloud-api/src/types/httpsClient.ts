@@ -1,5 +1,4 @@
 import { HttpMethodsEnum } from './enums';
-import { Response, HeadersInit, BodyInit } from 'node-fetch';
 
 export type ResponseHeaderValue = string | string[] | undefined;
 

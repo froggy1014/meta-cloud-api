@@ -5,17 +5,17 @@ import { createMessageHandler } from '../middleware/whatsappMessageHandler';
 
 dotenv.config();
 
-const router = express.Router();
+const messageRoutes = express.Router();
 
-router.post('/audio', whatsappAuth, createMessageHandler('audio'));
-router.post('/contacts', whatsappAuth, createMessageHandler('contacts'));
-router.post('/document', whatsappAuth, createMessageHandler('document'));
-router.post('/image', whatsappAuth, createMessageHandler('image'));
-router.post('/interactive', whatsappAuth, createMessageHandler('interactive'));
-router.post('/location', whatsappAuth, createMessageHandler('location'));
-router.post('/sticker', whatsappAuth, createMessageHandler('sticker'));
-router.post('/template', whatsappAuth, createMessageHandler('template'));
-router.post('/text', whatsappAuth, createMessageHandler('text'));
-router.post('/video', whatsappAuth, createMessageHandler('video'));
+messageRoutes.post('/audio', whatsappAuth, createMessageHandler('audio'));
+messageRoutes.post('/contacts', whatsappAuth, createMessageHandler('contacts'));
+messageRoutes.post('/document', whatsappAuth, createMessageHandler('document'));
+messageRoutes.post('/image', whatsappAuth, createMessageHandler('image'));
+messageRoutes.post('/interactive', whatsappAuth, createMessageHandler('interactive'));
+messageRoutes.post('/location', whatsappAuth, createMessageHandler('location'));
+messageRoutes.post('/sticker', whatsappAuth, createMessageHandler('sticker'));
+messageRoutes.post('/template', whatsappAuth, createMessageHandler('template'));
+messageRoutes.post('/text', whatsappAuth, createMessageHandler('text'));
+messageRoutes.post('/video', whatsappAuth, createMessageHandler('video'));
 
-export default router;
+export default messageRoutes;

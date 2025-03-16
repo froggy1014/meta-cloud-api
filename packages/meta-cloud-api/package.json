@@ -29,7 +29,6 @@
     "dist",
     "src"
   ],
-  "type": "module",
   "engines": {
     "node": ">=20"
   },
@@ -48,8 +47,5 @@
     "dotenv": "^16.4.7",
     "tsup": "^8.3.6",
     "typescript": "^5.7.3"
-  },
-  "dependencies": {
-    "node-fetch": "^3.3.2"
   }
 }

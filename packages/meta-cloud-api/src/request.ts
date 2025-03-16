@@ -1,7 +1,6 @@
 import HttpsClient from './httpsClient';
 import Logger from './logger';
 import type { HttpMethodsEnum } from './types/enums';
-import type { HeadersInit } from 'node-fetch';
 import type { RequesterClass } from './types/request';
 
 const LIB_NAME = 'REQUESTER';
