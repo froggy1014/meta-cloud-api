@@ -3,7 +3,7 @@
     "target": "ES6",
     "module": "commonjs",
     "outDir": "./dist",
-    "rootDir": ".",        // 프로젝트 루트로 설정
+    "rootDir": ".",
     "strict": true,
     "esModuleInterop": true,
     "baseUrl": "src",

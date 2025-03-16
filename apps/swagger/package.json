@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node dist/api/index.js",
     "build": "tsc --project ./tsconfig.json && cp -r src/spec dist/src",
-    "dev": "nodemon --exec ts-node src/app.ts",
+    "dev": "nodemon --exec ts-node api/index.ts",
     "clean": "rm -rf dist node_modules"
   },
   "keywords": [],
@@ -25,6 +25,7 @@
     "@types/swagger-jsdoc": "^6.0.0",
     "@types/swagger-ui-express": "^4.1.7",
     "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2",
     "typescript": "^5.7.3"
   }
 }

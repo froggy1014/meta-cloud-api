@@ -1,10 +1,10 @@
 import express, { Request, Response } from 'express';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsDoc from 'swagger-jsdoc';
-// import messageRoutes from './routes/message';
 
 import dotenv from 'dotenv';
 import path from 'path';
+import messageRoutes from '../src/routes/message';
 
 dotenv.config();
 
@@ -37,17 +37,8 @@ const options = {
     },
     apis: [path.join(__dirname, '..', 'src', 'routes', '*.js'), path.join(__dirname, '..', 'src', 'spec', '*.yaml')],
 };
-console.log(
-    "🚀 ~ options.path.join(__dirname, 'src', 'routes', '*.js':",
-    path.join(__dirname, 'src', 'routes', '*.js'),
-);
-console.log(
-    "🚀 ~ options.path.join(__dirname, 'src', 'spec', '*.yaml':",
-    path.join(__dirname, 'src', 'spec', '*.yaml'),
-);
 
 const swaggerDocs = swaggerJsDoc(options);
-console.log('🚀 ~ swaggerDocs:', swaggerDocs);
 
 app.use(
     '/api-docs',
@@ -63,12 +54,8 @@ app.use('/swagger.json', (req: Request, res: Response) => {
 
 app.get('/', (req, res) => res.send('Express on Vercel'));
 
+app.use('/messages', messageRoutes);
+
 app.listen(PORT, () => console.log(`Server ready on port ${PORT}.`));
-
-// app.use('/messages', messageRoutes);
-
-// app.listen(PORT, () => {
-//     console.log(`Server is running on port ${PORT}`);
-// });
 
 module.exports = app;
