@@ -15,7 +15,22 @@ router.get(
     '/',
     swaggerUi.setup(openapiDoc, {
         customCssUrl,
-        // customCss,
+        customCss: `
+        .opblock-summary-path-description-wrapper {
+            align-items: center;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0 10px;
+            padding: 0 10px;
+            width: 100%;
+        }
+
+        .opblock-control-arrow {
+            background: none;
+            border: none;
+            box-shadow: none;
+        }
+            `,
     }),
 );
 
