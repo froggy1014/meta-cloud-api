@@ -1,8 +1,8 @@
 import express from 'express';
 
 import dotenv from 'dotenv';
-import { apidocsRouter, messagesRouter } from './routes';
-import { validator } from './middleware/validator';
+import { apidocsRouter, messagesRouter } from '../src/routes';
+import { validator } from '../src/middleware/validator';
 
 dotenv.config();
 
