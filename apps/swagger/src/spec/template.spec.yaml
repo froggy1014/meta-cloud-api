@@ -1,0 +1,522 @@
+openapi: 3.0.0
+info:
+  title: Meta Cloud API - Templates
+  version: 1.0.0
+  description: API documentation for WhatsApp message templates
+
+servers:
+  - url: http://localhost:8080
+
+components:
+  securitySchemes:
+    AccessToken:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Bearer access token
+      scheme: Bearer
+
+  schemas:
+    LanguagesEnum:
+      type: string
+      enum:
+        - af
+        - sq
+        - ar
+        - az
+        - bn
+        - bg
+        - ca
+        - zh_CN
+        - zh_HK
+        - zh_TW
+        - hr
+        - cs
+        - da
+        - nl
+        - en
+        - en_GB
+        - en_US
+        - et
+        - fil
+        - fi
+        - fr
+        - de
+        - el
+        - gu
+        - he
+        - hi
+        - hu
+        - id
+        - ga
+        - it
+        - ja
+        - kn
+        - kk
+        - ko
+        - lo
+        - lv
+        - lt
+        - mk
+        - ms
+        - mr
+        - nb
+        - fa
+        - pl
+        - pt_BR
+        - pt_PT
+        - pa
+        - ro
+        - ru
+        - sr
+        - sk
+        - sl
+        - es
+        - es_AR
+        - es_ES
+        - es_MX
+        - sw
+        - sv
+        - ta
+        - te
+        - th
+        - tr
+        - uk
+        - ur
+        - uz
+        - vi
+      description: ISO language codes supported by WhatsApp
+      
+    CategoryEnum:
+      type: string
+      enum:
+        - AUTHENTICATION
+        - MARKETING
+        - UTILITY
+    
+    TemplateStatusEnum:
+      type: string
+      enum:
+        - APPROVED
+        - PENDING
+        - REJECTED
+        - DISABLED
+        - IN_APPEAL
+        
+    TemplateFormat:
+      type: string
+      enum:
+        - TEXT
+        - IMAGE
+        - VIDEO
+        - DOCUMENT
+        - LOCATION
+    
+    TemplateHeader:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [HEADER]
+        format:
+          $ref: '#/components/schemas/TemplateFormat'
+        text:
+          type: string
+          description: Content text, max 60 characters
+        example:
+          type: object
+          properties:
+            header_text:
+              type: array
+              items:
+                type: string
+            header_text_named_params:
+              type: array
+              items:
+                type: object
+                properties:
+                  param_name:
+                    type: string
+                  example:
+                    type: string
+            header_handle:
+              type: array
+              items:
+                type: string
+    
+    TemplateBody:
+      type: object
+      required:
+        - type
+        - text
+      properties:
+        type:
+          type: string
+          enum: [BODY]
+        text:
+          type: string
+          description: Content text, max 1024 characters
+        example:
+          type: object
+          properties:
+            body_text:
+              type: array
+              items:
+                type: array
+                items:
+                  type: string
+            body_text_named_params:
+              type: array
+              items:
+                type: object
+                properties:
+                  param_name:
+                    type: string
+                  example:
+                    type: string
+    
+    TemplateFooter:
+      type: object
+      required:
+        - type
+        - text
+      properties:
+        type:
+          type: string
+          enum: [FOOTER]
+        text:
+          type: string
+          description: Content text, max 60 characters
+    
+    TemplateButton:
+      oneOf:
+        - type: object
+          required:
+            - type
+            - text
+            - phone_number
+          properties:
+            type:
+              type: string
+              enum: [PHONE_NUMBER]
+            text:
+              type: string
+              description: Button text, max 25 characters
+            phone_number:
+              type: string
+              description: Phone number, max 20 characters
+              
+        - type: object
+          required:
+            - type
+            - text
+            - url
+          properties:
+            type:
+              type: string
+              enum: [URL]
+            text:
+              type: string
+              description: Button text, max 25 characters
+            url:
+              type: string
+              description: URL, max 2000 characters
+            example:
+              type: array
+              items:
+                type: string
+              description: Required if URL contains variables
+              
+        - type: object
+          required:
+            - type
+            - text
+          properties:
+            type:
+              type: string
+              enum: [QUICK_REPLY]
+            text:
+              type: string
+              description: Button text, max 25 characters
+              
+        - type: object
+          required:
+            - type
+            - example
+          properties:
+            type:
+              type: string
+              enum: [COPY_CODE]
+            example:
+              type: string
+              description: Example code, max 15 characters
+              
+        - type: object
+          required:
+            - type
+            - text
+          properties:
+            type:
+              type: string
+              enum: [FLOW]
+            text:
+              type: string
+              description: Button text, max 25 characters
+            flow_id:
+              type: string
+            flow_name:
+              type: string
+            flow_json:
+              type: string
+            flow_action:
+              type: string
+              enum: [navigate, data_exchange]
+            navigate_screen:
+              type: string
+              
+        - type: object
+          required:
+            - type
+          properties:
+            type:
+              type: string
+              enum: [MPM, OTP, SPM]
+              
+    TemplateComponent:
+      oneOf:
+        - $ref: '#/components/schemas/TemplateHeader'
+        - $ref: '#/components/schemas/TemplateBody'
+        - $ref: '#/components/schemas/TemplateFooter'
+        - $ref: '#/components/schemas/TemplateButton'
+    
+    TemplateRequest:
+      type: object
+      required:
+        - name
+        - language
+      properties:
+        name:
+          type: string
+          description: Name of the template
+        language:
+          $ref: '#/components/schemas/LanguagesEnum'
+        category:
+          $ref: '#/components/schemas/CategoryEnum'
+        components:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateComponent'
+    
+    TemplateResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          $ref: '#/components/schemas/TemplateStatusEnum'
+        name:
+          type: string
+        language:
+          $ref: '#/components/schemas/LanguagesEnum'
+        category:
+          $ref: '#/components/schemas/CategoryEnum'
+        components:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateComponent'
+    
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+
+paths:
+  /{waba-id}/message_templates:
+    get:
+      security:
+        - AccessToken: []
+      summary: Get a list of templates
+      tags: [Templates]
+      parameters:
+        - in: path
+          name: waba-id
+          required: true
+          schema:
+            type: string
+          description: WhatsApp Business Account ID
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          description: Maximum number of templates to return
+        - in: query
+          name: name
+          schema:
+            type: string
+          description: Filter by template name
+        - in: query
+          name: language
+          schema:
+            $ref: '#/components/schemas/LanguagesEnum'
+          description: Filter by language
+        - in: query
+          name: category
+          schema:
+            $ref: '#/components/schemas/CategoryEnum'
+          description: Filter by category
+        - in: query
+          name: status
+          schema:
+            $ref: '#/components/schemas/TemplateStatusEnum'
+          description: Filter by status
+      responses:
+        200:
+          description: List of templates
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TemplateResponse'
+        400:
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      security:
+        - AccessToken: []
+      summary: Create a new template
+      tags: [Templates]
+      parameters:
+        - in: path
+          name: waba-id
+          required: true
+          schema:
+            type: string
+          description: WhatsApp Business Account ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplateRequest'
+      responses:
+        200:
+          description: Template created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateResponse'
+        400:
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                
+    delete:
+      security:
+        - AccessToken: []
+      summary: Delete a template
+      tags: [Templates]
+      parameters:
+        - in: path
+          name: waba-id
+          required: true
+          schema:
+            type: string
+          description: WhatsApp Business Account ID
+        - in: query
+          name: hsm_id
+          schema:
+            type: string
+          description: HSM ID of the template to delete
+        - in: query
+          name: name
+          schema:
+            type: string
+          description: Name of the template to delete
+      responses:
+        200:
+          description: Template deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        400:
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /{templateId}:
+    get:
+      security:
+        - AccessToken: []
+      summary: Get a specific template by ID
+      tags: [Templates]
+      parameters:
+        - in: path
+          name: templateId
+          required: true
+          schema:
+            type: string
+          description: ID of the template to retrieve
+      responses:
+        200:
+          description: Template details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateResponse'
+        400:
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    post:
+      security:
+        - AccessToken: []
+      summary: Update an existing template
+      tags: [Templates]
+      parameters:
+        - in: path
+          name: templateId
+          required: true
+          schema:
+            type: string
+          description: ID of the template to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplateRequest'
+      responses:
+        200:
+          description: Template updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        400:
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

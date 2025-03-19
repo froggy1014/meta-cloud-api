@@ -1,0 +1,42 @@
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          required:
+            - message
+            - type
+            - code
+            - error_data
+            - error_subcode
+            - fbtrace_id
+          properties:
+            message:
+              type: string
+              description: Error message describing what went wrong
+            type:
+              type: string
+              description: Type of error that occurred
+            code:
+              type: integer
+              description: Error code
+            error_data:
+              type: object
+              required:
+                - messaging_product
+                - details
+              properties:
+                messaging_product:
+                  type: string
+                  enum: [whatsapp]
+                details:
+                  type: string
+                  description: Additional error details
+            error_subcode:
+              type: integer
+              description: Error subcode for more specific error classification
+            fbtrace_id:
+              type: string
+              description: Facebook trace ID for error tracking

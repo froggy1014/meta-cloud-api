@@ -1,16 +1,17 @@
 {
   "compilerOptions": {
     "target": "ES6",
-    "module": "commonjs",
     "outDir": "./dist",
     "rootDir": ".",
     "strict": true,
     "esModuleInterop": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "resolveJsonModule": true,
     "baseUrl": "src",
     "paths": {
       "@/*": ["./*"]
     },
-    "typeRoots": ["./node_modules/@types"],
     "types": ["node", "express"]
   },
   "include": ["src/**/*", "api/**/*"],
