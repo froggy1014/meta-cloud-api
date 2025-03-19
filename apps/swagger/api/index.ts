@@ -12,15 +12,6 @@ const app = express();
 
 const __dirname = path.dirname(__filename);
 
-app.use('/public', express.static(path.join(__dirname, 'public')));
-app.use((req, res, next) => {
-    if (req.url === '/api-docs/swagger-ui.css') {
-        res.sendFile(path.join(__dirname, 'public') + '/css/swagger-ui.css');
-    } else {
-        next();
-    }
-});
-
 app.use(express.json());
 app.use('/api-docs', apidocsRouter);
 app.use('/messages', messagesRouter);
