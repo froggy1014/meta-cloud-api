@@ -1,16 +1,12 @@
 import express from 'express';
 
 import dotenv from 'dotenv';
-import path from 'path';
 import { apidocsRouter, messagesRouter } from '../src/routes';
-import { fileURLToPath } from 'url';
 
 dotenv.config();
 
 const PORT = process.env.LISTENER_PORT || 8080;
 const app = express();
-
-const __dirname = path.dirname(__filename);
 
 app.use(express.json());
 app.use('/api-docs', apidocsRouter);
