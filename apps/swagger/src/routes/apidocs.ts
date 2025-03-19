@@ -30,6 +30,11 @@ router.get(
             border: none;
             box-shadow: none;
         }
+
+        .copy-to-clipboard {
+            height: 26px;
+            position: static;
+        }
             `,
     }),
 );
