@@ -45,7 +45,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
     private send(body: BodyInit | null): Promise<RequesterResponseInterface<m.MessagesResponse>> {
         return this.client.sendRequest(
             this.commonMethod,
-            this.commonEndpoint,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}/${this.commonEndpoint}`,
             this.config[WabaConfigEnum.RequestTimeout],
             body,
         );

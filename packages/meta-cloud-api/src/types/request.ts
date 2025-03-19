@@ -27,6 +27,10 @@ export interface RequesterResponseInterface<T> {
     json: () => Promise<T>;
 }
 
+export interface ResponseSuccess {
+    success: boolean;
+}
+
 export declare class RequesterClass {
     constructor(
         host: string,

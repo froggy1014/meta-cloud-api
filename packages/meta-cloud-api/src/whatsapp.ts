@@ -2,7 +2,7 @@ import { WabaConfigType } from './types/config';
 import * as SDKEnums from './types/enums';
 import Logger from './logger';
 import MessagesAPI from './api/messages';
-
+import TemplatesAPI from './api/template';
 import { importConfig } from './utils/importConfig';
 import Requester from './request';
 import { WhatsAppClass } from './types/whatsapp';
@@ -19,7 +19,7 @@ export default class WhatsApp implements WhatsAppClass {
     requester: Readonly<Requester>;
 
     readonly messages: MessagesAPI;
-
+    readonly templates: TemplatesAPI;
     static readonly Enums = SDKEnums;
 
     constructor(senderNumberId?: number, accessToken?: string) {
@@ -34,6 +34,7 @@ export default class WhatsApp implements WhatsAppClass {
         );
 
         this.messages = new MessagesAPI(this.config, this.requester);
+        this.templates = new TemplatesAPI(this.config, this.requester);
 
         LOGGER.log('WhatsApp Node.js SDK instantiated!');
     }

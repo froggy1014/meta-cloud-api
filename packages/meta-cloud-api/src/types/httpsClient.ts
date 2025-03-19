@@ -19,7 +19,6 @@ export declare class HttpsClientClass {
     clearSockets: () => boolean;
     sendRequest: (
         host: string,
-        port: number,
         path: string,
         method: HttpMethodsEnum,
         headers: HeadersInit,

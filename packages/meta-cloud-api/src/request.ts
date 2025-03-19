@@ -16,7 +16,6 @@ export default class Requester implements RequesterClass {
     userAgent: Readonly<string>;
     host: Readonly<string>;
     protocol: Readonly<string> = 'https:';
-    port: Readonly<number> = 443;
 
     constructor(
         host: string,
@@ -45,19 +44,16 @@ export default class Requester implements RequesterClass {
     }
 
     buildCAPIPath(endpoint: string): string {
-        return `/${this.apiVersion}/${this.phoneNumberId}/${endpoint}`;
+        return `v${this.apiVersion}.0/${endpoint}`;
     }
 
     async sendRequest(method: HttpMethodsEnum, endpoint: string, timeout: number, body?: any) {
         const contentType = 'application/json';
 
-        LOGGER.log(
-            `${method} : ${this.protocol.toLowerCase()}//${this.host}:${this.port}/${this.buildCAPIPath(endpoint)}`,
-        );
+        LOGGER.log(`${method} : ${this.protocol.toLowerCase()}//${this.host}/${this.buildCAPIPath(endpoint)}`);
 
         return await this.client.sendRequest(
             this.host,
-            this.port,
             this.buildCAPIPath(endpoint),
             method,
             this.buildHeader(contentType),

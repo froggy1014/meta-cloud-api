@@ -6,3 +6,4 @@ export * from './httpsClient';
 export * from './logger';
 export * from './messages';
 export * from './whatsapp';
+export * from './template';

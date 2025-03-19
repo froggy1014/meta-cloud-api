@@ -1,3 +1,15 @@
+export enum CategoryEnum {
+    Authentication = 'AUTHENTICATION',
+    Marketing = 'MARKETING',
+    Utility = 'UTILITY',
+}
+
+export enum TemplateStatusEnum {
+    Approved = 'APPROVED',
+    Pending = 'PENDING',
+    Rejected = 'REJECTED',
+}
+
 export const enum HttpMethodsEnum {
     Get = 'GET',
     Post = 'POST',
@@ -47,15 +59,17 @@ export const enum ButtonPositionEnum {
     Third,
 }
 
-export const enum ComponentTypesEnum {
-    Header = 'header',
-    Body = 'body',
-    Button = 'button',
+export enum ComponentTypesEnum {
+    Header = 'HEADER',
+    Body = 'BODY',
+    Button = 'BUTTON',
+    Footer = 'FOOTER',
 }
 
 export enum WabaConfigEnum {
     BaseURL = 'WA_BASE_URL',
     AppId = 'M4D_APP_ID',
+    Port = 'WA_PORT',
     AppSecret = 'M4D_APP_SECRET',
     PhoneNumberId = 'WA_PHONE_NUMBER_ID',
     BusinessAcctId = 'WA_BUSINESS_ACCOUNT_ID',
@@ -143,7 +157,7 @@ export const enum RequestCodeMethodsEnum {
     Voice = 'VOICE',
 }
 
-export const enum LanguagesEnum {
+export enum LanguagesEnum {
     Afrikaans = 'af',
     Albanian = 'sq',
     Arabic = 'ar',

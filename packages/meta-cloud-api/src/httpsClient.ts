@@ -22,23 +22,24 @@ export default class HttpsClient implements HttpsClientClass {
 
     async sendRequest(
         hostname: string,
-        port: number,
         path: string,
         method: HttpMethodsEnum,
         headers: HeadersInit,
         timeout: number,
         body?: BodyInit | null,
     ): Promise<HttpsClientResponseClass> {
-        const url = `https://${hostname}:${port}${path}`;
+        const url = `https://${hostname}/${path}`;
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), timeout);
+        console.log('🚀 ~ HttpsClient ~ url:', url);
+        console.log('🚀 ~ HttpsClient ~ headers:', headers);
+        console.log('🚀 ~ HttpsClient ~ body:', body);
 
         try {
             const response = await fetch(url, {
                 method,
                 headers,
                 body,
-
                 signal: controller.signal,
             });
             LOGGER.log(`${method} : ${url} - ${JSON.stringify(response)}`);
