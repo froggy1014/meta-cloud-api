@@ -20,7 +20,7 @@
     "express-openapi-validator": "^5.4.6",
     "meta-cloud-api": "workspace:*",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1",
+    "swagger-ui-express": "^4.3.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
