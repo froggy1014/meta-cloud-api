@@ -32,8 +32,8 @@ router.get(
         }
 
         .copy-to-clipboard {
-            height: 26px;
-            position: static;
+            height: 26px !important;
+            position: static !important;
         }
             `,
     }),
