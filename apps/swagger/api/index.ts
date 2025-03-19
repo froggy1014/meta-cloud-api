@@ -1,16 +1,27 @@
 import express from 'express';
 
 import dotenv from 'dotenv';
+import path from 'path';
 import { apidocsRouter, messagesRouter } from '../src/routes';
-import { validator } from '../src/middleware/validator';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
 
 const PORT = process.env.LISTENER_PORT || 8080;
 const app = express();
 
-app.use(express.json());
+const __dirname = path.dirname(__filename);
 
+app.use('/public', express.static(path.join(__dirname, 'public')));
+app.use((req, res, next) => {
+    if (req.url === '/api-docs/swagger-ui.css') {
+        res.sendFile(path.join(__dirname, 'public') + '/css/swagger-ui.css');
+    } else {
+        next();
+    }
+});
+
+app.use(express.json());
 app.use('/api-docs', apidocsRouter);
 app.use('/messages', messagesRouter);
 
