@@ -2,11 +2,11 @@
   "name": "meta-cloud-api-swagger",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/src/app.js",
+  "main": "dist/api/index.js",
   "scripts": {
-    "start": "node dist/src/app.js",
+    "start": "node dist/api/index.js",
     "build": "pnpm run schemas:openapi && pnpm run copyfiles && tsc",
-    "dev": "pnpm run schemas:openapi && pnpm run copyfiles && concurrently \"tsc -w\" \"nodemon dist/src/app.js\"",
+    "dev": "pnpm run schemas:openapi && pnpm run copyfiles && concurrently \"tsc -w\" \"nodemon dist/api/index.js\"",
     "schemas:openapi": "mkdir -p src/schemas && swagger-jsdoc -d src/spec/*.yaml src/routes/*.ts -o src/schemas/openapi.json",
     "copyfiles": "copyfiles -u 1 src/schemas/*.json dist",
     "clean": "rm -rf dist node_modules"

@@ -2,7 +2,7 @@ import express from 'express';
 
 import dotenv from 'dotenv';
 import { apidocsRouter, messagesRouter } from '../src/routes';
-import templateRoutes from '@/routes/template';
+import templateRoutes from '../src/routes/template';
 
 dotenv.config();
 
