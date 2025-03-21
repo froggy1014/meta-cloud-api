@@ -303,7 +303,21 @@ templateRoutes.get('/', async (req, res) => {
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/TemplateResponse'
+ *               type: object
+ *               required:
+ *                 - id
+ *                 - status
+ *                 - category
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   example: "9533679340021041"
+ *                 status:
+ *                   $ref: '#/components/schemas/TemplateStatusEnum'
+ *                   example: "APPROVED"
+ *                 category:
+ *                   $ref: '#/components/schemas/CategoryEnum'
+ *                   example: "MARKETING"
  *       400:
  *         description: Invalid request
  *         content:
@@ -316,7 +330,7 @@ templateRoutes.post('/', async (req, res) => {
         const whatsapp = new WhatsApp();
         const template = req.body;
         const response = await whatsapp.templates.createTemplate(template);
-        res.status(201).json(response);
+        res.status(201).json(await response.json());
     } catch (error) {
         if (error instanceof Error) {
             res.status(400).json({ error: error.message });
@@ -365,7 +379,7 @@ templateRoutes.get('/:templateId', async (req, res) => {
         if (!response) {
             return res.status(404).json({ error: 'Template not found' });
         }
-        res.json(response);
+        res.status(200).json(await response.json());
     } catch (error) {
         if (error instanceof Error) {
             res.status(400).json({ error: error.message });
@@ -402,7 +416,24 @@ templateRoutes.get('/:templateId', async (req, res) => {
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/TemplateResponse'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 id:
+ *                   type: string
+ *                   example: "9533679340021041"
+ *                 name:
+ *                   type: string
+ *                   example: "seasonal_promotion12"
+ *                 category:
+ *                   $ref: '#/components/schemas/CategoryEnum'
+ *               required:
+ *                 - success
+ *                 - id
+ *                 - name
+ *                 - category
  *       400:
  *         description: Invalid request
  *         content:
@@ -421,7 +452,7 @@ templateRoutes.put('/:templateId', async (req, res) => {
         if (!response) {
             return res.status(404).json({ error: 'Template not found' });
         }
-        res.json(response);
+        res.status(200).json(await response.json());
     } catch (error) {
         if (error instanceof Error) {
             res.status(400).json({ error: error.message });
@@ -446,9 +477,19 @@ templateRoutes.put('/:templateId', async (req, res) => {
  *         schema:
  *           type: string
  *         description: ID of the template to delete
+ *       - in: query
+ *         name: name
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Name of the template to delete
  *     responses:
- *       204:
+ *       200:
  *         description: Template deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponse'
  *       400:
  *         description: Invalid request
  *         content:
@@ -462,12 +503,20 @@ templateRoutes.delete('/:templateId', async (req, res) => {
     try {
         const whatsapp = new WhatsApp();
         const { templateId } = req.params;
-        const params = { hsm_id: templateId };
+        const { name } = req.query;
+
+        if (!templateId || !name) {
+            return res.status(400).json({ error: 'Template ID and name are required' });
+        }
+
+        const params = { hsm_id: templateId, name: name as string };
         const response = await whatsapp.templates.deleteTemplate(params);
+
         if (!response) {
             return res.status(404).json({ error: 'Template not found' });
         }
-        res.status(204).send();
+
+        res.status(200).json(await response.json());
     } catch (error) {
         if (error instanceof Error) {
             res.status(400).json({ error: error.message });

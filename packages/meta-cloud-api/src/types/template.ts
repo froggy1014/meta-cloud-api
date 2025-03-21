@@ -118,8 +118,8 @@ export type TemplateGetParams = {
 };
 
 export type TemplateDeleteParams = {
-    hsm_id?: string;
-    name?: string;
+    hsm_id: string;
+    name: string;
 };
 
 export declare class TemplateClass {

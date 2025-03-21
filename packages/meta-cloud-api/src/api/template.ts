@@ -60,7 +60,7 @@ export default class TemplateApi extends BaseAPI implements TemplateClass {
     async deleteTemplate(params: TemplateDeleteParams): Promise<RequesterResponseInterface<ResponseSuccess>> {
         return this.client.sendRequest(
             HttpMethodsEnum.Delete,
-            `${this.config[WabaConfigEnum.BusinessAcctId]}/${this.endpoint}?${objectToQueryString(params)}`,
+            `${this.config[WabaConfigEnum.BusinessAcctId]}/${this.endpoint}${objectToQueryString(params)}`,
             this.config[WabaConfigEnum.RequestTimeout],
             null,
         );

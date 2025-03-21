@@ -1590,7 +1590,26 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TemplateResponse"
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "status",
+                    "category"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "9533679340021041"
+                    },
+                    "status": {
+                      "$ref": "#/components/schemas/TemplateStatusEnum",
+                      "example": "APPROVED"
+                    },
+                    "category": {
+                      "$ref": "#/components/schemas/CategoryEnum",
+                      "example": "MARKETING"
+                    }
+                  }
                 }
               }
             }
@@ -1693,7 +1712,30 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TemplateResponse"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "id": {
+                      "type": "string",
+                      "example": "9533679340021041"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "seasonal_promotion12"
+                    },
+                    "category": {
+                      "$ref": "#/components/schemas/CategoryEnum"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "id",
+                    "name",
+                    "category"
+                  ]
                 }
               }
             }
@@ -1732,11 +1774,27 @@
               "type": "string"
             },
             "description": "ID of the template to delete"
+          },
+          {
+            "in": "query",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Name of the template to delete"
           }
         ],
         "responses": {
-          "204": {
-            "description": "Template deleted successfully"
+          "200": {
+            "description": "Template deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid request",
