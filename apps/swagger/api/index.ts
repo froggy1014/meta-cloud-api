@@ -2,6 +2,7 @@ import express from 'express';
 
 import dotenv from 'dotenv';
 import { apidocsRouter, messagesRouter } from '../src/routes';
+import templateRoutes from '@/routes/template';
 
 dotenv.config();
 
@@ -11,9 +12,9 @@ const app = express();
 app.use(express.json());
 app.use('/api-docs', apidocsRouter);
 app.use('/messages', messagesRouter);
+app.use('/templates', templateRoutes);
 
 app.use('/', (req, res) => res.redirect('/api-docs'));
-// app.use('/', templateRoutes);
 
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
     // Log error details in a structured format

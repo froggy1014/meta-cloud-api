@@ -7,7 +7,7 @@
     "start": "node dist/src/app.js",
     "build": "pnpm run schemas:openapi && pnpm run copyfiles && tsc",
     "dev": "pnpm run schemas:openapi && pnpm run copyfiles && concurrently \"tsc -w\" \"nodemon dist/src/app.js\"",
-    "schemas:openapi": "mkdir -p src/schemas && swagger-jsdoc -d src/routes/definition.yaml \"src/routes/**/*.ts\" \"src/routes/**/*.yaml\" -o src/schemas/openapi.json",
+    "schemas:openapi": "mkdir -p src/schemas && swagger-jsdoc -d src/spec/*.yaml src/routes/*.ts -o src/schemas/openapi.json",
     "copyfiles": "copyfiles -u 1 src/schemas/*.json dist",
     "clean": "rm -rf dist node_modules"
   },
