@@ -57,11 +57,14 @@ const router = express.Router();
  *                     properties:
  *                       id:
  *                         type: string
+ *                         description: The media object ID from Meta servers
  *                   - type: object
  *                     required: [link]
  *                     properties:
  *                       link:
  *                         type: string
+ *                         description: HTTP/HTTPS URL of the audio file. Content-Type must be audio/aac, audio/mp4, audio/mpeg, audio/amr, or audio/ogg
+ *                         example: "https://example.com/audio.mp3"
  *               recipient:
  *                 type: number
  *               replyMessageId:
@@ -127,22 +130,30 @@ router.post('/audio', async (req: Request<{}, {}, AudioBody>, res: Response) => 
  *                         properties:
  *                           street:
  *                             type: string
+ *                             example: "123 Main St"
  *                           city:
  *                             type: string
+ *                             example: "Seoul"
  *                           state:
  *                             type: string
+ *                             example: "SL"
  *                           zip:
  *                             type: string
+ *                             example: "04524"
  *                           country:
  *                             type: string
+ *                             example: "South Korea"
  *                           country_code:
  *                             type: string
+ *                             example: "KR"
  *                           type:
  *                             type: string
  *                             enum: [HOME, WORK]
+ *                             example: "HOME"
  *                     birthday:
  *                       type: string
  *                       pattern: '^\d{4}-\d{2}-\d{2}$'
+ *                       example: "1990-01-15"
  *                     emails:
  *                       type: array
  *                       items:
@@ -150,9 +161,11 @@ router.post('/audio', async (req: Request<{}, {}, AudioBody>, res: Response) => 
  *                         properties:
  *                           email:
  *                             type: string
+ *                             example: "john.doe@personal.com"
  *                           type:
  *                             type: string
  *                             enum: [HOME, WORK]
+ *                             example: "HOME"
  *                     name:
  *                       type: object
  *                       required:
@@ -160,25 +173,34 @@ router.post('/audio', async (req: Request<{}, {}, AudioBody>, res: Response) => 
  *                       properties:
  *                         formatted_name:
  *                           type: string
+ *                           example: "John Doe"
  *                         first_name:
  *                           type: string
+ *                           example: "John"
  *                         last_name:
  *                           type: string
+ *                           example: "Doe"
  *                         middle_name:
  *                           type: string
+ *                           example: "William"
  *                         suffix:
  *                           type: string
+ *                           example: "Jr."
  *                         prefix:
  *                           type: string
+ *                           example: "Mr."
  *                     org:
  *                       type: object
  *                       properties:
  *                         company:
  *                           type: string
+ *                           example: "Tech Company Ltd."
  *                         department:
  *                           type: string
+ *                           example: "Engineering"
  *                         title:
  *                           type: string
+ *                           example: "Senior Software Engineer"
  *                     phones:
  *                       type: array
  *                       items:
@@ -186,11 +208,14 @@ router.post('/audio', async (req: Request<{}, {}, AudioBody>, res: Response) => 
  *                         properties:
  *                           phone:
  *                             type: string
+ *                             example: "+82101234567"
  *                           type:
  *                             type: string
  *                             enum: [CELL, MAIN, IPHONE, HOME, WORK]
+ *                             example: "CELL"
  *                           wa_id:
  *                             type: string
+ *                             example: "82101234567"
  *                     urls:
  *                       type: array
  *                       items:
@@ -198,11 +223,14 @@ router.post('/audio', async (req: Request<{}, {}, AudioBody>, res: Response) => 
  *                         properties:
  *                           url:
  *                             type: string
+ *                             example: "https://personal-website.com"
  *                           type:
  *                             type: string
  *                             enum: [HOME, WORK]
+ *                             example: "HOME"
  *               recipient:
  *                 type: number
+ *                 example: 821089791169
  *               replyMessageId:
  *                 type: string
  *     responses:
@@ -260,6 +288,7 @@ router.post('/contacts', async (req: Request<{}, {}, ContactsBody>, res: Respons
  *                     properties:
  *                       id:
  *                         type: string
+ *                         description: The media object ID from Meta servers
  *                       caption:
  *                         type: string
  *                       filename:
@@ -269,6 +298,8 @@ router.post('/contacts', async (req: Request<{}, {}, ContactsBody>, res: Respons
  *                     properties:
  *                       link:
  *                         type: string
+ *                         description: HTTP/HTTPS URL of the document. Content-Type must be text/plain, application/pdf, application/vnd.ms-powerpoint, application/msword, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.presentationml.presentation, or application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+ *                         example: "https://example.com/document.pdf"
  *                       caption:
  *                         type: string
  *                       filename:
@@ -332,6 +363,7 @@ router.post('/document', async (req: Request<{}, {}, DocBody>, res: Response) =>
  *                     properties:
  *                       id:
  *                         type: string
+ *                         description: The media object ID from Meta servers
  *                       caption:
  *                         type: string
  *                   - type: object
@@ -339,6 +371,8 @@ router.post('/document', async (req: Request<{}, {}, DocBody>, res: Response) =>
  *                     properties:
  *                       link:
  *                         type: string
+ *                         description: HTTP/HTTPS URL of the image. Content-Type must be image/jpeg, image/png, or image/webp
+ *                         example: "https://example.com/image.jpg"
  *                       caption:
  *                         type: string
  *               recipient:
@@ -424,15 +458,21 @@ router.post('/image', async (req: Request<{}, {}, ImageBody>, res: Response) => 
  *                         properties:
  *                           id:
  *                             type: string
+ *                             description: The media object ID from Meta servers
  *                           link:
  *                             type: string
+ *                             description: HTTP/HTTPS URL of the document. Content-Type must be text/plain, application/pdf, application/vnd.ms-powerpoint, application/msword, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.presentationml.presentation, or application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+ *                             example: "https://example.com/document.pdf"
  *                       image:
  *                         type: object
  *                         properties:
  *                           id:
  *                             type: string
+ *                             description: The media object ID from Meta servers
  *                           link:
  *                             type: string
+ *                             description: HTTP/HTTPS URL of the image. Content-Type must be image/jpeg, image/png, or image/webp
+ *                             example: "https://example.com/image.jpg"
  *                       text:
  *                         type: string
  *                       video:
@@ -440,8 +480,11 @@ router.post('/image', async (req: Request<{}, {}, ImageBody>, res: Response) => 
  *                         properties:
  *                           id:
  *                             type: string
+ *                             description: The media object ID from Meta servers
  *                           link:
  *                             type: string
+ *                             description: HTTP/HTTPS URL of the video. Content-Type must be video/mp4, video/3gp
+ *                             example: "https://example.com/video.mp4"
  *                   action:
  *                     type: object
  *                     properties:
@@ -565,14 +608,19 @@ router.post('/interactive', async (req: Request<{}, {}, InteractiveBody>, res: R
  *                 properties:
  *                   longitude:
  *                     type: number
+ *                     example: -122.1484785
  *                   latitude:
  *                     type: number
+ *                     example: 37.4847285
  *                   name:
  *                     type: string
+ *                     example: "Meta Headquarters"
  *                   address:
  *                     type: string
+ *                     example: "1 Hacker Way, Menlo Park, CA 94025"
  *               recipient:
  *                 type: number
+ *                 example: 821089791169
  *               replyMessageId:
  *                 type: string
  *     responses:
@@ -629,11 +677,14 @@ router.post('/location', async (req: Request<{}, {}, LocationBody>, res: Respons
  *                     properties:
  *                       id:
  *                         type: string
+ *                         description: The media object ID from Meta servers
  *                   - type: object
  *                     required: [link]
  *                     properties:
  *                       link:
  *                         type: string
+ *                         description: HTTP/HTTPS URL of the sticker. Content-Type must be image/webp for static stickers or video/webm for animated stickers
+ *                         example: "https://example.com/sticker.webp"
  *               recipient:
  *                 type: number
  *               replyMessageId:
@@ -776,22 +827,31 @@ router.post('/sticker', async (req: Request<{}, {}, StickerBody>, res: Response)
  *                                         properties:
  *                                           id:
  *                                             type: string
+ *                                             description: The media object ID from Meta servers
  *                                           link:
  *                                             type: string
+ *                                             description: HTTP/HTTPS URL of the document. Content-Type must be text/plain, application/pdf, application/vnd.ms-powerpoint, application/msword, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.presentationml.presentation, or application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+ *                                             example: "https://example.com/document.pdf"
  *                                       image:
  *                                         type: object
  *                                         properties:
  *                                           id:
  *                                             type: string
+ *                                             description: The media object ID from Meta servers
  *                                           link:
  *                                             type: string
+ *                                             description: HTTP/HTTPS URL of the image. Content-Type must be image/jpeg, image/png, or image/webp
+ *                                             example: "https://example.com/image.jpg"
  *                                       video:
  *                                         type: object
  *                                         properties:
  *                                           id:
  *                                             type: string
+ *                                             description: The media object ID from Meta servers
  *                                           link:
  *                                             type: string
+ *                                             description: HTTP/HTTPS URL of the video. Content-Type must be video/mp4, video/3gp
+ *                                             example: "https://example.com/video.mp4"
  *                         - type: object
  *                           required:
  *                             - type
@@ -911,8 +971,6 @@ router.post('/text', async (req: Request<{}, {}, TextBody>, res: Response) => {
     try {
         const { body, recipient, replyMessageId } = req.body;
         const whatsapp = new WhatsApp();
-        whatsapp.updateSenderNumberId(Number(process.env.WA_PHONE_NUMBER_ID));
-        whatsapp.updateAccessToken(process.env.CLOUD_API_ACCESS_TOKEN as string);
         const response = await whatsapp.messages.text(body, recipient, replyMessageId);
         res.status(200).json(await response.json());
     } catch (error) {

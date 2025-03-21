@@ -31,9 +31,6 @@ export default class HttpsClient implements HttpsClientClass {
         const url = `https://${hostname}/${path}`;
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), timeout);
-        console.log('🚀 ~ HttpsClient ~ url:', url);
-        console.log('🚀 ~ HttpsClient ~ headers:', headers);
-        console.log('🚀 ~ HttpsClient ~ body:', body);
 
         try {
             const response = await fetch(url, {
