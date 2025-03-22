@@ -10,18 +10,17 @@ components:
             - type
             - code
             - error_data
-            - error_subcode
             - fbtrace_id
           properties:
             message:
               type: string
-              description: Error message describing what went wrong
+              description: Combination of the error code and its title. Example - "(#130429) Rate limit hit"
             type:
               type: string
-              description: Type of error that occurred
+              description: Error type, e.g. "OAuthException"
             code:
               type: integer
-              description: Error code
+              description: Error code. Primary value for error handling logic
             error_data:
               type: object
               required:
@@ -31,12 +30,36 @@ components:
                 messaging_product:
                   type: string
                   enum: [whatsapp]
+                  description: Always "whatsapp" for Cloud API responses
                 details:
-                  type: string
-                  description: Additional error details
+                  type: object
+                  description: Detailed error description object
+                  properties:
+                    title:
+                      type: string
+                      description: Error title
+                    message:
+                      type: string
+                      description: Detailed error message
+                    code:
+                      type: string
+                      description: Error code
             error_subcode:
               type: integer
-              description: Error subcode for more specific error classification
+              description: Deprecated Graph API subcode. Will not be returned in v16.0+
             fbtrace_id:
               type: string
-              description: Facebook trace ID for error tracking
+              description: Trace ID for debugging when contacting Direct Support
+      example:
+        error:
+          message: "(#130429) Rate limit hit"
+          type: "OAuthException" 
+          code: 130429
+          error_data:
+            messaging_product: "whatsapp"
+            details: 
+              title: "Rate Limit"
+              message: "Message failed to send because there were too many messages sent from this phone number in a short period of time"
+              code: "rate_limit_hit"
+          error_subcode: 2494055
+          fbtrace_id: "Az8or2yhqkZfEZ-_4Qn_Bam"

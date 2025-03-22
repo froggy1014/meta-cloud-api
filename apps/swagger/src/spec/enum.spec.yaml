@@ -560,3 +560,20 @@ components:
         - XRE
         - XFU
 
+    DataLocalizationRegionEnum:
+      type: string
+      enum:
+        - AU
+        - ID
+        - IN
+        - JP
+        - SG
+        - KR
+        - DE
+        - CH
+        - GB
+        - BR
+        - BH
+        - ZA
+        - AE
+        - CA

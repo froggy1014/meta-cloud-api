@@ -1480,6 +1480,341 @@
         }
       }
     },
+    "/phone-numbers": {
+      "get": {
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "summary": "Get all phone numbers",
+        "tags": [
+          "Phone Numbers"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved phone numbers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhoneNumbersResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/phone-numbers/{businessNumberId}": {
+      "get": {
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "summary": "Get details for the specified phone number",
+        "tags": [
+          "Phone Numbers"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "businessNumberId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "description": "The ID of the business phone number"
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Comma-separated list of fields to retrieve",
+            "example": "id, account_mode, certificate, code_verification_status, conversational_automation, display_phone_number, eligibility_for_api_business_global_search, health_status, is_official_business_account, is_on_biz_app, is_pin_enabled, is_preverified_number, last_onboarded_time, messaging_limit_tier, name_status, new_certificate, new_name_status, platform_type, quality_score, search_visibility, status, throughput, verified_name"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved phone number details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhoneNumber"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/phone-numbers/{businessNumberId}/request-code": {
+      "post": {
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "summary": "Request verification code for phone number",
+        "tags": [
+          "Phone Numbers"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "businessNumberId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the business phone number"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "code_method",
+                  "language"
+                ],
+                "properties": {
+                  "code_method": {
+                    "$ref": "#/components/schemas/RequestCodeMethodsEnum"
+                  },
+                  "language": {
+                    "$ref": "#/components/schemas/LanguagesEnum"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully requested verification code",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/phone-numbers/{businessNumberId}/verify-code": {
+      "post": {
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "summary": "Verify code for phone number",
+        "tags": [
+          "Phone Numbers"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "businessNumberId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the business phone number"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "code"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully verified code",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/phone-numbers/{businessNumberId}/register": {
+      "post": {
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "summary": "Register a phone number",
+        "tags": [
+          "Phone Numbers"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "businessNumberId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the business phone number"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "pin"
+                ],
+                "properties": {
+                  "pin": {
+                    "type": "string"
+                  },
+                  "data_localization_region": {
+                    "$ref": "#/components/schemas/DataLocalizationRegionEnum"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully registered phone number",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/phone-numbers/{businessNumberId}/deregister": {
+      "post": {
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "summary": "Deregister a phone number",
+        "tags": [
+          "Phone Numbers"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "businessNumberId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the business phone number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully deregistered phone number",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/templates": {
       "get": {
         "security": [
@@ -2398,6 +2733,25 @@
           "XFU"
         ]
       },
+      "DataLocalizationRegionEnum": {
+        "type": "string",
+        "enum": [
+          "AU",
+          "ID",
+          "IN",
+          "JP",
+          "SG",
+          "KR",
+          "DE",
+          "CH",
+          "GB",
+          "BR",
+          "BH",
+          "ZA",
+          "AE",
+          "CA"
+        ]
+      },
       "Error": {
         "type": "object",
         "properties": {
@@ -2408,21 +2762,20 @@
               "type",
               "code",
               "error_data",
-              "error_subcode",
               "fbtrace_id"
             ],
             "properties": {
               "message": {
                 "type": "string",
-                "description": "Error message describing what went wrong"
+                "description": "Combination of the error code and its title. Example - \"(#130429) Rate limit hit\""
               },
               "type": {
                 "type": "string",
-                "description": "Type of error that occurred"
+                "description": "Error type, e.g. \"OAuthException\""
               },
               "code": {
                 "type": "integer",
-                "description": "Error code"
+                "description": "Error code. Primary value for error handling logic"
               },
               "error_data": {
                 "type": "object",
@@ -2435,23 +2788,55 @@
                     "type": "string",
                     "enum": [
                       "whatsapp"
-                    ]
+                    ],
+                    "description": "Always \"whatsapp\" for Cloud API responses"
                   },
                   "details": {
-                    "type": "string",
-                    "description": "Additional error details"
+                    "type": "object",
+                    "description": "Detailed error description object",
+                    "properties": {
+                      "title": {
+                        "type": "string",
+                        "description": "Error title"
+                      },
+                      "message": {
+                        "type": "string",
+                        "description": "Detailed error message"
+                      },
+                      "code": {
+                        "type": "string",
+                        "description": "Error code"
+                      }
+                    }
                   }
                 }
               },
               "error_subcode": {
                 "type": "integer",
-                "description": "Error subcode for more specific error classification"
+                "description": "Deprecated Graph API subcode. Will not be returned in v16.0+"
               },
               "fbtrace_id": {
                 "type": "string",
-                "description": "Facebook trace ID for error tracking"
+                "description": "Trace ID for debugging when contacting Direct Support"
               }
             }
+          }
+        },
+        "example": {
+          "error": {
+            "message": "(#130429) Rate limit hit",
+            "type": "OAuthException",
+            "code": 130429,
+            "error_data": {
+              "messaging_product": "whatsapp",
+              "details": {
+                "title": "Rate Limit",
+                "message": "Message failed to send because there were too many messages sent from this phone number in a short period of time",
+                "code": "rate_limit_hit"
+              }
+            },
+            "error_subcode": 2494055,
+            "fbtrace_id": "Az8or2yhqkZfEZ-_4Qn_Bam"
           }
         }
       },
@@ -2832,6 +3217,194 @@
                   }
                 }
               ]
+            }
+          }
+        }
+      },
+      "QualityScore": {
+        "type": "object",
+        "properties": {
+          "score": {
+            "type": "string",
+            "enum": [
+              "GREEN",
+              "YELLOW",
+              "RED",
+              "NA"
+            ]
+          }
+        }
+      },
+      "Throughput": {
+        "type": "object",
+        "properties": {
+          "level": {
+            "type": "string",
+            "enum": [
+              "STANDARD",
+              "HIGH",
+              "NOT_APPLICABLE"
+            ]
+          }
+        }
+      },
+      "HealthStatusEntity": {
+        "type": "object",
+        "properties": {
+          "entity_type": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "can_send_message": {
+            "type": "string"
+          },
+          "additional_info": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "error_code": {
+                  "type": "number"
+                },
+                "error_description": {
+                  "type": "string"
+                },
+                "possible_solution": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "HealthStatus": {
+        "type": "object",
+        "properties": {
+          "can_send_message": {
+            "type": "string"
+          },
+          "entities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HealthStatusEntity"
+            }
+          }
+        }
+      },
+      "PhoneNumber": {
+        "type": "object",
+        "properties": {
+          "display_phone_number": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "quality_rating": {
+            "type": "string",
+            "enum": [
+              "GREEN",
+              "YELLOW",
+              "RED",
+              "NA"
+            ]
+          },
+          "verified_name": {
+            "type": "string"
+          },
+          "account_mode": {
+            "type": "string",
+            "enum": [
+              "LIVE",
+              "SANDBOX"
+            ]
+          },
+          "code_verification_status": {
+            "type": "string",
+            "enum": [
+              "NOT_VERIFIED",
+              "VERIFIED",
+              "EXPIRED",
+              "PENDING",
+              "DELETED",
+              "MIGRATED",
+              "BANNED",
+              "RESTRICTED",
+              "RATE_LIMITED",
+              "FLAGGED",
+              "CONNECTED",
+              "DISCONNECTED",
+              "UNKNOWN",
+              "UNVERIFIED"
+            ]
+          },
+          "health_status": {
+            "$ref": "#/components/schemas/HealthStatus"
+          },
+          "is_official_business_account": {
+            "type": "boolean"
+          },
+          "is_on_biz_app": {
+            "type": "boolean"
+          },
+          "messaging_limit_tier": {
+            "type": "string",
+            "enum": [
+              "TIER_50",
+              "TIER_250",
+              "TIER_1K",
+              "TIER_10K",
+              "TIER_100K",
+              "TIER_UNLIMITED"
+            ]
+          },
+          "platform_type": {
+            "type": "string",
+            "enum": [
+              "CLOUD_API",
+              "ON_PREMISE",
+              "NOT_APPLICABLE"
+            ]
+          },
+          "quality_score": {
+            "$ref": "#/components/schemas/QualityScore"
+          },
+          "throughput": {
+            "$ref": "#/components/schemas/Throughput"
+          }
+        }
+      },
+      "PhoneNumbersResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PhoneNumber"
+            }
+          },
+          "paging": {
+            "type": "object",
+            "properties": {
+              "cursors": {
+                "type": "object",
+                "properties": {
+                  "before": {
+                    "type": "string"
+                  },
+                  "after": {
+                    "type": "string"
+                  }
+                }
+              }
             }
           }
         }

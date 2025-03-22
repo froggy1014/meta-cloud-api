@@ -12,7 +12,7 @@
  */
 
 import dotenv from 'dotenv';
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import WhatsApp from 'meta-cloud-api';
 import {
     AudioMessageRequestBody as AudioBody,
@@ -83,18 +83,14 @@ const router = express.Router();
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/audio', async (req: Request<{}, {}, AudioBody>, res: Response) => {
+router.post('/audio', async (req: Request<{}, {}, AudioBody>, res: Response, next: NextFunction) => {
     try {
         const { body, recipient, replyMessageId } = req.body;
         const whatsapp = new WhatsApp();
         const response = await whatsapp.messages.audio(body, recipient, replyMessageId);
         res.status(200).json(await response.json());
     } catch (error) {
-        if (error instanceof Error) {
-            res.status(400).json({ error: error.message });
-        } else {
-            res.status(400).json({ error: 'Unknown error' });
-        }
+        next(error);
     }
 });
 
@@ -247,18 +243,14 @@ router.post('/audio', async (req: Request<{}, {}, AudioBody>, res: Response) => 
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/contacts', async (req: Request<{}, {}, ContactsBody>, res: Response) => {
+router.post('/contacts', async (req: Request<{}, {}, ContactsBody>, res: Response, next: NextFunction) => {
     try {
         const { body, recipient, replyMessageId } = req.body;
         const whatsapp = new WhatsApp();
         const response = await whatsapp.messages.contacts(body, recipient, replyMessageId);
         res.status(200).json(await response.json());
     } catch (error) {
-        if (error instanceof Error) {
-            res.status(400).json({ error: error.message });
-        } else {
-            res.status(400).json({ error: 'Unknown error' });
-        }
+        next(error);
     }
 });
 
@@ -322,18 +314,14 @@ router.post('/contacts', async (req: Request<{}, {}, ContactsBody>, res: Respons
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/document', async (req: Request<{}, {}, DocBody>, res: Response) => {
+router.post('/document', async (req: Request<{}, {}, DocBody>, res: Response, next: NextFunction) => {
     try {
         const { body, recipient, replyMessageId } = req.body;
         const whatsapp = new WhatsApp();
         const response = await whatsapp.messages.document(body, recipient, replyMessageId);
         res.status(200).json(await response.json());
     } catch (error) {
-        if (error instanceof Error) {
-            res.status(400).json({ error: error.message });
-        } else {
-            res.status(400).json({ error: 'Unknown error' });
-        }
+        next(error);
     }
 });
 
@@ -393,18 +381,14 @@ router.post('/document', async (req: Request<{}, {}, DocBody>, res: Response) =>
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/image', async (req: Request<{}, {}, ImageBody>, res: Response) => {
+router.post('/image', async (req: Request<{}, {}, ImageBody>, res: Response, next: NextFunction) => {
     try {
         const { body, recipient, replyMessageId } = req.body;
         const whatsapp = new WhatsApp();
         const response = await whatsapp.messages.image(body, recipient, replyMessageId);
         res.status(200).json(await response.json());
     } catch (error) {
-        if (error instanceof Error) {
-            res.status(400).json({ error: error.message });
-        } else {
-            res.status(400).json({ error: 'Unknown error' });
-        }
+        next(error);
     }
 });
 /**
@@ -568,18 +552,14 @@ router.post('/image', async (req: Request<{}, {}, ImageBody>, res: Response) => 
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/interactive', async (req: Request<{}, {}, InteractiveBody>, res: Response) => {
+router.post('/interactive', async (req: Request<{}, {}, InteractiveBody>, res: Response, next: NextFunction) => {
     try {
         const { body, recipient, replyMessageId } = req.body;
         const whatsapp = new WhatsApp();
         const response = await whatsapp.messages.interactive(body, recipient, replyMessageId);
         res.status(200).json(await response.json());
     } catch (error) {
-        if (error instanceof Error) {
-            res.status(400).json({ error: error.message });
-        } else {
-            res.status(400).json({ error: 'Unknown error' });
-        }
+        next(error);
     }
 });
 /**
@@ -637,18 +617,14 @@ router.post('/interactive', async (req: Request<{}, {}, InteractiveBody>, res: R
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/location', async (req: Request<{}, {}, LocationBody>, res: Response) => {
+router.post('/location', async (req: Request<{}, {}, LocationBody>, res: Response, next: NextFunction) => {
     try {
         const { body, recipient, replyMessageId } = req.body;
         const whatsapp = new WhatsApp();
         const response = await whatsapp.messages.location(body, recipient, replyMessageId);
         res.status(200).json(await response.json());
     } catch (error) {
-        if (error instanceof Error) {
-            res.status(400).json({ error: error.message });
-        } else {
-            res.status(400).json({ error: 'Unknown error' });
-        }
+        next(error);
     }
 });
 /**
@@ -703,18 +679,14 @@ router.post('/location', async (req: Request<{}, {}, LocationBody>, res: Respons
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/sticker', async (req: Request<{}, {}, StickerBody>, res: Response) => {
+router.post('/sticker', async (req: Request<{}, {}, StickerBody>, res: Response, next: NextFunction) => {
     try {
         const { body, recipient, replyMessageId } = req.body;
         const whatsapp = new WhatsApp();
         const response = await whatsapp.messages.sticker(body, recipient, replyMessageId);
         res.status(200).json(await response.json());
     } catch (error) {
-        if (error instanceof Error) {
-            res.status(400).json({ error: error.message });
-        } else {
-            res.status(400).json({ error: 'Unknown error' });
-        }
+        next(error);
     }
 });
 /**
@@ -967,18 +939,14 @@ router.post('/template', async (req: Request<{}, {}, TemplateBody>, res: Respons
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/text', async (req: Request<{}, {}, TextBody>, res: Response) => {
+router.post('/text', async (req: Request<{}, {}, TextBody>, res: Response, next: NextFunction) => {
     try {
         const { body, recipient, replyMessageId } = req.body;
         const whatsapp = new WhatsApp();
         const response = await whatsapp.messages.text(body, recipient, replyMessageId);
         res.status(200).json(await response.json());
     } catch (error) {
-        if (error instanceof Error) {
-            res.status(400).json({ error: error.message });
-        } else {
-            res.status(400).json({ error: 'Unknown error' });
-        }
+        next(error);
     }
 });
 /**
