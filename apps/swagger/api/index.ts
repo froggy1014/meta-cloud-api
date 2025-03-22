@@ -4,7 +4,6 @@ import dotenv from 'dotenv';
 import { apidocsRouter, messagesRouter, phoneNumberRouter } from '../src/routes';
 import templateRoutes from '../src/routes/template';
 import { errorHandler } from '../src/middleware/error';
-import 'express-async-errors';
 
 dotenv.config();
 
