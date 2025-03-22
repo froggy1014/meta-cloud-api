@@ -535,3 +535,29 @@ export const enum CurrencyCodesEnum {
     XRE = 'XRE',
     XFU = 'XFU',
 }
+
+export enum DataLocalizationRegionEnum {
+    // APAC
+    AU = 'AU', // Australia
+    ID = 'ID', // Indonesia
+    IN = 'IN', // India
+    JP = 'JP', // Japan
+    SG = 'SG', // Singapore
+    KR = 'KR', // South Korea
+
+    // Europe
+    DE = 'DE', // EU (Germany)
+    CH = 'CH', // Switzerland
+    GB = 'GB', // United Kingdom
+
+    // LATAM
+    BR = 'BR', // Brazil
+
+    // MEA
+    BH = 'BH', // Bahrain
+    ZA = 'ZA', // South Africa
+    AE = 'AE', // United Arab Emirates
+
+    // NORAM
+    CA = 'CA', // Canada
+}

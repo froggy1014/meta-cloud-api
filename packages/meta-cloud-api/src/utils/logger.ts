@@ -1,5 +1,5 @@
 // @ts-nocheck
-import type { LoggerInterface } from './types/logger';
+import type { LoggerInterface } from '../types/logger';
 
 export default class Logger implements LoggerInterface {
     private name: string;

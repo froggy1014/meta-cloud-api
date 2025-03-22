@@ -1,4 +1,4 @@
-import Logger from '../logger';
+import Logger from './logger';
 import type { WabaConfigType } from '../types/config';
 import { WabaConfigEnum } from '../types/enums';
 

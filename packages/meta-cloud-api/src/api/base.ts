@@ -1,4 +1,4 @@
-import Logger from '../logger';
+import Logger from '../utils/logger';
 import type { BaseClass } from '../types/base';
 import type { WabaConfigType } from '../types/config';
 import type { RequesterClass } from '../types/request';

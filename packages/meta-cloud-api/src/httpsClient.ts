@@ -1,6 +1,6 @@
 import { Agent } from 'https';
 
-import Logger from './logger';
+import Logger from './utils/logger';
 import { HttpMethodsEnum } from './types/enums';
 import { HttpsClientClass, HttpsClientResponseClass, ResponseHeaders, ResponseJSONBody } from './types/httpsClient';
 
