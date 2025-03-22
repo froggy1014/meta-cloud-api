@@ -1,8 +1,10 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 
 import dotenv from 'dotenv';
-import { apidocsRouter, messagesRouter } from '../src/routes';
+import { apidocsRouter, messagesRouter, phoneNumberRouter } from '../src/routes';
 import templateRoutes from '../src/routes/template';
+import { errorHandler } from '../src/middleware/error';
+import 'express-async-errors';
 
 dotenv.config();
 
@@ -13,38 +15,10 @@ app.use(express.json());
 app.use('/api-docs', apidocsRouter);
 app.use('/messages', messagesRouter);
 app.use('/templates', templateRoutes);
+app.use('/phone-numbers', phoneNumberRouter);
+app.use('/', (req: Request, res: Response) => res.redirect('/api-docs'));
 
-app.use('/', (req, res) => res.redirect('/api-docs'));
-
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-    // Log error details in a structured format
-    console.error('Error occurred:', {
-        message: err.message,
-        type: err.name,
-        code: err.code || 500,
-        error_data: {
-            messaging_product: 'whatsapp',
-            details: err.stack,
-        },
-        error_subcode: err.subcode || 0,
-        fbtrace_id: req.headers['x-fb-trace-id'] || 'unknown',
-    });
-
-    // Send error response matching the schema
-    res.status(500).json({
-        error: {
-            message: err.message || 'Internal server error',
-            type: err.name || 'ServerError',
-            code: err.code || 500,
-            error_data: {
-                messaging_product: 'whatsapp',
-                details: 'An unexpected error occurred',
-            },
-            error_subcode: err.subcode || 0,
-            fbtrace_id: req.headers['x-fb-trace-id'] || 'unknown',
-        },
-    });
-});
+app.use(errorHandler);
 
 app.listen(PORT, () => console.log(`Server ready on port ${PORT}.`));
 
