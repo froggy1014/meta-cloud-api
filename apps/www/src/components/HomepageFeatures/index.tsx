@@ -1,4 +1,4 @@
-import type {ReactNode} from 'react';
+import type { ReactNode } from 'react';
 import clsx from 'clsx';
 import Heading from '@theme/Heading';
 import styles from './styles.module.css';
@@ -9,14 +9,15 @@ type FeatureItem = {
   description: ReactNode;
 };
 
+// TODO: 컴포넌트 데이터 재사용 예정
 const FeatureList: FeatureItem[] = [
   {
     title: 'Easy to Use',
     Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        Docusaurus was designed from the ground up to be easily installed and used to get your website up and running
+        quickly.
       </>
     ),
   },
@@ -25,8 +26,8 @@ const FeatureList: FeatureItem[] = [
     Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go ahead and move your docs into the{' '}
+        <code>docs</code> directory.
       </>
     ),
   },
@@ -35,14 +36,15 @@ const FeatureList: FeatureItem[] = [
     Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        Extend or customize your website layout by reusing React. Docusaurus can be extended while reusing the same
+        header and footer.
       </>
     ),
   },
 ];
 
-function Feature({title, Svg, description}: FeatureItem) {
+// TODO: 컴포넌트 분리 예정
+function Feature({ title, Svg, description }: FeatureItem) {
   return (
     <div className={clsx('col col--4')}>
       <div className="text--center">
@@ -56,16 +58,23 @@ function Feature({title, Svg, description}: FeatureItem) {
   );
 }
 
+// TODO: 임시 사용 컴포넌트
+const BannerImage = () => {
+  return (
+    <div className={styles.bannerImage}>
+      <div className={styles.bannerTextContainer}>
+        <p className={styles.bannerText}>META</p>
+        <p className={styles.bannerText}>CLOUD</p>
+        <p className={styles.bannerText}>API_</p>
+      </div>
+    </div>
+  );
+};
+
 export default function HomepageFeatures(): ReactNode {
   return (
     <section className={styles.features}>
-      <div className="container">
-        <div className="row">
-          {FeatureList.map((props, idx) => (
-            <Feature key={idx} {...props} />
-          ))}
-        </div>
-      </div>
+      <BannerImage />
     </section>
   );
 }
