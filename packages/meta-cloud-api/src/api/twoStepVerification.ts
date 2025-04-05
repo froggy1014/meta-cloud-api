@@ -9,17 +9,14 @@ export default class TwoStepVerificationAPI extends BaseAPI implements TwoStepVe
         super(config, client);
     }
 
-    async setTwoStepVerificationCode(
-        businessPhoneNumberId: string,
-        pin: string,
-    ): Promise<RequesterResponseInterface<ResponseSuccess>> {
+    async setTwoStepVerificationCode(pin: string): Promise<RequesterResponseInterface<ResponseSuccess>> {
         const body = {
             pin,
         };
 
         return this.client.sendRequest(
             HttpMethodsEnum.Post,
-            `${businessPhoneNumberId ?? this.config[WabaConfigEnum.PhoneNumberId]}`,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}`,
             this.config[WabaConfigEnum.RequestTimeout],
             JSON.stringify(body),
         );

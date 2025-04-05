@@ -106,17 +106,10 @@ export type TwoStepVerificationParams = {
 };
 
 export declare class PhoneNumberClass {
-    getPhoneNumberById(
-        businessNumberId: string,
-        fields?: string,
-    ): Promise<RequesterResponseInterface<PhoneNumberResponse>>;
+    getPhoneNumberById(fields?: string): Promise<RequesterResponseInterface<PhoneNumberResponse>>;
     getPhoneNumbers(): Promise<RequesterResponseInterface<PhoneNumbersResponse>>;
     requestVerificationCode(
-        businessPhoneNumberId: string,
-        requestVerificationCodeRequest: RequestVerificationCodeRequest,
+        params: RequestVerificationCodeRequest,
     ): Promise<RequesterResponseInterface<ResponseSuccess>>;
-    verifyCode(
-        businessPhoneNumberId: string,
-        verifyCodeRequest: VerifyCodeRequest,
-    ): Promise<RequesterResponseInterface<ResponseSuccess>>;
+    verifyCode(params: VerifyCodeRequest): Promise<RequesterResponseInterface<ResponseSuccess>>;
 }

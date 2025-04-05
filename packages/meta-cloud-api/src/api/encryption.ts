@@ -11,27 +11,22 @@ export default class EncryptionAPI extends BaseAPI implements EncryptionClass {
         super(config, client);
     }
 
-    async getEncryptionPublicKey(
-        businessPhoneNumberId?: string,
-    ): Promise<RequesterResponseInterface<EncryptionPublicKeyResponse>> {
+    async getEncryptionPublicKey(): Promise<RequesterResponseInterface<EncryptionPublicKeyResponse>> {
         return this.client.sendRequest(
             HttpMethodsEnum.Get,
-            `${businessPhoneNumberId ?? this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}`,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}`,
             this.config[WabaConfigEnum.RequestTimeout],
             null,
         );
     }
 
-    async setEncryptionPublicKey(
-        businessPhoneNumberId: string,
-        businessPublicKey: string,
-    ): Promise<RequesterResponseInterface<ResponseSuccess>> {
+    async setEncryptionPublicKey(businessPublicKey: string): Promise<RequesterResponseInterface<ResponseSuccess>> {
         const formData = new FormData();
         formData.append('business_public_key', businessPublicKey);
 
         return this.client.sendRequest(
             HttpMethodsEnum.Post,
-            `${businessPhoneNumberId ?? this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}`,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}`,
             this.config[WabaConfigEnum.RequestTimeout],
             formData,
         );

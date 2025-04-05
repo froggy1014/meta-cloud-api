@@ -6,6 +6,11 @@ import { importConfig } from './utils/importConfig';
 import Requester from './request';
 import { WhatsAppClass } from './types/whatsapp';
 import { MessagesAPI, PhoneNumberAPI, TemplateAPI } from './api';
+import QrCodeAPI from './api/qrCode';
+import EncryptionAPI from './api/encryption';
+import TwoStepVerificationAPI from './api/twoStepVerification';
+import RegistrationAPI from './api/registration';
+import MediaAPI from './api/media';
 
 const LIB_NAME = 'WHATSAPP';
 const LOG_LOCAL = false;
@@ -21,6 +26,11 @@ export default class WhatsApp implements WhatsAppClass {
     readonly messages: MessagesAPI;
     readonly templates: TemplateAPI;
     readonly phoneNumber: PhoneNumberAPI;
+    readonly qrCode: QrCodeAPI;
+    readonly encryption: EncryptionAPI;
+    readonly twoStepVerification: TwoStepVerificationAPI;
+    readonly registration: RegistrationAPI;
+    readonly media: MediaAPI;
     static readonly Enums = SDKEnums;
 
     constructor(senderNumberId?: number, accessToken?: string) {
@@ -37,6 +47,11 @@ export default class WhatsApp implements WhatsAppClass {
         this.messages = new MessagesAPI(this.config, this.requester);
         this.templates = new TemplateAPI(this.config, this.requester);
         this.phoneNumber = new PhoneNumberAPI(this.config, this.requester);
+        this.qrCode = new QrCodeAPI(this.config, this.requester);
+        this.encryption = new EncryptionAPI(this.config, this.requester);
+        this.twoStepVerification = new TwoStepVerificationAPI(this.config, this.requester);
+        this.registration = new RegistrationAPI(this.config, this.requester);
+        this.media = new MediaAPI(this.config, this.requester);
         LOGGER.log('WhatsApp Node.js SDK instantiated!');
     }
 
@@ -51,7 +66,7 @@ export default class WhatsApp implements WhatsAppClass {
         return true;
     }
 
-    updateSenderNumberId(phoneNumberId: number): boolean {
+    updatePhoneNumberId(phoneNumberId: number): boolean {
         this.config[SDKEnums.WabaConfigEnum.PhoneNumberId] = phoneNumberId;
         LOGGER.log(`Updated sender phone number id to ${phoneNumberId}`);
         return true;
@@ -60,6 +75,12 @@ export default class WhatsApp implements WhatsAppClass {
     updateAccessToken(accessToken: string): boolean {
         this.config[SDKEnums.WabaConfigEnum.AccessToken] = accessToken;
         LOGGER.log(`Updated access token`);
+        return true;
+    }
+
+    updateWabaId(wabaId: string): boolean {
+        this.config[SDKEnums.WabaConfigEnum.BusinessAcctId] = wabaId;
+        LOGGER.log(`Updated business account id to ${wabaId}`);
         return true;
     }
 }

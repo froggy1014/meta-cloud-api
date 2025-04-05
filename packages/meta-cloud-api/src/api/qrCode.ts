@@ -17,58 +17,46 @@ export default class QrCodeAPI extends BaseAPI implements QrCodeClass {
         super(config, client);
     }
 
-    async createQrCode(
-        businessPhoneNumberId: string,
-        request: CreateQrCodeRequest,
-    ): Promise<RequesterResponseInterface<QrCodeResponse>> {
+    async createQrCode(request: CreateQrCodeRequest): Promise<RequesterResponseInterface<QrCodeResponse>> {
         return this.client.sendRequest(
             HttpMethodsEnum.Post,
-            `${businessPhoneNumberId ?? this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}`,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}`,
             this.config[WabaConfigEnum.RequestTimeout],
             JSON.stringify(request),
         );
     }
 
-    async getQrCodes(businessPhoneNumberId: string): Promise<RequesterResponseInterface<QrCodesResponse>> {
+    async getQrCodes(): Promise<RequesterResponseInterface<QrCodesResponse>> {
         return this.client.sendRequest(
             HttpMethodsEnum.Get,
-            `${businessPhoneNumberId ?? this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}`,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}`,
             this.config[WabaConfigEnum.RequestTimeout],
             null,
         );
     }
 
-    async getQrCode(
-        businessPhoneNumberId: string,
-        qrCodeId: string,
-    ): Promise<RequesterResponseInterface<QrCodeResponse>> {
+    async getQrCode(qrCodeId: string): Promise<RequesterResponseInterface<QrCodeResponse>> {
         return this.client.sendRequest(
             HttpMethodsEnum.Get,
-            `${businessPhoneNumberId ?? this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}/${qrCodeId}`,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}/${qrCodeId}`,
             this.config[WabaConfigEnum.RequestTimeout],
             null,
         );
     }
 
-    async updateQrCode(
-        businessPhoneNumberId: string,
-        request: UpdateQrCodeRequest,
-    ): Promise<RequesterResponseInterface<QrCodeResponse>> {
+    async updateQrCode(request: UpdateQrCodeRequest): Promise<RequesterResponseInterface<QrCodeResponse>> {
         return this.client.sendRequest(
             HttpMethodsEnum.Post,
-            `${businessPhoneNumberId ?? this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}`,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}`,
             this.config[WabaConfigEnum.RequestTimeout],
             JSON.stringify(request),
         );
     }
 
-    async deleteQrCode(
-        businessPhoneNumberId: string,
-        qrCodeId: string,
-    ): Promise<RequesterResponseInterface<ResponseSuccess>> {
+    async deleteQrCode(qrCodeId: string): Promise<RequesterResponseInterface<ResponseSuccess>> {
         return this.client.sendRequest(
             HttpMethodsEnum.Delete,
-            `${businessPhoneNumberId ?? this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}/${qrCodeId}`,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}/${qrCodeId}`,
             this.config[WabaConfigEnum.RequestTimeout],
             null,
         );

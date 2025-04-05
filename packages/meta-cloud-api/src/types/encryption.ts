@@ -6,12 +6,6 @@ export type EncryptionPublicKeyResponse = ResponseData<{
 }>;
 
 export interface EncryptionClass {
-    getEncryptionPublicKey(
-        businessPhoneNumberId?: string,
-    ): Promise<RequesterResponseInterface<EncryptionPublicKeyResponse>>;
-
-    setEncryptionPublicKey(
-        businessPhoneNumberId: string,
-        businessPublicKey: string,
-    ): Promise<RequesterResponseInterface<ResponseSuccess>>;
+    getEncryptionPublicKey(): Promise<RequesterResponseInterface<EncryptionPublicKeyResponse>>;
+    setEncryptionPublicKey(businessPublicKey: string): Promise<RequesterResponseInterface<ResponseSuccess>>;
 }

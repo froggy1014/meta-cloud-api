@@ -5,8 +5,5 @@ export type TwoStepVerificationRequest = {
 };
 
 export interface TwoStepVerificationClass {
-    setTwoStepVerificationCode(
-        businessPhoneNumberId: string,
-        pin: string,
-    ): Promise<RequesterResponseInterface<ResponseSuccess>>;
+    setTwoStepVerificationCode(pin: string): Promise<RequesterResponseInterface<ResponseSuccess>>;
 }

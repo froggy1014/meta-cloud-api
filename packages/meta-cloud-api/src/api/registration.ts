@@ -10,7 +10,6 @@ export default class RegistrationAPI extends BaseAPI implements RegistrationClas
     }
 
     async register(
-        businessPhoneNumberId: string,
         pin: string,
         dataLocalizationRegion?: DataLocalizationRegionEnum,
     ): Promise<RequesterResponseInterface<ResponseSuccess>> {
@@ -22,16 +21,16 @@ export default class RegistrationAPI extends BaseAPI implements RegistrationClas
 
         return this.client.sendRequest(
             HttpMethodsEnum.Post,
-            `${businessPhoneNumberId ?? this.config[WabaConfigEnum.PhoneNumberId]}/register`,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}/register`,
             this.config[WabaConfigEnum.RequestTimeout],
             JSON.stringify(body),
         );
     }
 
-    async deregister(businessPhoneNumberId: string): Promise<RequesterResponseInterface<ResponseSuccess>> {
+    async deregister(): Promise<RequesterResponseInterface<ResponseSuccess>> {
         return this.client.sendRequest(
             HttpMethodsEnum.Post,
-            `${businessPhoneNumberId ?? this.config[WabaConfigEnum.PhoneNumberId]}/deregister`,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}/deregister`,
             this.config[WabaConfigEnum.RequestTimeout],
             null,
         );

@@ -9,10 +9,9 @@ export type RegistrationRequest = {
 
 export interface RegistrationClass {
     register(
-        businessPhoneNumberId: string,
         pin: string,
         dataLocalizationRegion?: DataLocalizationRegionEnum,
     ): Promise<RequesterResponseInterface<ResponseSuccess>>;
 
-    deregister(businessPhoneNumberId: string): Promise<RequesterResponseInterface<ResponseSuccess>>;
+    deregister(): Promise<RequesterResponseInterface<ResponseSuccess>>;
 }

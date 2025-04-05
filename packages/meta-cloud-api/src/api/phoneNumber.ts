@@ -18,14 +18,11 @@ export default class PhoneNumberApi extends BaseAPI implements PhoneNumberClass 
         super(config, client);
     }
 
-    async getPhoneNumberById(
-        businessPhoneNumberId: string,
-        fields?: string,
-    ): Promise<RequesterResponseInterface<PhoneNumberResponse>> {
+    async getPhoneNumberById(fields?: string): Promise<RequesterResponseInterface<PhoneNumberResponse>> {
         const queryParams = fields ? objectToQueryString({ fields }) : '';
         return this.client.sendRequest(
             HttpMethodsEnum.Get,
-            `${businessPhoneNumberId ?? this.config[WabaConfigEnum.PhoneNumberId]}${queryParams}`,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}${queryParams}`,
             this.config[WabaConfigEnum.RequestTimeout],
             null,
         );
@@ -41,24 +38,20 @@ export default class PhoneNumberApi extends BaseAPI implements PhoneNumberClass 
     }
 
     async requestVerificationCode(
-        businessPhoneNumberId: string,
         requestVerificationCodeRequest: RequestVerificationCodeRequest,
     ): Promise<RequesterResponseInterface<ResponseSuccess>> {
         return this.client.sendRequest(
             HttpMethodsEnum.Post,
-            `${businessPhoneNumberId ?? this.config[WabaConfigEnum.PhoneNumberId]}/request_code`,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}/request_code`,
             this.config[WabaConfigEnum.RequestTimeout],
             JSON.stringify(requestVerificationCodeRequest),
         );
     }
 
-    async verifyCode(
-        businessPhoneNumberId: string,
-        verifyCodeRequest: VerifyCodeRequest,
-    ): Promise<RequesterResponseInterface<ResponseSuccess>> {
+    async verifyCode(verifyCodeRequest: VerifyCodeRequest): Promise<RequesterResponseInterface<ResponseSuccess>> {
         return this.client.sendRequest(
             HttpMethodsEnum.Post,
-            `${businessPhoneNumberId ?? this.config[WabaConfigEnum.PhoneNumberId]}/verify_code`,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}/verify_code`,
             this.config[WabaConfigEnum.RequestTimeout],
             JSON.stringify(verifyCodeRequest),
         );
