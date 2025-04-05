@@ -1,8 +1,3 @@
-import { objectToQueryString } from 'src/utils/objectToQueryString';
-import type { WabaConfigType } from '../types/config';
-import { DataLocalizationRegionEnum, HttpMethodsEnum, WabaConfigEnum } from '../types/enums';
-import type { RequesterClass, RequesterResponseInterface, ResponseSuccess } from '../types/request';
-import BaseAPI from './base';
 import {
     PhoneNumberClass,
     PhoneNumberResponse,
@@ -10,6 +5,11 @@ import {
     RequestVerificationCodeRequest,
     VerifyCodeRequest,
 } from 'src/types/phoneNumber';
+import { objectToQueryString } from 'src/utils/objectToQueryString';
+import type { WabaConfigType } from '../types/config';
+import { HttpMethodsEnum, WabaConfigEnum } from '../types/enums';
+import type { RequesterClass, RequesterResponseInterface, ResponseSuccess } from '../types/request';
+import BaseAPI from './base';
 
 export default class PhoneNumberApi extends BaseAPI implements PhoneNumberClass {
     private readonly endpoint = 'phone_numbers';
@@ -61,34 +61,6 @@ export default class PhoneNumberApi extends BaseAPI implements PhoneNumberClass 
             `${businessPhoneNumberId ?? this.config[WabaConfigEnum.PhoneNumberId]}/verify_code`,
             this.config[WabaConfigEnum.RequestTimeout],
             JSON.stringify(verifyCodeRequest),
-        );
-    }
-
-    async register(
-        businessPhoneNumberId: string,
-        pin: string,
-        dataLocalizationRegion?: DataLocalizationRegionEnum,
-    ): Promise<RequesterResponseInterface<ResponseSuccess>> {
-        const body = {
-            messaging_product: 'whatsapp',
-            pin,
-            ...(dataLocalizationRegion && { data_localization_region: dataLocalizationRegion }),
-        };
-
-        return this.client.sendRequest(
-            HttpMethodsEnum.Post,
-            `${businessPhoneNumberId ?? this.config[WabaConfigEnum.PhoneNumberId]}/register`,
-            this.config[WabaConfigEnum.RequestTimeout],
-            JSON.stringify(body),
-        );
-    }
-
-    async deregister(businessPhoneNumberId: string): Promise<RequesterResponseInterface<ResponseSuccess>> {
-        return this.client.sendRequest(
-            HttpMethodsEnum.Post,
-            `${businessPhoneNumberId ?? this.config[WabaConfigEnum.PhoneNumberId]}/deregister`,
-            this.config[WabaConfigEnum.RequestTimeout],
-            null,
         );
     }
 }

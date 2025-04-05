@@ -1,4 +1,4 @@
-import { RequesterResponseInterface, ResponseSuccess } from './request';
+import { RequesterResponseInterface, ResponseData, ResponseSuccess } from './request';
 
 export type QualityRating = 'GREEN' | 'YELLOW' | 'RED' | 'NA';
 
@@ -119,10 +119,4 @@ export declare class PhoneNumberClass {
         businessPhoneNumberId: string,
         verifyCodeRequest: VerifyCodeRequest,
     ): Promise<RequesterResponseInterface<ResponseSuccess>>;
-    register(
-        businessPhoneNumberId: string,
-        pin: string,
-        dataLocalizationRegion?: string,
-    ): Promise<RequesterResponseInterface<ResponseSuccess>>;
-    deregister(businessPhoneNumberId: string): Promise<RequesterResponseInterface<ResponseSuccess>>;
 }
