@@ -1,0 +1,152 @@
+components:
+  schemas:
+    QualityScore:
+      type: object
+      properties:
+        score:
+          type: string
+          enum: [GREEN, YELLOW, RED, NA]
+          description: Quality rating of the phone number
+
+    Throughput:
+      type: object
+      properties:
+        level:
+          type: string
+          enum: [STANDARD, HIGH, NOT_APPLICABLE]
+          description: Throughput level for the phone number
+
+    HealthStatusEntity:
+      type: object
+      properties:
+        entity_type:
+          type: string
+          description: Type of the entity
+        id:
+          type: string
+          description: Entity identifier
+        can_send_message:
+          type: boolean
+          description: Whether messages can be sent
+        additional_info:
+          type: array
+          items:
+            type: string
+          description: Additional information about the entity
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              error_code:
+                type: number
+                description: Error code
+              error_description:
+                type: string
+                description: Description of the error
+              possible_solution:
+                type: string
+                description: Suggested solution for the error
+
+    HealthStatus:
+      type: object
+      properties:
+        can_send_message:
+          type: boolean
+          description: Whether messages can be sent
+        entities:
+          type: array
+          items:
+            $ref: '#/components/schemas/HealthStatusEntity'
+          description: List of health status entities
+
+    PhoneNumber:
+      type: object
+      required:
+        - display_phone_number
+        - id
+      properties:
+        display_phone_number:
+          type: string
+          description: The formatted phone number for display
+        id:
+          type: string
+          description: Unique identifier for the phone number
+        quality_rating:
+          type: string
+          enum: [GREEN, YELLOW, RED, NA]
+          description: Quality rating of the phone number
+        verified_name:
+          type: string
+          description: Verified business name
+        account_mode:
+          type: string
+          enum: [LIVE, SANDBOX]
+          description: Current account mode
+        code_verification_status:
+          type: string
+          enum: [NOT_VERIFIED, VERIFIED, EXPIRED, PENDING, DELETED, MIGRATED, BANNED, RESTRICTED, RATE_LIMITED, FLAGGED, CONNECTED, DISCONNECTED, UNKNOWN, UNVERIFIED]
+          description: Current verification status
+        health_status:
+          $ref: '#/components/schemas/HealthStatus'
+        is_official_business_account:
+          type: boolean
+          description: Whether this is an official business account
+        is_on_biz_app:
+          type: boolean
+          description: Whether this number is on WhatsApp Business app
+        messaging_limit_tier:
+          type: string
+          enum: [TIER_50, TIER_250, TIER_1K, TIER_10K, TIER_100K, TIER_UNLIMITED]
+          description: Current messaging limit tier
+        platform_type:
+          type: string
+          enum: [CLOUD_API, ON_PREMISE, NOT_APPLICABLE]
+          description: Type of platform
+        quality_score:
+          $ref: '#/components/schemas/QualityScore'
+        throughput:
+          $ref: '#/components/schemas/Throughput'
+
+    PhoneNumbersResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PhoneNumber'
+          description: List of phone numbers
+        paging:
+          type: object
+          properties:
+            cursors:
+              type: object
+              properties:
+                before:
+                  type: string
+                  description: Cursor for previous page
+                after:
+                  type: string
+                  description: Cursor for next page
+
+    RequestCodeRequest:
+      type: object
+      required:
+        - code_method
+        - language
+      properties:
+        code_method:
+          $ref: '#/components/schemas/RequestCodeMethodsEnum'
+          description: Method to receive verification code
+        language:
+          $ref: '#/components/schemas/LanguagesEnum'
+          description: Language for verification code
+
+    VerifyCodeRequest:
+      type: object
+      required:
+        - code
+      properties:
+        code:
+          type: string
+          description: Verification code received 

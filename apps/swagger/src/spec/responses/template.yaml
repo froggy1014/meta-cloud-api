@@ -1,42 +1,5 @@
 components:
   schemas:
-    MessageResponse:
-      description: Response from sending a WhatsApp message
-      type: object
-      required:
-        - contacts
-        - messages
-      properties:
-        contacts:
-          type: array
-          items:
-            type: object
-            properties:
-              input:
-                type: string
-                description: Phone number input
-              wa_id:
-                type: string
-                description: WhatsApp ID
-        messages:
-          type: array
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-                description: Message ID
-
-    SuccessResponse:
-      description: Generic success response
-      type: object
-      required:
-        - success
-      properties:
-        success:
-          type: boolean
-          description: Indicates if the operation was successful
-
     TemplateResponse:
       description: Response from template operations
       type: object
@@ -52,11 +15,11 @@ components:
           type: string
           description: Template ID
         status:
-          $ref: '#/components/schemas/TemplateStatusEnum'
+          $ref: './index.yaml#/components/schemas/TemplateStatusEnum'
         language:
-          $ref: '#/components/schemas/LanguagesEnum'
+          $ref: './index.yaml#/components/schemas/LanguagesEnum'
         category:
-          $ref: '#/components/schemas/CategoryEnum'
+          $ref: './index.yaml#/components/schemas/CategoryEnum'
         name:
           type: string
           description: Template name
@@ -74,7 +37,7 @@ components:
                     type: string
                     enum: [HEADER]
                   format:
-                    $ref: '#/components/schemas/MessageTypesEnum'
+                    $ref: './index.yaml#/components/schemas/MessageTypesEnum'
                   text:
                     type: string
                     maxLength: 60
@@ -236,4 +199,4 @@ components:
                 properties:
                   type:
                     type: string
-                    enum: [SPM]
+                    enum: [SPM] 

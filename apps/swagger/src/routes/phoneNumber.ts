@@ -112,11 +112,44 @@
  *                   type: string
  *                 after:
  *                   type: string
+ *
+ *     RequestCodeRequest:
+ *       type: object
+ *       required:
+ *         - code_method
+ *         - language
+ *       properties:
+ *         code_method:
+ *           type: string
+ *           enum: [SMS, VOICE]
+ *         language:
+ *           type: string
+ *
+ *     VerifyCodeRequest:
+ *       type: object
+ *       required:
+ *         - code
+ *       properties:
+ *         code:
+ *           type: string
+ *
+ *     SuccessResponse:
+ *       type: object
+ *       properties:
+ *         success:
+ *           type: boolean
+ *
+ *     Error:
+ *       type: object
+ *       properties:
+ *         error:
+ *           type: string
  */
 
 import dotenv from 'dotenv';
 import express, { NextFunction, Request, Response } from 'express';
 import WhatsApp from 'meta-cloud-api';
+import { RequestVerificationCodeRequest, VerifyCodeRequest } from 'meta-cloud-api/types';
 
 dotenv.config();
 
@@ -143,12 +176,25 @@ const router = express.Router();
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.get('/', async (_req: Request, res: Response, next: NextFunction) => {
     try {
         const whatsapp = new WhatsApp();
         const response = await whatsapp.phoneNumber.getPhoneNumbers();
-        res.status(200).json(await response.json());
+        const data = await response.json();
+        res.status(200).json(data);
     } catch (error) {
         next(error);
     }
@@ -167,14 +213,14 @@ router.get('/', async (_req: Request, res: Response, next: NextFunction) => {
  *         name: businessNumberId
  *         required: true
  *         schema:
- *           type: number
+ *           type: string
  *         description: The ID of the business phone number
  *       - in: query
  *         name: fields
  *         schema:
  *           type: string
  *         description: Comma-separated list of fields to retrieve
- *         example: "id, account_mode, certificate, code_verification_status, conversational_automation, display_phone_number, eligibility_for_api_business_global_search, health_status, is_official_business_account, is_on_biz_app, is_pin_enabled, is_preverified_number, last_onboarded_time, messaging_limit_tier, name_status, new_certificate, new_name_status, platform_type, quality_score, search_visibility, status, throughput, verified_name"
+ *         example: "id,account_mode,certificate,code_verification_status,display_phone_number,health_status,quality_score,throughput"
  *     responses:
  *       200:
  *         description: Successfully retrieved phone number details
@@ -188,14 +234,32 @@ router.get('/', async (_req: Request, res: Response, next: NextFunction) => {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Phone number not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.get('/:businessNumberId', async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const businessNumberId = req.params.businessNumberId;
         const fields = req.query.fields as string | undefined;
         const whatsapp = new WhatsApp();
-        const response = await whatsapp.phoneNumber.getPhoneNumberById(businessNumberId, fields);
-        res.status(200).json(await response.json());
+        const response = await whatsapp.phoneNumber.getPhoneNumberById(fields);
+        const data = await response.json();
+        res.status(200).json(data);
     } catch (error) {
         next(error);
     }
@@ -221,15 +285,7 @@ router.get('/:businessNumberId', async (req: Request, res: Response, next: NextF
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - code_method
- *               - language
- *             properties:
- *               code_method:
- *                 $ref: '#/components/schemas/RequestCodeMethodsEnum'
- *               language:
- *                 $ref: '#/components/schemas/LanguagesEnum'
+ *             $ref: '#/components/schemas/RequestCodeRequest'
  *     responses:
  *       200:
  *         description: Successfully requested verification code
@@ -243,17 +299,38 @@ router.get('/:businessNumberId', async (req: Request, res: Response, next: NextF
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
-router.post('/:businessNumberId/request-code', async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const businessNumberId = req.params.businessNumberId;
-        const whatsapp = new WhatsApp();
-        const response = await whatsapp.phoneNumber.requestVerificationCode(businessNumberId, req.body);
-        res.status(200).json(await response.json());
-    } catch (error) {
-        next(error);
-    }
-});
+router.post(
+    '/:businessNumberId/request-code',
+    async (req: Request<any, any, RequestVerificationCodeRequest>, res: Response, next: NextFunction) => {
+        try {
+            const { code_method, language } = req.body;
+            if (!code_method || !language) {
+                res.status(400).json({ error: 'Code method and language are required' });
+                return;
+            }
+
+            const whatsapp = new WhatsApp();
+            const response = await whatsapp.phoneNumber.requestVerificationCode(req.body);
+            const data = await response.json();
+            res.status(200).json(data);
+        } catch (error) {
+            next(error);
+        }
+    },
+);
 
 /**
  * @openapi
@@ -275,12 +352,7 @@ router.post('/:businessNumberId/request-code', async (req: Request, res: Respons
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - code
- *             properties:
- *               code:
- *                 type: string
+ *             $ref: '#/components/schemas/VerifyCodeRequest'
  *     responses:
  *       200:
  *         description: Successfully verified code
@@ -294,110 +366,37 @@ router.post('/:businessNumberId/request-code', async (req: Request, res: Respons
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
- */
-router.post('/:businessNumberId/verify-code', async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const businessNumberId = req.params.businessNumberId;
-        const whatsapp = new WhatsApp();
-        const response = await whatsapp.phoneNumber.verifyCode(businessNumberId, req.body);
-        res.status(200).json(await response.json());
-    } catch (error) {
-        next(error);
-    }
-});
-
-/**
- * @openapi
- * /phone-numbers/{businessNumberId}/register:
- *   post:
- *     security:
- *       - AccessToken: []
- *     summary: Register a phone number
- *     tags: [Phone Numbers]
- *     parameters:
- *       - in: path
- *         name: businessNumberId
- *         required: true
- *         schema:
- *           type: string
- *         description: The ID of the business phone number
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - pin
- *             properties:
- *               pin:
- *                 type: string
- *               data_localization_region:
- *                 $ref: '#/components/schemas/DataLocalizationRegionEnum'
- *     responses:
- *       200:
- *         description: Successfully registered phone number
+ *       401:
+ *         description: Unauthorized
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/SuccessResponse'
- *       400:
- *         description: Invalid request
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Internal server error
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/:businessNumberId/register', async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const businessNumberId = req.params.businessNumberId;
-        const { pin, data_localization_region } = req.body;
-        const whatsapp = new WhatsApp();
-        const response = await whatsapp.phoneNumber.register(businessNumberId, pin, data_localization_region);
-        res.status(200).json(await response.json());
-    } catch (error) {
-        next(error);
-    }
-});
+router.post(
+    '/:businessNumberId/verify-code',
+    async (req: Request<any, any, VerifyCodeRequest>, res: Response, next: NextFunction) => {
+        try {
+            const { code } = req.body;
+            if (!code) {
+                res.status(400).json({ error: 'Verification code is required' });
+                return;
+            }
 
-/**
- * @openapi
- * /phone-numbers/{businessNumberId}/deregister:
- *   post:
- *     security:
- *       - AccessToken: []
- *     summary: Deregister a phone number
- *     tags: [Phone Numbers]
- *     parameters:
- *       - in: path
- *         name: businessNumberId
- *         required: true
- *         schema:
- *           type: string
- *         description: The ID of the business phone number
- *     responses:
- *       200:
- *         description: Successfully deregistered phone number
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/SuccessResponse'
- *       400:
- *         description: Invalid request
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- */
-router.post('/:businessNumberId/deregister', async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const businessNumberId = req.params.businessNumberId;
-        const whatsapp = new WhatsApp();
-        const response = await whatsapp.phoneNumber.deregister(businessNumberId);
-        res.status(200).json(await response.json());
-    } catch (error) {
-        next(error);
-    }
-});
+            const whatsapp = new WhatsApp();
+            const response = await whatsapp.phoneNumber.verifyCode(req.body);
+            const data = await response.json();
+            res.status(200).json(data);
+        } catch (error) {
+            next(error);
+        }
+    },
+);
 
 export { router };

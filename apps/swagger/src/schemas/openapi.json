@@ -13,6 +13,30 @@
     {
       "name": "Templates",
       "description": "API documentation for WhatsApp message templates"
+    },
+    {
+      "name": "Phone Numbers",
+      "description": "API documentation for WhatsApp phone numbers"
+    },
+    {
+      "name": "QR Codes",
+      "description": "API documentation for WhatsApp QR codes"
+    },
+    {
+      "name": "WABA",
+      "description": "API documentation for WhatsApp Business API subscriptions"
+    },
+    {
+      "name": "Encryption",
+      "description": "API documentation for WhatsApp business encryption"
+    },
+    {
+      "name": "Two-Step Verification",
+      "description": "API documentation for WhatsApp two-step verification"
+    },
+    {
+      "name": "Media",
+      "description": "API documentation for WhatsApp media"
     }
   ],
   "servers": [
@@ -33,13 +57,374 @@
       "4": "0"
     },
     "info": {
-      "title": "Meta Cloud API - Templates",
+      "title": "Meta Cloud API - WABA Subscriptions",
       "version": "1.0.0",
-      "description": "API documentation for WhatsApp message templates"
+      "description": "API documentation for WhatsApp Business API subscriptions"
     },
     "servers": {
       "0": {
         "url": "http://localhost:8080"
+      }
+    },
+    "externalDocs": {
+      "description": "Find out more about Meta Cloud API",
+      "url": "https://developers.facebook.com/docs/whatsapp/cloud-api/reference/"
+    },
+    "/encryption/{businessNumberId}/public-key": {
+      "get": {
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "summary": "Get encryption public key",
+        "tags": [
+          "Encryption"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "businessNumberId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the business phone number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved encryption public key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EncryptionPublicKeyResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Public key not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "summary": "Set encryption public key",
+        "tags": [
+          "Encryption"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "businessNumberId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the business phone number"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "business_public_key"
+                ],
+                "properties": {
+                  "business_public_key": {
+                    "type": "string",
+                    "description": "The business public key for encryption"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully set encryption public key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/media/{mediaId}": {
+      "get": {
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "summary": "Get media by ID",
+        "tags": [
+          "Media"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "mediaId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the media"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved media",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "summary": "Delete media",
+        "tags": [
+          "Media"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "mediaId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the media to delete"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully deleted media",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/media": {
+      "post": {
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "summary": "Upload media",
+        "tags": [
+          "Media"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "messaging_product": {
+                    "type": "string",
+                    "enum": [
+                      "whatsapp"
+                    ],
+                    "default": "whatsapp"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully uploaded media",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadMediaResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/media/download": {
+      "get": {
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "summary": "Download media",
+        "tags": [
+          "Media"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "url",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The URL of the media to download"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully downloaded media",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/messages/audio": {
@@ -1511,6 +1896,26 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
@@ -1532,7 +1937,7 @@
             "name": "businessNumberId",
             "required": true,
             "schema": {
-              "type": "number"
+              "type": "string"
             },
             "description": "The ID of the business phone number"
           },
@@ -1543,7 +1948,7 @@
               "type": "string"
             },
             "description": "Comma-separated list of fields to retrieve",
-            "example": "id, account_mode, certificate, code_verification_status, conversational_automation, display_phone_number, eligibility_for_api_business_global_search, health_status, is_official_business_account, is_on_biz_app, is_pin_enabled, is_preverified_number, last_onboarded_time, messaging_limit_tier, name_status, new_certificate, new_name_status, platform_type, quality_score, search_visibility, status, throughput, verified_name"
+            "example": "id,account_mode,certificate,code_verification_status,display_phone_number,health_status,quality_score,throughput"
           }
         ],
         "responses": {
@@ -1559,6 +1964,36 @@
           },
           "400": {
             "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Phone number not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1597,19 +2032,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "required": [
-                  "code_method",
-                  "language"
-                ],
-                "properties": {
-                  "code_method": {
-                    "$ref": "#/components/schemas/RequestCodeMethodsEnum"
-                  },
-                  "language": {
-                    "$ref": "#/components/schemas/LanguagesEnum"
-                  }
-                }
+                "$ref": "#/components/schemas/RequestCodeRequest"
               }
             }
           }
@@ -1627,6 +2050,26 @@
           },
           "400": {
             "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1665,15 +2108,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "required": [
-                  "code"
-                ],
-                "properties": {
-                  "code": {
-                    "type": "string"
-                  }
-                }
+                "$ref": "#/components/schemas/VerifyCodeRequest"
               }
             }
           }
@@ -1698,11 +2133,395 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
     },
-    "/phone-numbers/{businessNumberId}/register": {
+    "/qr-codes": {
+      "get": {
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "summary": "Get all QR codes",
+        "tags": [
+          "QR Codes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved QR codes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrCodesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "summary": "Create a new QR code",
+        "tags": [
+          "QR Codes"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "prefilled_message": {
+                    "type": "string",
+                    "description": "Message to be pre-filled when the QR code is scanned"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successfully created QR code",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrCodesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/qr-codes/{qrCodeId}": {
+      "get": {
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "summary": "Get a specific QR code by ID",
+        "tags": [
+          "QR Codes"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "qrCodeId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the QR code"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved QR code",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrCodesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "QR code not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "summary": "Update a QR code",
+        "tags": [
+          "QR Codes"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "qrCodeId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the QR code to update"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "prefilled_message": {
+                    "type": "string",
+                    "description": "New message to be pre-filled when the QR code is scanned"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully updated QR code",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrCodeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "QR code not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "summary": "Delete a QR code",
+        "tags": [
+          "QR Codes"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "qrCodeId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the QR code to delete"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully deleted QR code",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "QR code not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/registration/{businessNumberId}/register": {
       "post": {
         "security": [
           {
@@ -1711,7 +2530,7 @@
         ],
         "summary": "Register a phone number",
         "tags": [
-          "Phone Numbers"
+          "Registration"
         ],
         "parameters": [
           {
@@ -1769,7 +2588,7 @@
         }
       }
     },
-    "/phone-numbers/{businessNumberId}/deregister": {
+    "/registration/{businessNumberId}/deregister": {
       "post": {
         "security": [
           {
@@ -1778,7 +2597,7 @@
         ],
         "summary": "Deregister a phone number",
         "tags": [
-          "Phone Numbers"
+          "Registration"
         ],
         "parameters": [
           {
@@ -2146,6 +2965,366 @@
           }
         }
       }
+    },
+    "/two-step-verification/{businessNumberId}": {
+      "post": {
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "summary": "Set two-step verification PIN",
+        "tags": [
+          "Two-Step Verification"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "businessNumberId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the business phone number"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TwoStepVerificationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully set two-step verification PIN",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/waba/{businessAccountId}/subscriptions": {
+      "get": {
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "summary": "Get all WABA subscriptions",
+        "tags": [
+          "WABA"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "businessAccountId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the business account"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved WABA subscriptions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WabaSubscriptions"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "summary": "Subscribe to WABA",
+        "tags": [
+          "WABA"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "businessAccountId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the business account"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully subscribed to WABA",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "summary": "Unsubscribe from WABA",
+        "tags": [
+          "WABA"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "businessAccountId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the business account"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully unsubscribed from WABA",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/waba/{businessAccountId}/webhooks": {
+      "post": {
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
+        "summary": "Override WABA webhook",
+        "tags": [
+          "WABA"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "businessAccountId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the business account"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "override_callback_uri",
+                  "verify_token"
+                ],
+                "properties": {
+                  "override_callback_uri": {
+                    "type": "string",
+                    "description": "The webhook URL"
+                  },
+                  "verify_token": {
+                    "type": "string",
+                    "description": "The verification token for the webhook"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully overrode WABA webhook",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2476,8 +3655,6 @@
           "CRC",
           "HRK",
           "CUP",
-          "CUC",
-          "ANG",
           "CZK",
           "DKK",
           "DJF",
@@ -2736,9 +3913,9 @@
       "DataLocalizationRegionEnum": {
         "type": "string",
         "enum": [
-          "AU",
-          "ID",
-          "IN",
+          "INDIA",
+          "SINGAPORE",
+          "UNITED_STATES",
           "JP",
           "SG",
           "KR",
@@ -2756,7 +3933,7 @@
         "type": "object",
         "properties": {
           "error": {
-            "type": "object",
+            "type": "string",
             "required": [
               "message",
               "type",
@@ -2767,15 +3944,15 @@
             "properties": {
               "message": {
                 "type": "string",
-                "description": "Combination of the error code and its title. Example - \"(#130429) Rate limit hit\""
+                "description": "Error message"
               },
               "type": {
                 "type": "string",
-                "description": "Error type, e.g. \"OAuthException\""
+                "description": "Error type"
               },
               "code": {
                 "type": "integer",
-                "description": "Error code. Primary value for error handling logic"
+                "description": "Error code"
               },
               "error_data": {
                 "type": "object",
@@ -2809,7 +3986,8 @@
                       }
                     }
                   }
-                }
+                },
+                "description": "Additional error data"
               },
               "error_subcode": {
                 "type": "integer",
@@ -2837,6 +4015,36 @@
             },
             "error_subcode": 2494055,
             "fbtrace_id": "Az8or2yhqkZfEZ-_4Qn_Bam"
+          }
+        },
+        "description": "Error response",
+        "required": [
+          "error"
+        ]
+      },
+      "SuccessResponse": {
+        "description": "Generic success response",
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Indicates if the operation was successful"
+          }
+        }
+      },
+      "ResponseData": {
+        "description": "Generic data response wrapper",
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "description": "Response data payload"
           }
         }
       },
@@ -2878,346 +4086,84 @@
           }
         }
       },
-      "SuccessResponse": {
-        "description": "Generic success response",
+      "EncryptionPublicKeyResponse": {
         "type": "object",
-        "required": [
-          "success"
-        ],
         "properties": {
-          "success": {
-            "type": "boolean",
-            "description": "Indicates if the operation was successful"
+          "data": {
+            "type": "object",
+            "properties": {
+              "business_public_key": {
+                "type": "string"
+              },
+              "business_public_key_signature_status": {
+                "type": "string",
+                "enum": [
+                  "VALID",
+                  "MISMATCH"
+                ]
+              }
+            }
           }
         }
       },
-      "TemplateResponse": {
-        "description": "Response from template operations",
+      "MediaResponse": {
         "type": "object",
-        "required": [
-          "id",
-          "status",
-          "language",
-          "category",
-          "name",
-          "components"
-        ],
         "properties": {
           "id": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "mime_type": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "file_size": {
+            "type": "number"
+          },
+          "messaging_product": {
             "type": "string",
-            "description": "Template ID"
-          },
-          "status": {
-            "$ref": "#/components/schemas/TemplateStatusEnum"
-          },
-          "language": {
-            "$ref": "#/components/schemas/LanguagesEnum"
-          },
-          "category": {
-            "$ref": "#/components/schemas/CategoryEnum"
-          },
-          "name": {
-            "type": "string",
-            "description": "Template name"
-          },
-          "components": {
+            "enum": [
+              "whatsapp"
+            ]
+          }
+        }
+      },
+      "MediasResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
             "type": "array",
             "items": {
-              "type": "object",
-              "oneOf": [
-                {
-                  "type": "object",
-                  "required": [
-                    "type",
-                    "format"
-                  ],
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "enum": [
-                        "HEADER"
-                      ]
-                    },
-                    "format": {
-                      "$ref": "#/components/schemas/MessageTypesEnum"
-                    },
-                    "text": {
-                      "type": "string",
-                      "maxLength": 60
-                    },
-                    "example": {
-                      "type": "object",
-                      "properties": {
-                        "header_text": {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        },
-                        "header_text_named_params": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "param_name": {
-                                "type": "string"
-                              },
-                              "example": {
-                                "type": "string"
-                              }
-                            }
-                          }
-                        },
-                        "header_handle": {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        }
-                      }
-                    }
-                  }
-                },
-                {
-                  "type": "object",
-                  "required": [
-                    "type",
-                    "text"
-                  ],
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "enum": [
-                        "BODY"
-                      ]
-                    },
-                    "text": {
-                      "type": "string",
-                      "maxLength": 1024
-                    },
-                    "example": {
-                      "type": "object",
-                      "properties": {
-                        "body_text": {
-                          "type": "array",
-                          "items": {
-                            "type": "array",
-                            "items": {
-                              "type": "string"
-                            }
-                          }
-                        },
-                        "body_text_named_params": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "param_name": {
-                                "type": "string"
-                              },
-                              "example": {
-                                "type": "string"
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                },
-                {
-                  "type": "object",
-                  "required": [
-                    "type",
-                    "text"
-                  ],
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "enum": [
-                        "FOOTER"
-                      ]
-                    },
-                    "text": {
-                      "type": "string",
-                      "maxLength": 60
-                    }
-                  }
-                },
-                {
-                  "type": "object",
-                  "required": [
-                    "type",
-                    "text",
-                    "phone_number"
-                  ],
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "enum": [
-                        "PHONE_NUMBER"
-                      ]
-                    },
-                    "text": {
-                      "type": "string",
-                      "maxLength": 25
-                    },
-                    "phone_number": {
-                      "type": "string",
-                      "maxLength": 20
-                    }
-                  }
-                },
-                {
-                  "type": "object",
-                  "required": [
-                    "type",
-                    "text",
-                    "url"
-                  ],
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "enum": [
-                        "URL"
-                      ]
-                    },
-                    "text": {
-                      "type": "string",
-                      "maxLength": 25
-                    },
-                    "url": {
-                      "type": "string",
-                      "maxLength": 2000
-                    },
-                    "example": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                },
-                {
-                  "type": "object",
-                  "required": [
-                    "type",
-                    "text"
-                  ],
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "enum": [
-                        "QUICK_REPLY"
-                      ]
-                    },
-                    "text": {
-                      "type": "string",
-                      "maxLength": 25
-                    }
-                  }
-                },
-                {
-                  "type": "object",
-                  "required": [
-                    "type",
-                    "example"
-                  ],
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "enum": [
-                        "COPY_CODE"
-                      ]
-                    },
-                    "example": {
-                      "type": "string",
-                      "maxLength": 15
-                    }
-                  }
-                },
-                {
-                  "type": "object",
-                  "required": [
-                    "type",
-                    "text"
-                  ],
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "enum": [
-                        "FLOW"
-                      ]
-                    },
-                    "text": {
-                      "type": "string",
-                      "maxLength": 25
-                    },
-                    "flow_id": {
-                      "type": "string"
-                    },
-                    "flow_name": {
-                      "type": "string"
-                    },
-                    "flow_json": {
-                      "type": "string"
-                    },
-                    "flow_action": {
-                      "type": "string",
-                      "enum": [
-                        "navigate",
-                        "data_exchange"
-                      ]
-                    },
-                    "navigate_screen": {
-                      "type": "string"
-                    }
-                  }
-                },
-                {
-                  "type": "object",
-                  "required": [
-                    "type"
-                  ],
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "enum": [
-                        "MPM"
-                      ]
-                    }
-                  }
-                },
-                {
-                  "type": "object",
-                  "required": [
-                    "type"
-                  ],
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "enum": [
-                        "OTP"
-                      ]
-                    }
-                  }
-                },
-                {
-                  "type": "object",
-                  "required": [
-                    "type"
-                  ],
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "enum": [
-                        "SPM"
-                      ]
-                    }
+              "$ref": "#/components/schemas/MediaResponse"
+            }
+          },
+          "paging": {
+            "type": "object",
+            "properties": {
+              "cursors": {
+                "type": "object",
+                "properties": {
+                  "before": {
+                    "type": "string"
+                  },
+                  "after": {
+                    "type": "string"
                   }
                 }
-              ]
+              }
             }
+          }
+        }
+      },
+      "UploadMediaResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
           }
         }
       },
@@ -3405,6 +4351,64 @@
                   }
                 }
               }
+            }
+          }
+        }
+      },
+      "RequestCodeRequest": {
+        "type": "object",
+        "required": [
+          "code_method",
+          "language"
+        ],
+        "properties": {
+          "code_method": {
+            "type": "string",
+            "enum": [
+              "SMS",
+              "VOICE"
+            ]
+          },
+          "language": {
+            "type": "string"
+          }
+        }
+      },
+      "VerifyCodeRequest": {
+        "type": "object",
+        "required": [
+          "code"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          }
+        }
+      },
+      "QrCodeResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "prefilled_message": {
+            "type": "string"
+          },
+          "deep_link_url": {
+            "type": "string"
+          },
+          "qr_image_url": {
+            "type": "string"
+          }
+        }
+      },
+      "QrCodesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QrCodeResponse"
             }
           }
         }
@@ -3713,6 +4717,48 @@
                   }
                 }
               ]
+            }
+          }
+        }
+      },
+      "TwoStepVerificationRequest": {
+        "type": "object",
+        "required": [
+          "pin"
+        ],
+        "properties": {
+          "pin": {
+            "type": "string",
+            "description": "The PIN code for two-step verification"
+          }
+        }
+      },
+      "WabaSubscription": {
+        "type": "object",
+        "properties": {
+          "whatsapp_business_api_data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "link": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "WabaSubscriptions": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WabaSubscription"
             }
           }
         }

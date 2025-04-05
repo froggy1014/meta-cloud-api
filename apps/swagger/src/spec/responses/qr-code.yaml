@@ -1,0 +1,23 @@
+components:
+  schemas:
+    QrCodeResponse:
+      type: object
+      properties:
+        code:
+          type: string
+          description: QR code data
+        prefilled_message:
+          type: string
+          description: Prefilled message for QR code
+        deep_link_url:
+          type: string
+          description: Deep link URL for the QR code
+
+    QrCodesResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/QrCodeResponse'
+          description: List of QR codes 
