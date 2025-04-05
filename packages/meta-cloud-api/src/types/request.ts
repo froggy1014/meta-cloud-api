@@ -31,6 +31,10 @@ export interface ResponseSuccess {
     success: boolean;
 }
 
+export interface ResponseData<T> {
+    data: T;
+}
+
 export declare class RequesterClass {
     constructor(
         host: string,
