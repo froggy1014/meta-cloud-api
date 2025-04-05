@@ -5,12 +5,17 @@ import Logger from './utils/logger';
 import { importConfig } from './utils/importConfig';
 import Requester from './request';
 import { WhatsAppClass } from './types/whatsapp';
-import { MessagesAPI, PhoneNumberAPI, TemplateAPI } from './api';
-import QrCodeAPI from './api/qrCode';
-import EncryptionAPI from './api/encryption';
-import TwoStepVerificationAPI from './api/twoStepVerification';
-import RegistrationAPI from './api/registration';
-import MediaAPI from './api/media';
+import {
+    MessagesAPI,
+    PhoneNumberAPI,
+    TemplateAPI,
+    QrCodeAPI,
+    EncryptionAPI,
+    TwoStepVerificationAPI,
+    RegistrationAPI,
+    MediaAPI,
+    WabaAPI,
+} from './api';
 
 const LIB_NAME = 'WHATSAPP';
 const LOG_LOCAL = false;
@@ -31,6 +36,7 @@ export default class WhatsApp implements WhatsAppClass {
     readonly twoStepVerification: TwoStepVerificationAPI;
     readonly registration: RegistrationAPI;
     readonly media: MediaAPI;
+    readonly waba: WabaAPI;
     static readonly Enums = SDKEnums;
 
     constructor(senderNumberId?: number, accessToken?: string) {
@@ -52,6 +58,7 @@ export default class WhatsApp implements WhatsAppClass {
         this.twoStepVerification = new TwoStepVerificationAPI(this.config, this.requester);
         this.registration = new RegistrationAPI(this.config, this.requester);
         this.media = new MediaAPI(this.config, this.requester);
+        this.waba = new WabaAPI(this.config, this.requester);
         LOGGER.log('WhatsApp Node.js SDK instantiated!');
     }
 
