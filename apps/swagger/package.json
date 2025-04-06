@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/index.html",
   "scripts": {
-    "build": "pnpm run openapi:generate && pnpm run swagger:copy && pnpm run swagger:config && tsc",
+    "build": "pnpm run openapi:generate && pnpm run swagger:copy && pnpm run swagger:config",
     "openapi:generate": "swagger-jsdoc -d ./core/*.yaml ./endpoint/*.yaml ./response/*.yaml -o ./openapi.json",
     "swagger:copy": "copyfiles ./openapi.json dist && cp -r node_modules/swagger-ui-dist/* dist/",
     "swagger:config": "sed -i '' 's|https://petstore.swagger.io/v2/swagger.json|./openapi.json|g' dist/swagger-initializer.js",
@@ -17,7 +17,6 @@
     "copyfiles": "^2.4.1",
     "nodemon": "^3.1.9",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-dist": "^5.20.6",
-    "typescript": "^5.8.3"
+    "swagger-ui-dist": "^5.20.6"
   }
 }

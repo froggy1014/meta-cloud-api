@@ -1,6 +1,9 @@
 {
-    "events": {
-        "restart": "bash -c \"if [[ \"$FILENAME\" == *| \"src/routes/\"* ]]; then npm run-s schemas:openapi && npm run-s copyfiles; fi\""
-    },
-    "ext": "js,ts,json,yaml,yml"
+    "watch": [
+        "core/*.yaml",
+        "endpoint/*.yaml", 
+        "response/*.yaml"
+    ],
+    "ext": "yaml,yml",
+    "exec": "pnpm run build"
 }
