@@ -1,9 +1,0 @@
-export { router as apidocsRouter } from './apidocs';
-export { router as messagesRouter } from './message';
-export { router as phoneNumberRouter } from './phoneNumber';
-export { router as registrationRouter } from './registration';
-export { router as qrCodeRouter } from './qrCode';
-export { router as mediaRouter } from './media';
-export { router as twoStepVerificationRouter } from './twoStepVerification';
-export { router as encryptionRouter } from './encryption';
-export { router as wabaRouter } from './waba';
