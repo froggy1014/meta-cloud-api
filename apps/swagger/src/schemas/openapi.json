@@ -685,137 +685,8 @@
           "ZA",
           "AE",
           "CA"
-        ]
-      },
-      "FacebookError": {
-        "description": "Error response from Meta Cloud API",
-        "type": "object",
-        "required": [
-          "error"
         ],
-        "properties": {
-          "error": {
-            "type": "object",
-            "required": [
-              "message",
-              "type",
-              "code",
-              "fbtrace_id"
-            ],
-            "properties": {
-              "message": {
-                "type": "string",
-                "description": "Error message",
-                "example": "Invalid parameter"
-              },
-              "type": {
-                "type": "string",
-                "description": "Error type",
-                "example": "OAuthException"
-              },
-              "code": {
-                "type": "integer",
-                "description": "Error code",
-                "example": 100
-              },
-              "error_data": {
-                "type": "object",
-                "description": "Additional error data for WhatsApp errors",
-                "required": [
-                  "messaging_product",
-                  "details"
-                ],
-                "properties": {
-                  "messaging_product": {
-                    "type": "string",
-                    "enum": [
-                      "whatsapp"
-                    ],
-                    "example": "whatsapp"
-                  },
-                  "details": {
-                    "type": "string",
-                    "example": "Message failed to send"
-                  }
-                }
-              },
-              "error_subcode": {
-                "type": "integer",
-                "description": "Optional error subcode",
-                "example": 2018001
-              },
-              "fbtrace_id": {
-                "type": "string",
-                "description": "Meta API trace ID",
-                "example": "XYZ123abc"
-              }
-            }
-          }
-        }
-      },
-      "SuccessResponse": {
-        "description": "Generic success response",
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean",
-            "description": "Indicates if the operation was successful"
-          }
-        }
-      },
-      "ResponseData": {
-        "description": "Generic data response wrapper",
-        "type": "object",
-        "required": [
-          "data"
-        ],
-        "properties": {
-          "data": {
-            "type": "object",
-            "description": "Response data payload"
-          }
-        }
-      },
-      "MessageResponse": {
-        "description": "Response from sending a WhatsApp message",
-        "type": "object",
-        "required": [
-          "contacts",
-          "messages"
-        ],
-        "properties": {
-          "contacts": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "input": {
-                  "type": "string",
-                  "description": "Phone number input"
-                },
-                "wa_id": {
-                  "type": "string",
-                  "description": "WhatsApp ID"
-                }
-              }
-            }
-          },
-          "messages": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string",
-                  "description": "Message ID"
-                }
-              }
-            }
-          }
-        }
+        "description": "Regions available for data localization"
       },
       "QualityScore": {
         "type": "object",
@@ -1067,6 +938,19 @@
             "description": "Verification code received"
           }
         }
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Indicates if the operation was successful"
+          }
+        },
+        "description": "Generic success response",
+        "required": [
+          "success"
+        ]
       },
       "Error": {
         "type": "object",
@@ -1464,6 +1348,85 @@
           }
         }
       },
+      "FacebookError": {
+        "description": "Error response from Meta Cloud API",
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "object",
+            "required": [
+              "message",
+              "type",
+              "code",
+              "fbtrace_id"
+            ],
+            "properties": {
+              "message": {
+                "type": "string",
+                "description": "Error message",
+                "example": "Invalid parameter"
+              },
+              "type": {
+                "type": "string",
+                "description": "Error type",
+                "example": "OAuthException"
+              },
+              "code": {
+                "type": "integer",
+                "description": "Error code",
+                "example": 100
+              },
+              "error_data": {
+                "type": "object",
+                "description": "Additional error data for WhatsApp errors",
+                "required": [
+                  "messaging_product",
+                  "details"
+                ],
+                "properties": {
+                  "messaging_product": {
+                    "type": "string",
+                    "enum": [
+                      "whatsapp"
+                    ],
+                    "example": "whatsapp"
+                  },
+                  "details": {
+                    "type": "string",
+                    "example": "Message failed to send"
+                  }
+                }
+              },
+              "error_subcode": {
+                "type": "integer",
+                "description": "Optional error subcode",
+                "example": 2018001
+              },
+              "fbtrace_id": {
+                "type": "string",
+                "description": "Meta API trace ID",
+                "example": "XYZ123abc"
+              }
+            }
+          }
+        }
+      },
+      "ResponseData": {
+        "description": "Generic data response wrapper",
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "description": "Response data payload"
+          }
+        }
+      },
       "EncryptionPublicKeyResponse": {
         "type": "object",
         "properties": {
@@ -1523,6 +1486,44 @@
           "id": {
             "type": "string",
             "description": "Media ID"
+          }
+        }
+      },
+      "MessageResponse": {
+        "description": "Response from sending a WhatsApp message",
+        "type": "object",
+        "required": [
+          "contacts",
+          "messages"
+        ],
+        "properties": {
+          "contacts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "input": {
+                  "type": "string",
+                  "description": "Phone number input"
+                },
+                "wa_id": {
+                  "type": "string",
+                  "description": "WhatsApp ID"
+                }
+              }
+            }
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Message ID"
+                }
+              }
+            }
           }
         }
       },
