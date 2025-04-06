@@ -3,12 +3,12 @@ import path from 'path';
 import swaggerUi from 'swagger-ui-express';
 import openapiDoc from '../../openapi.json';
 
-const apidocsRouter = Router();
+const router = Router();
 
 const customCssUrl = 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.min.css';
 
-apidocsRouter.use('/', swaggerUi.serve);
-apidocsRouter.get(
+router.use('/', swaggerUi.serve);
+router.get(
     '/',
     swaggerUi.setup(openapiDoc, {
         customCssUrl,
@@ -36,6 +36,6 @@ apidocsRouter.get(
     }),
 );
 
-apidocsRouter.use('/openapi.json', express.static(path.join(__dirname, '../../openapi.json')));
+router.use('/openapi.json', express.static(path.join(__dirname, '../../openapi.json')));
 
-export default apidocsRouter;
+export { router };
