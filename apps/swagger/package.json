@@ -7,7 +7,7 @@
     "build": "pnpm run openapi:generate && pnpm run swagger:copy && pnpm run swagger:config",
     "openapi:generate": "swagger-jsdoc -d ./core/*.yaml ./endpoint/*.yaml ./response/*.yaml -o ./openapi.json",
     "swagger:copy": "copyfiles ./openapi.json dist && cp -r node_modules/swagger-ui-dist/* dist/",
-    "swagger:config": "sed -i '' 's|https://petstore.swagger.io/v2/swagger.json|./openapi.json|g' dist/swagger-initializer.js",
+    "swagger:config": "sed -i '' 's|https://petstore.swagger.io/v2/swagger.json|/openapi.json|g' dist/swagger-initializer.js",
     "clean": "rm -rf dist node_modules"
   },
   "keywords": [],
