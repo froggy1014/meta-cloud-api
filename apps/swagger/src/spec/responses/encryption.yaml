@@ -1,0 +1,8 @@
+components:
+  schemas:
+    EncryptionPublicKeyResponse:
+      type: object
+      properties:
+        public_key:
+          type: string
+          description: Encryption public key 

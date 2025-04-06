@@ -1,0 +1,70 @@
+components:
+  schemas:
+    Error:
+      description: Error response
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: integer
+              description: Error code
+            message:
+              type: string
+              description: Error message
+            type:
+              type: string
+              description: Error type
+            error_data:
+              type: object
+              description: Additional error data
+
+    SuccessResponse:
+      description: Generic success response
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
+          description: Indicates if the operation was successful
+
+    ResponseData:
+      description: Generic data response wrapper
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          description: Response data payload
+
+    MessageResponse:
+      description: Response from sending a WhatsApp message
+      type: object
+      required:
+        - contacts
+        - messages
+      properties:
+        contacts:
+          type: array
+          items:
+            type: object
+            properties:
+              input:
+                type: string
+                description: Phone number input
+              wa_id:
+                type: string
+                description: WhatsApp ID
+        messages:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: Message ID 

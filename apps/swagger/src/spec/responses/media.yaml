@@ -1,0 +1,32 @@
+components:
+  schemas:
+    MediaResponse:
+      description: Response from fetching media details
+      type: object
+      properties:
+        messaging_product:
+          type: string
+          enum: [whatsapp]
+        url:
+          type: string
+          description: URL to download the media
+        mime_type:
+          type: string
+          description: MIME type of the media
+        sha256:
+          type: string
+          description: SHA256 hash of the media
+        file_size:
+          type: integer
+          description: Size of the media file in bytes
+        id:
+          type: string
+          description: Media ID
+
+    UploadMediaResponse:
+      description: Response from uploading media
+      type: object
+      properties:
+        id:
+          type: string
+          description: Media ID 

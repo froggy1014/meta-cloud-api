@@ -1,0 +1,26 @@
+components:
+  schemas:
+    WabaSubscription:
+      type: object
+      properties:
+        whatsapp_business_api_data:
+          type: object
+          properties:
+            id:
+              type: string
+              description: WABA subscription ID
+            link:
+              type: string
+              description: Link to the WABA subscription
+            name:
+              type: string
+              description: Name of the WABA subscription
+
+    WabaSubscriptions:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/WabaSubscription'
+          description: List of WABA subscriptions 
