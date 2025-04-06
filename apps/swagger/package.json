@@ -5,10 +5,9 @@
   "main": "dist/api/index.js",
   "scripts": {
     "start": "node dist/api/index.js",
-    "build": "pnpm run schemas:openapi && pnpm run copyfiles && tsc",
-    "dev": "pnpm run schemas:openapi && pnpm run copyfiles && concurrently \"tsc -w\" \"nodemon dist/api/index.js\"",
-    "schemas:openapi": "mkdir -p src/schemas && swagger-jsdoc -d core/*.yaml endpoint/*.yaml response/*.yaml -o src/schemas/openapi.json",
-    "copyfiles": "copyfiles -u 1 src/schemas/*.json dist",
+    "build": "pnpm run schemas:openapi && tsc",
+    "dev": "pnpm run schemas:openapi && concurrently \"tsc -w\" \"nodemon dist/api/index.js\"",
+    "schemas:openapi": "mkdir -p src/schemas && swagger-jsdoc -d src/spec/**/*.yaml -o src/schemas/openapi.json",
     "clean": "rm -rf dist node_modules"
   },
   "keywords": [],
