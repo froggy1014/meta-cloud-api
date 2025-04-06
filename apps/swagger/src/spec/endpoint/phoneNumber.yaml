@@ -154,19 +154,19 @@
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/Error'
+                  $ref: '#/components/schemas/FacebookError'
           401:
             description: Unauthorized
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/Error'
+                  $ref: '#/components/schemas/FacebookError'
           500:
             description: Internal server error
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/Error'
+                  $ref: '#/components/schemas/FacebookError'
  
     /{businessNumberId}:
       get:
@@ -199,25 +199,25 @@
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/Error'
+                  $ref: '#/components/schemas/FacebookError'
           401:
             description: Unauthorized
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/Error'
+                  $ref: '#/components/schemas/FacebookError'
           404:
             description: Phone number not found
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/Error'
+                  $ref: '#/components/schemas/FacebookError'
           500:
             description: Internal server error
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/Error'
+                  $ref: '#/components/schemas/FacebookError'
  
     /{businessNumberId}/request_code:
       post:
@@ -250,19 +250,19 @@
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/Error'
+                  $ref: '#/components/schemas/FacebookError'
           401:
             description: Unauthorized
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/Error'
+                  $ref: '#/components/schemas/FacebookError'
           500:
             description: Internal server error
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/Error'
+                  $ref: '#/components/schemas/FacebookError'
  
     /{businessNumberId}/verify_code:
       post:
@@ -295,17 +295,17 @@
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/Error'
+                  $ref: '#/components/schemas/FacebookError'
           401:
             description: Unauthorized
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/Error'
+                  $ref: '#/components/schemas/FacebookError'
           500:
             description: Internal server error
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/Error'
+                  $ref: '#/components/schemas/FacebookError'
  

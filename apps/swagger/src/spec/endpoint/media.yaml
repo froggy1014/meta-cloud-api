@@ -66,7 +66,7 @@ components:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/Error'
+                  $ref: '#/components/schemas/FacebookError'
       delete:
         security:
           - AccessToken: []
@@ -91,7 +91,7 @@ components:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/Error'
+                  $ref: '#/components/schemas/FacebookError'
  
     /{businessNumberId}/media:
       post:
@@ -134,7 +134,7 @@ components:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/Error'
+                  $ref: '#/components/schemas/FacebookError'
  
     /{mediaUrl}:
       get:
@@ -162,5 +162,5 @@ components:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/Error'
+                  $ref: '#/components/schemas/FacebookError'
  

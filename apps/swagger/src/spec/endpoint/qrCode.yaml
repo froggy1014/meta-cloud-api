@@ -45,19 +45,19 @@
          content:
            application/json:
              schema:
-               $ref: '#/components/schemas/Error'
+               $ref: '#/components/schemas/FacebookError'
        401:
          description: Unauthorized
          content:
            application/json:
              schema:
-               $ref: '#/components/schemas/Error'
+               $ref: '#/components/schemas/FacebookError'
        500:
          description: Internal server error
          content:
            application/json:
              schema:
-               $ref: '#/components/schemas/Error'
+               $ref: '#/components/schemas/FacebookError'
 
    post:
      security:
@@ -93,19 +93,19 @@
          content:
            application/json:
              schema:
-               $ref: '#/components/schemas/Error'
+               $ref: '#/components/schemas/FacebookError'
        401:
          description: Unauthorized
          content:
            application/json:
              schema:
-               $ref: '#/components/schemas/Error'
+               $ref: '#/components/schemas/FacebookError'
        500:
          description: Internal server error
          content:
            application/json:
              schema:
-               $ref: '#/components/schemas/Error'
+               $ref: '#/components/schemas/FacebookError'
 
  /{businessNumberId}/qr-codes/{qrCodeId}:
    get:
@@ -138,25 +138,25 @@
          content:
            application/json:
              schema:
-               $ref: '#/components/schemas/Error'
+               $ref: '#/components/schemas/FacebookError'
        401:
          description: Unauthorized
          content:
            application/json:
              schema:
-               $ref: '#/components/schemas/Error'
+               $ref: '#/components/schemas/FacebookError'
        404:
          description: QR code not found
          content:
            application/json:
              schema:
-               $ref: '#/components/schemas/Error'
+               $ref: '#/components/schemas/FacebookError'
        500:
          description: Internal server error
          content:
            application/json:
              schema:
-               $ref: '#/components/schemas/Error'
+               $ref: '#/components/schemas/FacebookError'
 
    put:
      security:
@@ -198,25 +198,25 @@
          content:
            application/json:
              schema:
-               $ref: '#/components/schemas/Error'
+               $ref: '#/components/schemas/FacebookError'
        401:
          description: Unauthorized
          content:
            application/json:
              schema:
-               $ref: '#/components/schemas/Error'
+               $ref: '#/components/schemas/FacebookError'
        404:
          description: QR code not found
          content:
            application/json:
              schema:
-               $ref: '#/components/schemas/Error'
+               $ref: '#/components/schemas/FacebookError'
        500:
          description: Internal server error
          content:
            application/json:
              schema:
-               $ref: '#/components/schemas/Error'
+               $ref: '#/components/schemas/FacebookError'
 
    delete:
      security:
@@ -248,22 +248,22 @@
          content:
            application/json:
              schema:
-               $ref: '#/components/schemas/Error'
+               $ref: '#/components/schemas/FacebookError'
        401:
          description: Unauthorized
          content:
            application/json:
              schema:
-               $ref: '#/components/schemas/Error'
+               $ref: '#/components/schemas/FacebookError'
        404:
          description: QR code not found
          content:
            application/json:
              schema:
-               $ref: '#/components/schemas/Error'
+               $ref: '#/components/schemas/FacebookError'
        500:
          description: Internal server error
          content:
            application/json:
              schema:
-               $ref: '#/components/schemas/Error'
+               $ref: '#/components/schemas/FacebookError'

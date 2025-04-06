@@ -7,11 +7,19 @@ export const apidocsRouter = Router();
 
 const customCssUrl = 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.min.css';
 
+const customSiteTitle = 'Meta Cloud API Documentation Swagger';
+
 apidocsRouter.use('/', swaggerUi.serve);
 apidocsRouter.get(
     '/',
     swaggerUi.setup(openapiDoc, {
         customCssUrl,
+        customSiteTitle,
+        swaggerOptions: {
+            docExpansion: 'none',
+            persistAuthorization: true,
+            filter: true,
+        },
         customCss: `
         .opblock-summary-path-description-wrapper {
             align-items: center;

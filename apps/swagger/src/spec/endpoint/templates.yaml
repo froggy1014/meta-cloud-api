@@ -231,7 +231,7 @@ components:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Error'
+              $ref: '#/components/schemas/FacebookError'
       404:
         description: Template not found
   post:
@@ -282,7 +282,7 @@ components:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Error'
+              $ref: '#/components/schemas/FacebookError'
       404:
         description: Template not found
 
@@ -343,7 +343,7 @@ components:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Error'
+              $ref: '#/components/schemas/FacebookError'
   post:
     security:
       - AccessToken: []
@@ -390,7 +390,7 @@ components:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Error'
+              $ref: '#/components/schemas/FacebookError'
   delete:
     security:
       - AccessToken: []
@@ -429,7 +429,7 @@ components:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Error'
+              $ref: '#/components/schemas/FacebookError'
       404:
         description: Template not found
 

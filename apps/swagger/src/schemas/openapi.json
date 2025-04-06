@@ -13,6 +13,34 @@
     {
       "name": "Templates",
       "description": "API documentation for WhatsApp message templates"
+    },
+    {
+      "name": "Media",
+      "description": "API endpoints for uploading, retrieving, and managing WhatsApp media files"
+    },
+    {
+      "name": "QR Codes",
+      "description": "API endpoints for creating and managing WhatsApp QR codes"
+    },
+    {
+      "name": "WABA",
+      "description": "API endpoints for WhatsApp Business Account (WABA) management"
+    },
+    {
+      "name": "Phone Numbers",
+      "description": "API endpoints for managing and verifying WhatsApp business phone numbers"
+    },
+    {
+      "name": "Registration",
+      "description": "API endpoints for registering and deregistering WhatsApp phone numbers"
+    },
+    {
+      "name": "Encryption",
+      "description": "API endpoints for managing WhatsApp business encryption keys"
+    },
+    {
+      "name": "Two-Step Verification",
+      "description": "API endpoints for configuring two-step verification for WhatsApp business accounts"
     }
   ],
   "servers": [
@@ -25,16 +53,6 @@
         }
       },
       "description": "Meta Cloud API production server"
-    },
-    {
-      "url": "http://localhost:{port}",
-      "description": "Local development server",
-      "variables": {
-        "port": {
-          "default": "8080",
-          "description": "Local server port"
-        }
-      }
     }
   ],
   "externalDocs": {
@@ -564,7 +582,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -599,7 +617,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -609,7 +627,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -619,7 +637,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -674,7 +692,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -684,7 +702,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -694,7 +712,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -704,7 +722,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -758,7 +776,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -768,7 +786,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -778,7 +796,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -834,7 +852,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -844,7 +862,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -854,7 +872,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -910,7 +928,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -920,7 +938,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -930,7 +948,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -976,7 +994,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -986,7 +1004,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -996,7 +1014,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -1056,7 +1074,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -1066,7 +1084,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -1076,7 +1094,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -1131,7 +1149,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -1141,7 +1159,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -1151,7 +1169,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -1161,7 +1179,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -1230,7 +1248,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -1240,7 +1258,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -1250,7 +1268,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -1260,7 +1278,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -1313,7 +1331,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -1323,7 +1341,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -1333,7 +1351,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -1343,7 +1361,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -1410,7 +1428,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -1456,7 +1474,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -1505,7 +1523,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -1588,7 +1606,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -1691,7 +1709,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -1770,7 +1788,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -1838,7 +1856,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -1887,7 +1905,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -1897,7 +1915,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -1907,7 +1925,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -1984,7 +2002,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -1994,7 +2012,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -2004,7 +2022,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -2048,7 +2066,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -2058,7 +2076,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -2068,7 +2086,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -2679,31 +2697,67 @@
           "CA"
         ]
       },
-      "Error": {
-        "description": "Error response",
+      "FacebookError": {
+        "description": "Error response from Meta Cloud API",
         "type": "object",
         "required": [
           "error"
         ],
         "properties": {
           "error": {
-            "type": "string",
+            "type": "object",
+            "required": [
+              "message",
+              "type",
+              "code",
+              "fbtrace_id"
+            ],
             "properties": {
-              "code": {
-                "type": "integer",
-                "description": "Error code"
-              },
               "message": {
                 "type": "string",
-                "description": "Error message"
+                "description": "Error message",
+                "example": "Invalid parameter"
               },
               "type": {
                 "type": "string",
-                "description": "Error type"
+                "description": "Error type",
+                "example": "OAuthException"
+              },
+              "code": {
+                "type": "integer",
+                "description": "Error code",
+                "example": 100
               },
               "error_data": {
                 "type": "object",
-                "description": "Additional error data"
+                "description": "Additional error data for WhatsApp errors",
+                "required": [
+                  "messaging_product",
+                  "details"
+                ],
+                "properties": {
+                  "messaging_product": {
+                    "type": "string",
+                    "enum": [
+                      "whatsapp"
+                    ],
+                    "example": "whatsapp"
+                  },
+                  "details": {
+                    "type": "string",
+                    "example": "Message failed to send"
+                  }
+                }
+              },
+              "error_subcode": {
+                "type": "integer",
+                "description": "Optional error subcode",
+                "example": 2018001
+              },
+              "fbtrace_id": {
+                "type": "string",
+                "description": "Meta API trace ID",
+                "example": "XYZ123abc"
               }
             }
           }
@@ -3114,6 +3168,14 @@
           "code": {
             "type": "string",
             "description": "Verification code received"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
           }
         }
       },
@@ -3901,7 +3963,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -3911,7 +3973,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -3921,7 +3983,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -3931,7 +3993,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -3994,7 +4056,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -4004,7 +4066,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -4014,7 +4076,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -4061,7 +4123,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -4105,7 +4167,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -4177,7 +4239,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
@@ -4224,7 +4286,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/FacebookError"
                 }
               }
             }
