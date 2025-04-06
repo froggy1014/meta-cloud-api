@@ -1,6 +1,6 @@
 {
     "events": {
-        "restart": "bash -c \"if [[ \"$FILENAME\" == *| \"src/routes/\"* ]]; then npm run-s schemas && npm run-s copyfiles; fi\""
+        "restart": "bash -c \"if [[ \"$FILENAME\" == *| \"src/routes/\"* ]]; then npm run-s schemas:openapi && npm run-s copyfiles; fi\""
     },
     "ext": "js,ts,json,yaml,yml"
 }

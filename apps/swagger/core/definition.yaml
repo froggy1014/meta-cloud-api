@@ -1,0 +1,30 @@
+openapi: 3.0.0
+
+info:
+  title: Meta Cloud API
+  version: 1.0.0
+  description: API documentation for WhatsApp Cloud API
+
+tags:
+  - name: Messages
+    description: API documentation for WhatsApp messages
+  - name: Templates
+    description: API documentation for WhatsApp message templates
+
+servers:
+  - url: https://graph.facebook.com/{version}
+    variables:
+      version:
+        default: v22.0
+        description: Meta Graph API version
+    description: Meta Cloud API production server
+  - url: http://localhost:{port}
+    description: Local development server
+    variables:
+      port:
+        default: "8080"
+        description: Local server port
+
+externalDocs:
+  description: Find out more about Meta Cloud API
+  url: https://developers.facebook.com/docs/whatsapp/cloud-api/reference/

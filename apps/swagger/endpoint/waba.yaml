@@ -1,0 +1,156 @@
+components:
+  schemas:
+    WabaSubscription:
+      type: object
+      properties:
+        whatsapp_business_api_data:
+          type: object
+          properties:
+            id:
+              type: string
+            link:
+              type: string
+            name:
+              type: string
+    WabaSubscriptions:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/WabaSubscription'
+
+/{wabaId}/subscribed_apps:
+  get:
+    security:
+      - AccessToken: []
+    summary: Get all WABA subscriptions
+    tags: [WABA]
+    parameters:
+      - in: path
+        name: wabaId
+        required: true
+        schema:
+          type: string
+        description: The ID of the business account
+    responses:
+      200:
+        description: Successfully retrieved WABA subscriptions
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WabaSubscriptions'
+      400:
+        description: Invalid request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      500:
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+  post:
+    security:
+      - AccessToken: []
+    summary: Subscribe to WABA or override webhook if override_callback_uri and verify_token provided
+    tags: [WABA]
+    parameters:
+      - in: path
+        name: wabaId
+        required: true
+        schema:
+          type: string
+        description: The ID of the business account
+    requestBody:
+      required: false
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              override_callback_uri:
+                type: string
+                description: The webhook URL. If provided with verify_token, acts as webhook override
+              verify_token:
+                type: string
+                description: The verification token for the webhook. Required if override_callback_uri provided
+          examples:
+            subscription:
+              summary: Simple subscription
+              value: {}
+            webhookOverride:
+              summary: Subscribe with webhook override
+              value:
+                override_callback_uri: "https://example.com/webhook"
+                verify_token: "your_verify_token"
+    responses:
+      200:
+        description: Successfully subscribed to WABA or overrode webhook
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SuccessResponse'
+      400:
+        description: Invalid request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      500:
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+  delete:
+    security:
+      - AccessToken: []
+    summary: Unsubscribe from WABA
+    tags: [WABA]
+    parameters:
+      - in: path
+        name: wabaId
+        required: true
+        schema:
+          type: string
+        description: The ID of the business account
+    responses:
+      200:
+        description: Successfully unsubscribed from WABA
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SuccessResponse'
+      400:
+        description: Invalid request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      500:
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'

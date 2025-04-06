@@ -15,11 +15,11 @@ components:
           type: string
           description: Template ID
         status:
-          $ref: './index.yaml#/components/schemas/TemplateStatusEnum'
+          $ref: '#/components/schemas/TemplateStatusEnum'
         language:
-          $ref: './index.yaml#/components/schemas/LanguagesEnum'
+          $ref: '#/components/schemas/LanguagesEnum'
         category:
-          $ref: './index.yaml#/components/schemas/CategoryEnum'
+          $ref: '#/components/schemas/CategoryEnum'
         name:
           type: string
           description: Template name
@@ -37,7 +37,7 @@ components:
                     type: string
                     enum: [HEADER]
                   format:
-                    $ref: './index.yaml#/components/schemas/MessageTypesEnum'
+                    $ref: '#/components/schemas/MessageTypesEnum'
                   text:
                     type: string
                     maxLength: 60

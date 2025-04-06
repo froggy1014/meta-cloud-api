@@ -1,0 +1,108 @@
+components:
+  schemas:
+    EncryptionPublicKeyResponse:
+      type: object
+      properties:
+          data:
+            type: object
+            properties:
+              business_public_key:
+                type: string
+              business_public_key_signature_status:
+                type: string
+                enum: [VALID, MISMATCH]
+ 
+  /{businessNumberId}/whatsapp_business_encryption:
+    get:
+      security:
+        - AccessToken: []
+      summary: Get encryption public key
+      tags: [Encryption]
+      parameters:
+        - in: path
+          name: businessNumberId
+          required: true
+          schema:
+            type: string
+          description: The ID of the business phone number
+      responses:
+        200:
+          description: Successfully retrieved encryption public key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EncryptionPublicKeyResponse'
+        400:
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: Public key not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      security:
+        - AccessToken: []
+      summary: Set encryption public key
+      tags: [Encryption]
+      parameters:
+        - in: path
+          name: businessNumberId
+          required: true
+          schema:
+            type: string
+          description: The ID of the business phone number
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - business_public_key
+              properties:
+                business_public_key:
+                  type: string
+                  description: The business public key for encryption
+      responses:
+        200:
+          description: Successfully set encryption public key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        400:
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+ 

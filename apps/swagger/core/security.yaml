@@ -1,0 +1,23 @@
+components:
+  securitySchemes:
+    AccessToken:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Bearer access token (CLOUD_API_ACCESS_TOKEN) - Required for all API calls
+      scheme: Bearer
+    PhoneNumberId:
+      type: apiKey
+      in: header
+      name: X-Phone-Number-ID
+      description: WhatsApp phone number ID (WA_PHONE_NUMBER_ID) - Required for most API operations
+    BusinessAccountId:
+      type: apiKey
+      in: header
+      name: X-Business-Account-ID
+      description: WhatsApp business account ID (WA_BUSINESS_ACCOUNT_ID) - Required for WABA and some template operations
+    ApiVersion:
+      type: apiKey
+      in: header
+      name: X-API-Version
+      description: Meta Cloud API version (CLOUD_API_VERSION) - Optional, will use default if not provided
