@@ -5,7 +5,6 @@ components:
         in: header
         name: Authorization
         description: Bearer access token
-        scheme: Bearer
       PhoneNumberId:
         type: apiKey
         in: header

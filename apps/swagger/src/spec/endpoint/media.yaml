@@ -1,166 +1,123 @@
-components:
-    schemas:
-      MediaResponse:
-        type: object
-        properties:
-          id:
-            type: string
-          url:
-            type: string
-          mime_type:
-            type: string
-          sha256:
-            type: string
-          file_size:
-            type: number
-          messaging_product:
-            type: string
-            enum: [whatsapp]
- 
-      MediasResponse:
-        type: object
-        properties:
-          data:
-            type: array
-            items:
-              $ref: '#/components/schemas/MediaResponse'
-          paging:
-            type: object
-            properties:
-              cursors:
-                type: object
-                properties:
-                  before:
-                    type: string
-                  after:
-                    type: string
- 
-      UploadMediaResponse:
-        type: object
-        properties:
-          id:
-            type: string
-    paths:
-    /{mediaId}:
-      get:
-        security:
-          - AccessToken: []
-        summary: Get media by ID
-        tags: [Media]
-        parameters:
-          - in: path
-            name: mediaId
-            required: true
-            schema:
-              type: string
-            description: The ID of the media
-        responses:
-          200:
-            description: Successfully retrieved media
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/MediaResponse'
-          400:
-            description: Invalid request
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/FacebookError'
-      delete:
-        security:
-          - AccessToken: []
-        summary: Delete media
-        tags: [Media]
-        parameters:
-          - in: path
-            name: mediaId
-            required: true
-            schema:
-              type: string
-            description: The ID of the media to delete
-        responses:
-          200:
-            description: Successfully deleted media
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/SuccessResponse'
-          400:
-            description: Invalid request
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/FacebookError'
- 
-    /{businessNumberId}/media:
-      post:
-        security:
-          - AccessToken: []
-        summary: Upload media
-        tags: [Media]
-        parameters:
-          - in: path
-            name: businessNumberId
-            required: true
-            schema:
-              type: string
-            description: The ID of the WhatsApp Business phone number
-        requestBody:
+paths:
+  '/{mediaId}':
+    get:
+      security:
+        - AccessToken: []
+      summary: Get media by ID
+      tags: [Media]
+      parameters:
+        - in: path
+          name: mediaId
           required: true
+          schema:
+            type: string
+          description: The ID of the media
+      responses:
+        '200':
+          description: Successfully retrieved media
           content:
-            multipart/form-data:
+            application/json:
               schema:
-                type: object
-                required:
-                  - file
-                properties:
-                  file:
-                    type: string
-                    format: binary
-                  messaging_product:
-                    type: string
-                    enum: [whatsapp]
-                    default: whatsapp
-        responses:
-          200:
-            description: Successfully uploaded media
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/UploadMediaResponse'
-          400:
-            description: Invalid request
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/FacebookError'
+                $ref: '#/components/schemas/MediaResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FacebookError'
+    delete:
+      security:
+        - AccessToken: []
+      summary: Delete media
+      tags: [Media]
+      parameters:
+        - in: path
+          name: mediaId
+          required: true
+          schema:
+            type: string
+          description: The ID of the media to delete
+      responses:
+        '200':
+          description: Successfully deleted media
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FacebookError'
  
-    /{mediaUrl}:
-      get:
-        security:
-          - AccessToken: []
-        summary: Download media
-        tags: [Media]
-        parameters:
-          - in: path
-            name: mediaUrl
-            required: true
+  '/{businessNumberId}/media':
+    post:
+      security:
+        - AccessToken: []
+      summary: Upload media
+      tags: [Media]
+      parameters:
+        - in: path
+          name: businessNumberId
+          required: true
+          schema:
+            type: string
+          description: The ID of the WhatsApp Business phone number
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
             schema:
-              type: string
-            description: The URL of the media to download
-        responses:
-          200:
-            description: Successfully downloaded media
-            content:
-              application/octet-stream:
-                schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
                   type: string
                   format: binary
-          400:
-            description: Invalid request
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/FacebookError'
+                messaging_product:
+                  type: string
+                  enum: [whatsapp]
+                  default: whatsapp
+      responses:
+        '200':
+          description: Successfully uploaded media
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadMediaResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FacebookError'
  
+  '/{mediaUrl}':
+    get:
+      security:
+        - AccessToken: []
+      summary: Download media
+      tags: [Media]
+      parameters:
+        - in: path
+          name: mediaUrl
+          required: true
+          schema:
+            type: string
+          description: The URL of the media to download
+      responses:
+        '200':
+          description: Successfully downloaded media
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FacebookError'

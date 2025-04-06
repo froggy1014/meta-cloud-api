@@ -1,18 +1,5 @@
-components:
-  schemas:
-    EncryptionPublicKeyResponse:
-      type: object
-      properties:
-          data:
-            type: object
-            properties:
-              business_public_key:
-                type: string
-              business_public_key_signature_status:
-                type: string
-                enum: [VALID, MISMATCH]
- 
-  /{businessNumberId}/whatsapp_business_encryption:
+paths:
+  '/{businessNumberId}/whatsapp_business_encryption':
     get:
       security:
         - AccessToken: []

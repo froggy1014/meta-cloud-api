@@ -3,6 +3,12 @@ components:
     EncryptionPublicKeyResponse:
       type: object
       properties:
-        public_key:
-          type: string
-          description: Encryption public key 
+          data:
+            type: object
+            properties:
+              business_public_key:
+                type: string
+              business_public_key_signature_status:
+                type: string
+                enum: [VALID, MISMATCH]
+    

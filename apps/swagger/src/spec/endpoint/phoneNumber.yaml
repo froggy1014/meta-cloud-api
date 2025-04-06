@@ -142,6 +142,13 @@
           - AccessToken: []
         summary: Get all phone numbers
         tags: [Phone Numbers]
+        parameters:
+          - in: path
+            name: wabaId
+            required: true
+            schema:
+              type: string
+            description: The ID of the WhatsApp Business Account
         responses:
           200:
             description: Successfully retrieved phone numbers
