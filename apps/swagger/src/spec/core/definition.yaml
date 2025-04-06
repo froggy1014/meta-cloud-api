@@ -10,6 +10,20 @@ tags:
     description: API documentation for WhatsApp messages
   - name: Templates
     description: API documentation for WhatsApp message templates
+  - name: Media
+    description: API endpoints for uploading, retrieving, and managing WhatsApp media files
+  - name: QR Codes
+    description: API endpoints for creating and managing WhatsApp QR codes
+  - name: WABA
+    description: API endpoints for WhatsApp Business Account (WABA) management
+  - name: Phone Numbers
+    description: API endpoints for managing and verifying WhatsApp business phone numbers
+  - name: Registration
+    description: API endpoints for registering and deregistering WhatsApp phone numbers
+  - name: Encryption
+    description: API endpoints for managing WhatsApp business encryption keys
+  - name: Two-Step Verification
+    description: API endpoints for configuring two-step verification for WhatsApp business accounts
 
 servers:
   - url: https://graph.facebook.com/{version}
@@ -18,12 +32,6 @@ servers:
         default: v22.0
         description: Meta Graph API version
     description: Meta Cloud API production server
-  - url: http://localhost:{port}
-    description: Local development server
-    variables:
-      port:
-        default: "8080"
-        description: Local server port
 
 externalDocs:
   description: Find out more about Meta Cloud API
