@@ -15,6 +15,7 @@ import {
     RegistrationAPI,
     MediaAPI,
     WabaAPI,
+    FlowAPI,
 } from './api';
 
 const LIB_NAME = 'WHATSAPP';
@@ -37,6 +38,7 @@ export default class WhatsApp implements WhatsAppClass {
     readonly registration: RegistrationAPI;
     readonly media: MediaAPI;
     readonly waba: WabaAPI;
+    readonly flow: FlowAPI;
     static readonly Enums = SDKEnums;
 
     constructor(senderNumberId?: number, accessToken?: string) {
@@ -59,6 +61,7 @@ export default class WhatsApp implements WhatsAppClass {
         this.registration = new RegistrationAPI(this.config, this.requester);
         this.media = new MediaAPI(this.config, this.requester);
         this.waba = new WabaAPI(this.config, this.requester);
+        this.flow = new FlowAPI(this.config, this.requester);
         LOGGER.log('WhatsApp Node.js SDK instantiated!');
     }
 

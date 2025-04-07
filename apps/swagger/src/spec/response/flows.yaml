@@ -1,0 +1,204 @@
+components:
+  schemas:
+    FlowValidationErrorPointer:
+      type: object
+      properties:
+        line_start:
+          type: integer
+          example: 10
+        line_end:
+          type: integer
+          example: 10
+        column_start:
+          type: integer
+          example: 21
+        column_end:
+          type: integer
+          example: 34
+        path:
+          type: string
+          example: 'screens[0].layout.children[0].type'
+
+    FlowValidationError:
+      type: object
+      properties:
+        error:
+          type: string
+          example: 'INVALID_PROPERTY_VALUE'
+        error_type:
+          type: string
+          example: 'FLOW_JSON_ERROR'
+        message:
+          type: string
+          example: "Invalid value found for property 'type'."
+        line_start:
+          type: integer
+          example: 10
+        line_end:
+          type: integer
+          example: 10
+        column_start:
+          type: integer
+          example: 21
+        column_end:
+          type: integer
+          example: 34
+        pointers:
+          type: array
+          items:
+            $ref: '#/components/schemas/FlowValidationErrorPointer'
+
+    Flow:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 'flow-1'
+        name:
+          type: string
+          example: 'My first flow'
+        status:
+          $ref: '#/components/schemas/FlowStatusEnum'
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/FlowCategoryEnum'
+        validation_errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/FlowValidationError'
+
+    PaginationCursors:
+      type: object
+      properties:
+        before:
+          type: string
+          example: 'QVFIUnhCZAHF0NVNtYm1ER3JORDVhc1RhaWw2Mk9tUDctNFNhOUZAxcHBUVUtTMlBtZAl96MWJFWnh1V3o3OWJ2UHowZA2xSbTZAZAd0ZADVGFmQ1kzbXNoeTFOSE9R'
+        after:
+          type: string
+          example: 'QVFIUnpHeEstLVlONng5RlNpTmVSbm5uMlJSbS1oRjRnSjFSNTFHMHpDZAmppT1J0TWxPWG5vTW9HeU1xVHdwRWpGMkxSQ0RZARnRvblVPTUFaRi1Vc0wyVXFR'
+
+    Pagination:
+      type: object
+      properties:
+        cursors:
+          $ref: '#/components/schemas/PaginationCursors'
+        next:
+          type: string
+          example: 'https://graph.facebook.com/v22.0/392103643975987/flows?pretty=1&limit=25&after=QVFIUnpHeEstLVlONng5RlNpTmVSbm5uMlJSbS1oRjRnSjFSNTFHMHpDZAmppT1J0TWxPWG5vTW9HeU1xVHdwRWpGMkxSQ0RZARnRvblVPTUFaRi1Vc0wyVXFR'
+
+    FlowsListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Flow'
+        paging:
+          $ref: '#/components/schemas/Pagination'
+
+    FlowAsset:
+      type: object
+      properties:
+        name:
+          type: string
+          example: 'flow.json'
+        asset_type:
+          type: string
+          example: 'FLOW_JSON'
+        download_url:
+          type: string
+          example: 'https://scontent.xx.fbcdn.net/m1/v/t0.57323-24/An_Hq0jnfJ...'
+
+    FlowAssetsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/FlowAsset'
+        paging:
+          $ref: '#/components/schemas/Pagination'
+
+    FlowPreview:
+      type: object
+      properties:
+        preview_url:
+          type: string
+          example: 'https://business.facebook.com/wa/manage/flows/550.../preview/?token=b9d6....'
+        expires_at:
+          type: string
+          format: date-time
+          example: '2023-05-21T11:18:09+0000'
+
+    FlowPreviewResponse:
+      type: object
+      properties:
+        preview:
+          $ref: '#/components/schemas/FlowPreview'
+        id:
+          type: string
+          example: 'flow-1'
+
+    FlowMigrationResult:
+      type: object
+      properties:
+        source_name:
+          type: string
+          example: 'appointment-booking'
+        source_id:
+          type: string
+          example: '1234'
+        migrated_id:
+          type: string
+          example: '5678'
+
+    FlowMigrationFailure:
+      type: object
+      properties:
+        source_name:
+          type: string
+          example: 'lead-gen'
+        error_code:
+          type: string
+          example: '4233041'
+        error_message:
+          type: string
+          example: 'Flows Migration Error: Flow with the same name exists in destination WABA.'
+
+    FlowMigrationResponse:
+      type: object
+      properties:
+        migrated_flows:
+          type: array
+          items:
+            $ref: '#/components/schemas/FlowMigrationResult'
+        failed_flows:
+          type: array
+          items:
+            $ref: '#/components/schemas/FlowMigrationFailure'
+
+    CreateFlowResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 'flow-1'
+        success:
+          type: boolean
+          example: true
+        validation_errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/FlowValidationError'
+
+    UpdateFlowJsonResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        validation_errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/FlowValidationError'

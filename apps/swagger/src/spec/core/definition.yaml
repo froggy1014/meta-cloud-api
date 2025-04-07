@@ -24,6 +24,8 @@ tags:
     description: API endpoints for managing WhatsApp business encryption keys
   - name: Two-Step Verification
     description: API endpoints for configuring two-step verification for WhatsApp business accounts
+  - name: Flow
+    description: API endpoints for creating and managing WhatsApp flows, including flow metadata, assets, and validation
 
 servers:
   - url: https://graph.facebook.com/{version}

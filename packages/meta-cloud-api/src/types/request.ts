@@ -35,6 +35,19 @@ export interface ResponseData<T> {
     data: T;
 }
 
+export interface ResponsePagination<T> {
+    data: T[];
+    paging: Paging;
+}
+
+export interface Paging {
+    cursors: {
+        before: string;
+        after: string;
+    };
+    next: string;
+}
+
 export declare class RequesterClass {
     constructor(
         host: string,

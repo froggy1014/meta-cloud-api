@@ -575,3 +575,24 @@ components:
         - ZA
         - AE
         - CA
+
+    FlowStatusEnum:
+      type: string
+      enum:
+        - DRAFT
+        - PUBLISHED
+        - THROTTLED
+        - BLOCKED
+        - DEPRECATED
+
+    FlowCategoryEnum:
+      type: string
+      enum:
+        - SIGN_UP
+        - SIGN_IN
+        - APPOINTMENT_BOOKING
+        - LEAD_GENERATION
+        - CONTACT_US
+        - CUSTOMER_SUPPORT
+        - SURVEY
+        - OTHER

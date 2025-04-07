@@ -68,5 +68,3 @@ components:
         data:
           type: object
           description: Response data payload
-
-   

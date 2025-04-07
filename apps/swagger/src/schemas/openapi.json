@@ -41,6 +41,10 @@
     {
       "name": "Two-Step Verification",
       "description": "API endpoints for configuring two-step verification for WhatsApp business accounts"
+    },
+    {
+      "name": "Flow",
+      "description": "API endpoints for creating and managing WhatsApp flows, including flow metadata, assets, and validation"
     }
   ],
   "servers": [
@@ -687,6 +691,29 @@
           "CA"
         ],
         "description": "Regions available for data localization"
+      },
+      "FlowStatusEnum": {
+        "type": "string",
+        "enum": [
+          "DRAFT",
+          "PUBLISHED",
+          "THROTTLED",
+          "BLOCKED",
+          "DEPRECATED"
+        ]
+      },
+      "FlowCategoryEnum": {
+        "type": "string",
+        "enum": [
+          "SIGN_UP",
+          "SIGN_IN",
+          "APPOINTMENT_BOOKING",
+          "LEAD_GENERATION",
+          "CONTACT_US",
+          "CUSTOMER_SUPPORT",
+          "SURVEY",
+          "OTHER"
+        ]
       },
       "QualityScore": {
         "type": "object",
@@ -1447,6 +1474,279 @@
           }
         }
       },
+      "FlowValidationErrorPointer": {
+        "type": "object",
+        "properties": {
+          "line_start": {
+            "type": "integer",
+            "example": 10
+          },
+          "line_end": {
+            "type": "integer",
+            "example": 10
+          },
+          "column_start": {
+            "type": "integer",
+            "example": 21
+          },
+          "column_end": {
+            "type": "integer",
+            "example": 34
+          },
+          "path": {
+            "type": "string",
+            "example": "screens[0].layout.children[0].type"
+          }
+        }
+      },
+      "FlowValidationError": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "example": "INVALID_PROPERTY_VALUE"
+          },
+          "error_type": {
+            "type": "string",
+            "example": "FLOW_JSON_ERROR"
+          },
+          "message": {
+            "type": "string",
+            "example": "Invalid value found for property 'type'."
+          },
+          "line_start": {
+            "type": "integer",
+            "example": 10
+          },
+          "line_end": {
+            "type": "integer",
+            "example": 10
+          },
+          "column_start": {
+            "type": "integer",
+            "example": 21
+          },
+          "column_end": {
+            "type": "integer",
+            "example": 34
+          },
+          "pointers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowValidationErrorPointer"
+            }
+          }
+        }
+      },
+      "Flow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "flow-1"
+          },
+          "name": {
+            "type": "string",
+            "example": "My first flow"
+          },
+          "status": {
+            "$ref": "#/components/schemas/FlowStatusEnum"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowCategoryEnum"
+            }
+          },
+          "validation_errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowValidationError"
+            }
+          }
+        }
+      },
+      "PaginationCursors": {
+        "type": "object",
+        "properties": {
+          "before": {
+            "type": "string",
+            "example": "QVFIUnhCZAHF0NVNtYm1ER3JORDVhc1RhaWw2Mk9tUDctNFNhOUZAxcHBUVUtTMlBtZAl96MWJFWnh1V3o3OWJ2UHowZA2xSbTZAZAd0ZADVGFmQ1kzbXNoeTFOSE9R"
+          },
+          "after": {
+            "type": "string",
+            "example": "QVFIUnpHeEstLVlONng5RlNpTmVSbm5uMlJSbS1oRjRnSjFSNTFHMHpDZAmppT1J0TWxPWG5vTW9HeU1xVHdwRWpGMkxSQ0RZARnRvblVPTUFaRi1Vc0wyVXFR"
+          }
+        }
+      },
+      "Pagination": {
+        "type": "object",
+        "properties": {
+          "cursors": {
+            "$ref": "#/components/schemas/PaginationCursors"
+          },
+          "next": {
+            "type": "string",
+            "example": "https://graph.facebook.com/v22.0/392103643975987/flows?pretty=1&limit=25&after=QVFIUnpHeEstLVlONng5RlNpTmVSbm5uMlJSbS1oRjRnSjFSNTFHMHpDZAmppT1J0TWxPWG5vTW9HeU1xVHdwRWpGMkxSQ0RZARnRvblVPTUFaRi1Vc0wyVXFR"
+          }
+        }
+      },
+      "FlowsListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Flow"
+            }
+          },
+          "paging": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        }
+      },
+      "FlowAsset": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "flow.json"
+          },
+          "asset_type": {
+            "type": "string",
+            "example": "FLOW_JSON"
+          },
+          "download_url": {
+            "type": "string",
+            "example": "https://scontent.xx.fbcdn.net/m1/v/t0.57323-24/An_Hq0jnfJ..."
+          }
+        }
+      },
+      "FlowAssetsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowAsset"
+            }
+          },
+          "paging": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        }
+      },
+      "FlowPreview": {
+        "type": "object",
+        "properties": {
+          "preview_url": {
+            "type": "string",
+            "example": "https://business.facebook.com/wa/manage/flows/550.../preview/?token=b9d6...."
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2023-05-21T11:18:09+0000"
+          }
+        }
+      },
+      "FlowPreviewResponse": {
+        "type": "object",
+        "properties": {
+          "preview": {
+            "$ref": "#/components/schemas/FlowPreview"
+          },
+          "id": {
+            "type": "string",
+            "example": "flow-1"
+          }
+        }
+      },
+      "FlowMigrationResult": {
+        "type": "object",
+        "properties": {
+          "source_name": {
+            "type": "string",
+            "example": "appointment-booking"
+          },
+          "source_id": {
+            "type": "string",
+            "example": "1234"
+          },
+          "migrated_id": {
+            "type": "string",
+            "example": "5678"
+          }
+        }
+      },
+      "FlowMigrationFailure": {
+        "type": "object",
+        "properties": {
+          "source_name": {
+            "type": "string",
+            "example": "lead-gen"
+          },
+          "error_code": {
+            "type": "string",
+            "example": "4233041"
+          },
+          "error_message": {
+            "type": "string",
+            "example": "Flows Migration Error: Flow with the same name exists in destination WABA."
+          }
+        }
+      },
+      "FlowMigrationResponse": {
+        "type": "object",
+        "properties": {
+          "migrated_flows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowMigrationResult"
+            }
+          },
+          "failed_flows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowMigrationFailure"
+            }
+          }
+        }
+      },
+      "CreateFlowResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "flow-1"
+          },
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "validation_errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowValidationError"
+            }
+          }
+        }
+      },
+      "UpdateFlowJsonResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "validation_errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowValidationError"
+            }
+          }
+        }
+      },
       "MediaResponse": {
         "description": "Response from fetching media details",
         "type": "object",
@@ -1856,6 +2156,36 @@
             }
           }
         }
+      },
+      "TemplatesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TemplateResponse"
+            }
+          },
+          "paging": {
+            "type": "object",
+            "properties": {
+              "cursors": {
+                "type": "object",
+                "properties": {
+                  "before": {
+                    "type": "string"
+                  },
+                  "after": {
+                    "type": "string"
+                  }
+                }
+              },
+              "next": {
+                "type": "string"
+              }
+            }
+          }
+        }
       }
     }
   },
@@ -2012,6 +2342,821 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/FacebookError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{waba-id}/flows": {
+      "get": {
+        "security": [
+          {
+            "AccessToken": []
+          },
+          {
+            "PhoneNumberId": []
+          },
+          {
+            "BusinessAccountId": []
+          }
+        ],
+        "tags": [
+          "Flow"
+        ],
+        "summary": "List Flows",
+        "description": "List flows for a WhatsApp Business Account",
+        "operationId": "listFlows",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "waba-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the WhatsApp Business Account"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Flow"
+                      }
+                    },
+                    "paging": {
+                      "type": "object",
+                      "properties": {
+                        "cursors": {
+                          "$ref": "#/components/schemas/PaginationCursors"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "List Flows": {
+                    "value": {
+                      "data": [
+                        {
+                          "categories": [
+                            "SIGN_UP"
+                          ],
+                          "id": "flow-1",
+                          "name": "my first flow",
+                          "status": "DRAFT",
+                          "validation_errors": []
+                        },
+                        {
+                          "categories": [
+                            "SIGN_UP",
+                            "SIGN_IN"
+                          ],
+                          "id": "flow-2",
+                          "name": "my second flow",
+                          "status": "DRAFT",
+                          "validation_errors": [
+                            {
+                              "column_end": 30,
+                              "column_start": 17,
+                              "error": "INVALID_PROPERTY",
+                              "error_type": "JSON_SCHEMA_ERROR",
+                              "line_end": 46,
+                              "line_start": 46,
+                              "message": "The property \"initial-text\" cannot be specified at \"$root/screens/0/layout/children/2/children/0\"."
+                            }
+                          ]
+                        },
+                        {
+                          "categories": [
+                            "CONTACT_US"
+                          ],
+                          "id": "flow-3",
+                          "name": "another flow",
+                          "status": "PUBLISHED",
+                          "validation_errors": []
+                        }
+                      ],
+                      "paging": {
+                        "cursors": {
+                          "after": "QVFIUnZAWV...",
+                          "before": "QVFIUnpKT..."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "AccessToken": []
+          },
+          {
+            "PhoneNumberId": []
+          },
+          {
+            "BusinessAccountId": []
+          }
+        ],
+        "tags": [
+          "Flow"
+        ],
+        "summary": "Create Flow",
+        "description": "Create a new flow for a WhatsApp Business Account",
+        "operationId": "createFlow",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "waba-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the WhatsApp Business Account"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "categories"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Flow Name",
+                    "description": "Flow name"
+                  },
+                  "categories": {
+                    "type": "string",
+                    "example": "[\"OTHER\"]",
+                    "description": "A list of Flow categories encoded as JSON string"
+                  },
+                  "endpoint_uri": {
+                    "type": "string",
+                    "example": "https://example.com",
+                    "description": "The URL of the WA Flow Endpoint"
+                  },
+                  "clone_flow_id": {
+                    "type": "string",
+                    "example": "flow-123",
+                    "description": "ID of source Flow to clone"
+                  },
+                  "flow_json": {
+                    "type": "string",
+                    "description": "Flow's JSON encoded as string",
+                    "example": "{\"version\":\"5.0\",\"screens\":[{\"id\":\"WELCOME_SCREEN\"}]}"
+                  },
+                  "publish": {
+                    "type": "boolean",
+                    "description": "Indicates whether Flow should also get published",
+                    "example": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateFlowResponse"
+                },
+                "examples": {
+                  "Create Flow": {
+                    "value": {
+                      "id": "flow-1",
+                      "success": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{waba-id}/migrate_flows": {
+      "post": {
+        "security": [
+          {
+            "AccessToken": []
+          },
+          {
+            "PhoneNumberId": []
+          },
+          {
+            "BusinessAccountId": []
+          }
+        ],
+        "tags": [
+          "Flow"
+        ],
+        "summary": "Migrate Flows",
+        "description": "Migrate Flows from one WhatsApp Business Account to another",
+        "operationId": "migrateFlows",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "waba-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The destination WhatsApp Business Account ID"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "source_waba_id"
+                ],
+                "properties": {
+                  "source_waba_id": {
+                    "type": "string",
+                    "description": "Source WhatsApp Business Account ID",
+                    "example": "102290129340398"
+                  },
+                  "source_flow_names": {
+                    "type": "string",
+                    "description": "List of specific Flow names to migrate (up to 100) as JSON string",
+                    "example": "[\"appointment-booking\", \"lead-gen\"]"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowMigrationResponse"
+                },
+                "examples": {
+                  "Migrate Flows": {
+                    "value": {
+                      "failed_flows": [
+                        {
+                          "error_code": "4233041",
+                          "error_message": "Flows Migration Error: Flow name not found in source WABA.",
+                          "source_name": "leadgen"
+                        }
+                      ],
+                      "migrated_flows": [
+                        {
+                          "migrated_id": "dest-flow-1",
+                          "source_id": "source-flow-1",
+                          "source_name": "appointment"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{flow-id}": {
+      "get": {
+        "security": [
+          {
+            "AccessToken": []
+          },
+          {
+            "PhoneNumberId": []
+          },
+          {
+            "BusinessAccountId": []
+          }
+        ],
+        "tags": [
+          "Flow"
+        ],
+        "summary": "Get Flow",
+        "description": "Get details of a specific flow",
+        "operationId": "getFlow",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "flow-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the flow"
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "id,name,categories,preview,status,validation_errors,json_version"
+            },
+            "description": "Return specific fields in the response"
+          },
+          {
+            "name": "date_format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "U"
+            },
+            "description": "Returns date as unix timestamp in seconds"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Flow"
+                },
+                "examples": {
+                  "Get Flow": {
+                    "value": {
+                      "application": {
+                        "id": "app-1",
+                        "link": "https://www.facebook.com/games/?app_id=app-1",
+                        "name": "My Awesome App"
+                      },
+                      "categories": [
+                        "OTHER"
+                      ],
+                      "data_api_version": "3.0",
+                      "data_channel_uri": "https://example.com",
+                      "health_status": {
+                        "can_send_message": "BLOCKED",
+                        "entities": [
+                          {
+                            "can_send_message": "AVAILABLE",
+                            "entity_type": "FLOW",
+                            "id": "flow-1"
+                          }
+                        ]
+                      },
+                      "id": "flow-1",
+                      "json_version": "2.1",
+                      "name": "my first flow",
+                      "preview": {
+                        "expires_at": "2023-05-21T11:18:09+0000",
+                        "preview_url": "https://business.facebook.com/wa/manage/flows/55000..../preview/?token=b9d6....."
+                      },
+                      "status": "DRAFT",
+                      "validation_errors": [],
+                      "whatsapp_business_account": {
+                        "business_type": "ent",
+                        "id": "waba-1",
+                        "message_template_namespace": "namespace-1",
+                        "name": "My Awesome WABA",
+                        "timezone_id": "54"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "AccessToken": []
+          },
+          {
+            "PhoneNumberId": []
+          },
+          {
+            "BusinessAccountId": []
+          }
+        ],
+        "tags": [
+          "Flow"
+        ],
+        "summary": "Update Flow Metadata",
+        "description": "Update metadata of a specific flow",
+        "operationId": "updateFlowMetadata",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "flow-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the flow"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "New Flow Name",
+                    "description": "Flow name"
+                  },
+                  "categories": {
+                    "type": "string",
+                    "example": "[\"OTHER\"]",
+                    "description": "A list of Flow categories encoded as JSON string"
+                  },
+                  "endpoint_uri": {
+                    "type": "string",
+                    "example": "https://example.com",
+                    "description": "The URL of the WA Flow Endpoint"
+                  },
+                  "application_id": {
+                    "type": "string",
+                    "example": "1234567890",
+                    "description": "The ID of the Meta application which will be connected to the Flow"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                },
+                "examples": {
+                  "Update Flow Metadata": {
+                    "value": {
+                      "success": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "AccessToken": []
+          },
+          {
+            "PhoneNumberId": []
+          },
+          {
+            "BusinessAccountId": []
+          }
+        ],
+        "tags": [
+          "Flow"
+        ],
+        "summary": "Delete Flow",
+        "description": "Delete a specific flow (only drafts can be deleted)",
+        "operationId": "deleteFlow",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "flow-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the flow"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                },
+                "examples": {
+                  "Delete Flow": {
+                    "value": {
+                      "success": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{flow-id}/publish": {
+      "post": {
+        "security": [
+          {
+            "AccessToken": []
+          },
+          {
+            "PhoneNumberId": []
+          },
+          {
+            "BusinessAccountId": []
+          }
+        ],
+        "tags": [
+          "Flow"
+        ],
+        "summary": "Publish Flow",
+        "description": "Updates the status of the Flow to PUBLISHED",
+        "operationId": "publishFlow",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "flow-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the flow"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                },
+                "examples": {
+                  "Publish Flow": {
+                    "value": {
+                      "success": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{flow-id}/deprecate": {
+      "post": {
+        "security": [
+          {
+            "AccessToken": []
+          },
+          {
+            "PhoneNumberId": []
+          },
+          {
+            "BusinessAccountId": []
+          }
+        ],
+        "tags": [
+          "Flow"
+        ],
+        "summary": "Deprecate Flow",
+        "description": "Mark a published Flow as deprecated",
+        "operationId": "deprecateFlow",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "flow-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the flow"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                },
+                "examples": {
+                  "Deprecate Flow": {
+                    "value": {
+                      "success": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{flow-id}/assets": {
+      "get": {
+        "security": [
+          {
+            "AccessToken": []
+          },
+          {
+            "PhoneNumberId": []
+          },
+          {
+            "BusinessAccountId": []
+          }
+        ],
+        "tags": [
+          "Flow"
+        ],
+        "summary": "List Assets",
+        "description": "Returns all assets attached to a specific flow",
+        "operationId": "listAssets",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "flow-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the flow"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "example": "flow.json"
+                          },
+                          "asset_type": {
+                            "type": "string",
+                            "example": "FLOW_JSON"
+                          },
+                          "download_url": {
+                            "type": "string",
+                            "example": "https://scontent.xx.fbcdn.net/m1/v/t0.57323-24/An_Hq0jnfJ..."
+                          }
+                        }
+                      }
+                    },
+                    "paging": {
+                      "type": "object",
+                      "properties": {
+                        "cursors": {
+                          "type": "object",
+                          "properties": {
+                            "after": {
+                              "type": "string"
+                            },
+                            "before": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "List Assets": {
+                    "value": {
+                      "data": [
+                        {
+                          "asset_type": "FLOW_JSON",
+                          "download_url": "https://scontent.xx.fbcdn.net/m1/v/t0.57323-24/An_Hq0jnfJ...",
+                          "name": "flow.json"
+                        }
+                      ],
+                      "paging": {
+                        "cursors": {
+                          "after": "QVFI...",
+                          "before": "QVFI..."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "AccessToken": []
+          },
+          {
+            "PhoneNumberId": []
+          },
+          {
+            "BusinessAccountId": []
+          }
+        ],
+        "tags": [
+          "Flow"
+        ],
+        "summary": "Update Flow JSON",
+        "description": "Update Flow JSON for a specified Flow",
+        "operationId": "updateFlowJson",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "flow-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the flow"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "asset_type",
+                  "file",
+                  "name"
+                ],
+                "properties": {
+                  "asset_type": {
+                    "type": "string",
+                    "enum": [
+                      "FLOW_JSON"
+                    ],
+                    "example": "FLOW_JSON"
+                  },
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "File with the JSON content (size limited to 10 MB)"
+                  },
+                  "name": {
+                    "type": "string",
+                    "example": "flow.json",
+                    "description": "Flow asset name"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                },
+                "examples": {
+                  "Update Flow JSON": {
+                    "value": {
+                      "success": true
+                    }
+                  }
                 }
               }
             }
@@ -3870,15 +5015,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/TemplateResponse"
-                      }
-                    }
-                  }
+                  "$ref": "#/components/schemas/TemplatesResponse"
                 }
               }
             }

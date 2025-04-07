@@ -199,4 +199,24 @@ components:
                 properties:
                   type:
                     type: string
-                    enum: [SPM] 
+                    enum: [SPM]
+
+    TemplatesResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateResponse'
+        paging:
+          type: object
+          properties:
+            cursors:
+              type: object
+              properties:
+                before:
+                  type: string
+                after:
+                  type: string
+            next:
+              type: string

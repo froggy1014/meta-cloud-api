@@ -331,12 +331,7 @@ components:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                data:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/TemplateResponse'
+              $ref: '#/components/schemas/TemplatesResponse'
       400:
         description: Invalid request
         content:

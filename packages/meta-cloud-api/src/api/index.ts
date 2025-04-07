@@ -8,6 +8,7 @@ import QrCodeAPI from './qrCode';
 import EncryptionAPI from './encryption';
 import WabaAPI from './waba';
 import MediaAPI from './media';
+import FlowAPI from './flow';
 export {
     MessagesAPI,
     BaseAPI,
@@ -19,4 +20,5 @@ export {
     EncryptionAPI,
     WabaAPI,
     MediaAPI,
+    FlowAPI,
 };
