@@ -5,8 +5,8 @@ import type * as Preset from '@docusaurus/preset-classic';
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-    title: 'My Site',
-    tagline: 'Dinosaurs are cool',
+    title: 'Meta Cloud API',
+    tagline: 'Build powerful WhatsApp integrations',
     favicon: 'img/favicon.ico',
 
     // Set the production url of your site here
@@ -17,8 +17,8 @@ const config: Config = {
 
     // GitHub pages deployment config.
     // If you aren't using GitHub pages, you don't need these.
-    organizationName: 'facebook', // Usually your GitHub org/user name.
-    projectName: 'docusaurus', // Usually your repo name.
+    organizationName: 'meta-cloud-api', // Usually your GitHub org/user name.
+    projectName: 'meta-cloud-api', // Usually your repo name.
 
     onBrokenLinks: 'throw',
     onBrokenMarkdownLinks: 'warn',
@@ -39,8 +39,7 @@ const config: Config = {
                     sidebarPath: './sidebars.ts',
                     // Please change this to your repo.
                     // Remove this to remove the "edit this page" links.
-                    editUrl:
-                        'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
+                    editUrl: 'https://github.com/meta-cloud-api/meta-cloud-api/tree/main/apps/www/',
                 },
                 blog: {
                     showReadingTime: true,
@@ -50,8 +49,7 @@ const config: Config = {
                     },
                     // Please change this to your repo.
                     // Remove this to remove the "edit this page" links.
-                    editUrl:
-                        'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
+                    editUrl: 'https://github.com/froggy1014/meta-cloud-api',
                     // Useful options to enforce blogging best practices
                     onInlineTags: 'warn',
                     onInlineAuthors: 'warn',
@@ -68,9 +66,9 @@ const config: Config = {
         // Replace with your project's social card
         image: 'img/docusaurus-social-card.jpg',
         navbar: {
-            title: 'My Site',
+            title: 'Meta Cloud API',
             logo: {
-                alt: 'My Site Logo',
+                alt: 'Meta Cloud API Logo',
                 src: 'img/logo.svg',
             },
             items: [
@@ -78,11 +76,11 @@ const config: Config = {
                     type: 'docSidebar',
                     sidebarId: 'tutorialSidebar',
                     position: 'left',
-                    label: 'Tutorial',
+                    label: 'Documentation',
                 },
                 { to: '/blog', label: 'Blog', position: 'left' },
                 {
-                    href: 'https://github.com/facebook/docusaurus',
+                    href: 'https://github.com/meta-cloud-api/meta-cloud-api',
                     label: 'GitHub',
                     position: 'right',
                 },
@@ -95,28 +93,28 @@ const config: Config = {
                     title: 'Docs',
                     items: [
                         {
-                            label: 'Tutorial',
+                            label: 'Getting Started',
                             to: '/docs/intro',
                         },
-                    ],
-                },
-                {
-                    title: 'Community',
-                    items: [
                         {
-                            label: 'Stack Overflow',
-                            href: 'https://stackoverflow.com/questions/tagged/docusaurus',
-                        },
-                        {
-                            label: 'Discord',
-                            href: 'https://discordapp.com/invite/docusaurus',
-                        },
-                        {
-                            label: 'X',
-                            href: 'https://x.com/docusaurus',
+                            label: 'Messages API',
+                            to: '/docs/messages-api',
                         },
                     ],
                 },
+                // {
+                //     title: 'Community',
+                //     items: [
+                //         {
+                //             label: 'Stack Overflow',
+                //             href: 'https://stackoverflow.com/questions/tagged/meta-cloud-api',
+                //         },
+                //         {
+                //             label: 'Twitter',
+                //             href: 'https://twitter.com/metacloudapi',
+                //         },
+                //     ],
+                // },
                 {
                     title: 'More',
                     items: [
@@ -126,12 +124,12 @@ const config: Config = {
                         },
                         {
                             label: 'GitHub',
-                            href: 'https://github.com/facebook/docusaurus',
+                            href: 'https://github.com/froggy1014/meta-cloud-api',
                         },
                     ],
                 },
             ],
-            copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+            copyright: `Copyright © ${new Date().getFullYear()} Meta Cloud API. Built with Docusaurus.`,
         },
         prism: {
             theme: prismThemes.github,
