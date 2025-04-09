@@ -1,6 +1,7 @@
 import Logger from './logger';
 import type { WabaConfigType } from '../types/config';
 import { WabaConfigEnum } from '../types/enums';
+import { WhatsAppConfig } from 'src/types/whatsapp';
 
 const LIB_NAME = 'UTILS';
 const LOG_LOCAL = false;
@@ -28,17 +29,17 @@ const emptyConfigChecker = (phoneNumberId?: number, accessToken?: string) => {
     }
 };
 
-export const importConfig = (phoneNumberId?: number, accessToken?: string) => {
-    emptyConfigChecker(phoneNumberId, accessToken);
+export const importConfig = (inputConfig?: WhatsAppConfig) => {
+    emptyConfigChecker(inputConfig?.phoneNumberId, inputConfig?.accessToken);
 
-    const config: WabaConfigType = {
+    const wabaConfig: WabaConfigType = {
         [WabaConfigEnum.BaseURL]: process.env.WA_BASE_URL || DEFAULT_BASE_URL,
         [WabaConfigEnum.AppId]: process.env.M4D_APP_ID || '',
         [WabaConfigEnum.AppSecret]: process.env.M4D_APP_SECRET || '',
-        [WabaConfigEnum.PhoneNumberId]: phoneNumberId || parseInt(process.env.WA_PHONE_NUMBER_ID || ''),
+        [WabaConfigEnum.PhoneNumberId]: inputConfig?.phoneNumberId || parseInt(process.env.WA_PHONE_NUMBER_ID || ''),
         [WabaConfigEnum.BusinessAcctId]: process.env.WA_BUSINESS_ACCOUNT_ID || '',
         [WabaConfigEnum.APIVersion]: process.env.CLOUD_API_VERSION || DEFAULT_APIVersion,
-        [WabaConfigEnum.AccessToken]: accessToken || process.env.CLOUD_API_ACCESS_TOKEN || '',
+        [WabaConfigEnum.AccessToken]: inputConfig?.accessToken || process.env.CLOUD_API_ACCESS_TOKEN || '',
         [WabaConfigEnum.WebhookEndpoint]: process.env.WEBHOOK_ENDPOINT || '',
         [WabaConfigEnum.WebhookVerificationToken]: process.env.WEBHOOK_VERIFICATION_TOKEN || '',
         [WabaConfigEnum.ListenerPort]: parseInt(process.env.LISTENER_PORT || '') || DEFAULT_LISTENER_PORT,
@@ -48,7 +49,7 @@ export const importConfig = (phoneNumberId?: number, accessToken?: string) => {
         [WabaConfigEnum.Debug]: process.env.DEBUG === 'true',
     };
 
-    LOGGER.log(`Configuration loaded for App Id ${config[WabaConfigEnum.AppId]}`);
+    LOGGER.log(`Configuration loaded for App Id ${wabaConfig[WabaConfigEnum.AppId]}`);
 
-    return config;
+    return wabaConfig;
 };

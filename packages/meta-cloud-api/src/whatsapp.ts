@@ -4,7 +4,7 @@ import Logger from './utils/logger';
 
 import { importConfig } from './utils/importConfig';
 import Requester from './request';
-import { WhatsAppClass } from './types/whatsapp';
+import { WhatsAppClass, WhatsAppConfig } from './types/whatsapp';
 import {
     MessagesAPI,
     PhoneNumberAPI,
@@ -41,8 +41,8 @@ export default class WhatsApp implements WhatsAppClass {
     readonly flow: FlowAPI;
     static readonly Enums = SDKEnums;
 
-    constructor(senderNumberId?: number, accessToken?: string) {
-        this.config = importConfig(senderNumberId, accessToken);
+    constructor(config?: WhatsAppConfig) {
+        this.config = importConfig(config);
         this.requester = new Requester(
             this.config[SDKEnums.WabaConfigEnum.BaseURL],
             this.config[SDKEnums.WabaConfigEnum.APIVersion],
