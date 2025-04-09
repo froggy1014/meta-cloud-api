@@ -2,46 +2,54 @@
 sidebar_position: 1
 ---
 
-# Tutorial Intro
+# Meta Cloud API Documentation
 
-Let's discover **Docusaurus in less than 5 minutes**.
+Welcome to the Meta Cloud API documentation. This guide will help you use our WhatsApp messaging APIs to build rich, interactive experiences for your users.
+
+## Available APIs
+
+- [Messages API](./messages-api.md) - Send various types of WhatsApp messages including text, media, interactive components, and more
+- More APIs coming soon...
 
 ## Getting Started
 
-Get started by **creating a new site**.
+### Installation
 
-Or **try Docusaurus immediately** with **[docusaurus.new](https://docusaurus.new)**.
-
-### What you'll need
-
-- [Node.js](https://nodejs.org/en/download/) version 18.0 or above:
-  - When installing Node.js, you are recommended to check all checkboxes related to dependencies.
-
-## Generate a new site
-
-Generate a new Docusaurus site using the **classic template**.
-
-The classic template will automatically be added to your project after you run the command:
+Install the Meta Cloud API package:
 
 ```bash
-npm init docusaurus@latest my-website classic
+npm install meta-cloud-api
 ```
 
-You can type this command into Command Prompt, Powershell, Terminal, or any other integrated terminal of your code editor.
+### Basic Setup
 
-The command also installs all necessary dependencies you need to run Docusaurus.
+```typescript
+import WhatsApp from 'meta-cloud-api';
 
-## Start your site
+// Initialize with configuration object
+const whatsapp = new WhatsApp({
+  phoneNumberId: YOUR_PHONE_NUMBER_ID,
+  accessToken: 'YOUR_ACCESS_TOKEN'
+});
 
-Run the development server:
+// You can also use environment variables (.env file)
+// const whatsapp = new WhatsApp();
 
-```bash
-cd my-website
-npm run start
+// Now you can use various API endpoints
+// Example: Send a text message
+const response = await whatsapp.messages.text(
+  { body: "Hello from Meta Cloud API!" },
+  15551234567
+);
 ```
 
-The `cd` command changes the directory you're working with. In order to work with your newly created Docusaurus site, you'll need to navigate the terminal there.
+## About This Documentation
 
-The `npm run start` command builds your website locally and serves it through a development server, ready for you to view at http://localhost:3000/.
+This documentation provides detailed guides and examples for using the Meta Cloud API. Each section includes:
 
-Open `docs/intro.md` (this page) and edit some lines: the site **reloads automatically** and displays your changes.
+- Complete API reference
+- Code examples
+- Parameter details
+- Response formats
+
+Use the sidebar to navigate between different API sections.
