@@ -49,7 +49,7 @@ const config: Config = {
                     },
                     // Please change this to your repo.
                     // Remove this to remove the "edit this page" links.
-                    editUrl: 'https://github.com/froggy1014/meta-cloud-api',
+                    editUrl: 'https://github.com/meta-cloud-api/meta-cloud-api/tree/main/apps/www/',
                     // Useful options to enforce blogging best practices
                     onInlineTags: 'warn',
                     onInlineAuthors: 'warn',
@@ -74,7 +74,7 @@ const config: Config = {
             items: [
                 {
                     type: 'docSidebar',
-                    sidebarId: 'tutorialSidebar',
+                    sidebarId: 'apiReference',
                     position: 'left',
                     label: 'Documentation',
                 },
@@ -98,23 +98,55 @@ const config: Config = {
                         },
                         {
                             label: 'Messages API',
-                            to: '/docs/messages-api',
+                            to: '/docs/messages',
+                        },
+                        {
+                            label: 'Template API',
+                            to: '/docs/template-api',
+                        },
+                        {
+                            label: 'Phone Number API',
+                            to: '/docs/phone-number-api',
+                        },
+                        {
+                            label: 'QR Code API',
+                            to: '/docs/qr-code-api',
+                        },
+                        {
+                            label: 'Encryption API',
+                            to: '/docs/encryption-api',
+                        },
+                        {
+                            label: 'Two-Step Verification API',
+                            to: '/docs/two-step-verification-api',
+                        },
+                        {
+                            label: 'Registration API',
+                            to: '/docs/registration-api',
+                        },
+                        {
+                            label: 'Media API',
+                            to: '/docs/media-api',
+                        },
+                        {
+                            label: 'WABA API',
+                            to: '/docs/waba-api',
+                        },
+                        {
+                            label: 'Flow API',
+                            to: '/docs/flow-api',
                         },
                     ],
                 },
-                // {
-                //     title: 'Community',
-                //     items: [
-                //         {
-                //             label: 'Stack Overflow',
-                //             href: 'https://stackoverflow.com/questions/tagged/meta-cloud-api',
-                //         },
-                //         {
-                //             label: 'Twitter',
-                //             href: 'https://twitter.com/metacloudapi',
-                //         },
-                //     ],
-                // },
+                {
+                    title: 'Community',
+                    items: [
+                        {
+                            label: 'Stack Overflow',
+                            href: 'https://stackoverflow.com/questions/tagged/meta-cloud-api',
+                        },
+                    ],
+                },
                 {
                     title: 'More',
                     items: [
@@ -124,7 +156,11 @@ const config: Config = {
                         },
                         {
                             label: 'GitHub',
-                            href: 'https://github.com/froggy1014/meta-cloud-api',
+                            href: 'https://github.com/meta-cloud-api/meta-cloud-api',
+                        },
+                        {
+                            label: 'WhatsApp Business Platform',
+                            href: 'https://developers.facebook.com/docs/whatsapp/cloud-api',
                         },
                     ],
                 },

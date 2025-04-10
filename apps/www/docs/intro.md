@@ -8,7 +8,16 @@ Welcome to the Meta Cloud API documentation. This guide will help you use our Wh
 
 ## Available APIs
 
-- [Messages API](./messages-api.md) - Send various types of WhatsApp messages including text, media, interactive components, and more
+- [Messages API](./messages/index.md) - Send various types of WhatsApp messages including text, media, interactive components, and more
+- [Template API](./template-api.md) - Send pre-approved message templates for notifications and customer care
+- [Phone Number API](./phone-number-api.md) - Manage WhatsApp business phone numbers and verification
+- [QR Code API](./qr-code-api.md) - Create and manage QR codes and short links for WhatsApp conversations
+- [Encryption API](./encryption-api.md) - Manage encryption for secure data exchange in WhatsApp Flows
+- [Two-Step Verification API](./two-step-verification-api.md) - Set up and manage PIN-based security for your WhatsApp account
+- [Registration API](./registration-api.md) - Register and deregister your business phone numbers with WhatsApp Cloud API
+- [Media API](./media-api.md) - Upload, retrieve, download, and delete media files for use with WhatsApp messaging
+- [WABA API](./waba-api.md) - Manage WhatsApp Business Accounts and their webhook subscriptions
+- [Flow API](./flow-api.md) - Create and manage interactive WhatsApp Flows for collecting information from customers
 - More APIs coming soon...
 
 ## Getting Started
