@@ -78,7 +78,7 @@ export default function Home(): ReactNode {
                             <div className="h-3 w-3 rounded-full bg-green-500"></div>
                             <div className="ml-4 text-sm text-gray-400">meta-cloud-api.ts</div>
                         </div>
-                        <pre className="overflow-x-auto text-sm text-green-400">
+                        <pre className="bg-transparent! overflow-x-auto text-sm text-green-400">
                             <code className="text-green-400">{`import { MetaCloudAPI } from 'meta-cloud-api';
 
 // Initialize the client
