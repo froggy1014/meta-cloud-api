@@ -4,7 +4,7 @@ import type { Props } from '@theme/Footer/Copyright';
 export default function FooterCopyright({ copyright }: Props): ReactNode {
     // Override the copyright content to match the desired format
     const currentYear = new Date().getFullYear();
-    const customCopyright = `© ${currentYear} Meta Cloud API. Built with Next.js.`;
+    const customCopyright = `© ${currentYear} Meta Cloud API. Built with Docusaurus.`;
 
     return (
         <div
