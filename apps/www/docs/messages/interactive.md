@@ -407,7 +407,3 @@ try {
 
 6. **Stay within limits**: Respect the character limits for titles, descriptions, and other fields.
 
-## Related
-
-- [Template Messages](./template.md) - Templates can also include interactive elements
-- [Webhooks](../webhooks.md) - Learn more about handling interactive message responses 

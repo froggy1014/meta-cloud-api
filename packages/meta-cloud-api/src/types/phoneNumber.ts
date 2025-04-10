@@ -1,4 +1,4 @@
-import { RequesterResponseInterface, ResponseData, ResponseSuccess } from './request';
+import { Paging, RequesterResponseInterface, ResponseData, ResponseSuccess } from './request';
 
 export type QualityRating = 'GREEN' | 'YELLOW' | 'RED' | 'NA';
 
@@ -81,10 +81,6 @@ export type PhoneNumberResponse = {
 export type Cursors = {
     before: string;
     after: string;
-};
-
-export type Paging = {
-    cursors: Cursors;
 };
 
 export type PhoneNumbersResponse = {

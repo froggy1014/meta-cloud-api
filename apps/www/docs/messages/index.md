@@ -44,7 +44,3 @@ const response = await whatsapp.messages.MESSAGETYPE(
 );
 ```
 
-## Related Documentation
-
-- [Media API](../media-api.md) - For uploading and managing media files
-- [Webhooks](../webhooks.md) - For receiving and processing incoming messages 

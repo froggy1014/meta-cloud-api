@@ -126,9 +126,3 @@ try {
 4. **Personalize messages**: When possible, personalize messages with the recipient's name or relevant information.
 
 5. **Include clear calls to action**: If you want the recipient to take action, make it clear what they should do next.
-
-## Related
-
-- [Replying to Messages](./reply.md)
-- [Marking Messages as Read](./mark-read.md)
-- [Error Handling](./error-handling.md) 

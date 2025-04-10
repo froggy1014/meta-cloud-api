@@ -1,7 +1,7 @@
 import { objectToQueryString } from 'src/utils/objectToQueryString';
 import type { WabaConfigType } from '../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../types/enums';
-import type { RequesterClass, RequesterResponseInterface, ResponseSuccess } from '../types/request';
+import type { RequesterClass, RequesterResponseInterface, ResponsePagination, ResponseSuccess } from '../types/request';
 import type {
     TemplateClass,
     TemplateDeleteParams,
@@ -39,7 +39,9 @@ export default class TemplateApi extends BaseAPI implements TemplateClass {
         );
     }
 
-    async getTemplates(params: TemplateGetParams): Promise<RequesterResponseInterface<TemplateResponse>> {
+    async getTemplates(
+        params: TemplateGetParams,
+    ): Promise<RequesterResponseInterface<ResponsePagination<TemplateResponse>>> {
         return this.client.sendRequest(
             HttpMethodsEnum.Get,
             `${this.config[WabaConfigEnum.BusinessAcctId]}/${this.endpoint}${objectToQueryString(params)}`,
