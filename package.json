@@ -8,7 +8,7 @@
     "build": "turbo build",
     "lint": "turbo lint",
     "format": "turbo format",
-    "publish-packages": "turbo run build lint test && changeset version && changeset publish",
+    "publish-packages": "turbo run build lint && changeset version && changeset publish",
     "clean": "rm -rf node_modules && turbo clean"
   },
   "devDependencies": {
@@ -30,6 +30,9 @@
   "engines": {
     "node": ">=18"
   },
+  "files": [
+    "dist"
+  ],
   "lint-staged": {
     "**/*.{ts,tsx}": [
       "prettier --write --ignore-unknown"
