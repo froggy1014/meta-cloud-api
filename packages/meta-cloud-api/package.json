@@ -44,8 +44,8 @@
     "clean": "rm -rf dist node_modules"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "froggy1014",
+  "license": "MIT",
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
     "@types/node": "^22.13.4",

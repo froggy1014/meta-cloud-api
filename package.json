@@ -8,9 +8,11 @@
     "build": "turbo build",
     "lint": "turbo lint",
     "format": "turbo format",
+    "publish-packages": "turbo run build lint test && changeset version && changeset publish",
     "clean": "rm -rf node_modules && turbo clean"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.28.1",
     "@commitlint/cli": "^19.6.1",
     "@commitlint/config-conventional": "^19.6.0",
     "@commitlint/cz-commitlint": "^19.6.1",
