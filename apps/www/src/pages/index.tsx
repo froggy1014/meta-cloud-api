@@ -68,7 +68,7 @@ export default function Home(): ReactNode {
 
             <section className="bg-[#131927] px-4 py-10 backdrop-blur-sm md:px-6">
                 <div className="mx-auto max-w-7xl">
-                    <h2 className="text-5xl! mb-8 text-center font-bold text-white md:text-4xl">
+                    <h2 className="text-lg! sm:text-3xl! md:text-5xl! mb-8! text-center font-bold text-white">
                         Comprehensive API Documentation
                     </h2>
                     <div className="overflow-hidden rounded-lg border border-gray-800 bg-gray-900 p-6 shadow-xl">
