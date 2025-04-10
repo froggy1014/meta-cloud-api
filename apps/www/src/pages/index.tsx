@@ -43,7 +43,7 @@ export default function Home(): ReactNode {
             </section>
 
             <section className="w-full bg-[#0B101D] px-4 py-20 md:px-6">
-                <h2 className="text-5xl! py-10 text-center font-bold text-white md:text-4xl">
+                <h2 className="text-5xl! text-[#FFFFFF]! py-10 text-center font-bold md:text-4xl">
                     Powerful Features for Developers
                 </h2>
 
@@ -68,7 +68,7 @@ export default function Home(): ReactNode {
 
             <section className="bg-[#131927] px-4 py-10 backdrop-blur-sm md:px-6">
                 <div className="mx-auto max-w-7xl">
-                    <h2 className="text-lg! sm:text-3xl! md:text-5xl! mb-8! text-center font-bold text-white">
+                    <h2 className="text-lg! sm:text-3xl! md:text-5xl! mb-8! text-[#FFFFFF]! text-center font-bold">
                         Comprehensive API Documentation
                     </h2>
                     <div className="overflow-hidden rounded-lg border border-gray-800 bg-gray-900 p-6 shadow-xl">
