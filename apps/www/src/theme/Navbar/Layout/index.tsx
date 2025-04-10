@@ -30,7 +30,7 @@ export default function NavbarLayout({ children }: Props): ReactNode {
                 'navbar',
                 'navbar--fixed-top',
                 hideOnScroll && [styles.navbarHideable, !isNavbarVisible && styles.navbarHidden],
-                'bg-[#131927]! border-b border-gray-800',
+                'bg-[#131927]! text-white! border-b border-gray-800',
             )}
         >
             {children}

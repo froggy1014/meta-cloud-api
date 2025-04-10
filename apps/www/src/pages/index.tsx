@@ -43,7 +43,9 @@ export default function Home(): ReactNode {
             </section>
 
             <section className="w-full bg-[#0B101D] px-4 py-20 md:px-6">
-                <h2 className="text-5xl! py-10 text-center font-bold md:text-4xl">Powerful Features for Developers</h2>
+                <h2 className="text-5xl! py-10 text-center font-bold text-white md:text-4xl">
+                    Powerful Features for Developers
+                </h2>
 
                 <div className="grid gap-8 md:grid-cols-3">
                     <FeatureCard
