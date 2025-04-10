@@ -31,6 +31,8 @@ const config: Config = {
         locales: ['en'],
     },
 
+    plugins: ['./src/plugins/tailwind-config.js'],
+
     presets: [
         [
             'classic',
@@ -39,21 +41,7 @@ const config: Config = {
                     sidebarPath: './sidebars.ts',
                     // Please change this to your repo.
                     // Remove this to remove the "edit this page" links.
-                    editUrl: 'https://github.com/meta-cloud-api/meta-cloud-api/tree/main/apps/www/',
-                },
-                blog: {
-                    showReadingTime: true,
-                    feedOptions: {
-                        type: ['rss', 'atom'],
-                        xslt: true,
-                    },
-                    // Please change this to your repo.
-                    // Remove this to remove the "edit this page" links.
-                    editUrl: 'https://github.com/meta-cloud-api/meta-cloud-api/tree/main/apps/www/',
-                    // Useful options to enforce blogging best practices
-                    onInlineTags: 'warn',
-                    onInlineAuthors: 'warn',
-                    onUntruncatedBlogPosts: 'warn',
+                    editUrl: 'https://github.com/froggy1014/meta-cloud-api',
                 },
                 theme: {
                     customCss: './src/css/custom.css',
@@ -78,9 +66,8 @@ const config: Config = {
                     position: 'left',
                     label: 'Documentation',
                 },
-                { to: '/blog', label: 'Blog', position: 'left' },
                 {
-                    href: 'https://github.com/meta-cloud-api/meta-cloud-api',
+                    href: 'https://github.com/froggy1014/meta-cloud-api',
                     label: 'GitHub',
                     position: 'right',
                 },
@@ -96,54 +83,18 @@ const config: Config = {
                             label: 'Getting Started',
                             to: '/docs/intro',
                         },
-                        {
-                            label: 'Messages API',
-                            to: '/docs/messages',
-                        },
-                        {
-                            label: 'Template API',
-                            to: '/docs/template-api',
-                        },
-                        {
-                            label: 'Phone Number API',
-                            to: '/docs/phone-number-api',
-                        },
-                        {
-                            label: 'QR Code API',
-                            to: '/docs/qr-code-api',
-                        },
-                        {
-                            label: 'Encryption API',
-                            to: '/docs/encryption-api',
-                        },
-                        {
-                            label: 'Two-Step Verification API',
-                            to: '/docs/two-step-verification-api',
-                        },
-                        {
-                            label: 'Registration API',
-                            to: '/docs/registration-api',
-                        },
-                        {
-                            label: 'Media API',
-                            to: '/docs/media-api',
-                        },
-                        {
-                            label: 'WABA API',
-                            to: '/docs/waba-api',
-                        },
-                        {
-                            label: 'Flow API',
-                            to: '/docs/flow-api',
-                        },
                     ],
                 },
                 {
                     title: 'Community',
                     items: [
                         {
-                            label: 'Stack Overflow',
-                            href: 'https://stackoverflow.com/questions/tagged/meta-cloud-api',
+                            label: 'GitHub',
+                            href: 'https://github.com/froggy1014/meta-cloud-api',
+                        },
+                        {
+                            label: 'Meta Developers Community',
+                            href: 'https://developers.facebook.com/community?sort=trending&category=766772797555412',
                         },
                     ],
                 },
@@ -151,21 +102,17 @@ const config: Config = {
                     title: 'More',
                     items: [
                         {
-                            label: 'Blog',
-                            to: '/blog',
-                        },
-                        {
-                            label: 'GitHub',
-                            href: 'https://github.com/meta-cloud-api/meta-cloud-api',
-                        },
-                        {
                             label: 'WhatsApp Business Platform',
                             href: 'https://developers.facebook.com/docs/whatsapp/cloud-api',
+                        },
+                        {
+                            label: 'Meta for Developers',
+                            href: 'https://developers.facebook.com/',
                         },
                     ],
                 },
             ],
-            copyright: `Copyright © ${new Date().getFullYear()} Meta Cloud API. Built with Docusaurus.`,
+            copyright: `© ${new Date().getFullYear()} Meta Cloud API. Built with Docusaurus.`,
         },
         prism: {
             theme: prismThemes.github,
