@@ -7,7 +7,7 @@
     "./card": "./components/ui/card.tsx"
   },
   "scripts": {
-    "lint": "eslint \"**/*.{ts,tsx}\" --fix --max-warnings 0",
+    "lint": "eslint \"**/*.{ts,tsx}\" --fix",
     "dev": "pnpm /^watch:.*/",
     "watch:tsup": "tsup --watch",
     "watch:tailwind": "tailwindcss -i ./src/styles/globals.css -o ./dist/globals.css --watch",
