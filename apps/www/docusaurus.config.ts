@@ -46,8 +46,36 @@ const config: Config = {
                 theme: {
                     customCss: './src/css/custom.css',
                 },
+                sitemap: {
+                    changefreq: 'weekly',
+                    priority: 0.5,
+                    ignorePatterns: ['/tags/**'],
+                    filename: 'sitemap.xml',
+                },
             } satisfies Preset.Options,
         ],
+    ],
+    headTags: [
+        {
+            tagName: 'script',
+            attributes: {
+                type: 'application/ld+json',
+            },
+            innerHTML: JSON.stringify({
+                '@context': 'https://schema.org/',
+                '@type': 'Organization',
+                name: 'Meta Cloud API',
+                url: 'https://www.meta-cloud-api.xyz/',
+                logo: 'https://www.meta-cloud-api.xyz/img/logo.svg',
+            }),
+        },
+        {
+            tagName: 'link',
+            attributes: {
+                rel: 'preconnect',
+                href: 'https://example.com',
+            },
+        },
     ],
 
     themeConfig: {
@@ -71,6 +99,14 @@ const config: Config = {
                 },
             ],
         },
+        metadata: [
+            { name: 'keywords', content: 'meta, whatsapp, api, cloud, integration, messaging' },
+            { name: 'og:title', content: 'Meta Cloud API' },
+            { name: 'og:description', content: 'Build powerful WhatsApp integrations' },
+            { name: 'og:type', content: 'website' },
+            { name: 'og:image', content: '/img/meta-cloud-api-social.png' },
+            { name: 'og:url', content: 'https://www.meta-cloud-api.xyz' },
+        ],
         footer: {
             style: 'dark',
             links: [
