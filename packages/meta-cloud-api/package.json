@@ -32,7 +32,7 @@
   },
   "files": [
     "dist",
-    "src"
+    "README.md"
   ],
   "engines": {
     "node": ">=20"

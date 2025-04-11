@@ -1,0 +1,32 @@
+# Source files
+src/
+
+# Dev configs
+tsconfig.json
+tsup.config.ts
+jest.config.js
+.eslintrc
+.prettierrc
+.editorconfig
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.*
+.env.sample
+
+# Build cache
+.turbo/
+
+# Editor directories and files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# node_modules is automatically ignored by npm 
