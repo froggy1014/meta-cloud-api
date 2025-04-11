@@ -1,7 +1,7 @@
 {
   "name": "meta-cloud-api",
-  "version": "0.0.2",
-  "description": "",
+  "version": "0.0.3",
+  "description": "TypeScript SDK for WhatsApp Cloud API - simplified integration with Meta's WhatsApp Business Platform",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "publishConfig": {
@@ -43,9 +43,39 @@
     "build": "tsup --clean",
     "clean": "rm -rf dist node_modules"
   },
-  "keywords": [],
+  "keywords": [
+    "whatsapp-api",
+    "cloud-api",
+    "meta-api",
+    "typescript-sdk",
+    "whatsapp-business",
+    "whatsapp-cloud-api", 
+    "messaging-api",
+    "node-api-client",
+    "meta-cloud",
+    "whatsapp-messaging",
+    "api-wrapper",
+    "typescript",
+    "nodejs",
+    "meta",
+    "facebook-api",
+    "whatsapp-integration",
+    "whatsapp-templates",
+    "media-api",
+    "flow-api",
+    "waba",
+    "business-messaging"
+  ],
   "author": "froggy1014",
   "license": "MIT",
+  "homepage": "https://github.com/froggy1014/meta-cloud-api#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/froggy1014/meta-cloud-api.git"
+  },
+  "bugs": {
+    "url": "https://github.com/froggy1014/meta-cloud-api/issues"
+  },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
     "@types/node": "^22.13.4",
