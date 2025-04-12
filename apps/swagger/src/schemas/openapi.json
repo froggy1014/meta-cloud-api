@@ -1793,22 +1793,36 @@
         "description": "Response from sending a WhatsApp message",
         "type": "object",
         "required": [
+          "messaging_product",
           "contacts",
           "messages"
         ],
         "properties": {
+          "messaging_product": {
+            "type": "string",
+            "enum": [
+              "whatsapp"
+            ],
+            "description": "The messaging service used"
+          },
           "contacts": {
             "type": "array",
             "items": {
               "type": "object",
+              "required": [
+                "input",
+                "wa_id"
+              ],
               "properties": {
                 "input": {
                   "type": "string",
-                  "description": "Phone number input"
+                  "description": "Phone number input",
+                  "example": "821089791169"
                 },
                 "wa_id": {
                   "type": "string",
-                  "description": "WhatsApp ID"
+                  "description": "WhatsApp ID",
+                  "example": "821089791169"
                 }
               }
             }
@@ -1817,10 +1831,14 @@
             "type": "array",
             "items": {
               "type": "object",
+              "required": [
+                "id"
+              ],
               "properties": {
                 "id": {
                   "type": "string",
-                  "description": "Message ID"
+                  "description": "Message ID",
+                  "example": "wamid.HBgMODIxMDg5NzkxMTY5FQIAERgSOTEzMzVBQzQ1M0JDRDUyNkRGAA=="
                 }
               }
             }
@@ -3402,10 +3420,18 @@
               "schema": {
                 "type": "object",
                 "required": [
+                  "messaging_product",
                   "type",
-                  "recipient"
+                  "to"
                 ],
                 "properties": {
+                  "messaging_product": {
+                    "type": "string",
+                    "description": "The messaging service being used",
+                    "enum": [
+                      "whatsapp"
+                    ]
+                  },
                   "type": {
                     "type": "string",
                     "description": "The type of message to send",
@@ -3422,7 +3448,7 @@
                       "video"
                     ]
                   },
-                  "recipient": {
+                  "to": {
                     "type": "number",
                     "description": "The WhatsApp ID (phone number) of the recipient"
                   },
@@ -3750,8 +3776,9 @@
                 "text-message": {
                   "summary": "Text Message Example",
                   "value": {
+                    "messaging_product": "whatsapp",
                     "type": "text",
-                    "recipient": 821012345678,
+                    "to": 821089791169,
                     "text": {
                       "body": "Hello, this is a text message",
                       "preview_url": false
@@ -3761,41 +3788,68 @@
                 "image-message": {
                   "summary": "Image Message Example",
                   "value": {
+                    "messaging_product": "whatsapp",
                     "type": "image",
-                    "recipient": 821012345678,
+                    "to": 821089791169,
                     "image": {
-                      "link": "https://example.com/image.jpg",
+                      "link": "https://www.pngplay.com/wp-content/uploads/8/Whatsapp-Logo-Download-Free-PNG.png",
                       "caption": "Check out this image!"
-                    }
-                  }
-                },
-                "document-message": {
-                  "summary": "Document Message Example",
-                  "value": {
-                    "type": "document",
-                    "recipient": 821012345678,
-                    "document": {
-                      "link": "https://example.com/document.pdf",
-                      "caption": "Important document",
-                      "filename": "report.pdf"
                     }
                   }
                 },
                 "audio-message": {
                   "summary": "Audio Message Example",
                   "value": {
+                    "messaging_product": "whatsapp",
                     "type": "audio",
-                    "recipient": 821012345678,
+                    "to": 821089791169,
                     "audio": {
-                      "link": "https://example.com/audio.mp3"
+                      "link": "https://onlinetestcase.com/wp-content/uploads/2023/06/100-KB-MP3.mp3"
+                    }
+                  }
+                },
+                "video-message": {
+                  "summary": "Video Message Example",
+                  "value": {
+                    "messaging_product": "whatsapp",
+                    "type": "video",
+                    "to": 821089791169,
+                    "video": {
+                      "link": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+                      "caption": "Check out this video!"
+                    }
+                  }
+                },
+                "document-message": {
+                  "summary": "Document Message Example",
+                  "value": {
+                    "messaging_product": "whatsapp",
+                    "type": "document",
+                    "to": 821089791169,
+                    "document": {
+                      "link": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+                      "caption": "Important document",
+                      "filename": "report.pdf"
+                    }
+                  }
+                },
+                "sticker-message": {
+                  "summary": "Sticker Message Example",
+                  "value": {
+                    "messaging_product": "whatsapp",
+                    "type": "sticker",
+                    "to": 821089791169,
+                    "sticker": {
+                      "link": "https://mathiasbynens.be/demo/animated-webp-supported.webp"
                     }
                   }
                 },
                 "location-message": {
                   "summary": "Location Message Example",
                   "value": {
+                    "messaging_product": "whatsapp",
                     "type": "location",
-                    "recipient": 821012345678,
+                    "to": 821089791169,
                     "location": {
                       "longitude": -122.1484785,
                       "latitude": 37.4847285,
@@ -3804,41 +3858,111 @@
                     }
                   }
                 },
-                "video-message": {
-                  "summary": "Video Message Example",
+                "contacts-message": {
+                  "summary": "Contacts Message Example",
                   "value": {
-                    "type": "video",
-                    "recipient": 821012345678,
-                    "video": {
-                      "link": "https://example.com/video.mp4",
-                      "caption": "Check out this video!"
+                    "messaging_product": "whatsapp",
+                    "type": "contacts",
+                    "to": 821089791169,
+                    "contacts": [
+                      {
+                        "addresses": [
+                          {
+                            "street": "1 Lucky Shrub Way",
+                            "city": "Menlo Park",
+                            "state": "CA",
+                            "zip": "94025",
+                            "country": "United States",
+                            "country_code": "US",
+                            "type": "Office"
+                          }
+                        ],
+                        "emails": [
+                          {
+                            "email": "bjohnson@luckyshrub.com",
+                            "type": "Work"
+                          }
+                        ],
+                        "name": {
+                          "formatted_name": "Barbara J. Johnson",
+                          "first_name": "Barbara",
+                          "last_name": "Johnson",
+                          "middle_name": "Joana",
+                          "suffix": "Esq.",
+                          "prefix": "Dr."
+                        },
+                        "org": {
+                          "company": "Lucky Shrub",
+                          "department": "Legal",
+                          "title": "Lead Counsel"
+                        },
+                        "phones": [
+                          {
+                            "phone": "+16505559999",
+                            "type": "Landline"
+                          },
+                          {
+                            "phone": "+19175559999",
+                            "type": "Mobile",
+                            "wa_id": "19175559999"
+                          }
+                        ],
+                        "urls": [
+                          {
+                            "url": "https://www.luckyshrub.com",
+                            "type": "Company"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "template-message": {
+                  "summary": "Template Message Example",
+                  "value": {
+                    "messaging_product": "whatsapp",
+                    "type": "template",
+                    "to": 821089791169,
+                    "template": {
+                      "name": "hello_world",
+                      "language": {
+                        "code": "en_US"
+                      }
                     }
                   }
                 },
-                "interactive-message": {
-                  "summary": "Interactive Button Message Example",
+                "interactive-reply-buttons-message": {
+                  "summary": "Interactive Reply Buttons Message Example",
                   "value": {
+                    "messaging_product": "whatsapp",
                     "type": "interactive",
-                    "recipient": 821012345678,
+                    "to": 821089791169,
                     "interactive": {
                       "type": "button",
+                      "header": {
+                        "type": "text",
+                        "text": "Workshop Details"
+                      },
                       "body": {
-                        "text": "Would you like to proceed?"
+                        "text": "Hi Pablo! Your gardening workshop is scheduled for 9am tomorrow. Use the buttons if you need to reschedule. Thank you!"
+                      },
+                      "footer": {
+                        "text": "Lucky Shrub: Your gateway to succulents!™"
                       },
                       "action": {
                         "buttons": [
                           {
                             "type": "reply",
                             "reply": {
-                              "id": "yes_button",
-                              "title": "Yes"
+                              "id": "change-button",
+                              "title": "Change"
                             }
                           },
                           {
                             "type": "reply",
                             "reply": {
-                              "id": "no_button",
-                              "title": "No"
+                              "id": "cancel-button",
+                              "title": "Cancel"
                             }
                           }
                         ]
@@ -3846,32 +3970,135 @@
                     }
                   }
                 },
-                "template-message": {
-                  "summary": "Template Message Example",
+                "interactive-list-message": {
+                  "summary": "Interactive List Message Example",
                   "value": {
-                    "type": "template",
-                    "recipient": 821012345678,
-                    "template": {
-                      "name": "sample_template",
-                      "language": {
-                        "policy": "deterministic",
-                        "code": "en_US"
+                    "messaging_product": "whatsapp",
+                    "type": "interactive",
+                    "to": 821089791169,
+                    "interactive": {
+                      "type": "list",
+                      "header": {
+                        "type": "text",
+                        "text": "Choose Shipping Option"
                       },
-                      "components": [
-                        {
-                          "type": "body",
-                          "parameters": [
-                            {
-                              "type": "text",
-                              "text": "John Doe"
-                            },
-                            {
-                              "type": "text",
-                              "text": "123456789"
-                            }
-                          ]
+                      "body": {
+                        "text": "Which shipping option do you prefer?"
+                      },
+                      "footer": {
+                        "text": "Lucky Shrub: Your gateway to succulents™"
+                      },
+                      "action": {
+                        "button": "Shipping Options",
+                        "sections": [
+                          {
+                            "title": "I want it ASAP!",
+                            "rows": [
+                              {
+                                "id": "priority_express",
+                                "title": "Priority Mail Express",
+                                "description": "Next Day to 2 Days"
+                              },
+                              {
+                                "id": "priority_mail",
+                                "title": "Priority Mail",
+                                "description": "1–3 Days"
+                              }
+                            ]
+                          },
+                          {
+                            "title": "I can wait a bit",
+                            "rows": [
+                              {
+                                "id": "usps_ground_advantage",
+                                "title": "USPS Ground Advantage",
+                                "description": "2–5 Days"
+                              },
+                              {
+                                "id": "media_mail",
+                                "title": "Media Mail",
+                                "description": "2–8 Days"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                "interactive-cta-url-message": {
+                  "summary": "Interactive Call-to-Action URL Button Message Example",
+                  "value": {
+                    "messaging_product": "whatsapp",
+                    "type": "interactive",
+                    "to": 821089791169,
+                    "interactive": {
+                      "type": "cta_url",
+                      "header": {
+                        "type": "text",
+                        "text": "Available Dates"
+                      },
+                      "body": {
+                        "text": "Tap the button below to see available dates."
+                      },
+                      "footer": {
+                        "text": "Dates subject to change."
+                      },
+                      "action": {
+                        "name": "cta_url",
+                        "parameters": {
+                          "display_text": "See Dates",
+                          "url": "https://www.luckyshrub.com?clickID=kqDGWd24Q5TRwoEQTICY7W1JKoXvaZOXWAS7h1P76s0R7Paec4"
                         }
-                      ]
+                      }
+                    }
+                  }
+                },
+                "location-request-message": {
+                  "summary": "Location Request Message Example",
+                  "value": {
+                    "messaging_product": "whatsapp",
+                    "type": "interactive",
+                    "to": 821089791169,
+                    "interactive": {
+                      "type": "location_request_message",
+                      "body": {
+                        "text": "Let us start with your pickup. You can either manually *enter an address* or *share your current location*."
+                      },
+                      "action": {
+                        "name": "send_location"
+                      }
+                    }
+                  }
+                },
+                "mark-as-read": {
+                  "summary": "Mark Message as Read Example",
+                  "value": {
+                    "messaging_product": "whatsapp",
+                    "status": "read",
+                    "message_id": "wamid.HBgLMTY0NjcwNDM1OTUVAgARGBI1RjQyNUE3NEYxMzAzMzQ5MkEA"
+                  }
+                },
+                "typing-indicator": {
+                  "summary": "Typing Indicator Example",
+                  "value": {
+                    "messaging_product": "whatsapp",
+                    "status": "read",
+                    "message_id": "wamid.HBgLMTY1MDM4Nzk0MzkVAgARGBJDQjZCMzlEQUE4OTJBMTE4RTUA",
+                    "typing_indicator": {
+                      "type": "text"
+                    }
+                  }
+                },
+                "reaction-message": {
+                  "summary": "Reaction Message Example",
+                  "value": {
+                    "messaging_product": "whatsapp",
+                    "type": "reaction",
+                    "to": 821089791169,
+                    "reaction": {
+                      "message_id": "wamid.HBgLMTY0NjcwNDM1OTUVAgASGBQzQUZCMTY0MDc2MUYwNzBDNTY5MAA=",
+                      "emoji": "😀"
                     }
                   }
                 }
