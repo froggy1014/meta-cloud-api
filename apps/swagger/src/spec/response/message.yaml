@@ -4,25 +4,38 @@ components:
       description: Response from sending a WhatsApp message
       type: object
       required:
+        - messaging_product
         - contacts
         - messages
       properties:
+        messaging_product:
+          type: string
+          enum: [whatsapp]
+          description: The messaging service used
         contacts:
           type: array
           items:
             type: object
+            required:
+              - input
+              - wa_id
             properties:
               input:
                 type: string
                 description: Phone number input
+                example: "821089791169"
               wa_id:
                 type: string
                 description: WhatsApp ID
+                example: "821089791169"
         messages:
           type: array
           items:
             type: object
+            required:
+              - id
             properties:
               id:
                 type: string
-                description: Message ID 
+                description: Message ID
+                example: "wamid.HBgMODIxMDg5NzkxMTY5FQIAERgSOTEzMzVBQzQ1M0JDRDUyNkRGAA=="
