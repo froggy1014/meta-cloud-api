@@ -1,24 +1,27 @@
-import MessagesAPI from './messages';
 import BaseAPI from './base';
-import PhoneNumberAPI from './phoneNumber';
-import TemplateAPI from './template';
-import RegistrationAPI from './registration';
-import TwoStepVerificationAPI from './twoStepVerification';
-import QrCodeAPI from './qrCode';
+import BusinessProfileAPI from './businessProfile';
 import EncryptionAPI from './encryption';
-import WabaAPI from './waba';
-import MediaAPI from './media';
 import FlowAPI from './flow';
+import MediaAPI from './media';
+import MessagesAPI from './messages';
+import PhoneNumberAPI from './phoneNumber';
+import QrCodeAPI from './qrCode';
+import RegistrationAPI from './registration';
+import TemplateAPI from './template';
+import TwoStepVerificationAPI from './twoStepVerification';
+import WabaAPI from './waba';
+
 export {
-    MessagesAPI,
     BaseAPI,
-    PhoneNumberAPI,
-    TemplateAPI,
-    RegistrationAPI,
-    TwoStepVerificationAPI,
-    QrCodeAPI,
+    BusinessProfileAPI,
     EncryptionAPI,
-    WabaAPI,
-    MediaAPI,
     FlowAPI,
+    MediaAPI,
+    MessagesAPI,
+    PhoneNumberAPI,
+    QrCodeAPI,
+    RegistrationAPI,
+    TemplateAPI,
+    TwoStepVerificationAPI,
+    WabaAPI,
 };

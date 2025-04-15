@@ -561,3 +561,94 @@ export enum DataLocalizationRegionEnum {
     // NORAM
     CA = 'CA', // Canada
 }
+
+/**
+ * Business category values for WhatsApp Business Profile.
+ * These values map to specific strings displayed in the WhatsApp client.
+ */
+export enum BusinessVerticalEnum {
+    /**
+     * Alcoholic Beverages
+     */
+    ALCOHOL = 'ALCOHOL',
+    /**
+     * Clothing and Apparel
+     */
+    APPAREL = 'APPAREL',
+    /**
+     * Automotive
+     */
+    AUTO = 'AUTO',
+    /**
+     * Beauty, Spa and Salon
+     */
+    BEAUTY = 'BEAUTY',
+    /**
+     * Education
+     */
+    EDU = 'EDU',
+    /**
+     * Entertainment
+     */
+    ENTERTAIN = 'ENTERTAIN',
+    /**
+     * Event Planning and Service
+     */
+    EVENT_PLAN = 'EVENT_PLAN',
+    /**
+     * Finance and Banking
+     */
+    FINANCE = 'FINANCE',
+    /**
+     * Public Service
+     */
+    GOVT = 'GOVT',
+    /**
+     * Food and Grocery
+     */
+    GROCERY = 'GROCERY',
+    /**
+     * Medical and Health
+     */
+    HEALTH = 'HEALTH',
+    /**
+     * Hotel and Lodging
+     */
+    HOTEL = 'HOTEL',
+    /**
+     * Non-profit
+     */
+    NONPROFIT = 'NONPROFIT',
+    /**
+     * Online Gambling & Gaming
+     */
+    ONLINE_GAMBLING = 'ONLINE_GAMBLING',
+    /**
+     * Over-the-Counter Drugs
+     */
+    OTC_DRUGS = 'OTC_DRUGS',
+    /**
+     * Other
+     */
+    OTHER = 'OTHER',
+    /**
+     * Non-Online Gambling & Gaming (E.g. Brick and mortar)
+     */
+    PHYSICAL_GAMBLING = 'PHYSICAL_GAMBLING',
+    /**
+     * Professional Services
+     */
+    PROF_SERVICES = 'PROF_SERVICES',
+    /**
+     * Restaurant
+     */
+    RESTAURANT = 'RESTAURANT',
+    /**
+     * Shopping and Retail
+     */
+    RETAIL = 'RETAIL',
+    /**
+     * Travel and Transportation
+     */
+    TRAVEL = 'TRAVEL',
+}
