@@ -224,7 +224,7 @@
                        link:
                          type: string
                          description: HTTP/HTTPS URL of the video
-                         example: "https://example.com/video.mp4"
+                         example: "https://www.sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4"
                        caption:
                          type: string
            examples:
@@ -262,7 +262,7 @@
                  type: video
                  to: 821089791169
                  video:
-                   link: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+                   link: "https://www.sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4"
                    caption: "Check out this video!"
              document-message:
                summary: Document Message Example
