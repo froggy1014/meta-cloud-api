@@ -11,25 +11,25 @@ const DEFAULT_LISTENER_PORT = 3000;
 const DEFAULT_MAX_RETRIES_AFTER_WAIT = 30;
 const DEFAULT_REQUEST_TIMEOUT = 20000;
 
-const emptyConfigChecker = (phoneNumberId?: number, accessToken?: string) => {
-    if (!process.env[WabaConfigEnum.PhoneNumberId] && !phoneNumberId) {
+const emptyConfigChecker = (config: WhatsAppConfig | undefined) => {
+    if (!process.env[WabaConfigEnum.PhoneNumberId] && !config?.phoneNumberId) {
         LOGGER.log(`Environmental variable: WA_PHONE_NUMBER_ID and/or sender phone number id argument is undefined.`);
         throw new Error('Missing WhatsApp sender phone number Id.');
     }
 
-    if (!process.env[WabaConfigEnum.AccessToken] && !accessToken) {
+    if (!process.env[WabaConfigEnum.AccessToken] && !config?.accessToken) {
         LOGGER.log(`Environmental variable: CLOUD_API_ACCESS_TOKEN and/or access token argument is undefined.`);
         throw new Error('Missing WhatsApp access token.');
     }
 
-    if (!process.env[WabaConfigEnum.APIVersion]) {
+    if (!process.env[WabaConfigEnum.APIVersion] && !config?.apiVersion) {
         LOGGER.log(`Environmental variable: CLOUD_API_VERSION is undefined.`);
         throw new Error('Missing WhatsApp API version.');
     }
 };
 
 export const importConfig = (inputConfig?: WhatsAppConfig) => {
-    emptyConfigChecker(inputConfig?.phoneNumberId, inputConfig?.accessToken);
+    emptyConfigChecker(inputConfig);
 
     const wabaConfig: WabaConfigType = {
         [WabaConfigEnum.BaseURL]: process.env.WA_BASE_URL || DEFAULT_BASE_URL,
