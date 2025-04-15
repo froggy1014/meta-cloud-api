@@ -30,6 +30,11 @@ export type GeneralMessageBody = GeneralRequestBody & {
 export type StatusObject = {
     status: 'read';
     message_id: string;
+    typing_indicator?: TypingIndicatorObject;
+};
+
+export type TypingIndicatorObject = {
+    type: 'text';
 };
 
 export type StatusRequestBody = GeneralMessageBody & StatusObject;
@@ -240,11 +245,113 @@ type ProductListInteractiveObject = {
     action: ActionObject;
 };
 
+type CtaUrlParameters = {
+    display_text: string;
+    url: string;
+};
+
+type CtaUrlActionObject = {
+    name: 'cta_url';
+    parameters: CtaUrlParameters;
+};
+
+type CtaUrlInteractiveObject = {
+    type: InteractiveTypesEnum.CtaUrl;
+    body?: SimpleTextObject;
+    footer?: SimpleTextObject;
+    header?: HeaderObject;
+    action: CtaUrlActionObject;
+};
+
+type LocationRequestActionObject = {
+    name: 'send_location';
+};
+
+type LocationRequestInteractiveObject = {
+    type: InteractiveTypesEnum.LocationRequest;
+    body: SimpleTextObject;
+    footer?: SimpleTextObject;
+    header?: HeaderObject;
+    action: LocationRequestActionObject;
+};
+
+// Address message types
+type AddressValues = {
+    name?: string;
+    phone_number?: string;
+    in_pin_code?: string;
+    house_number?: string;
+    floor_number?: string;
+    tower_number?: string;
+    building_name?: string;
+    address?: string;
+    landmark_area?: string;
+    city?: string;
+    state?: string;
+};
+
+type SavedAddress = {
+    id: string;
+    value: AddressValues;
+};
+
+type ValidationErrors = {
+    [key in keyof AddressValues]?: string;
+};
+
+type AddressMessageParameters = {
+    country: string; // ISO country code, e.g., "IN" for India
+    values?: AddressValues;
+    saved_addresses?: SavedAddress[];
+    validation_errors?: ValidationErrors;
+};
+
+type AddressMessageActionObject = {
+    name: 'address_message';
+    parameters: AddressMessageParameters;
+};
+
+type AddressMessageInteractiveObject = {
+    type: InteractiveTypesEnum.AddressMessage;
+    body: SimpleTextObject;
+    footer?: SimpleTextObject;
+    header?: HeaderObject;
+    action: AddressMessageActionObject;
+};
+
+// Flow message types
+type FlowParameters = {
+    flow_token: string;
+    flow_id?: string;
+    flow_cta?: string;
+    screen?: string;
+    mode?: 'fullscreen' | 'drawer';
+    data?: Record<string, string>;
+};
+
+type FlowActionObject = {
+    name: 'flow';
+    parameters: FlowParameters;
+};
+
+type FlowInteractiveObject = {
+    type: InteractiveTypesEnum.Flow;
+    body: SimpleTextObject;
+    footer?: SimpleTextObject;
+    header?: HeaderObject;
+    action: FlowActionObject;
+};
+
+// Update InteractiveObject type
 export type InteractiveObject =
     | ButtonInteractiveObject
     | ListInteractiveObject
     | ProductInteractiveObject
-    | ProductListInteractiveObject;
+    | ProductListInteractiveObject
+    | CtaUrlInteractiveObject
+    | LocationRequestInteractiveObject
+    | AddressMessageInteractiveObject
+    | FlowInteractiveObject;
 
 export type InteractiveMessageRequestBody = MessageRequestBody<MessageTypesEnum.Interactive> & {
     [MessageTypesEnum.Interactive]: InteractiveObject;
@@ -399,54 +506,246 @@ export type MessagesResponse = GeneralMessageBody & {
 };
 
 export declare class MessagesClass extends BaseClass {
+    /**
+     * Sends an audio message via WhatsApp
+     * @param body The audio media object
+     * @param recipient Recipient's phone number
+     * @param replyMessageId Optional message ID to reply to
+     * @returns Promise with the message response
+     */
     audio(
         body: AudioMediaObject,
         recipient: number,
         replyMessageId?: string,
     ): Promise<RequesterResponseInterface<MessagesResponse>>;
+
+    /**
+     * Sends a contact card via WhatsApp
+     * @param body The contact object
+     * @param recipient Recipient's phone number
+     * @param replyMessageId Optional message ID to reply to
+     * @returns Promise with the message response
+     */
     contacts(
         body: [ContactObject],
         recipient: number,
         replyMessageId?: string,
     ): Promise<RequesterResponseInterface<MessagesResponse>>;
+
+    /**
+     * Sends a document via WhatsApp
+     * @param body The document media object
+     * @param recipient Recipient's phone number
+     * @param replyMessageId Optional message ID to reply to
+     * @returns Promise with the message response
+     */
     document(
         body: DocumentMediaObject,
         recipient: number,
         replyMessageId?: string,
     ): Promise<RequesterResponseInterface<MessagesResponse>>;
+
+    /**
+     * Sends an image via WhatsApp
+     * @param body The image media object
+     * @param recipient Recipient's phone number
+     * @param replyMessageId Optional message ID to reply to
+     * @returns Promise with the message response
+     */
     image(
         body: ImageMediaObject,
         recipient: number,
         replyMessageId?: string,
     ): Promise<RequesterResponseInterface<MessagesResponse>>;
+
+    /**
+     * Sends an interactive message via WhatsApp
+     * @param body The interactive object (buttons, lists, etc.)
+     * @param recipient Recipient's phone number
+     * @param replyMessageId Optional message ID to reply to
+     * @returns Promise with the message response
+     */
     interactive(
         body: InteractiveObject,
         recipient: number,
         replyMessageId?: string,
     ): Promise<RequesterResponseInterface<MessagesResponse>>;
+
+    /**
+     * Sends a location via WhatsApp
+     * @param body The location object with coordinates
+     * @param recipient Recipient's phone number
+     * @param replyMessageId Optional message ID to reply to
+     * @returns Promise with the message response
+     */
     location(
         body: LocationObject,
         recipient: number,
         replyMessageId?: string,
     ): Promise<RequesterResponseInterface<MessagesResponse>>;
+
+    /**
+     * Updates message status (used for read receipts and typing indicators)
+     * @param body The status object
+     * @returns Promise with the response
+     */
     status(body: StatusObject): Promise<RequesterResponseInterface<MessagesResponse>>;
+
+    /**
+     * Sends a sticker via WhatsApp
+     * @param body The sticker media object
+     * @param recipient Recipient's phone number
+     * @param replyMessageId Optional message ID to reply to
+     * @returns Promise with the message response
+     */
     sticker(
         body: StickerMediaObject,
         recipient: number,
         replyMessageId?: string,
     ): Promise<RequesterResponseInterface<MessagesResponse>>;
+
+    /**
+     * Sends a template message via WhatsApp
+     * @param body The message template object
+     * @param recipient Recipient's phone number
+     * @param replyMessageId Optional message ID to reply to
+     * @returns Promise with the message response
+     */
     template(
         body: MessageTemplateObject<ComponentTypesEnum>,
         recipient: number,
         replyMessageId?: string,
     ): Promise<RequesterResponseInterface<MessagesResponse>>;
+
+    /**
+     * Sends a text message via WhatsApp
+     * @param body The text object containing the message
+     * @param recipient Recipient's phone number
+     * @param replyMessageId Optional message ID to reply to
+     * @returns Promise with the message response
+     */
     text(
         body: TextObject,
         recipient: number,
         replyMessageId?: string,
     ): Promise<RequesterResponseInterface<MessagesResponse>>;
+
+    /**
+     * Sends a video via WhatsApp
+     * @param body The video media object
+     * @param recipient Recipient's phone number
+     * @param replyMessageId Optional message ID to reply to
+     * @returns Promise with the message response
+     */
     video(
         body: VideoMediaObject,
+        recipient: number,
+        replyMessageId?: string,
+    ): Promise<RequesterResponseInterface<MessagesResponse>>;
+
+    // New methods
+    /**
+     * Marks a message as read in WhatsApp
+     * @param messageId ID of the message to mark as read
+     * @returns Promise with the response
+     */
+    markAsRead(messageId: string): Promise<RequesterResponseInterface<MessagesResponse>>;
+
+    /**
+     * Marks a message as read and shows a typing indicator in WhatsApp
+     * @param messageId ID of the message to mark as read
+     * @returns Promise with the response
+     */
+    showTypingIndicator(messageId: string): Promise<RequesterResponseInterface<MessagesResponse>>;
+
+    /**
+     * Sends an interactive list message
+     * @param body The list message content
+     * @param recipient Recipient phone number
+     * @param replyMessageId Optional message ID to reply to
+     * @returns Promise with the response
+     */
+    interactiveList(
+        body: InteractiveObject & { type: 'list' },
+        recipient: number,
+        replyMessageId?: string,
+    ): Promise<RequesterResponseInterface<MessagesResponse>>;
+
+    /**
+     * Sends an interactive CTA URL message
+     * @param body The CTA URL message content
+     * @param recipient Recipient phone number
+     * @param replyMessageId Optional message ID to reply to
+     * @returns Promise with the response
+     */
+    interactiveCtaUrl(
+        body: InteractiveObject & { type: 'cta_url' },
+        recipient: number,
+        replyMessageId?: string,
+    ): Promise<RequesterResponseInterface<MessagesResponse>>;
+
+    /**
+     * Sends a location request message
+     * @param body The location request message content
+     * @param recipient Recipient phone number
+     * @param replyMessageId Optional message ID to reply to
+     * @returns Promise with the response
+     */
+    interactiveLocationRequest(
+        body: InteractiveObject & { type: 'location_request_message' },
+        recipient: number,
+        replyMessageId?: string,
+    ): Promise<RequesterResponseInterface<MessagesResponse>>;
+
+    /**
+     * Sends an address message to request shipping address from the user
+     * Note: This feature is only available for businesses based in India and their India customers
+     * @param body The address message content
+     * @param recipient Recipient phone number
+     * @param replyMessageId Optional message ID to reply to
+     * @returns Promise with the response
+     */
+    interactiveAddressMessage(
+        body: InteractiveObject & { type: 'address_message' },
+        recipient: number,
+        replyMessageId?: string,
+    ): Promise<RequesterResponseInterface<MessagesResponse>>;
+
+    /**
+     * Sends an interactive reply buttons message
+     * @param body The reply buttons message content
+     * @param recipient Recipient phone number
+     * @param replyMessageId Optional message ID to reply to
+     * @returns Promise with the response
+     */
+    interactiveReplyButtons(
+        body: InteractiveObject & { type: 'button' },
+        recipient: number,
+        replyMessageId?: string,
+    ): Promise<RequesterResponseInterface<MessagesResponse>>;
+
+    /**
+     * Sends a reaction to a message (emoji response)
+     * @param messageId ID of the message to react to
+     * @param emoji The emoji to send as reaction (e.g. "😀", "❤️", "👍")
+     * @param recipient Recipient phone number
+     * @returns Promise with the response
+     */
+    reaction(
+        messageId: string,
+        emoji: string,
+        recipient: number,
+    ): Promise<RequesterResponseInterface<MessagesResponse>>;
+
+    /**
+     * Sends an interactive Flow message
+     * @param body The Flow message content
+     * @param recipient Recipient phone number
+     * @param replyMessageId Optional message ID to reply to
+     * @returns Promise with the response
+     */
+    interactiveFlow(
+        body: InteractiveObject & { type: 'flow' },
         recipient: number,
         replyMessageId?: string,
     ): Promise<RequesterResponseInterface<MessagesResponse>>;

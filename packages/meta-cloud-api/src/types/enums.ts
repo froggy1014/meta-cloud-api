@@ -46,6 +46,10 @@ export const enum InteractiveTypesEnum {
     List = 'list',
     Product = 'product',
     ProductList = 'product_list',
+    CtaUrl = 'cta_url',
+    LocationRequest = 'location_request_message',
+    AddressMessage = 'address_message',
+    Flow = 'flow',
 }
 
 export const enum ButtonTypesEnum {
