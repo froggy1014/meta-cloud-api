@@ -105,8 +105,7 @@ export interface UploadSession {
 }
 
 export interface UploadSessionResponse {
-    upload_session_id: string;
-    video_id?: string;
+    id: string;
 }
 
 export interface UploadHandle {
