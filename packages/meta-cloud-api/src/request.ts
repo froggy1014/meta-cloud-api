@@ -14,9 +14,9 @@ export default class Requester implements RequesterClass {
     accessToken: Readonly<string>;
     phoneNumberId: Readonly<number>;
     businessAcctId: Readonly<string>;
-    apiVersion: Readonly<string> = '22';
+    apiVersion: Readonly<string>;
     userAgent: Readonly<string>;
-    host: Readonly<string> = 'graph.facebook.com';
+    host: Readonly<string>;
     protocol: Readonly<string> = 'https:';
 
     constructor(
@@ -28,8 +28,8 @@ export default class Requester implements RequesterClass {
         userAgent: string,
     ) {
         this.client = new HttpsClient();
-        this.host = host;
-        this.apiVersion = apiVersion;
+        this.host = host || 'graph.facebook.com';
+        this.apiVersion = apiVersion || '22';
         this.phoneNumberId = phoneNumberId;
         this.accessToken = accessToken;
         this.businessAcctId = businessAcctId;
