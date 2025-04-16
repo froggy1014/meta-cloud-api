@@ -48,9 +48,9 @@ export default class WhatsApp implements WhatsAppClass {
         this.requester = new Requester(
             this.config[SDKEnums.WabaConfigEnum.BaseURL],
             this.config[SDKEnums.WabaConfigEnum.APIVersion],
-            this.config[SDKEnums.WabaConfigEnum.PhoneNumberId],
-            this.config[SDKEnums.WabaConfigEnum.AccessToken],
-            this.config[SDKEnums.WabaConfigEnum.BusinessAcctId],
+            this.config[SDKEnums.WabaConfigEnum.PhoneNumberId] || config?.phoneNumberId || 0,
+            this.config[SDKEnums.WabaConfigEnum.AccessToken] || config?.accessToken || '',
+            this.config[SDKEnums.WabaConfigEnum.BusinessAcctId] || config?.businessAcctId || '',
             this.userAgent(),
         );
 

@@ -14,9 +14,9 @@ export default class Requester implements RequesterClass {
     accessToken: Readonly<string>;
     phoneNumberId: Readonly<number>;
     businessAcctId: Readonly<string>;
-    apiVersion: Readonly<string>;
+    apiVersion: Readonly<string> = '22';
     userAgent: Readonly<string>;
-    host: Readonly<string>;
+    host: Readonly<string> = 'graph.facebook.com';
     protocol: Readonly<string> = 'https:';
 
     constructor(

@@ -21,11 +21,6 @@ const emptyConfigChecker = (config: WhatsAppConfig | undefined) => {
         LOGGER.log(`Environmental variable: CLOUD_API_ACCESS_TOKEN and/or access token argument is undefined.`);
         throw new Error('Missing WhatsApp access token.');
     }
-
-    if (!process.env[WabaConfigEnum.APIVersion] && !config?.apiVersion) {
-        LOGGER.log(`Environmental variable: CLOUD_API_VERSION is undefined.`);
-        throw new Error('Missing WhatsApp API version.');
-    }
 };
 
 export const importConfig = (inputConfig?: WhatsAppConfig) => {
