@@ -14,3 +14,5 @@ export * from './qrCode';
 export * from './encryption';
 export * from './waba';
 export * from './media';
+export * from './flow';
+export * from './businessProfile';
