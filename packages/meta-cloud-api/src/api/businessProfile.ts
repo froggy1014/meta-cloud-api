@@ -2,6 +2,7 @@ import {
     BusinessProfileClass,
     BusinessProfileResponse,
     UpdateBusinessProfileRequest,
+    UploadBusinessProfileResponse,
     UploadHandle,
     UploadSessionResponse,
 } from '../types/businessProfile';
@@ -148,7 +149,10 @@ export default class BusinessProfileAPI extends BaseAPI implements BusinessProfi
      *   fileBuffer
      * );
      */
-    async uploadMedia(uploadId: string, file: Buffer): Promise<RequesterResponseInterface<ResponseSuccess>> {
+    async uploadMedia(
+        uploadId: string,
+        file: Buffer,
+    ): Promise<RequesterResponseInterface<UploadBusinessProfileResponse>> {
         return this.client.sendRequest(
             HttpMethodsEnum.Post,
             `${uploadId}`,

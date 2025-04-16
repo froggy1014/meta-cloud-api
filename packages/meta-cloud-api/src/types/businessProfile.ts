@@ -108,6 +108,10 @@ export interface UploadSessionResponse {
     id: string;
 }
 
+export interface UploadBusinessProfileResponse {
+    h: string;
+}
+
 export interface UploadHandle {
     handle: string;
     file_size: number;
@@ -150,7 +154,7 @@ export interface BusinessProfileClass {
      * @param uploadId The ID of the upload session.
      * @param file The binary data of the file.
      */
-    uploadMedia(uploadId: string, file: Buffer): Promise<RequesterResponseInterface<ResponseSuccess>>;
+    uploadMedia(uploadId: string, file: Buffer): Promise<RequesterResponseInterface<UploadMediaResponse>>;
 
     /**
      * Get the upload handle information.
