@@ -1,8 +1,8 @@
-import { HttpMethodsEnum, WabaConfigEnum } from '../types/enums';
 import type { WabaConfigType } from '../types/config';
+import { HttpMethodsEnum, WabaConfigEnum } from '../types/enums';
 import type { RequesterClass, RequesterResponseInterface, ResponseSuccess } from '../types/request';
+import { UpdateWabaSubscription, WABAClass, WabaSubscriptions } from '../types/waba';
 import BaseAPI from './base';
-import { WABAClass, WabaSubscriptions } from '../types/waba';
 
 export default class WabaAPI extends BaseAPI implements WABAClass {
     constructor(config: WabaConfigType, client: RequesterClass) {
@@ -18,12 +18,19 @@ export default class WabaAPI extends BaseAPI implements WABAClass {
         );
     }
 
-    async subscribeToWaba(): Promise<RequesterResponseInterface<ResponseSuccess>> {
+    async updateWabaSubscription({
+        override_callback_uri,
+        verify_token,
+    }: UpdateWabaSubscription): Promise<RequesterResponseInterface<ResponseSuccess>> {
+        const body = {
+            override_callback_uri,
+            verify_token,
+        };
         return this.client.sendRequest(
             HttpMethodsEnum.Post,
             `${this.config[WabaConfigEnum.BusinessAcctId]}/subscribed_apps`,
             this.config[WabaConfigEnum.RequestTimeout],
-            null,
+            JSON.stringify(body),
         );
     }
 
@@ -33,23 +40,6 @@ export default class WabaAPI extends BaseAPI implements WABAClass {
             `${this.config[WabaConfigEnum.BusinessAcctId]}/subscribed_apps`,
             this.config[WabaConfigEnum.RequestTimeout],
             null,
-        );
-    }
-
-    async overrideWabaWebhook(
-        webhookUrl: string,
-        verifyToken: string,
-    ): Promise<RequesterResponseInterface<ResponseSuccess>> {
-        const body = {
-            url: webhookUrl,
-            verify_token: verifyToken,
-        };
-
-        return this.client.sendRequest(
-            HttpMethodsEnum.Post,
-            `${this.config[WabaConfigEnum.BusinessAcctId]}/webhooks`,
-            this.config[WabaConfigEnum.RequestTimeout],
-            JSON.stringify(body),
         );
     }
 }

@@ -10,11 +10,18 @@ export type WabaSubscription = {
     override_callback_uri?: string;
 };
 
+export type UpdateWabaSubscription = {
+    override_callback_uri: string;
+    verify_token: string;
+};
+
 export type WabaSubscriptions = ResponseData<Array<WabaSubscription>>;
 
 export declare class WABAClass {
     getAllWabaSubscriptions(): Promise<RequesterResponseInterface<WabaSubscriptions>>;
-    subscribeToWaba(): Promise<RequesterResponseInterface<ResponseSuccess>>;
+    updateWabaSubscription({
+        override_callback_uri,
+        verify_token,
+    }: UpdateWabaSubscription): Promise<RequesterResponseInterface<ResponseSuccess>>;
     unsubscribeFromWaba(): Promise<RequesterResponseInterface<ResponseSuccess>>;
-    overrideWabaWebhook(webhookUrl: string, verifyToken: string): Promise<RequesterResponseInterface<ResponseSuccess>>;
 }
