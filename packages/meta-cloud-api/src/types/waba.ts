@@ -5,7 +5,9 @@ export type WabaSubscription = {
         id: string;
         link: string;
         name: string;
+        category: string;
     };
+    override_callback_uri?: string;
 };
 
 export type WabaSubscriptions = ResponseData<Array<WabaSubscription>>;
