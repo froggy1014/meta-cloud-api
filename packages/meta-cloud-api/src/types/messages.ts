@@ -319,14 +319,18 @@ type AddressMessageInteractiveObject = {
     action: AddressMessageActionObject;
 };
 
-// Flow message types
 type FlowParameters = {
-    flow_token: string;
+    flow_message_version: string;
     flow_id?: string;
-    flow_cta?: string;
-    screen?: string;
-    mode?: 'fullscreen' | 'drawer';
-    data?: Record<string, string>;
+    flow_name?: string;
+    flow_cta: string;
+    mode?: 'draft' | 'published';
+    flow_token: string;
+    flow_action: 'navigate' | 'data_exchange';
+    flow_action_payload?: {
+        screen?: string;
+        data?: Record<string, string>;
+    };
 };
 
 type FlowActionObject = {

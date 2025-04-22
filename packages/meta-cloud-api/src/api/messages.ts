@@ -356,6 +356,24 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
         params: m.MessageRequestParams<m.InteractiveObject & { type: InteractiveTypesEnum.Flow }>,
     ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
         const { body, to, replyMessageId } = params;
+
+        // Apply default values for FlowParameters
+        if (body.action.parameters.flow_message_version === undefined) {
+            body.action.parameters.flow_message_version = '3';
+        }
+        if (body.action.parameters.mode === undefined) {
+            body.action.parameters.mode = 'published';
+        }
+        if (body.action.parameters.flow_action === undefined) {
+            body.action.parameters.flow_action = 'navigate';
+        }
+        if (body.action.parameters.flow_action_payload?.screen === undefined) {
+            body.action.parameters.flow_action_payload = {
+                ...body.action.parameters.flow_action_payload,
+                screen: 'FIRST_ENTRY_SCREEN',
+            };
+        }
+
         return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Interactive, body, to, replyMessageId)));
     }
 
