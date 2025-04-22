@@ -2,9 +2,9 @@ import type { WabaConfigType } from '../types/config';
 import {
     ComponentTypesEnum,
     HttpMethodsEnum,
+    InteractiveTypesEnum,
     MessageTypesEnum,
     WabaConfigEnum,
-    InteractiveTypesEnum,
 } from '../types/enums';
 
 import * as m from '../types/messages';
@@ -57,14 +57,14 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
     bodyBuilder<T extends MessageTypesEnum>(
         type: T,
         payload: MessagePayloadType<T>,
-        toNumber: string,
+        to: string,
         replyMessageId?: string,
     ) {
         const body: m.MessageRequestBody<T> = {
             messaging_product: 'whatsapp',
             recipient_type: 'individual',
-            to: toNumber,
-            type: type,
+            to,
+            type,
             [type]: payload,
         };
 
@@ -90,171 +90,151 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
     /**
      * Sends an audio message via WhatsApp
      * @param body The audio media object
-     * @param recipient Recipient's phone number
+     * @param to Recipient's phone number
      * @param replyMessageId Optional message ID to reply to
      * @returns Promise with the message response
      */
     async audio(
         body: m.AudioMediaObject,
-        recipient: number,
+        to: string,
         replyMessageId?: string,
     ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
-        return this.send(
-            JSON.stringify(this.bodyBuilder(MessageTypesEnum.Audio, body, recipient.toString(), replyMessageId)),
-        );
+        return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Audio, body, to, replyMessageId)));
     }
 
     /**
      * Sends a contact card via WhatsApp
      * @param body The contact object
-     * @param recipient Recipient's phone number
+     * @param to Recipient's phone number
      * @param replyMessageId Optional message ID to reply to
      * @returns Promise with the message response
      */
     async contacts(
         body: [m.ContactObject],
-        recipient: number,
+        to: string,
         replyMessageId?: string,
     ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
-        return this.send(
-            JSON.stringify(this.bodyBuilder(MessageTypesEnum.Contacts, body, recipient.toString(), replyMessageId)),
-        );
+        return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Contacts, body, to, replyMessageId)));
     }
 
     /**
      * Sends a document via WhatsApp
      * @param body The document media object
-     * @param recipient Recipient's phone number
+     * @param to Recipient's phone number
      * @param replyMessageId Optional message ID to reply to
      * @returns Promise with the message response
      */
     async document(
         body: m.DocumentMediaObject,
-        recipient: number,
+        to: string,
         replyMessageId?: string,
     ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
-        return this.send(
-            JSON.stringify(this.bodyBuilder(MessageTypesEnum.Document, body, recipient.toString(), replyMessageId)),
-        );
+        return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Document, body, to, replyMessageId)));
     }
 
     /**
      * Sends an image via WhatsApp
      * @param body The image media object
-     * @param recipient Recipient's phone number
+     * @param to Recipient's phone number
      * @param replyMessageId Optional message ID to reply to
      * @returns Promise with the message response
      */
     async image(
         body: m.ImageMediaObject,
-        recipient: number,
+        to: string,
         replyMessageId?: string,
     ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
-        return this.send(
-            JSON.stringify(this.bodyBuilder(MessageTypesEnum.Image, body, recipient.toString(), replyMessageId)),
-        );
+        return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Image, body, to, replyMessageId)));
     }
 
     /**
      * Sends an interactive message via WhatsApp
      * @param body The interactive object (buttons, lists, etc.)
-     * @param recipient Recipient's phone number
+     * @param to Recipient's phone number
      * @param replyMessageId Optional message ID to reply to
      * @returns Promise with the message response
      */
     async interactive(
         body: m.InteractiveObject,
-        recipient: number,
+        to: string,
         replyMessageId?: string,
     ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
-        return this.send(
-            JSON.stringify(this.bodyBuilder(MessageTypesEnum.Interactive, body, recipient.toString(), replyMessageId)),
-        );
+        return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Interactive, body, to, replyMessageId)));
     }
 
     /**
      * Sends a location via WhatsApp
      * @param body The location object with coordinates
-     * @param recipient Recipient's phone number
+     * @param to Recipient's phone number
      * @param replyMessageId Optional message ID to reply to
      * @returns Promise with the message response
      */
     async location(
         body: m.LocationObject,
-        recipient: number,
+        to: string,
         replyMessageId?: string,
     ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
-        return this.send(
-            JSON.stringify(this.bodyBuilder(MessageTypesEnum.Location, body, recipient.toString(), replyMessageId)),
-        );
+        return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Location, body, to, replyMessageId)));
     }
 
     /**
      * Sends a sticker via WhatsApp
      * @param body The sticker media object
-     * @param recipient Recipient's phone number
+     * @param to Recipient's phone number
      * @param replyMessageId Optional message ID to reply to
      * @returns Promise with the message response
      */
     async sticker(
         body: m.StickerMediaObject,
-        recipient: number,
+        to: string,
         replyMessageId?: string,
     ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
-        return this.send(
-            JSON.stringify(this.bodyBuilder(MessageTypesEnum.Sticker, body, recipient.toString(), replyMessageId)),
-        );
+        return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Sticker, body, to, replyMessageId)));
     }
 
     /**
      * Sends a template message via WhatsApp
      * @param body The message template object
-     * @param recipient Recipient's phone number
+     * @param to Recipient's phone number
      * @param replyMessageId Optional message ID to reply to
      * @returns Promise with the message response
      */
     async template(
         body: m.MessageTemplateObject<ComponentTypesEnum>,
-        recipient: number,
+        to: string,
         replyMessageId?: string,
     ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
-        return this.send(
-            JSON.stringify(this.bodyBuilder(MessageTypesEnum.Template, body, recipient.toString(), replyMessageId)),
-        );
+        return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Template, body, to, replyMessageId)));
     }
 
     /**
      * Sends a text message via WhatsApp
      * @param body The text object containing the message
-     * @param recipient Recipient's phone number
+     * @param to Recipient's phone number
      * @param replyMessageId Optional message ID to reply to
      * @returns Promise with the message response
      */
     async text(
         body: m.TextObject,
-        recipient: number,
+        to: string,
         replyMessageId?: string,
     ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
-        return this.send(
-            JSON.stringify(this.bodyBuilder(MessageTypesEnum.Text, body, recipient.toString(), replyMessageId)),
-        );
+        return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Text, body, to, replyMessageId)));
     }
 
     /**
      * Sends a video via WhatsApp
      * @param body The video media object
-     * @param recipient Recipient's phone number
+     * @param to Recipient's phone number
      * @param replyMessageId Optional message ID to reply to
      * @returns Promise with the message response
      */
     async video(
         body: m.VideoMediaObject,
-        recipient: number,
+        to: string,
         replyMessageId?: string,
     ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
-        return this.send(
-            JSON.stringify(this.bodyBuilder(MessageTypesEnum.Video, body, recipient.toString(), replyMessageId)),
-        );
+        return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Video, body, to, replyMessageId)));
     }
 
     /**
@@ -301,122 +281,110 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
     /**
      * Sends an interactive list message
      * @param body The list message content
-     * @param recipient Recipient phone number
+     * @param to Recipient phone number
      * @param replyMessageId Optional message ID to reply to
      * @returns Promise with the response
      */
     async interactiveList(
         body: m.InteractiveObject & { type: InteractiveTypesEnum.List },
-        recipient: number,
+        to: string,
         replyMessageId?: string,
     ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
-        return this.send(
-            JSON.stringify(this.bodyBuilder(MessageTypesEnum.Interactive, body, recipient.toString(), replyMessageId)),
-        );
+        return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Interactive, body, to, replyMessageId)));
     }
 
     /**
      * Sends an interactive CTA URL message
      * @param body The CTA URL message content
-     * @param recipient Recipient phone number
+     * @param to Recipient phone number
      * @param replyMessageId Optional message ID to reply to
      * @returns Promise with the response
      */
     async interactiveCtaUrl(
         body: m.InteractiveObject & { type: InteractiveTypesEnum.CtaUrl },
-        recipient: number,
+        to: string,
         replyMessageId?: string,
     ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
-        return this.send(
-            JSON.stringify(this.bodyBuilder(MessageTypesEnum.Interactive, body, recipient.toString(), replyMessageId)),
-        );
+        return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Interactive, body, to, replyMessageId)));
     }
 
     /**
      * Sends a location request message
      * @param body The location request message content
-     * @param recipient Recipient phone number
+     * @param to Recipient phone number
      * @param replyMessageId Optional message ID to reply to
      * @returns Promise with the response
      */
     async interactiveLocationRequest(
         body: m.InteractiveObject & { type: InteractiveTypesEnum.LocationRequest },
-        recipient: number,
+        to: string,
         replyMessageId?: string,
     ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
-        return this.send(
-            JSON.stringify(this.bodyBuilder(MessageTypesEnum.Interactive, body, recipient.toString(), replyMessageId)),
-        );
+        return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Interactive, body, to, replyMessageId)));
     }
 
     /**
      * Sends an address message to request shipping address from the user
      * Note: This feature is only available for businesses based in India and their India customers
      * @param body The address message content
-     * @param recipient Recipient phone number
+     * @param to Recipient phone number
      * @param replyMessageId Optional message ID to reply to
      * @returns Promise with the response
      */
     async interactiveAddressMessage(
         body: m.InteractiveObject & { type: InteractiveTypesEnum.AddressMessage },
-        recipient: number,
+        to: string,
         replyMessageId?: string,
     ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
-        return this.send(
-            JSON.stringify(this.bodyBuilder(MessageTypesEnum.Interactive, body, recipient.toString(), replyMessageId)),
-        );
+        return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Interactive, body, to, replyMessageId)));
     }
 
     /**
      * Sends an interactive reply buttons message
      * @param body The reply buttons message content
-     * @param recipient Recipient phone number
+     * @param to Recipient phone number
      * @param replyMessageId Optional message ID to reply to
      * @returns Promise with the response
      */
     async interactiveReplyButtons(
         body: m.InteractiveObject & { type: InteractiveTypesEnum.Button },
-        recipient: number,
+        to: string,
         replyMessageId?: string,
     ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
-        return this.send(
-            JSON.stringify(this.bodyBuilder(MessageTypesEnum.Interactive, body, recipient.toString(), replyMessageId)),
-        );
+        return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Interactive, body, to, replyMessageId)));
     }
 
     /**
      * Sends an interactive Flow message
      * @param body The Flow message content
-     * @param recipient Recipient phone number
+     * @param to Recipient phone number
      * @param replyMessageId Optional message ID to reply to
      * @returns Promise with the response
      */
     async interactiveFlow(
         body: m.InteractiveObject & { type: InteractiveTypesEnum.Flow },
-        recipient: number,
+        to: string,
         replyMessageId?: string,
     ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
-        return this.send(
-            JSON.stringify(this.bodyBuilder(MessageTypesEnum.Interactive, body, recipient.toString(), replyMessageId)),
-        );
+        return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Interactive, body, to, replyMessageId)));
     }
 
     /**
      * Sends a reaction to a message (emoji response)
      * @param messageId ID of the message to react to
      * @param emoji The emoji to send as reaction (e.g. "😀", "❤️", "👍")
-     * @param recipient Recipient phone number
+     * @param to Recipient phone number
      * @returns Promise with the response
      */
     async reaction(
         messageId: string,
         emoji: string,
-        recipient: number,
+        to: string,
     ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
         const body = {
             messaging_product: 'whatsapp',
             recipient_type: 'individual',
-            to: recipient.toString(),
+            to: to,
             type: 'reaction',
             reaction: {
                 message_id: messageId,
