@@ -21,7 +21,8 @@
         "types": ["node"],
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
-        "skipLibCheck": false
+        "skipLibCheck": false,
+        "preserveConstEnums": true
     },
     "include": ["src/**/*"],
     "exclude": ["node_modules", "dist"]
