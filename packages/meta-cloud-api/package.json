@@ -41,7 +41,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsup --watch",
     "build": "tsup --clean",
-    "clean": "rm -rf dist node_modules"
+    "clean": "rm -rf dist node_modules",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [
     "whatsapp-api",
