@@ -19,19 +19,14 @@ export default class TemplateApi extends BaseAPI implements TemplateClass {
     }
 
     async getTemplate(templateId: string): Promise<RequesterResponseInterface<TemplateResponse>> {
-        return this.client.sendRequest(
-            HttpMethodsEnum.Get,
-            `${templateId}`,
-            this.config[WabaConfigEnum.RequestTimeout],
-            null,
-        );
+        return this.sendJson(HttpMethodsEnum.Get, `${templateId}`, this.config[WabaConfigEnum.RequestTimeout], null);
     }
 
     async updateTemplate(
         templateId: string,
         template: Partial<TemplateRequestBody>,
     ): Promise<RequesterResponseInterface<ResponseSuccess>> {
-        return this.client.sendRequest(
+        return this.sendJson(
             HttpMethodsEnum.Post,
             `${templateId}`,
             this.config[WabaConfigEnum.RequestTimeout],
@@ -42,7 +37,7 @@ export default class TemplateApi extends BaseAPI implements TemplateClass {
     async getTemplates(
         params: TemplateGetParams,
     ): Promise<RequesterResponseInterface<ResponsePagination<TemplateResponse>>> {
-        return this.client.sendRequest(
+        return this.sendJson(
             HttpMethodsEnum.Get,
             `${this.config[WabaConfigEnum.BusinessAcctId]}/${this.endpoint}${objectToQueryString(params)}`,
             this.config[WabaConfigEnum.RequestTimeout],
@@ -51,7 +46,7 @@ export default class TemplateApi extends BaseAPI implements TemplateClass {
     }
 
     async createTemplate(template: TemplateRequestBody): Promise<RequesterResponseInterface<TemplateResponse>> {
-        return this.client.sendRequest(
+        return this.sendJson(
             HttpMethodsEnum.Post,
             `${this.config[WabaConfigEnum.BusinessAcctId]}/${this.endpoint}`,
             this.config[WabaConfigEnum.RequestTimeout],
@@ -60,7 +55,7 @@ export default class TemplateApi extends BaseAPI implements TemplateClass {
     }
 
     async deleteTemplate(params: TemplateDeleteParams): Promise<RequesterResponseInterface<ResponseSuccess>> {
-        return this.client.sendRequest(
+        return this.sendJson(
             HttpMethodsEnum.Delete,
             `${this.config[WabaConfigEnum.BusinessAcctId]}/${this.endpoint}${objectToQueryString(params)}`,
             this.config[WabaConfigEnum.RequestTimeout],

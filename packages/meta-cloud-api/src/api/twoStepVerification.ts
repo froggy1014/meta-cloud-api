@@ -14,7 +14,7 @@ export default class TwoStepVerificationAPI extends BaseAPI implements TwoStepVe
             pin,
         };
 
-        return this.client.sendRequest(
+        return this.sendJson(
             HttpMethodsEnum.Post,
             `${this.config[WabaConfigEnum.PhoneNumberId]}`,
             this.config[WabaConfigEnum.RequestTimeout],

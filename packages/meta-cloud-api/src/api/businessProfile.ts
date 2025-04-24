@@ -49,7 +49,7 @@ export default class BusinessProfileAPI extends BaseAPI implements BusinessProfi
      */
     async getBusinessProfile(fields?: string): Promise<RequesterResponseInterface<BusinessProfileResponse>> {
         const queryParams = fields ? objectToQueryString({ fields }) : '';
-        return this.client.sendRequest(
+        return this.sendJson(
             HttpMethodsEnum.Get,
             `${this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}${queryParams}`,
             this.config[WabaConfigEnum.RequestTimeout],
@@ -86,7 +86,7 @@ export default class BusinessProfileAPI extends BaseAPI implements BusinessProfi
     async updateBusinessProfile(
         updateRequest: UpdateBusinessProfileRequest,
     ): Promise<RequesterResponseInterface<ResponseSuccess>> {
-        return this.client.sendRequest(
+        return this.sendJson(
             HttpMethodsEnum.Post,
             `${this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}`,
             this.config[WabaConfigEnum.RequestTimeout],
@@ -124,7 +124,7 @@ export default class BusinessProfileAPI extends BaseAPI implements BusinessProfi
             file_name: fileName,
         });
 
-        return this.client.sendRequest(
+        return this.sendJson(
             HttpMethodsEnum.Post,
             `app/uploads/${queryParams}`,
             this.config[WabaConfigEnum.RequestTimeout],
@@ -153,12 +153,7 @@ export default class BusinessProfileAPI extends BaseAPI implements BusinessProfi
         uploadId: string,
         file: Buffer,
     ): Promise<RequesterResponseInterface<UploadBusinessProfileResponse>> {
-        return this.client.sendRequest(
-            HttpMethodsEnum.Post,
-            `${uploadId}`,
-            this.config[WabaConfigEnum.RequestTimeout],
-            file,
-        );
+        return this.sendJson(HttpMethodsEnum.Post, `${uploadId}`, this.config[WabaConfigEnum.RequestTimeout], file);
     }
 
     /**
@@ -196,11 +191,6 @@ export default class BusinessProfileAPI extends BaseAPI implements BusinessProfi
      * });
      */
     async getUploadHandle(uploadId: string): Promise<RequesterResponseInterface<UploadHandle>> {
-        return this.client.sendRequest(
-            HttpMethodsEnum.Get,
-            `${uploadId}`,
-            this.config[WabaConfigEnum.RequestTimeout],
-            null,
-        );
+        return this.sendJson(HttpMethodsEnum.Get, `${uploadId}`, this.config[WabaConfigEnum.RequestTimeout], null);
     }
 }

@@ -1,18 +1,18 @@
-import BaseAPI from './base';
 import { WabaConfigType } from '../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../types/enums';
-import { RequesterClass, RequesterResponseInterface, ResponseSuccess } from '../types/request';
 import {
-    FlowClass,
-    FlowsListResponse,
-    FlowCategoryEnum,
     Flow,
-    FlowPreviewResponse,
     FlowAssetsResponse,
-    FlowValidationError,
+    FlowCategoryEnum,
+    FlowClass,
     FlowMigrationResponse,
+    FlowPreviewResponse,
+    FlowsListResponse,
+    FlowValidationError,
 } from '../types/flow';
+import { RequesterClass, RequesterResponseInterface, ResponseSuccess } from '../types/request';
 import Logger from '../utils/logger';
+import BaseAPI from './base';
 
 const LIB_NAME = 'FlowAPI';
 const LOG_LOCAL = false;
@@ -31,12 +31,7 @@ export default class FlowAPI extends BaseAPI implements FlowClass {
      * @returns Promise with the list of flows
      */
     async listFlows(wabaId: string): Promise<RequesterResponseInterface<FlowsListResponse>> {
-        return this.client.sendRequest(
-            HttpMethodsEnum.Get,
-            `/${wabaId}/flows`,
-            this.config[WabaConfigEnum.RequestTimeout],
-            null,
-        );
+        return this.sendJson(HttpMethodsEnum.Get, `/${wabaId}/flows`, this.config[WabaConfigEnum.RequestTimeout], null);
     }
 
     /**
@@ -68,7 +63,7 @@ export default class FlowAPI extends BaseAPI implements FlowClass {
         if (data.flow_json) formData.append('flow_json', data.flow_json);
         if (data.publish !== undefined) formData.append('publish', String(data.publish));
 
-        return this.client.sendRequest(
+        return this.sendJson(
             HttpMethodsEnum.Post,
             `/${wabaId}/flows`,
             this.config[WabaConfigEnum.RequestTimeout],
@@ -94,7 +89,7 @@ export default class FlowAPI extends BaseAPI implements FlowClass {
         if (dateFormat) params.append('date_format', dateFormat);
 
         const queryString = params.toString() ? `?${params.toString()}` : '';
-        return this.client.sendRequest(
+        return this.sendJson(
             HttpMethodsEnum.Get,
             `/${flowId}${queryString}`,
             this.config[WabaConfigEnum.RequestTimeout],
@@ -125,12 +120,7 @@ export default class FlowAPI extends BaseAPI implements FlowClass {
         if (data.endpoint_uri) formData.append('endpoint_uri', data.endpoint_uri);
         if (data.application_id) formData.append('application_id', data.application_id);
 
-        return this.client.sendRequest(
-            HttpMethodsEnum.Post,
-            `/${flowId}`,
-            this.config[WabaConfigEnum.RequestTimeout],
-            formData,
-        );
+        return this.sendJson(HttpMethodsEnum.Post, `/${flowId}`, this.config[WabaConfigEnum.RequestTimeout], formData);
     }
 
     /**
@@ -140,12 +130,7 @@ export default class FlowAPI extends BaseAPI implements FlowClass {
      * @returns Promise with the success status
      */
     async deleteFlow(flowId: string): Promise<RequesterResponseInterface<ResponseSuccess>> {
-        return this.client.sendRequest(
-            HttpMethodsEnum.Delete,
-            `/${flowId}`,
-            this.config[WabaConfigEnum.RequestTimeout],
-            null,
-        );
+        return this.sendJson(HttpMethodsEnum.Delete, `/${flowId}`, this.config[WabaConfigEnum.RequestTimeout], null);
     }
 
     /**
@@ -155,7 +140,7 @@ export default class FlowAPI extends BaseAPI implements FlowClass {
      * @returns Promise with the list of assets
      */
     async listAssets(flowId: string): Promise<RequesterResponseInterface<FlowAssetsResponse>> {
-        return this.client.sendRequest(
+        return this.sendJson(
             HttpMethodsEnum.Get,
             `/${flowId}/assets`,
             this.config[WabaConfigEnum.RequestTimeout],
@@ -184,7 +169,7 @@ export default class FlowAPI extends BaseAPI implements FlowClass {
         formData.append('file', data.file);
         formData.append('name', data.name);
 
-        return this.client.sendRequest(
+        return this.sendJson(
             HttpMethodsEnum.Post,
             `/${flowId}/assets`,
             this.config[WabaConfigEnum.RequestTimeout],
@@ -199,7 +184,7 @@ export default class FlowAPI extends BaseAPI implements FlowClass {
      * @returns Promise with the success status
      */
     async publishFlow(flowId: string): Promise<RequesterResponseInterface<ResponseSuccess>> {
-        return this.client.sendRequest(
+        return this.sendJson(
             HttpMethodsEnum.Post,
             `/${flowId}/publish`,
             this.config[WabaConfigEnum.RequestTimeout],
@@ -214,7 +199,7 @@ export default class FlowAPI extends BaseAPI implements FlowClass {
      * @returns Promise with the success status
      */
     async deprecateFlow(flowId: string): Promise<RequesterResponseInterface<ResponseSuccess>> {
-        return this.client.sendRequest(
+        return this.sendJson(
             HttpMethodsEnum.Post,
             `/${flowId}/deprecate`,
             this.config[WabaConfigEnum.RequestTimeout],
@@ -243,7 +228,7 @@ export default class FlowAPI extends BaseAPI implements FlowClass {
             formData.append('source_flow_names', JSON.stringify(data.source_flow_names));
         }
 
-        return this.client.sendRequest(
+        return this.sendJson(
             HttpMethodsEnum.Post,
             `/${wabaId}/migrate_flows`,
             this.config[WabaConfigEnum.RequestTimeout],

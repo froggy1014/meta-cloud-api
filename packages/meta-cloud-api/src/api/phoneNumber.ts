@@ -20,7 +20,7 @@ export default class PhoneNumberApi extends BaseAPI implements PhoneNumberClass 
 
     async getPhoneNumberById(fields?: string): Promise<RequesterResponseInterface<PhoneNumberResponse>> {
         const queryParams = fields ? objectToQueryString({ fields }) : '';
-        return this.client.sendRequest(
+        return this.sendJson(
             HttpMethodsEnum.Get,
             `${this.config[WabaConfigEnum.PhoneNumberId]}${queryParams}`,
             this.config[WabaConfigEnum.RequestTimeout],
@@ -29,7 +29,7 @@ export default class PhoneNumberApi extends BaseAPI implements PhoneNumberClass 
     }
 
     async getPhoneNumbers(): Promise<RequesterResponseInterface<PhoneNumbersResponse>> {
-        return this.client.sendRequest(
+        return this.sendJson(
             HttpMethodsEnum.Get,
             `${this.config[WabaConfigEnum.BusinessAcctId]}/${this.endpoint}`,
             this.config[WabaConfigEnum.RequestTimeout],
@@ -40,7 +40,7 @@ export default class PhoneNumberApi extends BaseAPI implements PhoneNumberClass 
     async requestVerificationCode(
         requestVerificationCodeRequest: RequestVerificationCodeRequest,
     ): Promise<RequesterResponseInterface<ResponseSuccess>> {
-        return this.client.sendRequest(
+        return this.sendJson(
             HttpMethodsEnum.Post,
             `${this.config[WabaConfigEnum.PhoneNumberId]}/request_code`,
             this.config[WabaConfigEnum.RequestTimeout],
@@ -49,7 +49,7 @@ export default class PhoneNumberApi extends BaseAPI implements PhoneNumberClass 
     }
 
     async verifyCode(verifyCodeRequest: VerifyCodeRequest): Promise<RequesterResponseInterface<ResponseSuccess>> {
-        return this.client.sendRequest(
+        return this.sendJson(
             HttpMethodsEnum.Post,
             `${this.config[WabaConfigEnum.PhoneNumberId]}/verify_code`,
             this.config[WabaConfigEnum.RequestTimeout],

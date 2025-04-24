@@ -1,8 +1,8 @@
-import { HttpMethodsEnum, WabaConfigEnum } from '../types/enums';
 import type { WabaConfigType } from '../types/config';
+import type { EncryptionClass, EncryptionPublicKeyResponse } from '../types/encryption';
+import { HttpMethodsEnum, WabaConfigEnum } from '../types/enums';
 import type { RequesterClass, RequesterResponseInterface, ResponseSuccess } from '../types/request';
 import BaseAPI from './base';
-import type { EncryptionClass, EncryptionPublicKeyResponse } from '../types/encryption';
 
 export default class EncryptionAPI extends BaseAPI implements EncryptionClass {
     private readonly endpoint = 'whatsapp_business_encryption';
@@ -12,7 +12,7 @@ export default class EncryptionAPI extends BaseAPI implements EncryptionClass {
     }
 
     async getEncryptionPublicKey(): Promise<RequesterResponseInterface<EncryptionPublicKeyResponse>> {
-        return this.client.sendRequest(
+        return this.sendJson(
             HttpMethodsEnum.Get,
             `${this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}`,
             this.config[WabaConfigEnum.RequestTimeout],
@@ -24,7 +24,7 @@ export default class EncryptionAPI extends BaseAPI implements EncryptionClass {
         const formData = new FormData();
         formData.append('business_public_key', businessPublicKey);
 
-        return this.client.sendRequest(
+        return this.sendJson(
             HttpMethodsEnum.Post,
             `${this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}`,
             this.config[WabaConfigEnum.RequestTimeout],

@@ -10,7 +10,7 @@ export default class WabaAPI extends BaseAPI implements WABAClass {
     }
 
     async getAllWabaSubscriptions(): Promise<RequesterResponseInterface<WabaSubscriptions>> {
-        return this.client.sendRequest(
+        return this.sendJson(
             HttpMethodsEnum.Get,
             `${this.config[WabaConfigEnum.BusinessAcctId]}/subscribed_apps`,
             this.config[WabaConfigEnum.RequestTimeout],
@@ -26,7 +26,7 @@ export default class WabaAPI extends BaseAPI implements WABAClass {
             override_callback_uri,
             verify_token,
         };
-        return this.client.sendRequest(
+        return this.sendJson(
             HttpMethodsEnum.Post,
             `${this.config[WabaConfigEnum.BusinessAcctId]}/subscribed_apps`,
             this.config[WabaConfigEnum.RequestTimeout],
@@ -35,7 +35,7 @@ export default class WabaAPI extends BaseAPI implements WABAClass {
     }
 
     async unsubscribeFromWaba(): Promise<RequesterResponseInterface<ResponseSuccess>> {
-        return this.client.sendRequest(
+        return this.sendJson(
             HttpMethodsEnum.Delete,
             `${this.config[WabaConfigEnum.BusinessAcctId]}/subscribed_apps`,
             this.config[WabaConfigEnum.RequestTimeout],

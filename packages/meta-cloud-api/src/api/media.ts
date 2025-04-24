@@ -1,7 +1,7 @@
-import { HttpMethodsEnum, WabaConfigEnum } from '../types/enums';
-import type { RequesterClass, RequesterResponseInterface, ResponseSuccess } from '../types/request';
 import type { WabaConfigType } from '../types/config';
-import type { MediaClass, MediaResponse, MediasResponse, UploadMediaResponse } from '../types/media';
+import { HttpMethodsEnum, WabaConfigEnum } from '../types/enums';
+import type { MediaClass, MediaResponse, UploadMediaResponse } from '../types/media';
+import type { RequesterClass, RequesterResponseInterface, ResponseSuccess } from '../types/request';
 import BaseAPI from './base';
 
 export default class MediaAPI extends BaseAPI implements MediaClass {
@@ -12,12 +12,7 @@ export default class MediaAPI extends BaseAPI implements MediaClass {
     }
 
     async getMediaById(mediaId: string): Promise<RequesterResponseInterface<MediaResponse>> {
-        return this.client.sendRequest(
-            HttpMethodsEnum.Get,
-            `${mediaId}`,
-            this.config[WabaConfigEnum.RequestTimeout],
-            null,
-        );
+        return this.sendJson(HttpMethodsEnum.Get, `${mediaId}`, this.config[WabaConfigEnum.RequestTimeout], null);
     }
 
     async uploadMedia(
@@ -29,7 +24,7 @@ export default class MediaAPI extends BaseAPI implements MediaClass {
         formData.append('messaging_product', messagingProduct);
         formData.append('type', file.type);
 
-        return this.client.sendRequest(
+        return this.sendJson(
             HttpMethodsEnum.Post,
             `${this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}`,
             this.config[WabaConfigEnum.RequestTimeout],
@@ -38,15 +33,10 @@ export default class MediaAPI extends BaseAPI implements MediaClass {
     }
 
     async deleteMedia(mediaId: string): Promise<RequesterResponseInterface<ResponseSuccess>> {
-        return this.client.sendRequest(
-            HttpMethodsEnum.Delete,
-            `${mediaId}`,
-            this.config[WabaConfigEnum.RequestTimeout],
-            null,
-        );
+        return this.sendJson(HttpMethodsEnum.Delete, `${mediaId}`, this.config[WabaConfigEnum.RequestTimeout], null);
     }
 
     async downloadMedia(mediaUrl: string): Promise<RequesterResponseInterface<Blob>> {
-        return this.client.sendRequest(HttpMethodsEnum.Get, mediaUrl, this.config[WabaConfigEnum.RequestTimeout], null);
+        return this.sendJson(HttpMethodsEnum.Get, mediaUrl, this.config[WabaConfigEnum.RequestTimeout], null);
     }
 }

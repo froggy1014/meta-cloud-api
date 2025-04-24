@@ -1,6 +1,6 @@
-import { RegistrationClass } from '../types/registration';
 import type { WabaConfigType } from '../types/config';
-import { HttpMethodsEnum, WabaConfigEnum, DataLocalizationRegionEnum } from '../types/enums';
+import { DataLocalizationRegionEnum, HttpMethodsEnum, WabaConfigEnum } from '../types/enums';
+import { RegistrationClass } from '../types/registration';
 import type { RequesterClass, RequesterResponseInterface, ResponseSuccess } from '../types/request';
 import BaseAPI from './base';
 
@@ -19,7 +19,7 @@ export default class RegistrationAPI extends BaseAPI implements RegistrationClas
             ...(dataLocalizationRegion && { data_localization_region: dataLocalizationRegion }),
         };
 
-        return this.client.sendRequest(
+        return this.sendJson(
             HttpMethodsEnum.Post,
             `${this.config[WabaConfigEnum.PhoneNumberId]}/register`,
             this.config[WabaConfigEnum.RequestTimeout],
@@ -28,7 +28,7 @@ export default class RegistrationAPI extends BaseAPI implements RegistrationClas
     }
 
     async deregister(): Promise<RequesterResponseInterface<ResponseSuccess>> {
-        return this.client.sendRequest(
+        return this.sendJson(
             HttpMethodsEnum.Post,
             `${this.config[WabaConfigEnum.PhoneNumberId]}/deregister`,
             this.config[WabaConfigEnum.RequestTimeout],
