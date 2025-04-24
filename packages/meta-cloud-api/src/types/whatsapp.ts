@@ -23,7 +23,7 @@ export type WhatsAppConfig = {
     baseUrl?: string;
     appId?: string;
     appSecret?: string;
-    phoneNumberId?: number;
+    phoneNumberId?: string;
     businessAcctId?: string;
     apiVersion?: string;
     webhookEndpoint?: string;

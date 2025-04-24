@@ -20,7 +20,7 @@ export type WabaConfigType = {
     /**
      * The Meta for Developers phone number id used by the registered business.
      */
-    [WabaConfigEnum.PhoneNumberId]: number;
+    [WabaConfigEnum.PhoneNumberId]: string;
 
     /**
      * The Meta for Developers business id for the registered business.

@@ -367,11 +367,18 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
         if (body.action.parameters.flow_action === undefined) {
             body.action.parameters.flow_action = 'navigate';
         }
-        if (body.action.parameters.flow_action_payload?.screen === undefined) {
-            body.action.parameters.flow_action_payload = {
-                ...body.action.parameters.flow_action_payload,
-                screen: 'FIRST_ENTRY_SCREEN',
-            };
+
+        // Only include flow_action_payload when flow_action is navigate
+        if (body.action.parameters.flow_action === 'navigate') {
+            if (body.action.parameters.flow_action_payload?.screen === undefined) {
+                body.action.parameters.flow_action_payload = {
+                    ...body.action.parameters.flow_action_payload,
+                    screen: 'INIT',
+                };
+            }
+        } else if (body.action.parameters.flow_action === 'data_exchange') {
+            // Remove flow_action_payload when flow_action is data_exchange
+            delete body.action.parameters.flow_action_payload;
         }
 
         return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Interactive, body, to, replyMessageId)));
