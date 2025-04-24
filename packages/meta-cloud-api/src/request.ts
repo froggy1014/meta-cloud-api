@@ -1,9 +1,8 @@
 import HttpsClient from './httpsClient';
-import Logger from './utils/logger';
 import type { HttpMethodsEnum } from './types/enums';
 import type { RequesterClass } from './types/request';
-import { MetaError } from './utils/isMetaError';
-import { isMetaError } from './utils/isMetaError';
+import { isMetaError, MetaError } from './utils/isMetaError';
+import Logger from './utils/logger';
 
 const LIB_NAME = 'REQUESTER';
 const LOG_LOCAL = false;
@@ -100,5 +99,10 @@ export default class Requester implements RequesterClass {
                 },
             } as MetaError;
         }
+    }
+
+    async getJson<T>(method: HttpMethodsEnum, endpoint: string, timeout: number, body?: any): Promise<T> {
+        const res = await this.sendRequest(method, endpoint, timeout, body);
+        return (await res.json()) as T;
     }
 }

@@ -2,6 +2,7 @@ import Logger from '../utils/logger';
 import type { BaseClass } from '../types/base';
 import type { WabaConfigType } from '../types/config';
 import type { RequesterClass } from '../types/request';
+import { HttpMethodsEnum } from 'src/types/enums';
 
 const LIB_NAME = 'BaseAPI';
 const LOG_LOCAL = false;
@@ -15,5 +16,9 @@ export default class BaseAPI implements BaseClass {
         this.config = config;
         this.client = client;
         LOGGER.log('Initialized with HTTPSClient');
+    }
+
+    protected sendJson<T>(method: HttpMethodsEnum, endpoint: string, timeout: number, body?: any): Promise<T> {
+        return this.client.getJson<T>(method, endpoint, timeout, body);
     }
 }

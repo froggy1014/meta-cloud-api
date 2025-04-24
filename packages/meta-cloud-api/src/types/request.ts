@@ -63,4 +63,6 @@ export declare class RequesterClass {
         timeout: number,
         body?: any,
     ) => Promise<RequesterResponseInterface<any>>;
+
+    getJson<T>(method: HttpMethodsEnum, endpoint: string, timeout: number, body?: any): Promise<T>;
 }
