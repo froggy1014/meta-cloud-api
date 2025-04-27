@@ -2,63 +2,31 @@
 sidebar_position: 1
 ---
 
-# Meta Cloud API Documentation
+# Introduction
 
-Welcome to the Meta Cloud API documentation. This guide will help you use our WhatsApp messaging APIs to build rich, interactive experiences for your users.
+Welcome to the documentation for the `meta-cloud-api`! This project provides a streamlined and developer-friendly interface for interacting with the official WhatsApp Business Cloud API, simplifying common tasks and reducing boilerplate code.
 
-## Available APIs
+## Why Use `meta-cloud-api`?
 
-- [Messages API](./messages/index.md) - Send various types of WhatsApp messages including text, media, interactive components, and more
-- [Template API](./template-api.md) - Send pre-approved message templates for notifications and customer care
-- [Phone Number API](./phone-number-api.md) - Manage WhatsApp business phone numbers and verification
-- [QR Code API](./qr-code-api.md) - Create and manage QR codes and short links for WhatsApp conversations
-- [Encryption API](./encryption-api.md) - Manage encryption for secure data exchange in WhatsApp Flows
-- [Two-Step Verification API](./two-step-verification-api.md) - Set up and manage PIN-based security for your WhatsApp account
-- [Registration API](./registration-api.md) - Register and deregister your business phone numbers with WhatsApp Cloud API
-- [Media API](./media-api.md) - Upload, retrieve, download, and delete media files for use with WhatsApp messaging
-- [WABA API](./waba-api.md) - Manage WhatsApp Business Accounts and their webhook subscriptions
-- [Flow API](./flow-api.md) - Create and manage interactive WhatsApp Flows for collecting information from customers
-- More APIs coming soon...
+The official WhatsApp Cloud API offers powerful capabilities, but interacting with it directly can sometimes involve repetitive setup and response handling. This wrapper aims to:
+
+*   **Simplify API Calls:** Provides intuitive methods for various API endpoints (Messages, Templates, Media, Flows, etc.).
+*   **Streamline Configuration:** Easily configure your API credentials (Phone Number ID, Access Token, Business Account ID) through constructor options or environment variables.
+*   **Provide Type Safety:** (Assuming TypeScript) Offers type definitions for requests and responses, improving developer experience and reducing runtime errors.
+*   **Offer Clear Documentation:** This site provides comprehensive guides, API references, and tutorials to get you up and running quickly.
+*   **Shared Types:** Provides shared types generated from the official WhatsApp Cloud API OpenAPI Specification (OAS), reducing duplication across endpoints and ensuring consistency.
+
+Whether you are building chatbots, sending notifications, managing customer interactions, or integrating WhatsApp Flows, this wrapper helps you leverage the full potential of the WhatsApp Cloud API with greater ease and efficiency.
 
 ## Getting Started
 
-### Installation
+Ready to dive in? Head over to the [Get Started](./get-started.md) guide for installation instructions and your first API call.
 
-Install the Meta Cloud API package:
+## Explore the API
 
-```bash
-npm install meta-cloud-api
-```
+Use the sidebar to navigate through the different sections:
 
-### Basic Setup
-
-```typescript
-import WhatsApp from 'meta-cloud-api';
-
-// Initialize with configuration object
-const whatsapp = new WhatsApp({
-  phoneNumberId: YOUR_PHONE_NUMBER_ID,
-  accessToken: 'YOUR_ACCESS_TOKEN'
-});
-
-// You can also use environment variables (.env file)
-// const whatsapp = new WhatsApp();
-
-// Now you can use various API endpoints
-// Example: Send a text message
-const response = await whatsapp.messages.text(
-  { body: "Hello from Meta Cloud API!" },
-  15551234567
-);
-```
-
-## About This Documentation
-
-This documentation provides detailed guides and examples for using the Meta Cloud API. Each section includes:
-
-- Complete API reference
-- Code examples
-- Parameter details
-- Response formats
-
-Use the sidebar to navigate between different API sections.
+*   **Get Started:** Installation and basic setup.
+*   **API Reference:** Detailed information on available methods and parameters for each API category (Messages, Templates, Media, etc.).
+*   **Settings:** Configuration options.
+*   **Tutorials:** Step-by-step guides for common use cases.

@@ -40,7 +40,7 @@ const flowResponse = await whatsapp.flows.create({
   categories: ["APPOINTMENT_BOOKING"],
 });
 
-console.log("Flow created successfully. Flow ID:", flowResponse.data.id);
+console.log("Flow created successfully. Flow ID:", flowResponse.id);
 ```
 
 To create a Flow with a JSON definition and publish it immediately:
@@ -84,7 +84,7 @@ const flowResponse = await whatsapp.flows.create({
   publish: true
 });
 
-console.log("Flow created and published. Flow ID:", flowResponse.data.id);
+console.log("Flow created and published. Flow ID:", flowResponse.id);
 ```
 
 ### Supported Parameters
@@ -109,7 +109,7 @@ const updateResponse = await whatsapp.flows.updateMetadata(FLOW_ID, {
   categories: ["APPOINTMENT_BOOKING", "CUSTOMER_SUPPORT"]
 });
 
-console.log("Flow updated successfully:", updateResponse.data.success);
+console.log("Flow updated successfully:", updateResponse.success);
 ```
 
 ## Updating Flow JSON
@@ -120,8 +120,8 @@ To update a Flow's JSON definition:
 // Update Flow JSON definition
 const updateJsonResponse = await whatsapp.flows.updateJson(FLOW_ID, flowJson);
 
-console.log("Flow JSON updated successfully:", updateJsonResponse.data.success);
-console.log("Validation errors:", updateJsonResponse.data.validation_errors);
+console.log("Flow JSON updated successfully:", updateJsonResponse.success);
+console.log("Validation errors:", updateJsonResponse.validation_errors);
 ```
 
 ## Getting Flow Preview URL
@@ -132,8 +132,8 @@ To generate a preview URL for your Flow:
 // Get a preview URL for a Flow
 const previewResponse = await whatsapp.flows.getPreviewUrl(FLOW_ID);
 
-console.log("Preview URL:", previewResponse.data.preview.preview_url);
-console.log("Expires at:", previewResponse.data.preview.expires_at);
+console.log("Preview URL:", previewResponse.preview.preview_url);
+console.log("Expires at:", previewResponse.preview.expires_at);
 ```
 
 The preview URL can be used to visualize and interact with your Flow before publishing. It can also be embedded as an iframe into an existing website:
@@ -161,7 +161,7 @@ Once your Flow has been validated and meets WhatsApp's design principles and pol
 // Publish a Flow
 const publishResponse = await whatsapp.flows.publish(FLOW_ID);
 
-console.log("Flow published successfully:", publishResponse.data.success);
+console.log("Flow published successfully:", publishResponse.success);
 ```
 
 ## Deprecating a Flow
@@ -172,7 +172,7 @@ When you no longer want to use a published Flow:
 // Deprecate a Flow
 const deprecateResponse = await whatsapp.flows.deprecate(FLOW_ID);
 
-console.log("Flow deprecated successfully:", deprecateResponse.data.success);
+console.log("Flow deprecated successfully:", deprecateResponse.success);
 ```
 
 ## Retrieving Flow Assets
@@ -183,7 +183,7 @@ To get a list of assets attached to a Flow:
 // Get Flow assets
 const assetsResponse = await whatsapp.flows.getAssets(FLOW_ID);
 
-console.log("Flow assets:", assetsResponse.data);
+console.log("Flow assets:", assetsResponse);
 ```
 
 ## Migrating Flows Between WABAs
@@ -198,8 +198,8 @@ const migrationResponse = await whatsapp.flows.migrate({
   sourceFlowNames: ["appointment-booking", "lead-gen"]
 });
 
-console.log("Migrated Flows:", migrationResponse.data.migrated_flows);
-console.log("Failed Flows:", migrationResponse.data.failed_flows);
+console.log("Migrated Flows:", migrationResponse.migrated_flows);
+console.log("Failed Flows:", migrationResponse.failed_flows);
 ```
 
 ## Flow Lifecycle
@@ -225,11 +225,11 @@ try {
     publish: true
   });
   
-  console.log("Flow created successfully. Flow ID:", flowResponse.data.id);
+  console.log("Flow created successfully. Flow ID:", flowResponse.id);
   
   // Check for validation errors even on success
-  if (flowResponse.data.validation_errors && flowResponse.data.validation_errors.length > 0) {
-    console.warn("Flow created with validation warnings:", flowResponse.data.validation_errors);
+  if (flowResponse.validation_errors && flowResponse.validation_errors.length > 0) {
+    console.warn("Flow created with validation warnings:", flowResponse.validation_errors);
   }
 } catch (error) {
   console.error("Error creating Flow:", error);
@@ -262,7 +262,7 @@ const createAndPublishFlow = async () => {
       categories: ["APPOINTMENT_BOOKING"]
     });
     
-    const flowId = flowResponse.data.id;
+    const flowId = flowResponse.id;
     
     // Step 2: Update the Flow with JSON content
     console.log("Updating Flow JSON...");
@@ -277,8 +277,8 @@ const createAndPublishFlow = async () => {
     const updateResponse = await whatsapp.flows.updateJson(flowId, flowJson);
     
     // Step 3: Check for validation errors
-    if (updateResponse.data.validation_errors && updateResponse.data.validation_errors.length > 0) {
-      console.warn("Flow validation issues need to be fixed:", updateResponse.data.validation_errors);
+    if (updateResponse.validation_errors && updateResponse.validation_errors.length > 0) {
+      console.warn("Flow validation issues need to be fixed:", updateResponse.validation_errors);
       return;
     }
     
@@ -286,14 +286,14 @@ const createAndPublishFlow = async () => {
     console.log("Generating preview URL...");
     const previewResponse = await whatsapp.flows.getPreviewUrl(flowId);
     
-    console.log("Please test your Flow at this URL:", previewResponse.data.preview.preview_url);
-    console.log("This URL will expire at:", previewResponse.data.preview.expires_at);
+    console.log("Please test your Flow at this URL:", previewResponse.preview.preview_url);
+    console.log("This URL will expire at:", previewResponse.preview.expires_at);
     
     // Step 5: After manual testing, publish the Flow
     console.log("Publishing Flow...");
     const publishResponse = await whatsapp.flows.publish(flowId);
     
-    console.log("Flow published successfully:", publishResponse.data.success);
+    console.log("Flow published successfully:", publishResponse.success);
     
     // Step 6: Now you can send the Flow to customers
     console.log("You can now send this Flow to customers using the Messages API");

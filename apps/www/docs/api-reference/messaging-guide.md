@@ -2,6 +2,7 @@
 sidebar_position: 4
 ---
 
+
 # Messaging Guide
 
 This guide covers essential WhatsApp messaging concepts and common operations for managing messages effectively.

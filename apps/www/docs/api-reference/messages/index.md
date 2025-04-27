@@ -2,7 +2,7 @@
 sidebar_position: 3
 ---
 
-# Messages
+# Messages API
 
 The WhatsApp API allows you to send various types of messages to your customers. This section covers all available message types and usage patterns.
 

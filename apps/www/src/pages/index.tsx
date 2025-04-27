@@ -83,8 +83,9 @@ export default function Home(): ReactNode {
 
 // Initialize the client
 const client = new MetaCloudAPI({
-  apiKey: process.env.META_API_KEY,
-  version: 'v1'
+  accessToken: process.env.ACCESS_TOKEN,
+  phoneNumberId: process.env.PHONE_NUMBER_ID,
+  version: '22'
 });
 
 // Send a WhatsApp message

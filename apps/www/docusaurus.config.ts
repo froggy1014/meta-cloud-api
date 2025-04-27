@@ -9,23 +9,15 @@ const config: Config = {
     tagline: 'Build powerful WhatsApp integrations',
     favicon: 'img/favicon.ico',
 
-    // Set the production url of your site here
     url: `https://${process.env.VERCEL_URL}`,
-    // Set the /<baseUrl>/ pathname under which your site is served
-    // For GitHub pages deployment, it is often '/<projectName>/'
     baseUrl: '/',
 
-    // GitHub pages deployment config.
-    // If you aren't using GitHub pages, you don't need these.
-    organizationName: 'meta-cloud-api', // Usually your GitHub org/user name.
-    projectName: 'meta-cloud-api', // Usually your repo name.
+    organizationName: 'meta-cloud-api',
+    projectName: 'meta-cloud-api',
 
     onBrokenLinks: 'throw',
     onBrokenMarkdownLinks: 'warn',
 
-    // Even if you don't use internationalization, you can use this field to set
-    // useful metadata like html lang. For example, if your site is Chinese, you
-    // may want to replace "en" with "zh-Hans".
     i18n: {
         defaultLocale: 'en',
         locales: ['en'],
@@ -39,8 +31,6 @@ const config: Config = {
             {
                 docs: {
                     sidebarPath: './sidebars.ts',
-                    // Please change this to your repo.
-                    // Remove this to remove the "edit this page" links.
                     editUrl: 'https://github.com/froggy1014/meta-cloud-api',
                 },
                 theme: {
@@ -79,6 +69,10 @@ const config: Config = {
     ],
 
     themeConfig: {
+        colorMode: {
+            defaultMode: 'dark',
+            disableSwitch: true,
+        },
         navbar: {
             title: 'Meta Cloud API',
             logo: {
@@ -88,7 +82,7 @@ const config: Config = {
             items: [
                 {
                     type: 'docSidebar',
-                    sidebarId: 'apiReference',
+                    sidebarId: 'docsSidebar',
                     position: 'left',
                     label: 'Documentation',
                 },

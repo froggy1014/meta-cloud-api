@@ -68,7 +68,7 @@ const response = await whatsapp.messages.template(
   recipientNumber
 );
 
-console.log(`Template message sent with ID: ${response.data.messages[0].id}`);
+console.log(`Template message sent with ID: ${response.messages[0].id}`);
 ```
 
 ### Media-Based Templates
@@ -357,7 +357,7 @@ try {
     },
     recipientNumber
   );
-  console.log("Template message sent successfully:", response.data);
+  console.log("Template message sent successfully:", response);
 } catch (error) {
   console.error("Error sending template message:", error);
   

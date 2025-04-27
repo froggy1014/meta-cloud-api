@@ -80,3 +80,13 @@
 .navbar__title {
   color: #FFFFFF;
 }
+
+.footer__link-item {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+}
+
+.footer--dark {
+  background-color: #111827;
+}
