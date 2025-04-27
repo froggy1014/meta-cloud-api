@@ -84,7 +84,7 @@ sendImageByURL();
 
 ### Document Message (using Media ID)
 
-First, you would typically upload the document using the [Media API](./../media-api.md) to get an ID.
+First, you would typically upload the document using the [Media API](../api-reference/media-api.md) to get an ID.
 
 ```typescript
 import { DocumentMessageRequest } from 'meta-cloud-api/dist/types/messages'; // Adjust path
@@ -204,7 +204,7 @@ sendInteractiveButtons();
 
 ## Sending Template Messages
 
-Template messages require prior approval from Meta. See the [Template API](./../template-api.md) reference for more details.
+Template messages require prior approval from Meta. See the [Template API](../api-reference/template-api.md) reference for more details.
 
 ```typescript
 import { TemplateMessageRequest } from 'meta-cloud-api/dist/types/messages'; // Adjust path
@@ -243,4 +243,4 @@ async function sendTemplate() {
 sendTemplate();
 ```
 
-This tutorial covers the basics of sending different message types. Explore the [API Reference](./../template-api.md) for more advanced options and other message types like location, contacts, and stickers.
+This tutorial covers the basics of sending different message types. Explore the [API Reference](../api-reference/template-api.md) for more advanced options and other message types like location, contacts, and stickers.

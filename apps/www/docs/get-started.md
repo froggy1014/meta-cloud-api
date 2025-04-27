@@ -152,7 +152,7 @@ try {
 Now that you've sent your first message, you can:
 
 - Learn about [configuration settings](./settings.md) for more advanced options
-- Explore the [API Reference](./template-api.md) for all available methods
+- Explore the [API Reference](./api-reference/template-api.md) for all available methods
 - Check out our [Tutorials](./tutorials/sending-messages.md) for common use cases
 
 For more information about the WhatsApp Cloud API itself, refer to the [official Meta documentation](https://developers.facebook.com/docs/whatsapp/cloud-api/).
