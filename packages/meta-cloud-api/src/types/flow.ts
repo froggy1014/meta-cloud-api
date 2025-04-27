@@ -143,11 +143,37 @@ export interface FlowMigrationFailure {
 }
 
 /**
+ * Create Flow Response
+ */
+export interface CreateFlowResponse {
+    id: string;
+    success: boolean;
+    validation_errors?: FlowValidationError[];
+}
+
+/**
+ * Update Flow Response
+ */
+export interface UpdateFlowResponse {
+    success: boolean;
+    validation_errors?: FlowValidationError[];
+}
+
+/**
  * Flow Migration Response
  */
 export interface FlowMigrationResponse {
     migrated_flows: FlowMigrationResult[];
     failed_flows: FlowMigrationFailure[];
+}
+
+/**
+ * Validate Flow JSON Response
+ */
+export interface ValidateFlowJsonResponse {
+    valid: boolean;
+    success: boolean;
+    validation_errors?: FlowValidationError[];
 }
 
 export interface FlowClass {
@@ -176,7 +202,7 @@ export interface FlowClass {
             flow_json?: string;
             publish?: boolean;
         },
-    ): Promise<RequesterResponseInterface<{ id: string; success: boolean; validation_errors?: FlowValidationError[] }>>;
+    ): Promise<RequesterResponseInterface<CreateFlowResponse>>;
 
     /**
      * Get Flow
@@ -239,7 +265,20 @@ export interface FlowClass {
             file: Blob;
             name: string;
         },
-    ): Promise<RequesterResponseInterface<{ success: boolean; validation_errors?: FlowValidationError[] }>>;
+    ): Promise<RequesterResponseInterface<UpdateFlowResponse>>;
+
+    /**
+     * Validate Flow JSON by attempting an update without publishing.
+     * This is a convenience method; the API doesn't have a dedicated validation endpoint.
+     *
+     * @param flowId - The ID of the Flow (must exist, can be in DRAFT status).
+     * @param flowJsonData - The Flow JSON content as a Buffer, JSON object, or Blob.
+     * @returns Promise indicating if the JSON is valid and includes validation errors if any.
+     */
+    validateFlowJson(
+        flowId: string,
+        flowJsonData: Blob | Buffer | object,
+    ): Promise<RequesterResponseInterface<ValidateFlowJsonResponse>>;
 
     /**
      * Publish Flow

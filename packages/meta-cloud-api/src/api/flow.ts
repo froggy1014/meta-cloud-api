@@ -39,7 +39,7 @@ export default class FlowAPI extends BaseAPI implements FlowClass {
      *
      * @param wabaId - The WABA ID
      * @param data - The flow data including name, categories, endpoint_uri, and optional clone_flow_id
-     * @returns Promise with the created flow ID
+     * @returns Promise with the created flow ID and validation errors if any
      */
     async createFlow(
         wabaId: string,
@@ -48,36 +48,38 @@ export default class FlowAPI extends BaseAPI implements FlowClass {
             categories?: FlowCategoryEnum[];
             endpoint_uri?: string;
             clone_flow_id?: string;
-            flow_json?: string;
+            flow_json?: string; // Flow JSON as a string
             publish?: boolean;
         },
     ): Promise<
         RequesterResponseInterface<{ id: string; success: boolean; validation_errors?: FlowValidationError[] }>
     > {
-        const formData = new FormData();
-
-        if (data.name) formData.append('name', data.name);
-        if (data.categories) formData.append('categories', JSON.stringify(data.categories));
-        if (data.endpoint_uri) formData.append('endpoint_uri', data.endpoint_uri);
-        if (data.clone_flow_id) formData.append('clone_flow_id', data.clone_flow_id);
-        if (data.flow_json) formData.append('flow_json', data.flow_json);
-        if (data.publish !== undefined) formData.append('publish', String(data.publish));
+        // The API expects application/json for this endpoint based on documentation examples
+        // Let's ensure we send JSON, not FormData, unless specifically required by an endpoint variation.
+        const payload = {
+            name: data.name,
+            categories: data.categories,
+            ...(data.endpoint_uri && { endpoint_uri: data.endpoint_uri }),
+            ...(data.clone_flow_id && { clone_flow_id: data.clone_flow_id }),
+            ...(data.flow_json && { flow_json: data.flow_json }),
+            ...(data.publish !== undefined && { publish: data.publish }),
+        };
 
         return this.sendJson(
             HttpMethodsEnum.Post,
             `/${wabaId}/flows`,
             this.config[WabaConfigEnum.RequestTimeout],
-            formData,
+            JSON.stringify(payload), // Send as JSON
         );
     }
 
     /**
-     * Get Flow
+     * Get Flow details
      *
      * @param flowId - The flow ID
-     * @param fields - Optional fields to return
+     * @param fields - Optional fields to return (e.g., 'name,status,preview.invalidate(false)')
      * @param dateFormat - Optional date format
-     * @returns Promise with the flow details
+     * @returns Promise with the flow details or preview response
      */
     async getFlow(
         flowId: string,
@@ -98,10 +100,26 @@ export default class FlowAPI extends BaseAPI implements FlowClass {
     }
 
     /**
+     * Get Flow Preview URL
+     *
+     * @param flowId - The flow ID
+     * @param invalidate - Optional. If true, invalidates existing preview and generates a new one. Defaults to false.
+     * @returns Promise with the flow preview details
+     */
+    async getFlowPreview(
+        flowId: string,
+        invalidate: boolean = false,
+    ): Promise<RequesterResponseInterface<FlowPreviewResponse>> {
+        const fields = `preview.invalidate(${invalidate})`;
+        // Type assertion needed as getFlow can return Flow or FlowPreviewResponse
+        return this.getFlow(flowId, fields) as Promise<RequesterResponseInterface<FlowPreviewResponse>>;
+    }
+
+    /**
      * Update Flow Metadata
      *
      * @param flowId - The flow ID
-     * @param data - The flow metadata to update
+     * @param data - The flow metadata to update (name, categories, endpoint_uri, application_id)
      * @returns Promise with the success status
      */
     async updateFlowMetadata(
@@ -113,18 +131,24 @@ export default class FlowAPI extends BaseAPI implements FlowClass {
             application_id?: string;
         },
     ): Promise<RequesterResponseInterface<ResponseSuccess>> {
-        const formData = new FormData();
+        // The API expects application/json for this endpoint based on documentation examples
+        const payload = {
+            ...(data.name && { name: data.name }),
+            ...(data.categories && { categories: data.categories }),
+            ...(data.endpoint_uri && { endpoint_uri: data.endpoint_uri }),
+            ...(data.application_id && { application_id: data.application_id }),
+        };
 
-        if (data.name) formData.append('name', data.name);
-        if (data.categories) formData.append('categories', JSON.stringify(data.categories));
-        if (data.endpoint_uri) formData.append('endpoint_uri', data.endpoint_uri);
-        if (data.application_id) formData.append('application_id', data.application_id);
-
-        return this.sendJson(HttpMethodsEnum.Post, `/${flowId}`, this.config[WabaConfigEnum.RequestTimeout], formData);
+        return this.sendJson(
+            HttpMethodsEnum.Post,
+            `/${flowId}`,
+            this.config[WabaConfigEnum.RequestTimeout],
+            JSON.stringify(payload), // Send as JSON
+        );
     }
 
     /**
-     * Delete Flow
+     * Delete Flow (only works if the Flow is in DRAFT status)
      *
      * @param flowId - The flow ID
      * @returns Promise with the success status
@@ -134,7 +158,7 @@ export default class FlowAPI extends BaseAPI implements FlowClass {
     }
 
     /**
-     * List Assets (Get Flow JSON URL)
+     * List Assets (e.g., get Flow JSON download URL)
      *
      * @param flowId - The flow ID
      * @returns Promise with the list of assets
@@ -149,32 +173,106 @@ export default class FlowAPI extends BaseAPI implements FlowClass {
     }
 
     /**
-     * Update Flow JSON
+     * Update Flow JSON by uploading a file, buffer, JSON object, or Blob.
      *
      * @param flowId - The flow ID
-     * @param data - The asset data including asset_type, file, and name
-     * @returns Promise with the success status and validation errors
+     * @param data - Object containing the file data and optional name.
+     * @param data.file - The Flow JSON content as a Buffer, JSON object, or Blob.
+     * @param data.name - Optional name for the asset, defaults to 'flow.json'.
+     * @returns Promise with the success status and validation errors, if any.
      */
     async updateFlowJson(
         flowId: string,
         data: {
-            asset_type: 'FLOW_JSON';
-            file: Blob;
-            name: string;
+            file: Blob | Buffer | object; // JSON object, Buffer, or Blob
+            name?: string; // Default to "flow.json"
         },
     ): Promise<RequesterResponseInterface<{ success: boolean; validation_errors?: FlowValidationError[] }>> {
         const formData = new FormData();
+        let fileContent: Blob;
 
-        formData.append('asset_type', data.asset_type);
-        formData.append('file', data.file);
-        formData.append('name', data.name);
+        // Handle different input types for the file
+        if (data.file instanceof Buffer) {
+            // Buffer
+            // Create a Blob from the Buffer and cast it to the global Blob type
+            fileContent = new globalThis.Blob([data.file]);
+            formData.append('file', fileContent as unknown as Blob);
+        } else if (typeof data.file === 'object' && !(data.file instanceof Blob)) {
+            // JSON object - stringify and create Blob
+            try {
+                // Create a Blob from the JSON string and cast it to the global Blob type
+                fileContent = new globalThis.Blob([JSON.stringify(data.file, null, 2)], { type: 'application/json' });
+                formData.append('file', fileContent as unknown as Blob);
+            } catch (e) {
+                throw new Error('Failed to stringify JSON object for Flow JSON update.');
+            }
+        } else if (data.file instanceof Blob) {
+            // Blob (already in correct format)
+            fileContent = data.file;
+            formData.append('file', fileContent as unknown as Blob);
+        } else {
+            throw new Error('Invalid file type provided for Flow JSON update. Must be a Buffer, JSON object, or Blob.');
+        }
 
+        formData.append('asset_type', 'FLOW_JSON'); // Required by API
+        formData.append('name', data.name || 'flow.json'); // Required by API
+
+        // The underlying.sendJson needs to correctly handle FormData
+        // It might need specific headers like `Content-Type: multipart/form-data; boundary=...`
+        // which FormData library usually helps generate.
+        // Assuming.sendJson handles FormData correctly:
         return this.sendJson(
             HttpMethodsEnum.Post,
             `/${flowId}/assets`,
             this.config[WabaConfigEnum.RequestTimeout],
-            formData,
+            formData, // Pass FormData directly
+            // Headers might be set automatically by the client when FormData is detected,
+            // or might need to be explicitly set depending on the client implementation.
+            // e.g., { 'Content-Type': `multipart/form-data; boundary=${formData.getBoundary()}` }
         );
+    }
+
+    /**
+     * Validate Flow JSON by attempting an update without publishing.
+     * This is a convenience method; the API doesn't have a dedicated validation endpoint.
+     *
+     * @param flowId - The ID of the Flow (must exist, can be in DRAFT status).
+     * @param flowJsonData - The Flow JSON content as a file path (string), Buffer, JSON object, or Blob.
+     * @returns Promise indicating if the JSON is valid and includes validation errors if any.
+     */
+    async validateFlowJson(
+        flowId: string,
+        flowJsonData: Blob | Buffer | object,
+    ): Promise<
+        RequesterResponseInterface<{ valid: boolean; success: boolean; validation_errors?: FlowValidationError[] }>
+    > {
+        try {
+            // Attempt to update the Flow JSON. The API response includes validation errors.
+            const result = await this.updateFlowJson(flowId, {
+                file: flowJsonData,
+            });
+
+            // Get the response data
+            const responseData = await result.json();
+
+            const isValid = !responseData.validation_errors || responseData.validation_errors.length === 0;
+
+            // Create a new response with the 'valid' flag
+            const enhancedResponse = {
+                ...responseData,
+                valid: isValid,
+            };
+
+            // Return a new RequesterResponseInterface with the enhanced data
+            return {
+                json: async () => enhancedResponse,
+            };
+        } catch (error) {
+            // If the update itself fails (e.g., network error, auth error), rethrow.
+            // Specific API validation errors are handled within the 'result' above.
+            LOGGER.error('Error during Flow JSON validation attempt:', error);
+            throw error;
+        }
     }
 
     /**
@@ -184,11 +282,12 @@ export default class FlowAPI extends BaseAPI implements FlowClass {
      * @returns Promise with the success status
      */
     async publishFlow(flowId: string): Promise<RequesterResponseInterface<ResponseSuccess>> {
+        // This endpoint expects an empty JSON body or no body
         return this.sendJson(
             HttpMethodsEnum.Post,
             `/${flowId}/publish`,
             this.config[WabaConfigEnum.RequestTimeout],
-            JSON.stringify({}),
+            JSON.stringify({}), // Send empty JSON object
         );
     }
 
@@ -199,40 +298,42 @@ export default class FlowAPI extends BaseAPI implements FlowClass {
      * @returns Promise with the success status
      */
     async deprecateFlow(flowId: string): Promise<RequesterResponseInterface<ResponseSuccess>> {
+        // This endpoint expects an empty JSON body or no body
         return this.sendJson(
             HttpMethodsEnum.Post,
             `/${flowId}/deprecate`,
             this.config[WabaConfigEnum.RequestTimeout],
-            JSON.stringify({}),
+            JSON.stringify({}), // Send empty JSON object
         );
     }
 
     /**
-     * Migrate Flows
+     * Migrate Flows between WABAs
      *
-     * @param wabaId - The destination WABA ID
+     * @param destinationWabaId - The destination WABA ID
      * @param data - The migration data including source_waba_id and optional source_flow_names
-     * @returns Promise with migration results
+     * @returns Promise with migration results (successes and failures)
      */
     async migrateFlows(
-        wabaId: string,
+        destinationWabaId: string,
         data: {
             source_waba_id: string;
             source_flow_names?: string[];
         },
     ): Promise<RequesterResponseInterface<FlowMigrationResponse>> {
-        const formData = new FormData();
-
-        formData.append('source_waba_id', data.source_waba_id);
-        if (data.source_flow_names) {
-            formData.append('source_flow_names', JSON.stringify(data.source_flow_names));
-        }
+        // API documentation suggests this endpoint might expect application/json
+        // Let's double-check or assume JSON based on typical Graph API patterns unless FormData is confirmed.
+        // Assuming JSON for now:
+        const payload = {
+            source_waba_id: data.source_waba_id,
+            ...(data.source_flow_names && { source_flow_names: data.source_flow_names }),
+        };
 
         return this.sendJson(
             HttpMethodsEnum.Post,
-            `/${wabaId}/migrate_flows`,
+            `/${destinationWabaId}/migrate_flows`,
             this.config[WabaConfigEnum.RequestTimeout],
-            formData,
+            JSON.stringify(payload),
         );
     }
 }
