@@ -7,7 +7,7 @@ import {
     QrCodesResponse,
     UpdateQrCodeRequest,
 } from '../types/qrCode';
-import type { RequesterClass, RequesterResponseInterface, ResponseSuccess } from '../types/request';
+import type { RequesterClass, ResponseSuccess } from '../types/request';
 import BaseAPI from './base';
 
 export default class QrCodeAPI extends BaseAPI implements QrCodeClass {
@@ -17,7 +17,7 @@ export default class QrCodeAPI extends BaseAPI implements QrCodeClass {
         super(config, client);
     }
 
-    async createQrCode(request: CreateQrCodeRequest): Promise<RequesterResponseInterface<QrCodeResponse>> {
+    async createQrCode(request: CreateQrCodeRequest): Promise<QrCodeResponse> {
         return this.sendJson(
             HttpMethodsEnum.Post,
             `${this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}`,
@@ -26,7 +26,7 @@ export default class QrCodeAPI extends BaseAPI implements QrCodeClass {
         );
     }
 
-    async getQrCodes(): Promise<RequesterResponseInterface<QrCodesResponse>> {
+    async getQrCodes(): Promise<QrCodesResponse> {
         return this.sendJson(
             HttpMethodsEnum.Get,
             `${this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}`,
@@ -35,7 +35,7 @@ export default class QrCodeAPI extends BaseAPI implements QrCodeClass {
         );
     }
 
-    async getQrCode(qrCodeId: string): Promise<RequesterResponseInterface<QrCodeResponse>> {
+    async getQrCode(qrCodeId: string): Promise<QrCodeResponse> {
         return this.sendJson(
             HttpMethodsEnum.Get,
             `${this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}/${qrCodeId}`,
@@ -44,7 +44,7 @@ export default class QrCodeAPI extends BaseAPI implements QrCodeClass {
         );
     }
 
-    async updateQrCode(request: UpdateQrCodeRequest): Promise<RequesterResponseInterface<QrCodeResponse>> {
+    async updateQrCode(request: UpdateQrCodeRequest): Promise<QrCodeResponse> {
         return this.sendJson(
             HttpMethodsEnum.Post,
             `${this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}`,
@@ -53,7 +53,7 @@ export default class QrCodeAPI extends BaseAPI implements QrCodeClass {
         );
     }
 
-    async deleteQrCode(qrCodeId: string): Promise<RequesterResponseInterface<ResponseSuccess>> {
+    async deleteQrCode(qrCodeId: string): Promise<ResponseSuccess> {
         return this.sendJson(
             HttpMethodsEnum.Delete,
             `${this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}/${qrCodeId}`,

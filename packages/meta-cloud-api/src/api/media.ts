@@ -1,7 +1,7 @@
 import type { WabaConfigType } from '../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../types/enums';
 import type { MediaClass, MediaResponse, UploadMediaResponse } from '../types/media';
-import type { RequesterClass, RequesterResponseInterface, ResponseSuccess } from '../types/request';
+import type { RequesterClass, ResponseSuccess } from '../types/request';
 import BaseAPI from './base';
 
 export default class MediaAPI extends BaseAPI implements MediaClass {
@@ -11,14 +11,11 @@ export default class MediaAPI extends BaseAPI implements MediaClass {
         super(config, client);
     }
 
-    async getMediaById(mediaId: string): Promise<RequesterResponseInterface<MediaResponse>> {
+    async getMediaById(mediaId: string): Promise<MediaResponse> {
         return this.sendJson(HttpMethodsEnum.Get, `${mediaId}`, this.config[WabaConfigEnum.RequestTimeout], null);
     }
 
-    async uploadMedia(
-        file: File,
-        messagingProduct: string = 'whatsapp',
-    ): Promise<RequesterResponseInterface<UploadMediaResponse>> {
+    async uploadMedia(file: File, messagingProduct: string = 'whatsapp'): Promise<UploadMediaResponse> {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('messaging_product', messagingProduct);
@@ -32,11 +29,11 @@ export default class MediaAPI extends BaseAPI implements MediaClass {
         );
     }
 
-    async deleteMedia(mediaId: string): Promise<RequesterResponseInterface<ResponseSuccess>> {
+    async deleteMedia(mediaId: string): Promise<ResponseSuccess> {
         return this.sendJson(HttpMethodsEnum.Delete, `${mediaId}`, this.config[WabaConfigEnum.RequestTimeout], null);
     }
 
-    async downloadMedia(mediaUrl: string): Promise<RequesterResponseInterface<Blob>> {
+    async downloadMedia(mediaUrl: string): Promise<Blob> {
         return this.sendJson(HttpMethodsEnum.Get, mediaUrl, this.config[WabaConfigEnum.RequestTimeout], null);
     }
 }

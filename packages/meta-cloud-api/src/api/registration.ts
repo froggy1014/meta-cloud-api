@@ -1,7 +1,7 @@
 import type { WabaConfigType } from '../types/config';
 import { DataLocalizationRegionEnum, HttpMethodsEnum, WabaConfigEnum } from '../types/enums';
 import { RegistrationClass } from '../types/registration';
-import type { RequesterClass, RequesterResponseInterface, ResponseSuccess } from '../types/request';
+import type { RequesterClass, ResponseSuccess } from '../types/request';
 import BaseAPI from './base';
 
 export default class RegistrationAPI extends BaseAPI implements RegistrationClass {
@@ -9,10 +9,7 @@ export default class RegistrationAPI extends BaseAPI implements RegistrationClas
         super(config, client);
     }
 
-    async register(
-        pin: string,
-        dataLocalizationRegion?: DataLocalizationRegionEnum,
-    ): Promise<RequesterResponseInterface<ResponseSuccess>> {
+    async register(pin: string, dataLocalizationRegion?: DataLocalizationRegionEnum): Promise<ResponseSuccess> {
         const body = {
             messaging_product: 'whatsapp',
             pin,
@@ -27,7 +24,7 @@ export default class RegistrationAPI extends BaseAPI implements RegistrationClas
         );
     }
 
-    async deregister(): Promise<RequesterResponseInterface<ResponseSuccess>> {
+    async deregister(): Promise<ResponseSuccess> {
         return this.sendJson(
             HttpMethodsEnum.Post,
             `${this.config[WabaConfigEnum.PhoneNumberId]}/deregister`,

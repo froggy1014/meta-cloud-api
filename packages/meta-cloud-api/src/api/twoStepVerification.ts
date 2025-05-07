@@ -1,7 +1,7 @@
-import { TwoStepVerificationClass } from '../types/twoStepVerification';
 import type { WabaConfigType } from '../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../types/enums';
-import type { RequesterClass, RequesterResponseInterface, ResponseSuccess } from '../types/request';
+import type { RequesterClass, ResponseSuccess } from '../types/request';
+import { TwoStepVerificationClass } from '../types/twoStepVerification';
 import BaseAPI from './base';
 
 export default class TwoStepVerificationAPI extends BaseAPI implements TwoStepVerificationClass {
@@ -9,7 +9,7 @@ export default class TwoStepVerificationAPI extends BaseAPI implements TwoStepVe
         super(config, client);
     }
 
-    async setTwoStepVerificationCode(pin: string): Promise<RequesterResponseInterface<ResponseSuccess>> {
+    async setTwoStepVerificationCode(pin: string): Promise<ResponseSuccess> {
         const body = {
             pin,
         };

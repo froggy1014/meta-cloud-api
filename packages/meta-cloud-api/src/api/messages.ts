@@ -8,7 +8,7 @@ import {
 } from '../types/enums';
 
 import * as m from '../types/messages';
-import type { RequesterClass, RequesterResponseInterface } from '../types/request';
+import type { RequesterClass } from '../types/request';
 import BaseAPI from './base';
 
 /**
@@ -103,7 +103,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * @param body The request body to send
      * @returns Promise with the API response
      */
-    private send(body: BodyInit | null): Promise<RequesterResponseInterface<m.MessagesResponse>> {
+    private send(body: BodyInit | null): Promise<m.MessagesResponse> {
         return this.sendJson(
             this.commonMethod,
             `${this.config[WabaConfigEnum.PhoneNumberId]}/${this.commonEndpoint}`,
@@ -117,9 +117,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * @param params The audio message parameter object
      * @returns Promise with the message response
      */
-    async audio(
-        params: m.MessageRequestParams<m.AudioMediaObject>,
-    ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
+    async audio(params: m.MessageRequestParams<m.AudioMediaObject>): Promise<m.MessagesResponse> {
         const { body, to, replyMessageId } = params;
         return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Audio, body, to, replyMessageId)));
     }
@@ -129,9 +127,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * @param params The contact message parameter object
      * @returns Promise with the message response
      */
-    async contacts(
-        params: m.MessageRequestParams<[m.ContactObject]>,
-    ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
+    async contacts(params: m.MessageRequestParams<[m.ContactObject]>): Promise<m.MessagesResponse> {
         const { body, to, replyMessageId } = params;
         return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Contacts, body, to, replyMessageId)));
     }
@@ -141,9 +137,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * @param params The document message parameter object
      * @returns Promise with the message response
      */
-    async document(
-        params: m.MessageRequestParams<m.DocumentMediaObject>,
-    ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
+    async document(params: m.MessageRequestParams<m.DocumentMediaObject>): Promise<m.MessagesResponse> {
         const { body, to, replyMessageId } = params;
         return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Document, body, to, replyMessageId)));
     }
@@ -153,9 +147,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * @param params The image message parameter object
      * @returns Promise with the message response
      */
-    async image(
-        params: m.MessageRequestParams<m.ImageMediaObject>,
-    ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
+    async image(params: m.MessageRequestParams<m.ImageMediaObject>): Promise<m.MessagesResponse> {
         const { body, to, replyMessageId } = params;
         return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Image, body, to, replyMessageId)));
     }
@@ -165,9 +157,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * @param params The interactive message parameter object
      * @returns Promise with the message response
      */
-    async interactive(
-        params: m.MessageRequestParams<m.InteractiveObject>,
-    ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
+    async interactive(params: m.MessageRequestParams<m.InteractiveObject>): Promise<m.MessagesResponse> {
         const { body, to, replyMessageId } = params;
         return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Interactive, body, to, replyMessageId)));
     }
@@ -177,9 +167,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * @param params The location message parameter object
      * @returns Promise with the message response
      */
-    async location(
-        params: m.MessageRequestParams<m.LocationObject>,
-    ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
+    async location(params: m.MessageRequestParams<m.LocationObject>): Promise<m.MessagesResponse> {
         const { body, to, replyMessageId } = params;
         return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Location, body, to, replyMessageId)));
     }
@@ -189,9 +177,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * @param params The sticker message parameter object
      * @returns Promise with the message response
      */
-    async sticker(
-        params: m.MessageRequestParams<m.StickerMediaObject>,
-    ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
+    async sticker(params: m.MessageRequestParams<m.StickerMediaObject>): Promise<m.MessagesResponse> {
         const { body, to, replyMessageId } = params;
         return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Sticker, body, to, replyMessageId)));
     }
@@ -203,7 +189,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      */
     async template(
         params: m.MessageRequestParams<m.MessageTemplateObject<ComponentTypesEnum>>,
-    ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
+    ): Promise<m.MessagesResponse> {
         const { body, to, replyMessageId } = params;
         return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Template, body, to, replyMessageId)));
     }
@@ -213,7 +199,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * @param params The text message parameter object
      * @returns Promise with the message response
      */
-    async text(params: m.TextMessageParams): Promise<RequesterResponseInterface<m.MessagesResponse>> {
+    async text(params: m.TextMessageParams): Promise<m.MessagesResponse> {
         const { body, previewUrl, to, replyMessageId } = params;
 
         let textObject: m.TextObject;
@@ -234,9 +220,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * @param params The video message parameter object
      * @returns Promise with the message response
      */
-    async video(
-        params: m.MessageRequestParams<m.VideoMediaObject>,
-    ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
+    async video(params: m.MessageRequestParams<m.VideoMediaObject>): Promise<m.MessagesResponse> {
         const { body, to, replyMessageId } = params;
         return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Video, body, to, replyMessageId)));
     }
@@ -246,7 +230,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * @param params The status update parameter object
      * @returns Promise with the response
      */
-    async status(params: m.StatusParams): Promise<RequesterResponseInterface<m.MessagesResponse>> {
+    async status(params: m.StatusParams): Promise<m.MessagesResponse> {
         const { status, messageId, typingIndicator } = params;
 
         const bodyToSend = {
@@ -264,7 +248,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * @param params The parameter object to mark message as read
      * @returns Promise with the response
      */
-    async markAsRead(params: { messageId: string }): Promise<RequesterResponseInterface<m.MessagesResponse>> {
+    async markAsRead(params: { messageId: string }): Promise<m.MessagesResponse> {
         return this.status({
             status: 'read',
             messageId: params.messageId,
@@ -276,7 +260,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * @param params The typing indicator parameter object
      * @returns Promise with the response
      */
-    async showTypingIndicator(params: { messageId: string }): Promise<RequesterResponseInterface<m.MessagesResponse>> {
+    async showTypingIndicator(params: { messageId: string }): Promise<m.MessagesResponse> {
         return this.status({
             status: 'read',
             messageId: params.messageId,
@@ -293,7 +277,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      */
     async interactiveList(
         params: m.MessageRequestParams<m.InteractiveObject & { type: InteractiveTypesEnum.List }>,
-    ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
+    ): Promise<m.MessagesResponse> {
         const { body, to, replyMessageId } = params;
         return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Interactive, body, to, replyMessageId)));
     }
@@ -305,7 +289,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      */
     async interactiveCtaUrl(
         params: m.MessageRequestParams<m.InteractiveObject & { type: InteractiveTypesEnum.CtaUrl }>,
-    ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
+    ): Promise<m.MessagesResponse> {
         const { body, to, replyMessageId } = params;
         return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Interactive, body, to, replyMessageId)));
     }
@@ -317,7 +301,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      */
     async interactiveLocationRequest(
         params: m.MessageRequestParams<m.InteractiveObject & { type: InteractiveTypesEnum.LocationRequest }>,
-    ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
+    ): Promise<m.MessagesResponse> {
         const { body, to, replyMessageId } = params;
         return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Interactive, body, to, replyMessageId)));
     }
@@ -330,7 +314,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      */
     async interactiveAddressMessage(
         params: m.MessageRequestParams<m.InteractiveObject & { type: InteractiveTypesEnum.AddressMessage }>,
-    ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
+    ): Promise<m.MessagesResponse> {
         const { body, to, replyMessageId } = params;
         return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Interactive, body, to, replyMessageId)));
     }
@@ -342,7 +326,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      */
     async interactiveReplyButtons(
         params: m.MessageRequestParams<m.InteractiveObject & { type: InteractiveTypesEnum.Button }>,
-    ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
+    ): Promise<m.MessagesResponse> {
         const { body, to, replyMessageId } = params;
         return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Interactive, body, to, replyMessageId)));
     }
@@ -354,7 +338,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      */
     async interactiveFlow(
         params: m.MessageRequestParams<m.InteractiveObject & { type: InteractiveTypesEnum.Flow }>,
-    ): Promise<RequesterResponseInterface<m.MessagesResponse>> {
+    ): Promise<m.MessagesResponse> {
         const { body, to, replyMessageId } = params;
 
         // Apply default values for FlowParameters
@@ -389,7 +373,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * @param params The reaction message parameter object
      * @returns Promise with the response
      */
-    async reaction(params: m.ReactionParams): Promise<RequesterResponseInterface<m.MessagesResponse>> {
+    async reaction(params: m.ReactionParams): Promise<m.MessagesResponse> {
         const { messageId, emoji, to } = params;
 
         const body = {

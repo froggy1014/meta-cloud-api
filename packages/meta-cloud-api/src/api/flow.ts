@@ -1,6 +1,7 @@
 import { WabaConfigType } from '../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../types/enums';
 import {
+    CreateFlowResponse,
     Flow,
     FlowAssetsResponse,
     FlowCategoryEnum,
@@ -8,9 +9,10 @@ import {
     FlowMigrationResponse,
     FlowPreviewResponse,
     FlowsListResponse,
-    FlowValidationError,
+    UpdateFlowResponse,
+    ValidateFlowJsonResponse,
 } from '../types/flow';
-import { RequesterClass, RequesterResponseInterface, ResponseSuccess } from '../types/request';
+import { RequesterClass, ResponseSuccess } from '../types/request';
 import Logger from '../utils/logger';
 import BaseAPI from './base';
 
@@ -30,7 +32,7 @@ export default class FlowAPI extends BaseAPI implements FlowClass {
      * @param wabaId - The WABA ID
      * @returns Promise with the list of flows
      */
-    async listFlows(wabaId: string): Promise<RequesterResponseInterface<FlowsListResponse>> {
+    async listFlows(wabaId: string): Promise<FlowsListResponse> {
         return this.sendJson(HttpMethodsEnum.Get, `/${wabaId}/flows`, this.config[WabaConfigEnum.RequestTimeout], null);
     }
 
@@ -51,9 +53,7 @@ export default class FlowAPI extends BaseAPI implements FlowClass {
             flow_json?: string; // Flow JSON as a string
             publish?: boolean;
         },
-    ): Promise<
-        RequesterResponseInterface<{ id: string; success: boolean; validation_errors?: FlowValidationError[] }>
-    > {
+    ): Promise<CreateFlowResponse> {
         // The API expects application/json for this endpoint based on documentation examples
         // Let's ensure we send JSON, not FormData, unless specifically required by an endpoint variation.
         const payload = {
@@ -81,11 +81,7 @@ export default class FlowAPI extends BaseAPI implements FlowClass {
      * @param dateFormat - Optional date format
      * @returns Promise with the flow details or preview response
      */
-    async getFlow(
-        flowId: string,
-        fields?: string,
-        dateFormat?: string,
-    ): Promise<RequesterResponseInterface<Flow | FlowPreviewResponse>> {
+    async getFlow(flowId: string, fields?: string, dateFormat?: string): Promise<Flow | FlowPreviewResponse> {
         const params = new URLSearchParams();
         if (fields) params.append('fields', fields);
         if (dateFormat) params.append('date_format', dateFormat);
@@ -106,13 +102,10 @@ export default class FlowAPI extends BaseAPI implements FlowClass {
      * @param invalidate - Optional. If true, invalidates existing preview and generates a new one. Defaults to false.
      * @returns Promise with the flow preview details
      */
-    async getFlowPreview(
-        flowId: string,
-        invalidate: boolean = false,
-    ): Promise<RequesterResponseInterface<FlowPreviewResponse>> {
+    async getFlowPreview(flowId: string, invalidate: boolean = false): Promise<FlowPreviewResponse> {
         const fields = `preview.invalidate(${invalidate})`;
         // Type assertion needed as getFlow can return Flow or FlowPreviewResponse
-        return this.getFlow(flowId, fields) as Promise<RequesterResponseInterface<FlowPreviewResponse>>;
+        return this.getFlow(flowId, fields) as Promise<FlowPreviewResponse>;
     }
 
     /**
@@ -130,7 +123,7 @@ export default class FlowAPI extends BaseAPI implements FlowClass {
             endpoint_uri?: string;
             application_id?: string;
         },
-    ): Promise<RequesterResponseInterface<ResponseSuccess>> {
+    ): Promise<ResponseSuccess> {
         // The API expects application/json for this endpoint based on documentation examples
         const payload = {
             ...(data.name && { name: data.name }),
@@ -153,7 +146,7 @@ export default class FlowAPI extends BaseAPI implements FlowClass {
      * @param flowId - The flow ID
      * @returns Promise with the success status
      */
-    async deleteFlow(flowId: string): Promise<RequesterResponseInterface<ResponseSuccess>> {
+    async deleteFlow(flowId: string): Promise<ResponseSuccess> {
         return this.sendJson(HttpMethodsEnum.Delete, `/${flowId}`, this.config[WabaConfigEnum.RequestTimeout], null);
     }
 
@@ -163,7 +156,7 @@ export default class FlowAPI extends BaseAPI implements FlowClass {
      * @param flowId - The flow ID
      * @returns Promise with the list of assets
      */
-    async listAssets(flowId: string): Promise<RequesterResponseInterface<FlowAssetsResponse>> {
+    async listAssets(flowId: string): Promise<FlowAssetsResponse> {
         return this.sendJson(
             HttpMethodsEnum.Get,
             `/${flowId}/assets`,
@@ -187,7 +180,7 @@ export default class FlowAPI extends BaseAPI implements FlowClass {
             file: Blob | Buffer | object; // JSON object, Buffer, or Blob
             name?: string; // Default to "flow.json"
         },
-    ): Promise<RequesterResponseInterface<{ success: boolean; validation_errors?: FlowValidationError[] }>> {
+    ): Promise<UpdateFlowResponse> {
         const formData = new FormData();
         let fileContent: Blob;
 
@@ -240,36 +233,21 @@ export default class FlowAPI extends BaseAPI implements FlowClass {
      * @param flowJsonData - The Flow JSON content as a file path (string), Buffer, JSON object, or Blob.
      * @returns Promise indicating if the JSON is valid and includes validation errors if any.
      */
-    async validateFlowJson(
-        flowId: string,
-        flowJsonData: Blob | Buffer | object,
-    ): Promise<
-        RequesterResponseInterface<{ valid: boolean; success: boolean; validation_errors?: FlowValidationError[] }>
-    > {
+    async validateFlowJson(flowId: string, flowJsonData: Blob | Buffer | object): Promise<ValidateFlowJsonResponse> {
         try {
-            // Attempt to update the Flow JSON. The API response includes validation errors.
             const result = await this.updateFlowJson(flowId, {
                 file: flowJsonData,
             });
 
-            // Get the response data
-            const responseData = await result.json();
+            const isValid = !result.validation_errors || result.validation_errors.length === 0;
 
-            const isValid = !responseData.validation_errors || responseData.validation_errors.length === 0;
-
-            // Create a new response with the 'valid' flag
             const enhancedResponse = {
-                ...responseData,
+                ...result,
                 valid: isValid,
             };
 
-            // Return a new RequesterResponseInterface with the enhanced data
-            return {
-                json: async () => enhancedResponse,
-            };
+            return enhancedResponse;
         } catch (error) {
-            // If the update itself fails (e.g., network error, auth error), rethrow.
-            // Specific API validation errors are handled within the 'result' above.
             LOGGER.error('Error during Flow JSON validation attempt:', error);
             throw error;
         }
@@ -281,7 +259,7 @@ export default class FlowAPI extends BaseAPI implements FlowClass {
      * @param flowId - The flow ID
      * @returns Promise with the success status
      */
-    async publishFlow(flowId: string): Promise<RequesterResponseInterface<ResponseSuccess>> {
+    async publishFlow(flowId: string): Promise<ResponseSuccess> {
         // This endpoint expects an empty JSON body or no body
         return this.sendJson(
             HttpMethodsEnum.Post,
@@ -297,7 +275,7 @@ export default class FlowAPI extends BaseAPI implements FlowClass {
      * @param flowId - The flow ID
      * @returns Promise with the success status
      */
-    async deprecateFlow(flowId: string): Promise<RequesterResponseInterface<ResponseSuccess>> {
+    async deprecateFlow(flowId: string): Promise<ResponseSuccess> {
         // This endpoint expects an empty JSON body or no body
         return this.sendJson(
             HttpMethodsEnum.Post,
@@ -320,7 +298,7 @@ export default class FlowAPI extends BaseAPI implements FlowClass {
             source_waba_id: string;
             source_flow_names?: string[];
         },
-    ): Promise<RequesterResponseInterface<FlowMigrationResponse>> {
+    ): Promise<FlowMigrationResponse> {
         // API documentation suggests this endpoint might expect application/json
         // Let's double-check or assume JSON based on typical Graph API patterns unless FormData is confirmed.
         // Assuming JSON for now:

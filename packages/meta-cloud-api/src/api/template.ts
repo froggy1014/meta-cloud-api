@@ -1,7 +1,7 @@
 import { objectToQueryString } from 'src/utils/objectToQueryString';
 import type { WabaConfigType } from '../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../types/enums';
-import type { RequesterClass, RequesterResponseInterface, ResponsePagination, ResponseSuccess } from '../types/request';
+import type { RequesterClass, ResponsePagination, ResponseSuccess } from '../types/request';
 import type {
     TemplateClass,
     TemplateDeleteParams,
@@ -18,14 +18,11 @@ export default class TemplateApi extends BaseAPI implements TemplateClass {
         super(config, client);
     }
 
-    async getTemplate(templateId: string): Promise<RequesterResponseInterface<TemplateResponse>> {
+    async getTemplate(templateId: string): Promise<TemplateResponse> {
         return this.sendJson(HttpMethodsEnum.Get, `${templateId}`, this.config[WabaConfigEnum.RequestTimeout], null);
     }
 
-    async updateTemplate(
-        templateId: string,
-        template: Partial<TemplateRequestBody>,
-    ): Promise<RequesterResponseInterface<ResponseSuccess>> {
+    async updateTemplate(templateId: string, template: Partial<TemplateRequestBody>): Promise<ResponseSuccess> {
         return this.sendJson(
             HttpMethodsEnum.Post,
             `${templateId}`,
@@ -34,9 +31,7 @@ export default class TemplateApi extends BaseAPI implements TemplateClass {
         );
     }
 
-    async getTemplates(
-        params: TemplateGetParams,
-    ): Promise<RequesterResponseInterface<ResponsePagination<TemplateResponse>>> {
+    async getTemplates(params: TemplateGetParams): Promise<ResponsePagination<TemplateResponse>> {
         return this.sendJson(
             HttpMethodsEnum.Get,
             `${this.config[WabaConfigEnum.BusinessAcctId]}/${this.endpoint}${objectToQueryString(params)}`,
@@ -45,7 +40,7 @@ export default class TemplateApi extends BaseAPI implements TemplateClass {
         );
     }
 
-    async createTemplate(template: TemplateRequestBody): Promise<RequesterResponseInterface<TemplateResponse>> {
+    async createTemplate(template: TemplateRequestBody): Promise<TemplateResponse> {
         return this.sendJson(
             HttpMethodsEnum.Post,
             `${this.config[WabaConfigEnum.BusinessAcctId]}/${this.endpoint}`,
@@ -54,7 +49,7 @@ export default class TemplateApi extends BaseAPI implements TemplateClass {
         );
     }
 
-    async deleteTemplate(params: TemplateDeleteParams): Promise<RequesterResponseInterface<ResponseSuccess>> {
+    async deleteTemplate(params: TemplateDeleteParams): Promise<ResponseSuccess> {
         return this.sendJson(
             HttpMethodsEnum.Delete,
             `${this.config[WabaConfigEnum.BusinessAcctId]}/${this.endpoint}${objectToQueryString(params)}`,

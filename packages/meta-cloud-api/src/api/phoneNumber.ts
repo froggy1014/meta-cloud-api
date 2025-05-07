@@ -8,7 +8,7 @@ import {
 import { objectToQueryString } from 'src/utils/objectToQueryString';
 import type { WabaConfigType } from '../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../types/enums';
-import type { RequesterClass, RequesterResponseInterface, ResponseSuccess } from '../types/request';
+import type { RequesterClass, ResponseSuccess } from '../types/request';
 import BaseAPI from './base';
 
 export default class PhoneNumberApi extends BaseAPI implements PhoneNumberClass {
@@ -18,7 +18,7 @@ export default class PhoneNumberApi extends BaseAPI implements PhoneNumberClass 
         super(config, client);
     }
 
-    async getPhoneNumberById(fields?: string): Promise<RequesterResponseInterface<PhoneNumberResponse>> {
+    async getPhoneNumberById(fields?: string): Promise<PhoneNumberResponse> {
         const queryParams = fields ? objectToQueryString({ fields }) : '';
         return this.sendJson(
             HttpMethodsEnum.Get,
@@ -28,7 +28,7 @@ export default class PhoneNumberApi extends BaseAPI implements PhoneNumberClass 
         );
     }
 
-    async getPhoneNumbers(): Promise<RequesterResponseInterface<PhoneNumbersResponse>> {
+    async getPhoneNumbers(): Promise<PhoneNumbersResponse> {
         return this.sendJson(
             HttpMethodsEnum.Get,
             `${this.config[WabaConfigEnum.BusinessAcctId]}/${this.endpoint}`,
@@ -39,7 +39,7 @@ export default class PhoneNumberApi extends BaseAPI implements PhoneNumberClass 
 
     async requestVerificationCode(
         requestVerificationCodeRequest: RequestVerificationCodeRequest,
-    ): Promise<RequesterResponseInterface<ResponseSuccess>> {
+    ): Promise<ResponseSuccess> {
         return this.sendJson(
             HttpMethodsEnum.Post,
             `${this.config[WabaConfigEnum.PhoneNumberId]}/request_code`,
@@ -48,7 +48,7 @@ export default class PhoneNumberApi extends BaseAPI implements PhoneNumberClass 
         );
     }
 
-    async verifyCode(verifyCodeRequest: VerifyCodeRequest): Promise<RequesterResponseInterface<ResponseSuccess>> {
+    async verifyCode(verifyCodeRequest: VerifyCodeRequest): Promise<ResponseSuccess> {
         return this.sendJson(
             HttpMethodsEnum.Post,
             `${this.config[WabaConfigEnum.PhoneNumberId]}/verify_code`,
