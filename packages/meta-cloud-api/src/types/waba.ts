@@ -1,4 +1,4 @@
-import { RequesterResponseInterface, ResponseData, ResponseSuccess } from './request';
+import type { RequesterResponseInterface, ResponseSuccess } from './request';
 
 export type WabaSubscription = {
     whatsapp_business_api_data: {
@@ -10,18 +10,75 @@ export type WabaSubscription = {
     override_callback_uri?: string;
 };
 
-export type UpdateWabaSubscription = {
+export interface UpdateWabaSubscription {
     override_callback_uri: string;
     verify_token: string;
-};
+}
 
-export type WabaSubscriptions = ResponseData<Array<WabaSubscription>>;
+export interface WabaSubscriptions {
+    data: Array<WabaSubscription>;
+}
 
-export declare class WABAClass {
+export interface WABAClass {
+    getWabaAccount(): Promise<RequesterResponseInterface<WabaAccount>>;
     getAllWabaSubscriptions(): Promise<RequesterResponseInterface<WabaSubscriptions>>;
-    updateWabaSubscription({
-        override_callback_uri,
-        verify_token,
-    }: UpdateWabaSubscription): Promise<RequesterResponseInterface<ResponseSuccess>>;
+    updateWabaSubscription(params: UpdateWabaSubscription): Promise<RequesterResponseInterface<ResponseSuccess>>;
     unsubscribeFromWaba(): Promise<RequesterResponseInterface<ResponseSuccess>>;
+}
+
+export enum WabaAccountReviewStatus {
+    Approved = 'APPROVED',
+    Active = 'ACTIVE',
+    Inactive = 'INACTIVE',
+    Disabled = 'DISABLED',
+}
+
+export enum WabaHealthStatusCanSendMessage {
+    Blocked = 'BLOCKED',
+    Limited = 'LIMITED',
+    Available = 'AVAILABLE',
+}
+
+export enum WabaAccountStatus {
+    Approved = 'APPROVED',
+    Active = 'ACTIVE',
+    Inactive = 'INACTIVE',
+    Disabled = 'DISABLED',
+}
+
+export enum WabaBusinessVerificationStatus {
+    Verified = 'verified',
+    PendingSubmission = 'pending_submission',
+    Unverified = 'unverified',
+    Rejected = 'rejected',
+}
+
+export interface WabaHealthStatusError {
+    error_code?: number;
+    error_description?: string;
+    possible_solution?: string;
+}
+
+export interface WabaHealthStatusEntity {
+    entity_type?: string;
+    id?: string;
+    can_send_message?: string;
+    errors?: WabaHealthStatusError[];
+}
+
+export interface WabaHealthStatus {
+    can_send_message?: WabaHealthStatusCanSendMessage;
+    entities?: WabaHealthStatusEntity[];
+}
+
+export interface WabaAccount {
+    account_review_status?: WabaAccountReviewStatus;
+    id?: string;
+    health_status?: WabaHealthStatus;
+    status?: WabaAccountStatus;
+    business_verification_status?: WabaBusinessVerificationStatus;
+    message_template_namespace?: string;
+    name?: string;
+    ownership_type?: string;
+    currency?: string;
 }

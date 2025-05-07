@@ -1,7 +1,7 @@
 import type { WabaConfigType } from '../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../types/enums';
 import type { RequesterClass, RequesterResponseInterface, ResponseSuccess } from '../types/request';
-import { UpdateWabaSubscription, WABAClass, WabaSubscriptions } from '../types/waba';
+import type { UpdateWabaSubscription, WABAClass, WabaAccount, WabaSubscriptions } from '../types/waba';
 import BaseAPI from './base';
 
 export default class WabaAPI extends BaseAPI implements WABAClass {
@@ -9,6 +9,14 @@ export default class WabaAPI extends BaseAPI implements WABAClass {
         super(config, client);
     }
 
+    async getWabaAccount(): Promise<RequesterResponseInterface<WabaAccount>> {
+        return this.sendJson(
+            HttpMethodsEnum.Get,
+            `${this.config[WabaConfigEnum.BusinessAcctId]}`,
+            this.config[WabaConfigEnum.RequestTimeout],
+            null,
+        );
+    }
     async getAllWabaSubscriptions(): Promise<RequesterResponseInterface<WabaSubscriptions>> {
         return this.sendJson(
             HttpMethodsEnum.Get,
