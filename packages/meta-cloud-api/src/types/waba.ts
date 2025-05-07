@@ -84,18 +84,16 @@ export interface WabaAccount {
 }
 
 export type WabaAccountFields =
-    | 'analytics'
+    | 'id'
+    | 'name'
+    | 'account_review_status'
+    | 'auth_international_rate_eligibility'
     | 'business_verification_status'
     | 'country'
     | 'currency'
     | 'health_status'
-    | 'is_enabled_for_insights'
-    | 'marketing_messages_lite_api_status'
-    | 'on_behalf_of_business_info'
-    | 'ownership_type'
-    | 'primary_funding_id'
-    | 'purchase_order_number'
     | 'status'
-    | 'timezone_id';
+    | 'ownership_type'
+    | 'message_template_namespace';
 
 export type WabaAccountFieldsParam = WabaAccountFields[];

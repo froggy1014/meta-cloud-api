@@ -17,7 +17,7 @@ export default class WabaAPI extends BaseAPI implements WABAClass {
     }
 
     async getWabaAccount(fields?: WabaAccountFieldsParam): Promise<RequesterResponseInterface<WabaAccount>> {
-        const queryString = buildFieldsQueryString(fields);
+        const queryString = buildFieldsQueryString(fields)?.replace(/,/g, '%2C');
 
         return this.sendJson(
             HttpMethodsEnum.Get,
