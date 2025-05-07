@@ -20,7 +20,7 @@ export interface WabaSubscriptions {
 }
 
 export interface WABAClass {
-    getWabaAccount(): Promise<RequesterResponseInterface<WabaAccount>>;
+    getWabaAccount(fields?: WabaAccountFieldsParam): Promise<RequesterResponseInterface<WabaAccount>>;
     getAllWabaSubscriptions(): Promise<RequesterResponseInterface<WabaSubscriptions>>;
     updateWabaSubscription(params: UpdateWabaSubscription): Promise<RequesterResponseInterface<ResponseSuccess>>;
     unsubscribeFromWaba(): Promise<RequesterResponseInterface<ResponseSuccess>>;
@@ -82,3 +82,20 @@ export interface WabaAccount {
     ownership_type?: string;
     currency?: string;
 }
+
+export type WabaAccountFields =
+    | 'analytics'
+    | 'business_verification_status'
+    | 'country'
+    | 'currency'
+    | 'health_status'
+    | 'is_enabled_for_insights'
+    | 'marketing_messages_lite_api_status'
+    | 'on_behalf_of_business_info'
+    | 'ownership_type'
+    | 'primary_funding_id'
+    | 'purchase_order_number'
+    | 'status'
+    | 'timezone_id';
+
+export type WabaAccountFieldsParam = WabaAccountFields[];

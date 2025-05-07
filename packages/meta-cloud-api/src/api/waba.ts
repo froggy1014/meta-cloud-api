@@ -1,7 +1,14 @@
+import { buildFieldsQueryString } from 'src/utils/buildFieldsQueryString';
 import type { WabaConfigType } from '../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../types/enums';
 import type { RequesterClass, RequesterResponseInterface, ResponseSuccess } from '../types/request';
-import type { UpdateWabaSubscription, WABAClass, WabaAccount, WabaSubscriptions } from '../types/waba';
+import type {
+    UpdateWabaSubscription,
+    WABAClass,
+    WabaAccount,
+    WabaAccountFieldsParam,
+    WabaSubscriptions,
+} from '../types/waba';
 import BaseAPI from './base';
 
 export default class WabaAPI extends BaseAPI implements WABAClass {
@@ -9,14 +16,17 @@ export default class WabaAPI extends BaseAPI implements WABAClass {
         super(config, client);
     }
 
-    async getWabaAccount(): Promise<RequesterResponseInterface<WabaAccount>> {
+    async getWabaAccount(fields?: WabaAccountFieldsParam): Promise<RequesterResponseInterface<WabaAccount>> {
+        const queryString = buildFieldsQueryString(fields);
+
         return this.sendJson(
             HttpMethodsEnum.Get,
-            `${this.config[WabaConfigEnum.BusinessAcctId]}`,
+            `${this.config[WabaConfigEnum.BusinessAcctId]}${queryString}`,
             this.config[WabaConfigEnum.RequestTimeout],
             null,
         );
     }
+
     async getAllWabaSubscriptions(): Promise<RequesterResponseInterface<WabaSubscriptions>> {
         return this.sendJson(
             HttpMethodsEnum.Get,
