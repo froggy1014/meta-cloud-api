@@ -540,79 +540,77 @@ export declare class MessagesClass extends BaseClass {
      * @param params The audio message parameter object
      * @returns Promise with the message response
      */
-    audio(params: MessageRequestParams<AudioMediaObject>): Promise<RequesterResponseInterface<MessagesResponse>>;
+    audio(params: MessageRequestParams<AudioMediaObject>): Promise<MessagesResponse>;
 
     /**
      * Sends a contact card via WhatsApp
      * @param params The contact message parameter object
      * @returns Promise with the message response
      */
-    contacts(params: MessageRequestParams<[ContactObject]>): Promise<RequesterResponseInterface<MessagesResponse>>;
+    contacts(params: MessageRequestParams<[ContactObject]>): Promise<MessagesResponse>;
 
     /**
      * Sends a document via WhatsApp
      * @param params The document message parameter object
      * @returns Promise with the message response
      */
-    document(params: MessageRequestParams<DocumentMediaObject>): Promise<RequesterResponseInterface<MessagesResponse>>;
+    document(params: MessageRequestParams<DocumentMediaObject>): Promise<MessagesResponse>;
 
     /**
      * Sends an image via WhatsApp
      * @param params The image message parameter object
      * @returns Promise with the message response
      */
-    image(params: MessageRequestParams<ImageMediaObject>): Promise<RequesterResponseInterface<MessagesResponse>>;
+    image(params: MessageRequestParams<ImageMediaObject>): Promise<MessagesResponse>;
 
     /**
      * Sends an interactive message via WhatsApp
      * @param params The interactive message parameter object
      * @returns Promise with the message response
      */
-    interactive(params: MessageRequestParams<InteractiveObject>): Promise<RequesterResponseInterface<MessagesResponse>>;
+    interactive(params: MessageRequestParams<InteractiveObject>): Promise<MessagesResponse>;
 
     /**
      * Sends a location via WhatsApp
      * @param params The location message parameter object
      * @returns Promise with the message response
      */
-    location(params: MessageRequestParams<LocationObject>): Promise<RequesterResponseInterface<MessagesResponse>>;
+    location(params: MessageRequestParams<LocationObject>): Promise<MessagesResponse>;
 
     /**
      * Updates message status (used for read receipts and typing indicators)
      * @param params The status update parameter object
      * @returns Promise with the response
      */
-    status(params: StatusParams): Promise<RequesterResponseInterface<MessagesResponse>>;
+    status(params: StatusParams): Promise<MessagesResponse>;
 
     /**
      * Sends a sticker via WhatsApp
      * @param params The sticker message parameter object
      * @returns Promise with the message response
      */
-    sticker(params: MessageRequestParams<StickerMediaObject>): Promise<RequesterResponseInterface<MessagesResponse>>;
+    sticker(params: MessageRequestParams<StickerMediaObject>): Promise<MessagesResponse>;
 
     /**
      * Sends a template message via WhatsApp
      * @param params The template message parameter object
      * @returns Promise with the message response
      */
-    template(
-        params: MessageRequestParams<MessageTemplateObject<ComponentTypesEnum>>,
-    ): Promise<RequesterResponseInterface<MessagesResponse>>;
+    template(params: MessageRequestParams<MessageTemplateObject<ComponentTypesEnum>>): Promise<MessagesResponse>;
 
     /**
      * Sends a text message via WhatsApp
      * @param params The text message parameter object
      * @returns Promise with the message response
      */
-    text(params: TextMessageParams): Promise<RequesterResponseInterface<MessagesResponse>>;
+    text(params: TextMessageParams): Promise<MessagesResponse>;
 
     /**
      * Sends a video via WhatsApp
      * @param params The video message parameter object
      * @returns Promise with the message response
      */
-    video(params: MessageRequestParams<VideoMediaObject>): Promise<RequesterResponseInterface<MessagesResponse>>;
+    video(params: MessageRequestParams<VideoMediaObject>): Promise<MessagesResponse>;
 
     // New methods
     /**
@@ -620,14 +618,14 @@ export declare class MessagesClass extends BaseClass {
      * @param params The parameter object to mark message as read
      * @returns Promise with the response
      */
-    markAsRead(params: { messageId: string }): Promise<RequesterResponseInterface<MessagesResponse>>;
+    markAsRead(params: { messageId: string }): Promise<MessagesResponse>;
 
     /**
      * Marks a message as read and shows a typing indicator in WhatsApp
      * @param params The typing indicator parameter object
      * @returns Promise with the response
      */
-    showTypingIndicator(params: { messageId: string }): Promise<RequesterResponseInterface<MessagesResponse>>;
+    showTypingIndicator(params: { messageId: string }): Promise<MessagesResponse>;
 
     /**
      * Sends an interactive list message
@@ -636,7 +634,7 @@ export declare class MessagesClass extends BaseClass {
      */
     interactiveList(
         params: MessageRequestParams<InteractiveObject & { type: InteractiveTypesEnum.List }>,
-    ): Promise<RequesterResponseInterface<MessagesResponse>>;
+    ): Promise<MessagesResponse>;
 
     /**
      * Sends an interactive CTA URL message
@@ -645,7 +643,7 @@ export declare class MessagesClass extends BaseClass {
      */
     interactiveCtaUrl(
         params: MessageRequestParams<InteractiveObject & { type: InteractiveTypesEnum.CtaUrl }>,
-    ): Promise<RequesterResponseInterface<MessagesResponse>>;
+    ): Promise<MessagesResponse>;
 
     /**
      * Sends a location request message
@@ -654,7 +652,7 @@ export declare class MessagesClass extends BaseClass {
      */
     interactiveLocationRequest(
         params: MessageRequestParams<InteractiveObject & { type: InteractiveTypesEnum.LocationRequest }>,
-    ): Promise<RequesterResponseInterface<MessagesResponse>>;
+    ): Promise<MessagesResponse>;
 
     /**
      * Sends an address message to request shipping address from the user
@@ -664,7 +662,7 @@ export declare class MessagesClass extends BaseClass {
      */
     interactiveAddressMessage(
         params: MessageRequestParams<InteractiveObject & { type: InteractiveTypesEnum.AddressMessage }>,
-    ): Promise<RequesterResponseInterface<MessagesResponse>>;
+    ): Promise<MessagesResponse>;
 
     /**
      * Sends an interactive reply buttons message
@@ -673,14 +671,14 @@ export declare class MessagesClass extends BaseClass {
      */
     interactiveReplyButtons(
         params: MessageRequestParams<InteractiveObject & { type: InteractiveTypesEnum.Button }>,
-    ): Promise<RequesterResponseInterface<MessagesResponse>>;
+    ): Promise<MessagesResponse>;
 
     /**
      * Sends a reaction to a message (emoji response)
      * @param params The reaction message parameter object
      * @returns Promise with the response
      */
-    reaction(params: ReactionParams): Promise<RequesterResponseInterface<MessagesResponse>>;
+    reaction(params: ReactionParams): Promise<MessagesResponse>;
 
     /**
      * Sends an interactive Flow message
@@ -689,5 +687,5 @@ export declare class MessagesClass extends BaseClass {
      */
     interactiveFlow(
         params: MessageRequestParams<InteractiveObject & { type: InteractiveTypesEnum.Flow }>,
-    ): Promise<RequesterResponseInterface<MessagesResponse>>;
+    ): Promise<MessagesResponse>;
 }

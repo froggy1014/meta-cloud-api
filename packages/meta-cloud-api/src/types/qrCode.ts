@@ -22,9 +22,9 @@ export type UpdateQrCodeRequest = {
 };
 
 export interface QrCodeClass {
-    createQrCode(request: CreateQrCodeRequest): Promise<RequesterResponseInterface<QrCodeResponse>>;
-    getQrCodes(): Promise<RequesterResponseInterface<QrCodesResponse>>;
-    getQrCode(qrCodeId: string): Promise<RequesterResponseInterface<QrCodeResponse>>;
-    updateQrCode(request: UpdateQrCodeRequest): Promise<RequesterResponseInterface<QrCodeResponse>>;
-    deleteQrCode(qrCodeId: string): Promise<RequesterResponseInterface<ResponseSuccess>>;
+    createQrCode(request: CreateQrCodeRequest): Promise<QrCodeResponse>;
+    getQrCodes(): Promise<QrCodesResponse>;
+    getQrCode(qrCodeId: string): Promise<QrCodeResponse>;
+    updateQrCode(request: UpdateQrCodeRequest): Promise<QrCodeResponse>;
+    deleteQrCode(qrCodeId: string): Promise<ResponseSuccess>;
 }

@@ -183,7 +183,7 @@ export interface FlowClass {
      * @param wabaId - The WABA ID
      * @returns Promise with the list of flows
      */
-    listFlows(wabaId: string): Promise<RequesterResponseInterface<FlowsListResponse>>;
+    listFlows(wabaId: string): Promise<FlowsListResponse>;
 
     /**
      * Create Flow
@@ -202,7 +202,7 @@ export interface FlowClass {
             flow_json?: string;
             publish?: boolean;
         },
-    ): Promise<RequesterResponseInterface<CreateFlowResponse>>;
+    ): Promise<CreateFlowResponse>;
 
     /**
      * Get Flow
@@ -212,11 +212,7 @@ export interface FlowClass {
      * @param dateFormat - Optional date format
      * @returns Promise with the flow details
      */
-    getFlow(
-        flowId: string,
-        fields?: string,
-        dateFormat?: string,
-    ): Promise<RequesterResponseInterface<Flow | FlowPreviewResponse>>;
+    getFlow(flowId: string, fields?: string, dateFormat?: string): Promise<Flow | FlowPreviewResponse>;
 
     /**
      * Update Flow Metadata
@@ -233,7 +229,7 @@ export interface FlowClass {
             endpoint_uri?: string;
             application_id?: string;
         },
-    ): Promise<RequesterResponseInterface<ResponseSuccess>>;
+    ): Promise<ResponseSuccess>;
 
     /**
      * Delete Flow
@@ -241,7 +237,7 @@ export interface FlowClass {
      * @param flowId - The flow ID
      * @returns Promise with the success status
      */
-    deleteFlow(flowId: string): Promise<RequesterResponseInterface<ResponseSuccess>>;
+    deleteFlow(flowId: string): Promise<ResponseSuccess>;
 
     /**
      * List Assets (Get Flow JSON URL)
@@ -249,7 +245,7 @@ export interface FlowClass {
      * @param flowId - The flow ID
      * @returns Promise with the list of assets
      */
-    listAssets(flowId: string): Promise<RequesterResponseInterface<FlowAssetsResponse>>;
+    listAssets(flowId: string): Promise<FlowAssetsResponse>;
 
     /**
      * Update Flow JSON
@@ -265,7 +261,7 @@ export interface FlowClass {
             file: Blob;
             name: string;
         },
-    ): Promise<RequesterResponseInterface<UpdateFlowResponse>>;
+    ): Promise<UpdateFlowResponse>;
 
     /**
      * Validate Flow JSON by attempting an update without publishing.
@@ -275,10 +271,7 @@ export interface FlowClass {
      * @param flowJsonData - The Flow JSON content as a Buffer, JSON object, or Blob.
      * @returns Promise indicating if the JSON is valid and includes validation errors if any.
      */
-    validateFlowJson(
-        flowId: string,
-        flowJsonData: Blob | Buffer | object,
-    ): Promise<RequesterResponseInterface<ValidateFlowJsonResponse>>;
+    validateFlowJson(flowId: string, flowJsonData: Blob | Buffer | object): Promise<ValidateFlowJsonResponse>;
 
     /**
      * Publish Flow
@@ -286,7 +279,7 @@ export interface FlowClass {
      * @param flowId - The flow ID
      * @returns Promise with the success status
      */
-    publishFlow(flowId: string): Promise<RequesterResponseInterface<ResponseSuccess>>;
+    publishFlow(flowId: string): Promise<ResponseSuccess>;
 
     /**
      * Deprecate Flow
@@ -294,7 +287,7 @@ export interface FlowClass {
      * @param flowId - The flow ID
      * @returns Promise with the success status
      */
-    deprecateFlow(flowId: string): Promise<RequesterResponseInterface<ResponseSuccess>>;
+    deprecateFlow(flowId: string): Promise<ResponseSuccess>;
 
     /**
      * Migrate Flows
@@ -309,5 +302,5 @@ export interface FlowClass {
             source_waba_id: string;
             source_flow_names?: string[];
         },
-    ): Promise<RequesterResponseInterface<FlowMigrationResponse>>;
+    ): Promise<FlowMigrationResponse>;
 }

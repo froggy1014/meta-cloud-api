@@ -1,5 +1,5 @@
 import { CategoryEnum, LanguagesEnum, TemplateStatusEnum } from './enums';
-import { GeneralRequestBody, RequesterResponseInterface, ResponsePagination, ResponseSuccess } from './request';
+import { GeneralRequestBody, ResponsePagination, ResponseSuccess } from './request';
 
 export type TemplateFormat = 'TEXT' | 'IMAGE' | 'VIDEO' | 'DOCUMENT' | 'LOCATION';
 
@@ -123,12 +123,9 @@ export type TemplateDeleteParams = {
 };
 
 export declare class TemplateClass {
-    getTemplate(templateId: string): Promise<RequesterResponseInterface<TemplateResponse>>;
-    updateTemplate(
-        templateId: string,
-        template: Partial<TemplateRequestBody>,
-    ): Promise<RequesterResponseInterface<ResponseSuccess>>;
-    getTemplates(params: TemplateGetParams): Promise<RequesterResponseInterface<ResponsePagination<TemplateResponse>>>;
-    createTemplate(template: TemplateRequestBody): Promise<RequesterResponseInterface<TemplateResponse>>;
-    deleteTemplate(params: TemplateDeleteParams): Promise<RequesterResponseInterface<ResponseSuccess>>;
+    getTemplate(templateId: string): Promise<TemplateResponse>;
+    updateTemplate(templateId: string, template: Partial<TemplateRequestBody>): Promise<ResponseSuccess>;
+    getTemplates(params: TemplateGetParams): Promise<ResponsePagination<TemplateResponse>>;
+    createTemplate(template: TemplateRequestBody): Promise<TemplateResponse>;
+    deleteTemplate(params: TemplateDeleteParams): Promise<ResponseSuccess>;
 }

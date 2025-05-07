@@ -11,7 +11,7 @@ export default class EncryptionAPI extends BaseAPI implements EncryptionClass {
         super(config, client);
     }
 
-    async getEncryptionPublicKey(): Promise<RequesterResponseInterface<EncryptionPublicKeyResponse>> {
+    async getEncryptionPublicKey(): Promise<EncryptionPublicKeyResponse> {
         return this.sendJson(
             HttpMethodsEnum.Get,
             `${this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}`,
@@ -20,7 +20,7 @@ export default class EncryptionAPI extends BaseAPI implements EncryptionClass {
         );
     }
 
-    async setEncryptionPublicKey(businessPublicKey: string): Promise<RequesterResponseInterface<ResponseSuccess>> {
+    async setEncryptionPublicKey(businessPublicKey: string): Promise<ResponseSuccess> {
         const formData = new FormData();
         formData.append('business_public_key', businessPublicKey);
 

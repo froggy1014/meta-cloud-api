@@ -1,7 +1,7 @@
 import { buildFieldsQueryString } from 'src/utils/buildFieldsQueryString';
 import type { WabaConfigType } from '../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../types/enums';
-import type { RequesterClass, RequesterResponseInterface, ResponseSuccess } from '../types/request';
+import type { RequesterClass, ResponseSuccess } from '../types/request';
 import type {
     UpdateWabaSubscription,
     WABAClass,
@@ -16,7 +16,7 @@ export default class WabaAPI extends BaseAPI implements WABAClass {
         super(config, client);
     }
 
-    async getWabaAccount(fields?: WabaAccountFieldsParam): Promise<RequesterResponseInterface<WabaAccount>> {
+    async getWabaAccount(fields?: WabaAccountFieldsParam): Promise<WabaAccount> {
         const queryString = buildFieldsQueryString(fields)?.replace(/,/g, '%2C');
 
         return this.sendJson(
@@ -27,7 +27,7 @@ export default class WabaAPI extends BaseAPI implements WABAClass {
         );
     }
 
-    async getAllWabaSubscriptions(): Promise<RequesterResponseInterface<WabaSubscriptions>> {
+    async getAllWabaSubscriptions(): Promise<WabaSubscriptions> {
         return this.sendJson(
             HttpMethodsEnum.Get,
             `${this.config[WabaConfigEnum.BusinessAcctId]}/subscribed_apps`,
@@ -39,7 +39,7 @@ export default class WabaAPI extends BaseAPI implements WABAClass {
     async updateWabaSubscription({
         override_callback_uri,
         verify_token,
-    }: UpdateWabaSubscription): Promise<RequesterResponseInterface<ResponseSuccess>> {
+    }: UpdateWabaSubscription): Promise<ResponseSuccess> {
         const body = {
             override_callback_uri,
             verify_token,
@@ -52,7 +52,7 @@ export default class WabaAPI extends BaseAPI implements WABAClass {
         );
     }
 
-    async unsubscribeFromWaba(): Promise<RequesterResponseInterface<ResponseSuccess>> {
+    async unsubscribeFromWaba(): Promise<ResponseSuccess> {
         return this.sendJson(
             HttpMethodsEnum.Delete,
             `${this.config[WabaConfigEnum.BusinessAcctId]}/subscribed_apps`,

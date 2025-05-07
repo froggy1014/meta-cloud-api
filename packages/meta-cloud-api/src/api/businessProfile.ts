@@ -8,7 +8,7 @@ import {
 } from '../types/businessProfile';
 import type { WabaConfigType } from '../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../types/enums';
-import type { RequesterClass, RequesterResponseInterface, ResponseSuccess } from '../types/request';
+import type { RequesterClass, ResponseSuccess } from '../types/request';
 import { objectToQueryString } from '../utils/objectToQueryString';
 import BaseAPI from './base';
 
@@ -47,7 +47,7 @@ export default class BusinessProfileAPI extends BaseAPI implements BusinessProfi
      * // Get specific business profile fields
      * const profile = await whatsappClient.businessProfile.getBusinessProfile('about,address,email');
      */
-    async getBusinessProfile(fields?: string): Promise<RequesterResponseInterface<BusinessProfileResponse>> {
+    async getBusinessProfile(fields?: string): Promise<BusinessProfileResponse> {
         const queryParams = fields ? objectToQueryString({ fields }) : '';
         return this.sendJson(
             HttpMethodsEnum.Get,
@@ -83,9 +83,7 @@ export default class BusinessProfileAPI extends BaseAPI implements BusinessProfi
      *   vertical: BusinessVerticalEnum.RETAIL
      * });
      */
-    async updateBusinessProfile(
-        updateRequest: UpdateBusinessProfileRequest,
-    ): Promise<RequesterResponseInterface<ResponseSuccess>> {
+    async updateBusinessProfile(updateRequest: UpdateBusinessProfileRequest): Promise<ResponseSuccess> {
         return this.sendJson(
             HttpMethodsEnum.Post,
             `${this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}`,
@@ -113,11 +111,7 @@ export default class BusinessProfileAPI extends BaseAPI implements BusinessProfi
      * );
      * const uploadSessionId = session.upload_session_id;
      */
-    async createUploadSession(
-        fileLength: number,
-        fileType: string,
-        fileName: string,
-    ): Promise<RequesterResponseInterface<UploadSessionResponse>> {
+    async createUploadSession(fileLength: number, fileType: string, fileName: string): Promise<UploadSessionResponse> {
         const queryParams = objectToQueryString({
             file_length: fileLength,
             file_type: fileType,
@@ -149,10 +143,7 @@ export default class BusinessProfileAPI extends BaseAPI implements BusinessProfi
      *   fileBuffer
      * );
      */
-    async uploadMedia(
-        uploadId: string,
-        file: Buffer,
-    ): Promise<RequesterResponseInterface<UploadBusinessProfileResponse>> {
+    async uploadMedia(uploadId: string, file: Buffer): Promise<UploadBusinessProfileResponse> {
         return this.sendJson(HttpMethodsEnum.Post, `${uploadId}`, this.config[WabaConfigEnum.RequestTimeout], file);
     }
 
@@ -190,7 +181,7 @@ export default class BusinessProfileAPI extends BaseAPI implements BusinessProfi
      *   about: 'Delicious food served daily'
      * });
      */
-    async getUploadHandle(uploadId: string): Promise<RequesterResponseInterface<UploadHandle>> {
+    async getUploadHandle(uploadId: string): Promise<UploadHandle> {
         return this.sendJson(HttpMethodsEnum.Get, `${uploadId}`, this.config[WabaConfigEnum.RequestTimeout], null);
     }
 }

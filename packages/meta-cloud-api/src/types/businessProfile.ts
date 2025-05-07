@@ -1,5 +1,5 @@
 import { BusinessVerticalEnum } from './enums';
-import { RequesterResponseInterface, ResponseSuccess } from './request';
+import { ResponseSuccess } from './request';
 
 export interface BusinessProfileData {
     /**
@@ -127,15 +127,13 @@ export interface BusinessProfileClass {
      * @param fields Fields to be returned in the response. If not specified, all fields will be returned.
      * Possible values: about, address, description, email, profile_picture_url, websites, vertical
      */
-    getBusinessProfile(fields?: string): Promise<RequesterResponseInterface<BusinessProfileResponse>>;
+    getBusinessProfile(fields?: string): Promise<BusinessProfileResponse>;
 
     /**
      * Update your business profile.
      * @param updateRequest The request object containing the fields to update.
      */
-    updateBusinessProfile(
-        updateRequest: UpdateBusinessProfileRequest,
-    ): Promise<RequesterResponseInterface<ResponseSuccess>>;
+    updateBusinessProfile(updateRequest: UpdateBusinessProfileRequest): Promise<ResponseSuccess>;
 
     /**
      * Create an upload session for profile picture.
@@ -143,22 +141,18 @@ export interface BusinessProfileClass {
      * @param fileType MIME type of the file (e.g., 'image/jpeg').
      * @param fileName Name of the file.
      */
-    createUploadSession(
-        fileLength: number,
-        fileType: string,
-        fileName: string,
-    ): Promise<RequesterResponseInterface<UploadSessionResponse>>;
+    createUploadSession(fileLength: number, fileType: string, fileName: string): Promise<UploadSessionResponse>;
 
     /**
      * Upload media file to the upload session.
      * @param uploadId The ID of the upload session.
      * @param file The binary data of the file.
      */
-    uploadMedia(uploadId: string, file: Buffer): Promise<RequesterResponseInterface<UploadBusinessProfileResponse>>;
+    uploadMedia(uploadId: string, file: Buffer): Promise<UploadBusinessProfileResponse>;
 
     /**
      * Get the upload handle information.
      * @param uploadId The ID of the upload session.
      */
-    getUploadHandle(uploadId: string): Promise<RequesterResponseInterface<UploadHandle>>;
+    getUploadHandle(uploadId: string): Promise<UploadHandle>;
 }

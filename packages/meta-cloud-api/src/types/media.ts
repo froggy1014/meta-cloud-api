@@ -24,8 +24,8 @@ export type UploadMediaResponse = {
 };
 
 export interface MediaClass {
-    getMediaById(mediaId: string, phone_number_id?: string): Promise<RequesterResponseInterface<MediaResponse>>;
-    uploadMedia(file: File, messagingProduct?: string): Promise<RequesterResponseInterface<UploadMediaResponse>>;
-    deleteMedia(mediaId: string, phone_number_id?: string): Promise<RequesterResponseInterface<ResponseSuccess>>;
-    downloadMedia(mediaUrl: string): Promise<RequesterResponseInterface<Blob>>;
+    getMediaById(mediaId: string, phone_number_id?: string): Promise<MediaResponse>;
+    uploadMedia(file: File, messagingProduct?: string): Promise<UploadMediaResponse>;
+    deleteMedia(mediaId: string, phone_number_id?: string): Promise<ResponseSuccess>;
+    downloadMedia(mediaUrl: string): Promise<Blob>;
 }

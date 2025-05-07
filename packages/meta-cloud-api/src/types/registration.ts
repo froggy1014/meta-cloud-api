@@ -1,5 +1,5 @@
-import { RequesterResponseInterface, ResponseSuccess } from './request';
 import { DataLocalizationRegionEnum } from './enums';
+import { ResponseSuccess } from './request';
 
 export type RegistrationRequest = {
     messaging_product: 'whatsapp';
@@ -8,10 +8,6 @@ export type RegistrationRequest = {
 };
 
 export interface RegistrationClass {
-    register(
-        pin: string,
-        dataLocalizationRegion?: DataLocalizationRegionEnum,
-    ): Promise<RequesterResponseInterface<ResponseSuccess>>;
-
-    deregister(): Promise<RequesterResponseInterface<ResponseSuccess>>;
+    register(pin: string, dataLocalizationRegion?: DataLocalizationRegionEnum): Promise<ResponseSuccess>;
+    deregister(): Promise<ResponseSuccess>;
 }

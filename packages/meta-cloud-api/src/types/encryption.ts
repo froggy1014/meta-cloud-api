@@ -1,4 +1,4 @@
-import { ResponseData, ResponseSuccess, RequesterResponseInterface } from './request';
+import { ResponseData, ResponseSuccess } from './request';
 
 export type EncryptionPublicKeyResponse = ResponseData<{
     business_public_key: string;
@@ -6,6 +6,6 @@ export type EncryptionPublicKeyResponse = ResponseData<{
 }>;
 
 export interface EncryptionClass {
-    getEncryptionPublicKey(): Promise<RequesterResponseInterface<EncryptionPublicKeyResponse>>;
-    setEncryptionPublicKey(businessPublicKey: string): Promise<RequesterResponseInterface<ResponseSuccess>>;
+    getEncryptionPublicKey(): Promise<EncryptionPublicKeyResponse>;
+    setEncryptionPublicKey(businessPublicKey: string): Promise<ResponseSuccess>;
 }

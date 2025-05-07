@@ -1,4 +1,4 @@
-import type { RequesterResponseInterface, ResponseSuccess } from './request';
+import type { ResponseSuccess } from './request';
 
 export type WabaSubscription = {
     whatsapp_business_api_data: {
@@ -20,10 +20,10 @@ export interface WabaSubscriptions {
 }
 
 export interface WABAClass {
-    getWabaAccount(fields?: WabaAccountFieldsParam): Promise<RequesterResponseInterface<WabaAccount>>;
-    getAllWabaSubscriptions(): Promise<RequesterResponseInterface<WabaSubscriptions>>;
-    updateWabaSubscription(params: UpdateWabaSubscription): Promise<RequesterResponseInterface<ResponseSuccess>>;
-    unsubscribeFromWaba(): Promise<RequesterResponseInterface<ResponseSuccess>>;
+    getWabaAccount(fields?: WabaAccountFieldsParam): Promise<WabaAccount>;
+    getAllWabaSubscriptions(): Promise<WabaSubscriptions>;
+    updateWabaSubscription(params: UpdateWabaSubscription): Promise<ResponseSuccess>;
+    unsubscribeFromWaba(): Promise<ResponseSuccess>;
 }
 
 export enum WabaAccountReviewStatus {
