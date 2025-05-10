@@ -1,16 +1,28 @@
-# Meta Cloud API Toolkit
+# Meta Cloud API
 
-This monorepo contains tools and documentation for working with the Meta Cloud API.
+<div style="display: flex; align-items: center;">
+  <img src="public/README.svg" alt="Meta Cloud API" style="flex: 1; width: 100px;">
+  <div style="flex: 1; padding-left: 20px;">
+    <p>Meta Cloud API - A powerful TypeScript wrapper for Meta's Cloud API, providing a clean and type-safe interface for WhatsApp Business Platform integration.</p>
+    <p>
+      <a href="LICENSE">
+        <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="GitHub license">
+      </a>
+    </p>
+  </div>
+</div>
 
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+## Resources
 
-## Overview
+- [Documentation](https://www.meta-cloud-api.xyz/)
+- [API Reference (Swagger)](https://meta-cloud-api-swagger.vercel.app/api-docs/)
 
-The Meta Cloud API Toolkit provides:
+## Features
 
-- **`meta-cloud-api`**: A TypeScript library providing a clean interface for Meta Cloud APIs
-- **Documentation**: Comprehensive guides and API references built with Docusaurus
-- **Playground**: Interactive examples demonstrating API integration with Next.js
+- **Type-Safe Development** - Built with TypeScript to provide code completion and catch errors during development
+- **Comprehensive Coverage** - Full support for WhatsApp Business Platform APIs
+- **Clean Interface** - Intuitive methods organized by domain for improved code readability
+- **Error Handling** - Standardized error handling with detailed Meta API error information
 
 ## Installation
 
@@ -22,46 +34,56 @@ yarn add meta-cloud-api
 pnpm add meta-cloud-api
 ```
 
-## Usage
+## Quick Start
 
 ```typescript
-import { MetaCloudAPI } from 'meta-cloud-api';
+import { WhatsApp } from 'meta-cloud-api';
 
-// Initialize the client with your credentials
-const client = new MetaCloudAPI({
-  apiKey: process.env.META_API_KEY,
-  // Additional configuration options
+// Initialize the client
+const client = new WhatsApp({
+  accessToken: process.env.ACCESS_TOKEN,
+  phoneNumberId: process.env.PHONE_NUMBER_ID,
+  version: '22'  // API version
 });
+
+// Send a WhatsApp message
+const response = await client.messages.send({
+  to: '+1234567890',
+  type: 'text',
+  text: {
+    body: 'Hello from Meta Cloud API!'
+  }
+});
+
+console.log(`Message ID: ${response.messages[0].id}`);
 ```
 
-### WhatsApp Messages
+## Usage Examples
 
-Send a text message:
+### Messaging
+
+Send different types of messages through WhatsApp Business Platform:
+
+#### Text Message
 
 ```typescript
-// Send a simple text message
-const result = await client.whatsapp.messages.send({
-  messaging_product: "whatsapp",
-  recipient_type: "individual",
+const result = await client.messages.send({
   to: "15551234567",
   type: "text",
   text: {
     body: "Hello from Meta Cloud API!"
   }
 });
-console.log(`Message ID: ${result.messages[0].id}`);
 ```
 
-Send a template message:
+#### Template Message
 
 ```typescript
-// Send a template message with parameters
-const result = await client.whatsapp.messages.send({
-  messaging_product: "whatsapp",
+const result = await client.messages.send({
   to: "15551234567",
   type: "template",
   template: {
-    name: "sample_shipping_confirmation",
+    name: "shipping_confirmation",
     language: {
       code: "en_US"
     },
@@ -84,12 +106,10 @@ const result = await client.whatsapp.messages.send({
 });
 ```
 
-Send a media message:
+#### Media Message
 
 ```typescript
-// Send an image message
-const result = await client.whatsapp.messages.send({
-  messaging_product: "whatsapp",
+const result = await client.messages.send({
   to: "15551234567",
   type: "image",
   image: {
@@ -98,31 +118,26 @@ const result = await client.whatsapp.messages.send({
 });
 ```
 
-### Message Templates
+### Templates
 
-List all templates:
+Manage message templates for your WhatsApp Business account:
 
 ```typescript
-// Get all message templates
-const templates = await client.whatsapp.templates.list({
+// List all templates
+const templates = await client.templates.list({
   business_id: "1234567890"
 });
-console.log(`Found ${templates.total_count} templates`);
-```
 
-Create a new template:
-
-```typescript
 // Create a new template
-const newTemplate = await client.whatsapp.templates.create({
+const newTemplate = await client.templates.create({
   business_id: "1234567890",
   name: "my_special_template",
-  category: "MARKETING",M
+  category: "MARKETING",
   components: [
     {
       type: "HEADER",
       format: "TEXT",
-      text: "Special Offer Inside"
+      text: "Special Offer"
     },
     {
       type: "BODY",
@@ -131,186 +146,48 @@ const newTemplate = await client.whatsapp.templates.create({
     {
       type: "FOOTER",
       text: "Tap the button below to shop now"
-    },
-    {
-      type: "BUTTONS",
-      buttons: [
-        {
-          type: "URL",
-          text: "Shop Now",
-          url: "https://example.com/shop?ref={{1}}"
-        }
-      ]
     }
   ],
   language: "en_US"
 });
 ```
 
-### Phone Numbers
-
-List phone numbers:
-
-```typescript
-// List all WhatsApp business phone numbers
-const phoneNumbers = await client.whatsapp.phoneNumbers.list({
-  business_id: "1234567890"
-});
-
-for (const number of phoneNumbers.data) {
-  console.log(`Phone: ${number.display_phone_number}, Status: ${number.quality_rating}`);
-}
-```
-
-Register a phone number:
-
-```typescript
-// Register a phone number with the WhatsApp Business API
-const registration = await client.whatsapp.registration.register({
-  messaging_product: "whatsapp",
-  pin: "12345"
-});
-
-console.log(`Registration status: ${registration.status}`);
-```
-
 ### Media Management
 
-Upload media:
+Upload and retrieve media for your messages:
 
 ```typescript
-// Upload a file to be used in messages
-const mediaUpload = await client.whatsapp.media.upload({
-  messaging_product: "whatsapp",
+// Upload media
+const mediaUpload = await client.media.upload({
   file: fs.createReadStream("./path/to/image.jpg"),
   type: "image/jpeg"
 });
 
-console.log(`Media ID: ${mediaUpload.id}`);
-```
-
-Retrieve media URL:
-
-```typescript
-// Get the URL for a previously uploaded media
-const media = await client.whatsapp.media.get({
-  media_id: "123456789"
+// Get media URL
+const media = await client.media.get({
+  media_id: mediaUpload.id
 });
-
-console.log(`Media URL: ${media.url}`);
-// Download or process the media using the URL
 ```
 
 ### Business Profile
 
-Update business profile:
+Update your WhatsApp Business profile information:
 
 ```typescript
-// Update WhatsApp Business Profile information
-const profile = await client.whatsapp.businessProfile.update({
-  messaging_product: "whatsapp",
+const profile = await client.businessProfile.update({
   phone_number_id: "1234567890",
   about: "We provide the best service!",
   address: "123 Business St, City",
   description: "Premium products and services",
   email: "contact@business.com",
-  websites: ["https://www.business.com"],
-  vertical: "RETAIL"
+  websites: ["https://www.business.com"]
 });
 ```
-
-### Two-Step Verification
-
-Set up verification:
-
-```typescript
-// Set up two-step verification for a phone number
-const result = await client.whatsapp.twoStepVerification.set({
-  pin: "123456"
-});
-
-console.log("Two-step verification configured successfully");
-```
-
-### QR Code API
-
-Generate a QR code:
-
-```typescript
-// Generate a QR code for linking a device
-const qrCode = await client.whatsapp.qrCode.generate({
-  prefilled_message: "Hello! I'm contacting you from your website."
-});
-
-console.log(`QR Code URL: ${qrCode.code}`);
-```
-
-### Flows API
-
-Start a flow:
-
-```typescript
-// Start a flow with a user
-const flowResponse = await client.whatsapp.flows.start({
-  to: "15551234567",
-  mode: "IVR",
-  flow_id: "291075350123526",
-  flow_token: "abcdefghijklmnop",
-  flow_message_version: "3",
-  data: {
-    screen_one: {
-      first_name: "John",
-      last_name: "Doe"
-    }
-  }
-});
-
-console.log(`Flow started with message ID: ${flowResponse.messages[0].id}`);
-```
-
-### Meta API Error Structure
-
-Meta API errors follow a specific format:
-
-```typescript
-interface MetaError {
-  error: {
-    message: string;
-    type: string;
-    code: number;
-    error_data?: {
-      messaging_product: 'whatsapp';
-      details: string;
-    };
-    error_subcode?: number;
-    fbtrace_id: string;
-  };
-}
-```
-
-### Common Meta API Error Codes
-
-| Category | Code | Description | Common Solution |
-|----------|------|-------------|----------------|
-| **Authorization** | 0 | Authentication failed | Refresh your access token |
-| **Authorization** | 10 | Permission denied | Verify API permissions |
-| **Authorization** | 190 | Access token expired | Get a new access token |
-| **Rate Limits** | 4 | Too many API calls | Reduce API call frequency |
-| **Rate Limits** | 130429 | Rate limit hit | Implement exponential backoff |
-| **Rate Limits** | 131048 | Spam rate limit | Check quality rating in WhatsApp Manager |
-| **Integrity** | 368 | Temporarily blocked | Review platform policy violations |
-| **Messaging** | 130015 | Message failed to send | Verify recipient phone format |
-| **Messaging** | 131051 | Template not approved | Review template status in WhatsApp Manager |
-
-For a complete list of error codes, refer to the [Meta WhatsApp Cloud API error documentation](https://developers.facebook.com/docs/whatsapp/cloud-api/support/error-codes/).
-
-
 
 ## Requirements
 
-- TypeScript >= 4.5
+- TypeScript 4.5+
 - Node.js 18 LTS or later
-- Modern browsers (Chrome, Firefox, Safari, Edge)
 
 ## Contributing
 
