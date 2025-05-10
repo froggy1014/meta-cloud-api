@@ -1,5 +1,7 @@
+import { buildFieldsQueryString } from 'src/utils/buildFieldsQueryString';
 import {
     BusinessProfileClass,
+    BusinessProfileFieldsParam,
     BusinessProfileResponse,
     UpdateBusinessProfileRequest,
     UploadBusinessProfileResponse,
@@ -46,12 +48,14 @@ export default class BusinessProfileAPI extends BaseAPI implements BusinessProfi
      *
      * // Get specific business profile fields
      * const profile = await whatsappClient.businessProfile.getBusinessProfile('about,address,email');
+     *
+     * // Using the BusinessProfileFieldsParam type
+     * const profile = await whatsappClient.businessProfile.getBusinessProfile(['about', 'address', 'email']);
      */
-    async getBusinessProfile(fields?: string): Promise<BusinessProfileResponse> {
-        const queryParams = fields ? objectToQueryString({ fields }) : '';
+    async getBusinessProfile(fields?: BusinessProfileFieldsParam): Promise<BusinessProfileResponse> {
         return this.sendJson(
             HttpMethodsEnum.Get,
-            `${this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}${queryParams}`,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}${buildFieldsQueryString(fields)}`,
             this.config[WabaConfigEnum.RequestTimeout],
             null,
         );

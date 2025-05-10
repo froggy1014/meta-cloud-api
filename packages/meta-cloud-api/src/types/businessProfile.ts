@@ -1,6 +1,20 @@
 import { BusinessVerticalEnum } from './enums';
 import { ResponseSuccess } from './request';
 
+/**
+ * Available fields that can be requested when retrieving a business profile.
+ */
+export type BusinessProfileField =
+    | 'about'
+    | 'address'
+    | 'description'
+    | 'email'
+    | 'profile_picture_url'
+    | 'websites'
+    | 'vertical';
+
+export type BusinessProfileFieldsParam = BusinessProfileField[];
+
 export interface BusinessProfileData {
     /**
      * The business's About text. This text appears in the business's profile, beneath its profile image,
@@ -124,10 +138,9 @@ export interface UploadHandle {
 export interface BusinessProfileClass {
     /**
      * Get your business profile.
-     * @param fields Fields to be returned in the response. If not specified, all fields will be returned.
-     * Possible values: about, address, description, email, profile_picture_url, websites, vertical
+     * @param fields Specific fields to be returned in the response. If not specified, all fields will be returned.
      */
-    getBusinessProfile(fields?: string): Promise<BusinessProfileResponse>;
+    getBusinessProfile(fields?: BusinessProfileFieldsParam | string): Promise<BusinessProfileResponse>;
 
     /**
      * Update your business profile.
