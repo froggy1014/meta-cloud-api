@@ -1,16 +1,14 @@
-import type { ReactNode } from 'react';
-import clsx from 'clsx';
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
+import clsx from 'clsx';
+import type { ReactNode } from 'react';
 
 import Heading from '@theme/Heading';
 
-import styles from './index.module.css';
-import { Button } from '@repo/ui/button';
 import FeatureCard from '../components/feature-card';
 import HeroScene from '../components/hero-scene';
-import { ArrowRight } from 'lucide-react';
+import styles from './index.module.css';
 
 function HomepageHeader() {
     const { siteConfig } = useDocusaurusContext();
@@ -79,10 +77,10 @@ export default function Home(): ReactNode {
                             <div className="ml-4 text-sm text-gray-400">meta-cloud-api.ts</div>
                         </div>
                         <pre className="bg-transparent! overflow-x-auto text-sm text-green-400">
-                            <code className="text-green-400">{`import { MetaCloudAPI } from 'meta-cloud-api';
+                            <code className="text-green-400">{`import Whatsapp from 'meta-cloud-api';
 
 // Initialize the client
-const client = new MetaCloudAPI({
+const client = new Whatsapp({
   accessToken: process.env.ACCESS_TOKEN,
   phoneNumberId: process.env.PHONE_NUMBER_ID,
   version: '22'
