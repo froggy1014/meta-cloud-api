@@ -1,6 +1,6 @@
 import { HttpMethodsEnum } from './enums';
 
-export type GeneralRequestBody = Record<string, any>;
+export type GeneralRequestBody = Record<string, unknown>;
 
 export interface GeneralHeaderInterface {
     /**
@@ -57,12 +57,37 @@ export declare class RequesterClass {
         businessAcctId: string,
         userAgent: string,
     );
+
     sendRequest: (
         method: HttpMethodsEnum,
         path: string,
         timeout: number,
-        body?: any,
-    ) => Promise<RequesterResponseInterface<any>>;
+        body?: GeneralRequestBody,
+        contentType?: string,
+        additionalHeaders?: Record<string, string>,
+    ) => Promise<RequesterResponseInterface<unknown>>;
 
-    getJson<T>(method: HttpMethodsEnum, endpoint: string, timeout: number, body?: any): Promise<T>;
+    getJson<T>(
+        method: HttpMethodsEnum,
+        endpoint: string,
+        timeout: number,
+        body?: GeneralRequestBody,
+        additionalHeaders?: Record<string, string>,
+    ): Promise<T>;
+
+    sendFormData<T>(
+        method: HttpMethodsEnum,
+        endpoint: string,
+        timeout: number,
+        formData: FormData,
+        additionalHeaders?: Record<string, string>,
+    ): Promise<T>;
+
+    sendUrlEncodedForm<T>(
+        method: HttpMethodsEnum,
+        endpoint: string,
+        timeout: number,
+        formData: Record<string, string>,
+        additionalHeaders?: Record<string, string>,
+    ): Promise<T>;
 }

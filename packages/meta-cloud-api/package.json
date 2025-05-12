@@ -1,6 +1,6 @@
 {
   "name": "meta-cloud-api",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "TypeScript SDK for WhatsApp Cloud API - simplified integration with Meta's WhatsApp Business Platform",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

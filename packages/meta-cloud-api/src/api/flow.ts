@@ -210,18 +210,11 @@ export default class FlowAPI extends BaseAPI implements FlowClass {
         formData.append('asset_type', 'FLOW_JSON'); // Required by API
         formData.append('name', data.name || 'flow.json'); // Required by API
 
-        // The underlying.sendJson needs to correctly handle FormData
-        // It might need specific headers like `Content-Type: multipart/form-data; boundary=...`
-        // which FormData library usually helps generate.
-        // Assuming.sendJson handles FormData correctly:
-        return this.sendJson(
+        return this.sendFormData(
             HttpMethodsEnum.Post,
             `/${flowId}/assets`,
             this.config[WabaConfigEnum.RequestTimeout],
-            formData, // Pass FormData directly
-            // Headers might be set automatically by the client when FormData is detected,
-            // or might need to be explicitly set depending on the client implementation.
-            // e.g., { 'Content-Type': `multipart/form-data; boundary=${formData.getBoundary()}` }
+            formData,
         );
     }
 
