@@ -4,4 +4,4 @@ import WhatsApp from './whatsapp';
 export default WhatsApp;
 export * from './types';
 export * from './utils';
-export { IRequest, IResponse, WebhookHandler, expressAdapter, nextJsAdapter };
+export { type IRequest, type IResponse, WebhookHandler, expressAdapter, nextJsAdapter };
