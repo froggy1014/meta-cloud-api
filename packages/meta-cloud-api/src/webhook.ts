@@ -9,8 +9,12 @@ const LOGGER = new Logger(LIB_NAME, process.env.DEBUG === 'true' || LOG_LOCAL);
 
 export interface IRequest {
     body: any;
-    query: Record<string, any>;
-    method: string;
+    query:
+        | Record<string, any>
+        | Partial<{
+              [key: string]: string | string[];
+          }>;
+    method?: string;
 }
 export interface IResponse {
     status: (code: number) => IResponse;
