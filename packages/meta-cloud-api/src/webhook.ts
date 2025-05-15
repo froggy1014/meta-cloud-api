@@ -1,7 +1,8 @@
-import { MessageTypesEnum } from './types';
+import { MessageTypesEnum, WhatsAppConfig } from './types';
 import { WabaConfigType } from './types/config';
 
 import { EventField, WebhookEvent, WebhookMessage } from './types/webhook';
+import { importConfig } from './utils';
 import Logger from './utils/logger';
 
 const LIB_NAME = 'WEBHOOK';
@@ -32,8 +33,9 @@ export default class WebhookHandler {
      * Create a new WebhookHandler
      * @param config The WhatsApp configuration
      */
-    constructor(config: WabaConfigType) {
-        this.config = config;
+    constructor(config: WhatsAppConfig) {
+        const configuration = importConfig(config);
+        this.config = configuration;
         LOGGER.log('WebhookHandler instantiated!');
     }
 

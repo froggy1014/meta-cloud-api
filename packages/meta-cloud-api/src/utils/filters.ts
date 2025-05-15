@@ -1,4 +1,5 @@
-import { MessageType, WebhookMessage } from '../types/webhook';
+import { MessageTypesEnum } from 'src/types';
+import { WebhookMessage } from '../types/webhook';
 
 /**
  * Filters for message handling, inspired by PyWa
@@ -9,7 +10,7 @@ export const filters = {
      * @param type Message type to filter for
      * @returns A filter function
      */
-    type: (type: MessageType | string): ((message: WebhookMessage) => boolean) => {
+    type: (type: MessageTypesEnum | string): ((message: WebhookMessage) => boolean) => {
         return (message: WebhookMessage) => message.type === type;
     },
 
@@ -19,7 +20,7 @@ export const filters = {
      * @returns True if the message is a text message
      */
     text: (message: WebhookMessage): boolean => {
-        return message.type === MessageType.TEXT;
+        return message.type === MessageTypesEnum.Text;
     },
 
     /**
@@ -28,7 +29,7 @@ export const filters = {
      * @returns True if the message is an image message
      */
     image: (message: WebhookMessage): boolean => {
-        return message.type === MessageType.IMAGE;
+        return message.type === MessageTypesEnum.Image;
     },
 
     /**
@@ -37,7 +38,7 @@ export const filters = {
      * @returns True if the message is an audio message
      */
     audio: (message: WebhookMessage): boolean => {
-        return message.type === MessageType.AUDIO;
+        return message.type === MessageTypesEnum.Audio;
     },
 
     /**
@@ -46,7 +47,7 @@ export const filters = {
      * @returns True if the message is a video message
      */
     video: (message: WebhookMessage): boolean => {
-        return message.type === MessageType.VIDEO;
+        return message.type === MessageTypesEnum.Video;
     },
 
     /**
@@ -55,7 +56,7 @@ export const filters = {
      * @returns True if the message is a document message
      */
     document: (message: WebhookMessage): boolean => {
-        return message.type === MessageType.DOCUMENT;
+        return message.type === MessageTypesEnum.Document;
     },
 
     /**
@@ -64,7 +65,7 @@ export const filters = {
      * @returns True if the message is a sticker message
      */
     sticker: (message: WebhookMessage): boolean => {
-        return message.type === MessageType.STICKER;
+        return message.type === MessageTypesEnum.Sticker;
     },
 
     /**
@@ -73,7 +74,7 @@ export const filters = {
      * @returns True if the message is a location message
      */
     location: (message: WebhookMessage): boolean => {
-        return message.type === MessageType.LOCATION;
+        return message.type === MessageTypesEnum.Location;
     },
 
     /**
@@ -82,7 +83,7 @@ export const filters = {
      * @returns True if the message is a contacts message
      */
     contacts: (message: WebhookMessage): boolean => {
-        return message.type === MessageType.CONTACTS;
+        return message.type === MessageTypesEnum.Contacts;
     },
 
     /**
@@ -91,7 +92,7 @@ export const filters = {
      * @returns True if the message is a button message
      */
     button: (message: WebhookMessage): boolean => {
-        return message.type === MessageType.BUTTON;
+        return message.type === MessageTypesEnum.Button;
     },
 
     /**
@@ -100,7 +101,7 @@ export const filters = {
      * @returns True if the message is an interactive message
      */
     interactive: (message: WebhookMessage): boolean => {
-        return message.type === MessageType.INTERACTIVE;
+        return message.type === MessageTypesEnum.Interactive;
     },
 
     /**
@@ -109,7 +110,7 @@ export const filters = {
      * @returns True if the message is a system message
      */
     system: (message: WebhookMessage): boolean => {
-        return message.type === MessageType.SYSTEM;
+        return message.type === MessageTypesEnum.System;
     },
 
     /**
@@ -118,7 +119,7 @@ export const filters = {
      * @returns True if the message is an order message
      */
     order: (message: WebhookMessage): boolean => {
-        return message.type === MessageType.ORDER;
+        return message.type === MessageTypesEnum.Order;
     },
 
     /**
@@ -130,7 +131,7 @@ export const filters = {
         const patternsArray = Array.isArray(patterns) ? patterns : [patterns];
 
         return (message: WebhookMessage): boolean => {
-            if (message.type !== MessageType.TEXT || !message.text) {
+            if (message.type !== MessageTypesEnum.Text || !message.text) {
                 return false;
             }
 
