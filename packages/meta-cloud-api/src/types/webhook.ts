@@ -1,3 +1,5 @@
+import { MessageTypesEnum } from './enums';
+
 /**
  * Represents a message received through the webhook
  * Based on Meta's documentation: https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/components#messages-object
@@ -21,7 +23,7 @@ export interface WebhookMessage {
     /**
      * The type of message (text, image, etc.)
      */
-    type: MessageType;
+    type: MessageTypesEnum;
 
     /**
      * The phone number ID that received the message
@@ -418,25 +420,6 @@ export type MessageHandler = (message: WebhookMessage) => void | Promise<void>;
  * Handler function for processing events
  */
 export type EventHandler = (event: WebhookEvent) => void | Promise<void>;
-
-/**
- * Message types that can be received through the webhook
- */
-export enum MessageType {
-    TEXT = 'text',
-    IMAGE = 'image',
-    AUDIO = 'audio',
-    VIDEO = 'video',
-    DOCUMENT = 'document',
-    STICKER = 'sticker',
-    LOCATION = 'location',
-    CONTACTS = 'contacts',
-    BUTTON = 'button',
-    INTERACTIVE = 'interactive',
-    ORDER = 'order',
-    SYSTEM = 'system',
-    UNKNOWN = 'unknown',
-}
 
 /**
  * Statuses that can be received in status updates

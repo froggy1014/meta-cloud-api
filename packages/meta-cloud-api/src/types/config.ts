@@ -10,59 +10,59 @@ export type WabaConfigType = {
     /**
      * The Meta for Developers business application Id for this registered application.
      */
-    [WabaConfigEnum.AppId]: string;
+    [WabaConfigEnum.AppId]?: string;
 
     /**
      * The Meta for Developers business application secret for this registered application.
      */
-    [WabaConfigEnum.AppSecret]: string;
+    [WabaConfigEnum.AppSecret]?: string;
 
     /**
      * The Meta for Developers phone number id used by the registered business.
      */
-    [WabaConfigEnum.PhoneNumberId]: number;
+    [WabaConfigEnum.PhoneNumberId]?: number;
 
     /**
      * The Meta for Developers business id for the registered business.
      */
-    [WabaConfigEnum.BusinessAcctId]: string;
+    [WabaConfigEnum.BusinessAcctId]?: string;
     /**
      * The version of the Cloud API being used. Starts with a "v" and follows the major number.
      */
-    [WabaConfigEnum.APIVersion]: string;
+    [WabaConfigEnum.APIVersion]?: string;
 
     /**
      * The access token to make calls on behalf of the signed in Meta for Developers account or business.
      */
-    [WabaConfigEnum.AccessToken]: string;
+    [WabaConfigEnum.AccessToken]?: string;
 
     /**
      * The endpoint path (e.g. if the value here is webhook, the webhook URL would look like http/https://{host}/webhook).
      */
-    [WabaConfigEnum.WebhookEndpoint]: string;
+    [WabaConfigEnum.WebhookEndpoint]?: string;
 
     /**
      * The verification token that needs to match what is sent by the Cloud API webhook in order to subscribe.
      */
-    [WabaConfigEnum.WebhookVerificationToken]: string;
+    [WabaConfigEnum.WebhookVerificationToken]?: string;
 
     /**
      * The listener port for the webhook web server.
      */
-    [WabaConfigEnum.ListenerPort]: number;
+    [WabaConfigEnum.ListenerPort]?: number;
 
     /**
      * To turn on global debugging of the logger to print verbose output across the APIs.
      */
-    [WabaConfigEnum.Debug]: boolean;
+    [WabaConfigEnum.Debug]?: boolean;
 
     /**
      * The total number of times a request should be retried after the wait period if it fails.
      */
-    [WabaConfigEnum.MaxRetriesAfterWait]: number;
+    [WabaConfigEnum.MaxRetriesAfterWait]?: number;
 
     /**
      * The timeout period for a request to quit and destroy the attempt in ms.
      */
-    [WabaConfigEnum.RequestTimeout]: number;
+    [WabaConfigEnum.RequestTimeout]?: number;
 };

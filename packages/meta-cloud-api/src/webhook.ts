@@ -1,6 +1,7 @@
+import { MessageTypesEnum } from './types';
 import { WabaConfigType } from './types/config';
 
-import { EventField, MessageType, WebhookEvent, WebhookMessage } from './types/webhook';
+import { EventField, WebhookEvent, WebhookMessage } from './types/webhook';
 import Logger from './utils/logger';
 
 const LIB_NAME = 'WEBHOOK';
@@ -9,11 +10,7 @@ const LOGGER = new Logger(LIB_NAME, process.env.DEBUG === 'true' || LOG_LOCAL);
 
 export interface IRequest {
     body: any;
-    query:
-        | Record<string, any>
-        | Partial<{
-              [key: string]: string | string[];
-          }>;
+    query: Record<string, any>;
     method?: string;
 }
 export interface IResponse {
@@ -104,22 +101,6 @@ export default class WebhookHandler {
         }
     }
 
-    // /**
-    //  * Initialize the webhook with an Express app (legacy support)
-    //  * @param app Express application instance
-    //  * @param path The path to listen on, defaults to /webhook
-    //  */
-    // public initialize(app: any, path: string = '/webhook'): void {
-    //     // Set up middleware to handle requests
-    //     app.all(path, async (req: any, res: any) => {
-    //         const request = expressAdapter.createRequest(req);
-    //         const response = expressAdapter.createResponse(res);
-    //         await this.handleRequest(request, response);
-    //     });
-
-    //     LOGGER.log(`Webhook initialized at path: ${path}`);
-    // }
-
     /**
      * Process incoming messages
      */
@@ -139,47 +120,47 @@ export default class WebhookHandler {
                     id: message.id,
                     from: message.from,
                     timestamp: message.timestamp,
-                    type: messageType,
+                    type: message.type,
                     phoneNumberId,
                     originalData: message,
                 };
 
                 // Add type-specific data based on the message type
-                switch (messageType) {
-                    case MessageType.TEXT:
+                switch (message.type) {
+                    case MessageTypesEnum.Text:
                         processedMessage.text = message.text;
                         break;
-                    case MessageType.IMAGE:
+                    case MessageTypesEnum.Image:
                         processedMessage.image = message.image;
                         break;
-                    case MessageType.VIDEO:
+                    case MessageTypesEnum.Video:
                         processedMessage.video = message.video;
                         break;
-                    case MessageType.AUDIO:
+                    case MessageTypesEnum.Audio:
                         processedMessage.audio = message.audio;
                         break;
-                    case MessageType.DOCUMENT:
+                    case MessageTypesEnum.Document:
                         processedMessage.document = message.document;
                         break;
-                    case MessageType.STICKER:
+                    case MessageTypesEnum.Sticker:
                         processedMessage.sticker = message.sticker;
                         break;
-                    case MessageType.LOCATION:
+                    case MessageTypesEnum.Location:
                         processedMessage.location = message.location;
                         break;
-                    case MessageType.CONTACTS:
+                    case MessageTypesEnum.Contacts:
                         processedMessage.contacts = message.contacts;
                         break;
-                    case MessageType.INTERACTIVE:
+                    case MessageTypesEnum.Interactive:
                         processedMessage.interactive = message.interactive;
                         break;
-                    case MessageType.BUTTON:
+                    case MessageTypesEnum.Button:
                         processedMessage.button = message.button;
                         break;
-                    case MessageType.ORDER:
+                    case MessageTypesEnum.Order:
                         processedMessage.order = message.order;
                         break;
-                    case MessageType.SYSTEM:
+                    case MessageTypesEnum.System:
                         processedMessage.system = message.system;
                         break;
                     default:
@@ -215,23 +196,17 @@ export default class WebhookHandler {
             }
         }
 
-        // Process status messages if present
         if (value.statuses && value.statuses.length > 0) {
-            // Process as events
             await this.processEvent(EventField.STATUSES, value);
         }
     }
 
-    /**
-     * Process other webhook events
-     */
     private async processEvent(field: string, value: any): Promise<void> {
         const event: WebhookEvent = {
             field,
             value,
         };
 
-        // Dispatch to appropriate event handler
         if (this.eventHandlers.has(field)) {
             const handler = this.eventHandlers.get(field);
             if (handler) {
@@ -239,7 +214,6 @@ export default class WebhookHandler {
             }
         }
 
-        // Also dispatch to general event handler if exists
         if (this.eventHandlers.has('*')) {
             const handler = this.eventHandlers.get('*');
             if (handler) {
@@ -253,7 +227,7 @@ export default class WebhookHandler {
      * @param type Message type to handle, or '*' for all types
      * @param handler The handler function
      */
-    public onMessage(type: string, handler: (message: WebhookMessage) => void | Promise<void>): void {
+    public onMessage(type: MessageTypesEnum, handler: (message: WebhookMessage) => void | Promise<void>): void {
         this.messageHandlers.set(type, handler);
         LOGGER.log(`Registered handler for message type: ${type}`);
     }

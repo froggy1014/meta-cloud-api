@@ -29,6 +29,11 @@ export enum MessageTypesEnum {
     Template = 'template', // for template messages. Text and media (images and documents) message templates are supported.
     Text = 'text', // for text messages.
     Video = 'video', // for video messages
+    Button = 'button',
+    Order = 'order',
+    System = 'system',
+    Unknown = 'unknown',
+    '*' = '*',
 }
 
 export enum ParametersTypesEnum {
