@@ -410,26 +410,6 @@ export interface WebhookEvent {
 }
 
 /**
- * Configuration for the webhook handler
- */
-export interface WebhookConfig {
-    /**
-     * The URL path to listen on
-     */
-    path?: string;
-
-    /**
-     * The verification token for the webhook
-     */
-    verifyToken: string;
-
-    /**
-     * The public URL for the webhook
-     */
-    callbackUrl: string;
-}
-
-/**
  * Handler function for processing messages
  */
 export type MessageHandler = (message: WebhookMessage) => void | Promise<void>;

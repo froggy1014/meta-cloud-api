@@ -1,4 +1,3 @@
-import { Server } from 'http';
 import { WabaConfigType } from './types/config';
 
 import { EventField, MessageType, WebhookEvent, WebhookMessage } from './types/webhook';
@@ -8,18 +7,11 @@ const LIB_NAME = 'WEBHOOK';
 const LOG_LOCAL = false;
 const LOGGER = new Logger(LIB_NAME, process.env.DEBUG === 'true' || LOG_LOCAL);
 
-/**
- * Generic HTTP request interface that works across frameworks
- */
 export interface IRequest {
     body: any;
     query: Record<string, any>;
     method: string;
 }
-
-/**
- * Generic HTTP response interface that works across frameworks
- */
 export interface IResponse {
     status: (code: number) => IResponse;
     send: (body: any) => IResponse | void;
@@ -28,78 +20,31 @@ export interface IResponse {
 }
 
 /**
- * Express adapter for the WebhookHandler
- */
-export const expressAdapter = {
-    createRequest: (req: any): IRequest => ({
-        body: req.body,
-        query: req.query,
-        method: req.method,
-    }),
-    createResponse: (res: any): IResponse => ({
-        status: (code: number) => {
-            res.status(code);
-            return res;
-        },
-        send: (body: any) => res.send(body),
-        json: (body: any) => res.json(body),
-        end: () => res.end(),
-    }),
-};
-
-/**
- * Next.js adapter for the WebhookHandler
- */
-export const nextJsAdapter = {
-    createRequest: (req: any): IRequest => ({
-        body: req.body,
-        query: req.query,
-        method: req.method,
-    }),
-    createResponse: (res: any): IResponse => ({
-        status: (code: number) => {
-            res.status(code);
-            return res;
-        },
-        send: (body: any) => res.send(body),
-        json: (body: any) => res.json(body),
-        end: () => res.end(),
-    }),
-};
-
-/**
  * Webhook handler for WhatsApp Cloud API
  */
 export default class WebhookHandler {
-    private server?: Server;
     private config: WabaConfigType;
-    private callbackUrl: string;
-    private verifyToken: string;
     private messageHandlers: Map<string, (message: WebhookMessage) => void | Promise<void>> = new Map();
     private eventHandlers: Map<string, (event: WebhookEvent) => void | Promise<void>> = new Map();
 
     /**
      * Create a new WebhookHandler
      * @param config The WhatsApp configuration
-     * @param callbackUrl The public URL for the webhook
-     * @param verifyToken The verification token for the webhook
      */
-    constructor(config: WabaConfigType, callbackUrl: string, verifyToken: string) {
+    constructor(config: WabaConfigType) {
         this.config = config;
-        this.callbackUrl = callbackUrl;
-        this.verifyToken = verifyToken;
         LOGGER.log('WebhookHandler instantiated!');
     }
 
     /**
      * Handle a GET request for webhook verification
      */
-    public handleVerificationRequest(req: IRequest, res: IResponse): void {
+    public handleVerificationRequest<Req extends IRequest, Res extends IResponse>(req: Req, res: Res): void {
         const mode = req.query['hub.mode'];
         const token = req.query['hub.verify_token'];
         const challenge = req.query['hub.challenge'];
 
-        if (mode === 'subscribe' && token === this.verifyToken) {
+        if (mode === 'subscribe' && token === this.config.WEBHOOK_VERIFICATION_TOKEN) {
             LOGGER.log('Webhook verified successfully');
             res.status(200).send(challenge);
         } else {
@@ -111,7 +56,7 @@ export default class WebhookHandler {
     /**
      * Handle a POST request for webhook events
      */
-    public async handleWebhookRequest(req: IRequest, res: IResponse): Promise<void> {
+    public async handleWebhookRequest<Req extends IRequest, Res extends IResponse>(req: Req, res: Res): Promise<void> {
         const body = req.body;
 
         // Check this is a WhatsApp Business Account webhook
@@ -155,21 +100,21 @@ export default class WebhookHandler {
         }
     }
 
-    /**
-     * Initialize the webhook with an Express app (legacy support)
-     * @param app Express application instance
-     * @param path The path to listen on, defaults to /webhook
-     */
-    public initialize(app: any, path: string = '/webhook'): void {
-        // Set up middleware to handle requests
-        app.all(path, async (req: any, res: any) => {
-            const request = expressAdapter.createRequest(req);
-            const response = expressAdapter.createResponse(res);
-            await this.handleRequest(request, response);
-        });
+    // /**
+    //  * Initialize the webhook with an Express app (legacy support)
+    //  * @param app Express application instance
+    //  * @param path The path to listen on, defaults to /webhook
+    //  */
+    // public initialize(app: any, path: string = '/webhook'): void {
+    //     // Set up middleware to handle requests
+    //     app.all(path, async (req: any, res: any) => {
+    //         const request = expressAdapter.createRequest(req);
+    //         const response = expressAdapter.createResponse(res);
+    //         await this.handleRequest(request, response);
+    //     });
 
-        LOGGER.log(`Webhook initialized at path: ${path}`);
-    }
+    //     LOGGER.log(`Webhook initialized at path: ${path}`);
+    // }
 
     /**
      * Process incoming messages
@@ -178,11 +123,12 @@ export default class WebhookHandler {
         // Extract metadata
         const metadata = value.metadata;
         const phoneNumberId = metadata.phone_number_id;
+        const messages = value.messages as WebhookMessage[];
 
         // Process messages if present
-        if (value.messages && value.messages.length > 0) {
-            for (const message of value.messages) {
-                const messageType = message.type as MessageType;
+        if (messages && messages.length > 0) {
+            for (const message of messages) {
+                const messageType = message.type;
 
                 // Create the base message object
                 const processedMessage: WebhookMessage = {
