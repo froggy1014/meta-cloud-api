@@ -247,6 +247,7 @@ export interface WebhookMessage {
     interactive?: {
         /**
          * Type of the interactive message
+         * Can be: button_reply, list_reply, flow, nfm_reply, etc.
          */
         type: string;
         /**
@@ -263,6 +264,24 @@ export interface WebhookMessage {
             id: string;
             title: string;
             description?: string;
+        };
+
+        /**
+         * NFM (No-Code Flow Message) reply data
+         */
+        nfm_reply?: {
+            /**
+             * Response data in JSON format
+             */
+            response_json: string;
+            /**
+             * Body text of the reply
+             */
+            body: string;
+            /**
+             * Name of the flow
+             */
+            name: string;
         };
     };
 
