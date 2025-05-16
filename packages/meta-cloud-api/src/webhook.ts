@@ -26,8 +26,10 @@ export interface IResponse {
  */
 export default class WebhookHandler {
     private config: WabaConfigType;
-    private messageHandlers: Map<string, (message: WebhookMessage) => void | Promise<void>> = new Map();
+    private messageHandlers: Map<MessageTypesEnum, (message: WebhookMessage) => void | Promise<void>> = new Map();
     private eventHandlers: Map<string, (event: WebhookEvent) => void | Promise<void>> = new Map();
+    private preProcessHandler: ((message: WebhookMessage) => void | Promise<void>) | null = null;
+    private postProcessHandler: ((message: WebhookMessage) => void | Promise<void>) | null = null;
 
     /**
      * Create a new WebhookHandler
@@ -184,7 +186,12 @@ export default class WebhookHandler {
                     processedMessage.errors = message.errors;
                 }
 
-                // Dispatch to appropriate message handler
+                // 1. Execute pre-processing handler if exists
+                if (this.preProcessHandler) {
+                    await Promise.resolve(this.preProcessHandler(processedMessage));
+                }
+
+                // 2. Dispatch to appropriate message handler
                 if (this.messageHandlers.has(messageType)) {
                     const handler = this.messageHandlers.get(messageType);
                     if (handler) {
@@ -193,11 +200,16 @@ export default class WebhookHandler {
                 }
 
                 // Also dispatch to general message handler if exists
-                if (this.messageHandlers.has('*')) {
-                    const handler = this.messageHandlers.get('*');
+                if (this.messageHandlers.has(MessageTypesEnum['*'])) {
+                    const handler = this.messageHandlers.get(MessageTypesEnum['*']);
                     if (handler) {
                         await Promise.resolve(handler(processedMessage));
                     }
+                }
+
+                // 3. Execute post-processing handler if exists
+                if (this.postProcessHandler) {
+                    await Promise.resolve(this.postProcessHandler(processedMessage));
                 }
             }
         }
@@ -246,5 +258,23 @@ export default class WebhookHandler {
     public onEvent(field: string, handler: (event: WebhookEvent) => void | Promise<void>): void {
         this.eventHandlers.set(field, handler);
         LOGGER.log(`Registered handler for event field: ${field}`);
+    }
+
+    /**
+     * Register a pre-processing handler for all messages
+     * @param handler The handler function
+     */
+    public onMessagePreProcess(handler: (message: WebhookMessage) => void | Promise<void>): void {
+        this.preProcessHandler = handler;
+        LOGGER.log('Registered pre-processing handler for all messages');
+    }
+
+    /**
+     * Register a post-processing handler for all messages
+     * @param handler The handler function
+     */
+    public onMessagePostProcess(handler: (message: WebhookMessage) => void | Promise<void>): void {
+        this.postProcessHandler = handler;
+        LOGGER.log('Registered post-processing handler for all messages');
     }
 }
