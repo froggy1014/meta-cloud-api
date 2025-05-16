@@ -109,10 +109,9 @@ export default class WebhookHandler {
     private async processMessages(value: any): Promise<void> {
         // Extract metadata
         const metadata = value.metadata;
-        const contacts = value.contacts;
         const displayPhoneNumber = metadata.display_phone_number;
         const phoneNumberId = metadata.phone_number_id;
-        const profileName = contacts.profile.name;
+        const profileName = value.contacts[0].profile.name;
         const messages = value.messages as WebhookMessage[];
 
         // Process messages if present
