@@ -4,6 +4,7 @@ import { WabaConfigType } from './types/config';
 import { EventField, WebhookEvent, WebhookMessage } from './types/webhook';
 import { importConfig } from './utils';
 import Logger from './utils/logger';
+import WhatsApp from './whatsapp';
 
 const LIB_NAME = 'WEBHOOK';
 const LOG_LOCAL = false;
@@ -26,10 +27,14 @@ export interface IResponse {
  */
 export default class WebhookHandler {
     private config: WabaConfigType;
-    private messageHandlers: Map<MessageTypesEnum, (message: WebhookMessage) => void | Promise<void>> = new Map();
+    private client: WhatsApp;
+    private messageHandlers: Map<
+        MessageTypesEnum,
+        (whatsapp: WhatsApp, message: WebhookMessage) => void | Promise<void>
+    > = new Map();
     private eventHandlers: Map<string, (event: WebhookEvent) => void | Promise<void>> = new Map();
-    private preProcessHandler: ((message: WebhookMessage) => void | Promise<void>) | null = null;
-    private postProcessHandler: ((message: WebhookMessage) => void | Promise<void>) | null = null;
+    private preProcessHandler: ((whatsapp: WhatsApp, message: WebhookMessage) => void | Promise<void>) | null = null;
+    private postProcessHandler: ((whatsapp: WhatsApp, message: WebhookMessage) => void | Promise<void>) | null = null;
 
     /**
      * Create a new WebhookHandler
@@ -38,6 +43,7 @@ export default class WebhookHandler {
     constructor(config: WhatsAppConfig) {
         const configuration = importConfig(config);
         this.config = configuration;
+        this.client = new WhatsApp(config);
         LOGGER.log('WebhookHandler instantiated!');
     }
 
@@ -188,14 +194,14 @@ export default class WebhookHandler {
 
                 // 1. Execute pre-processing handler if exists
                 if (this.preProcessHandler) {
-                    await Promise.resolve(this.preProcessHandler(processedMessage));
+                    await Promise.resolve(this.preProcessHandler(this.client, processedMessage));
                 }
 
                 // 2. Dispatch to appropriate message handler
                 if (this.messageHandlers.has(messageType)) {
                     const handler = this.messageHandlers.get(messageType);
                     if (handler) {
-                        await Promise.resolve(handler(processedMessage));
+                        await Promise.resolve(handler(this.client, processedMessage));
                     }
                 }
 
@@ -203,13 +209,13 @@ export default class WebhookHandler {
                 if (this.messageHandlers.has(MessageTypesEnum['*'])) {
                     const handler = this.messageHandlers.get(MessageTypesEnum['*']);
                     if (handler) {
-                        await Promise.resolve(handler(processedMessage));
+                        await Promise.resolve(handler(this.client, processedMessage));
                     }
                 }
 
                 // 3. Execute post-processing handler if exists
                 if (this.postProcessHandler) {
-                    await Promise.resolve(this.postProcessHandler(processedMessage));
+                    await Promise.resolve(this.postProcessHandler(this.client, processedMessage));
                 }
             }
         }
@@ -245,7 +251,10 @@ export default class WebhookHandler {
      * @param type Message type to handle, or '*' for all types
      * @param handler The handler function
      */
-    public onMessage(type: MessageTypesEnum, handler: (message: WebhookMessage) => void | Promise<void>): void {
+    public onMessage(
+        type: MessageTypesEnum,
+        handler: (whatsapp: WhatsApp, message: WebhookMessage) => void | Promise<void>,
+    ): void {
         this.messageHandlers.set(type, handler);
         LOGGER.log(`Registered handler for message type: ${type}`);
     }
@@ -264,7 +273,7 @@ export default class WebhookHandler {
      * Register a pre-processing handler for all messages
      * @param handler The handler function
      */
-    public onMessagePreProcess(handler: (message: WebhookMessage) => void | Promise<void>): void {
+    public onMessagePreProcess(handler: (whatsapp: WhatsApp, message: WebhookMessage) => void | Promise<void>): void {
         this.preProcessHandler = handler;
         LOGGER.log('Registered pre-processing handler for all messages');
     }
@@ -273,7 +282,7 @@ export default class WebhookHandler {
      * Register a post-processing handler for all messages
      * @param handler The handler function
      */
-    public onMessagePostProcess(handler: (message: WebhookMessage) => void | Promise<void>): void {
+    public onMessagePostProcess(handler: (whatsapp: WhatsApp, message: WebhookMessage) => void | Promise<void>): void {
         this.postProcessHandler = handler;
         LOGGER.log('Registered post-processing handler for all messages');
     }
