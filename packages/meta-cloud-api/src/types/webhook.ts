@@ -31,6 +31,16 @@ export interface WebhookMessage {
     phoneNumberId: string;
 
     /**
+     * The display phone number that received the message
+     */
+    displayPhoneNumber: string;
+
+    /**
+     * The profile name of the sender
+     */
+    profileName: string;
+
+    /**
      * Text object for text messages
      */
     text?: {
