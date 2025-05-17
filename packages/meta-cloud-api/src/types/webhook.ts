@@ -157,6 +157,20 @@ export interface WebhookMessage {
     };
 
     /**
+     * Reaction object for reaction messages
+     */
+    reaction?: {
+        /**
+         * The ID of the message being reacted to
+         */
+        message_id: string;
+        /**
+         * Emoji used for the reaction
+         */
+        emoji: string;
+    };
+
+    /**
      * Contacts object for contact messages
      */
     contacts?: Array<{
