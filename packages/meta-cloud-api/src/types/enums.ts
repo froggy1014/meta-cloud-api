@@ -24,7 +24,7 @@ export enum MessageTypesEnum {
     Image = 'image',
     Interactive = 'interactive',
     Location = 'location',
-    Reaction = 'sticker',
+    Reaction = 'reaction',
     Sticker = 'sticker',
     Template = 'template',
     Text = 'text',
