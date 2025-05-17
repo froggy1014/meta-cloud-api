@@ -1,5 +1,25 @@
 import { MessageTypesEnum } from './enums';
 
+export interface WebhookContact {
+    /**
+     * WhatsApp ID of the contact. Business can respond to this contact using this ID.
+     */
+    wa_id: string;
+    /**
+     *  Additional unique, alphanumeric identifier for a WhatsApp user
+     */
+    user_id?: string;
+    /**
+     * Profile of Whatsapp user
+     */
+    profile: {
+        /**
+         * The display name of the contact
+         */
+        name: string;
+    };
+}
+
 /**
  * Represents a message received through the webhook
  * Based on Meta's documentation: https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/components#messages-object
