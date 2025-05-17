@@ -20,13 +20,13 @@ Whether you are building chatbots, sending notifications, managing customer inte
 
 ## Getting Started
 
-Ready to dive in? Head over to the [Get Started](./get-started.md) guide for installation instructions and your first API call.
+Ready to dive in? Head over to the [Quick Start](./quick-start.md) guide for usage examples and your first API call.
 
 ## Explore the API
 
 Use the sidebar to navigate through the different sections:
 
-*   **Get Started:** Installation and basic setup.
+*   **Quick Start:** Usage examples and basic setup.
 *   **API Reference:** Detailed information on available methods and parameters for each API category (Messages, Templates, Media, etc.).
 *   **Settings:** Configuration options.
 *   **Tutorials:** Step-by-step guides for common use cases.
