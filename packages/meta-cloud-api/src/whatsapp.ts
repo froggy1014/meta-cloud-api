@@ -46,7 +46,6 @@ export default class WhatsApp implements WhatsAppClass {
     constructor(config?: WhatsAppConfig) {
         this.config = importConfig(config);
         this.requester = new Requester(
-            this.config[SDKEnums.WabaConfigEnum.BaseURL],
             this.config[SDKEnums.WabaConfigEnum.APIVersion],
             this.config[SDKEnums.WabaConfigEnum.PhoneNumberId],
             this.config[SDKEnums.WabaConfigEnum.AccessToken],

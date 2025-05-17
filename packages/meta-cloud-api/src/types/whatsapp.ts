@@ -20,7 +20,6 @@ import { WABAClass } from './waba';
 
 export type WhatsAppConfig = {
     accessToken: string;
-    baseUrl?: string;
     appId?: string;
     appSecret?: string;
     phoneNumberId?: number;

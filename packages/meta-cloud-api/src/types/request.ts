@@ -50,7 +50,6 @@ export interface Paging {
 
 export declare class RequesterClass {
     constructor(
-        host: string,
         apiVersion: string,
         phoneNumberId: number,
         accessToken: string,

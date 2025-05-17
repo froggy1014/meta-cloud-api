@@ -2,12 +2,6 @@ import { WabaConfigEnum } from './enums';
 
 export type WabaConfigType = {
     /**
-     * That base URL of the Cloud API, hosted by Meta.
-     * @default 'graph.facebook.com/'
-     */
-    [WabaConfigEnum.BaseURL]: string;
-
-    /**
      * The Meta for Developers business application Id for this registered application.
      */
     [WabaConfigEnum.AppId]: string;

@@ -76,7 +76,6 @@ export enum ComponentTypesEnum {
 }
 
 export enum WabaConfigEnum {
-    BaseURL = 'WA_BASE_URL',
     AppId = 'M4D_APP_ID',
     Port = 'WA_PORT',
     AppSecret = 'M4D_APP_SECRET',

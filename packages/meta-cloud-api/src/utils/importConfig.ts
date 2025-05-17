@@ -6,7 +6,6 @@ import Logger from './logger';
 const LIB_NAME = 'UTILS';
 const LOG_LOCAL = false;
 const LOGGER = new Logger(LIB_NAME, process.env.DEBUG === 'true' || LOG_LOCAL);
-const DEFAULT_BASE_URL = 'graph.facebook.com';
 const DEFAULT_LISTENER_PORT = 3000;
 const DEFAULT_MAX_RETRIES_AFTER_WAIT = 30;
 const DEFAULT_REQUEST_TIMEOUT = 20000;
@@ -22,7 +21,6 @@ export const importConfig = (inputConfig?: WhatsAppConfig) => {
     emptyConfigChecker(inputConfig);
 
     const wabaConfig: WabaConfigType = {
-        [WabaConfigEnum.BaseURL]: inputConfig?.baseUrl || process.env.WA_BASE_URL || DEFAULT_BASE_URL,
         [WabaConfigEnum.AppId]: inputConfig?.appId || process.env.M4D_APP_ID || '',
         [WabaConfigEnum.AppSecret]: inputConfig?.appSecret || process.env.M4D_APP_SECRET || '',
         [WabaConfigEnum.PhoneNumberId]: inputConfig?.phoneNumberId || Number(process.env.WA_PHONE_NUMBER_ID),
