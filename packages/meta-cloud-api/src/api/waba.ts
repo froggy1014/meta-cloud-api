@@ -1,4 +1,4 @@
-import { buildFieldsQueryString } from 'src/utils/buildFieldsQueryString';
+import { buildFieldsQueryString } from '../utils/buildFieldsQueryString';
 import type { WabaConfigType } from '../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../types/enums';
 import type { RequesterClass, ResponseSuccess } from '../types/request';
