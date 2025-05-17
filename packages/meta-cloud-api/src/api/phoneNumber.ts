@@ -4,8 +4,8 @@ import {
     PhoneNumbersResponse,
     RequestVerificationCodeRequest,
     VerifyCodeRequest,
-} from 'src/types/phoneNumber';
-import { objectToQueryString } from 'src/utils/objectToQueryString';
+} from '../types/phoneNumber';
+import { objectToQueryString } from '../utils/objectToQueryString';
 import type { WabaConfigType } from '../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../types/enums';
 import type { RequesterClass, ResponseSuccess } from '../types/request';

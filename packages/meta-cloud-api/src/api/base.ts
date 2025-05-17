@@ -1,4 +1,4 @@
-import { HttpMethodsEnum } from 'src/types/enums';
+import { HttpMethodsEnum } from '../types/enums';
 import type { BaseClass } from '../types/base';
 import type { WabaConfigType } from '../types/config';
 import type { RequesterClass } from '../types/request';

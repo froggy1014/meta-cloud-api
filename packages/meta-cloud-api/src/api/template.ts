@@ -1,4 +1,4 @@
-import { objectToQueryString } from 'src/utils/objectToQueryString';
+import { objectToQueryString } from '../utils/objectToQueryString';
 import type { WabaConfigType } from '../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../types/enums';
 import type { RequesterClass, ResponsePagination, ResponseSuccess } from '../types/request';

@@ -1,4 +1,4 @@
-import { buildFieldsQueryString } from 'src/utils/buildFieldsQueryString';
+import { buildFieldsQueryString } from '../utils/buildFieldsQueryString';
 import {
     BusinessProfileClass,
     BusinessProfileFieldsParam,
