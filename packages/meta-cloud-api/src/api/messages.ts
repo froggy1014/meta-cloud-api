@@ -1,13 +1,13 @@
 import type { WabaConfigType } from '../types/config';
 import {
-    ComponentTypesEnum,
+    type ComponentTypesEnum,
     HttpMethodsEnum,
-    InteractiveTypesEnum,
+    type InteractiveTypesEnum,
     MessageTypesEnum,
     WabaConfigEnum,
 } from '../types/enums';
 
-import * as m from '../types/messages';
+import type * as m from '../types/messages';
 import type { RequesterClass } from '../types/request';
 import BaseAPI from './base';
 
