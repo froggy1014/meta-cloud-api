@@ -18,8 +18,8 @@ const whatsapp = new WhatsApp({
 });
 
 // Send an interactive message with buttons
-const response = await whatsapp.messages.interactive(
-  {
+const response = await whatsapp.messages.interactive({
+  body: {
     type: "button",
     body: {
       text: "Would you like to proceed with your order?"
@@ -43,10 +43,10 @@ const response = await whatsapp.messages.interactive(
       ]
     }
   },
-  15551234567
-);
+  to: "15551234567"
+});
 
-console.log(`Interactive message sent with ID: ${response.data.messages[0].id}`);
+console.log(`Interactive message sent with ID: ${response.messages[0].id}`);
 ```
 
 ## Interactive Message Types
@@ -63,8 +63,8 @@ WhatsApp supports four types of interactive messages:
 Button messages are ideal for simple choices or confirmations.
 
 ```typescript
-const buttonResponse = await whatsapp.messages.interactive(
-  {
+const buttonResponse = await whatsapp.messages.interactive({
+  body: {
     type: "button",
     header: {  // Optional header
       type: "text",
@@ -102,8 +102,8 @@ const buttonResponse = await whatsapp.messages.interactive(
       ]
     }
   },
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ### Button Message Properties
@@ -117,6 +117,7 @@ const buttonResponse = await whatsapp.messages.interactive(
 | action | object | Contains the buttons array | Yes |
 
 Each button must have:
+
 - A unique ID (max 256 characters)
 - A title (max 20 characters)
 - The type "reply"
@@ -126,8 +127,8 @@ Each button must have:
 List messages allow you to present multiple options organized in sections.
 
 ```typescript
-const listResponse = await whatsapp.messages.interactive(
-  {
+const listResponse = await whatsapp.messages.interactive({
+  body: {
     type: "list",
     header: {
       type: "text",
@@ -175,8 +176,8 @@ const listResponse = await whatsapp.messages.interactive(
       ]
     }
   },
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ### List Message Properties
@@ -190,10 +191,12 @@ const listResponse = await whatsapp.messages.interactive(
 | action | object | Contains the button text and sections array | Yes |
 
 The action object must include:
+
 - button (string): Text for the main list button (max 20 characters)
 - sections (array): Up to 10 sections, each with a title and rows
 
 Each row must have:
+
 - A unique ID (max 256 characters)
 - A title (max 24 characters)
 - An optional description (max 72 characters)
@@ -203,8 +206,8 @@ Each row must have:
 To use product messages, you must have a WhatsApp Commerce account with a product catalog. These messages showcase products directly in the chat.
 
 ```typescript
-const productResponse = await whatsapp.messages.interactive(
-  {
+const productResponse = await whatsapp.messages.interactive({
+  body: {
     type: "product",
     body: {
       text: "Check out this product"
@@ -214,8 +217,8 @@ const productResponse = await whatsapp.messages.interactive(
       product_retailer_id: "SKU12345"
     }
   },
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ## Product List Interactive Messages
@@ -223,8 +226,8 @@ const productResponse = await whatsapp.messages.interactive(
 Product list messages allow you to showcase multiple products from your catalog.
 
 ```typescript
-const productListResponse = await whatsapp.messages.interactive(
-  {
+const productListResponse = await whatsapp.messages.interactive({
+  body: {
     type: "product_list",
     header: {
       type: "text",
@@ -256,8 +259,8 @@ const productListResponse = await whatsapp.messages.interactive(
       ]
     }
   },
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ## Header Options
@@ -356,8 +359,8 @@ When users interact with your interactive messages, you'll receive webhooks with
 
 ```typescript
 try {
-  const response = await whatsapp.messages.interactive(
-    {
+  const response = await whatsapp.messages.interactive({
+    body: {
       type: "button",
       body: {
         text: "Would you like to proceed with your order?"
@@ -381,9 +384,9 @@ try {
         ]
       }
     },
-    15551234567
-  );
-  console.log("Interactive message sent successfully:", response.data);
+    to: "15551234567"
+  });
+  console.log("Interactive message sent successfully:", response);
 } catch (error) {
   console.error("Error sending interactive message:", error);
   
@@ -406,4 +409,3 @@ try {
 5. **Prepare for responses**: Have proper handling in place for all possible user selections.
 
 6. **Stay within limits**: Respect the character limits for titles, descriptions, and other fields.
-

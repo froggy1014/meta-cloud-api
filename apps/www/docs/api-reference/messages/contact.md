@@ -18,8 +18,8 @@ const whatsapp = new WhatsApp({
 });
 
 // Send contact message
-const response = await whatsapp.messages.contacts(
-  [
+const response = await whatsapp.messages.contacts({
+  body: [
     {
       name: {
         formatted_name: "John Doe",
@@ -40,10 +40,10 @@ const response = await whatsapp.messages.contacts(
       ]
     }
   ],
-  15551234567
-);
+  to: "15551234567"
+});
 
-console.log(`Contact message sent with ID: ${response.data.messages[0].id}`);
+console.log(`Contact message sent with ID: ${response.messages[0].id}`);
 ```
 
 ## Parameters
@@ -52,11 +52,17 @@ The `contacts()` method accepts the following parameters:
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| contacts | array | Array of contact objects |
-| recipient | string or number | The recipient's phone number with country code |
-| replyMessageId | string (optional) | ID of a message to reply to |
+| params | MessageRequestParams`[ContactObject]` | Object containing message parameters |
 
-### Contact Object Properties
+### MessageRequestParams`[ContactObject]` Properties
+
+| Property | Type | Description | Required |
+|----------|------|-------------|----------|
+| body | Array`ContactObject` | Array of contact objects | Required |
+| to | string | The recipient's phone number with country code | Required |
+| replyMessageId | string | ID of a message to reply to | Optional |
+
+### ContactObject Properties
 
 | Property | Type | Description | Required |
 |----------|------|-------------|----------|
@@ -99,8 +105,8 @@ The `contacts()` method accepts the following parameters:
 ### Basic Contact with Name and Phone
 
 ```typescript
-const response = await whatsapp.messages.contacts(
-  [
+const response = await whatsapp.messages.contacts({
+  body: [
     {
       name: {
         formatted_name: "Jane Smith",
@@ -115,15 +121,15 @@ const response = await whatsapp.messages.contacts(
       ]
     }
   ],
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ### Contact with Multiple Phone Numbers and Emails
 
 ```typescript
-const response = await whatsapp.messages.contacts(
-  [
+const response = await whatsapp.messages.contacts({
+  body: [
     {
       name: {
         formatted_name: "Alex Johnson",
@@ -152,15 +158,15 @@ const response = await whatsapp.messages.contacts(
       ]
     }
   ],
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ### Business Contact with Organization Information
 
 ```typescript
-const response = await whatsapp.messages.contacts(
-  [
+const response = await whatsapp.messages.contacts({
+  body: [
     {
       name: {
         formatted_name: "Sarah Williams",
@@ -193,15 +199,15 @@ const response = await whatsapp.messages.contacts(
       ]
     }
   ],
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ### Sending Multiple Contacts
 
 ```typescript
-const response = await whatsapp.messages.contacts(
-  [
+const response = await whatsapp.messages.contacts({
+  body: [
     {
       name: {
         formatted_name: "John Doe",
@@ -229,8 +235,8 @@ const response = await whatsapp.messages.contacts(
       ]
     }
   ],
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ### Replying with Contacts
@@ -238,8 +244,8 @@ const response = await whatsapp.messages.contacts(
 ```typescript
 const originalMessageId = "wamid.abcd1234...";
 
-const response = await whatsapp.messages.contacts(
-  [
+const response = await whatsapp.messages.contacts({
+  body: [
     {
       name: {
         formatted_name: "Technical Support",
@@ -260,9 +266,9 @@ const response = await whatsapp.messages.contacts(
       ]
     }
   ],
-  15551234567,
-  originalMessageId
-);
+  to: "15551234567",
+  replyMessageId: originalMessageId
+});
 ```
 
 ## Address and Organization Format
@@ -308,8 +314,8 @@ urls: [
 
 ```typescript
 try {
-  const response = await whatsapp.messages.contacts(
-    [
+  const response = await whatsapp.messages.contacts({
+    body: [
       {
         name: {
           formatted_name: "John Doe",
@@ -324,9 +330,9 @@ try {
         ]
       }
     ],
-    15551234567
-  );
-  console.log("Contact message sent successfully:", response.data);
+    to: "15551234567"
+  });
+  console.log("Contact message sent successfully:", response);
 } catch (error) {
   console.error("Error sending contact message:", error);
   

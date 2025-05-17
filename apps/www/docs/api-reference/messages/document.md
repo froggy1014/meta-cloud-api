@@ -18,16 +18,16 @@ const whatsapp = new WhatsApp({
 });
 
 // Send document message using a URL
-const response = await whatsapp.messages.document(
-  { 
+const response = await whatsapp.messages.document({
+  body: { 
     link: "https://example.com/report.pdf",
     caption: "Monthly sales report",
     filename: "Sales_Report_July_2023.pdf"
   },
-  15551234567
-);
+  to: "15551234567"
+});
 
-console.log(`Document message sent with ID: ${response.data.messages[0].id}`);
+console.log(`Document message sent with ID: ${response.messages[0].id}`);
 ```
 
 ## Parameters
@@ -36,11 +36,17 @@ The `document()` method accepts the following parameters:
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| message | object | The document message object |
-| recipient | string or number | The recipient's phone number with country code |
-| replyMessageId | string (optional) | ID of a message to reply to |
+| params | MessageRequestParams`DocumentMediaObject` | Object containing message parameters |
 
-### Message Object Properties
+### MessageRequestParams`DocumentMediaObject` Properties
+
+| Property | Type | Description | Required |
+|----------|------|-------------|----------|
+| body | DocumentMediaObject | The document message body | Required |
+| to | string | The recipient's phone number with country code | Required |
+| replyMessageId | string | ID of a message to reply to | Optional |
+
+### DocumentMediaObject Properties
 
 | Property | Type | Description | Required |
 |----------|------|-------------|----------|
@@ -54,14 +60,14 @@ The `document()` method accepts the following parameters:
 ### Sending a Document with a URL
 
 ```typescript
-const response = await whatsapp.messages.document(
-  { 
+const response = await whatsapp.messages.document({
+  body: { 
     link: "https://example.com/contract.pdf",
     caption: "Please review and sign this contract",
     filename: "Contract_2023.pdf"
   },
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ### Sending a Document with a Media ID
@@ -69,48 +75,48 @@ const response = await whatsapp.messages.document(
 If you've previously uploaded a document and have its Media ID:
 
 ```typescript
-const response = await whatsapp.messages.document(
-  { 
+const response = await whatsapp.messages.document({
+  body: { 
     id: "1234567890",
     caption: "Document from our files",
     filename: "Important_Document.pdf"
   },
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ### Sending Different Document Types
 
 ```typescript
 // Sending a Word document
-const wordResponse = await whatsapp.messages.document(
-  { 
+const wordResponse = await whatsapp.messages.document({
+  body: { 
     link: "https://example.com/proposal.docx",
     caption: "Project proposal",
     filename: "Project_Proposal.docx"
   },
-  15551234567
-);
+  to: "15551234567"
+});
 
 // Sending an Excel spreadsheet
-const excelResponse = await whatsapp.messages.document(
-  { 
+const excelResponse = await whatsapp.messages.document({
+  body: { 
     link: "https://example.com/budget.xlsx",
     caption: "Budget forecast",
     filename: "Budget_2023.xlsx"
   },
-  15551234567
-);
+  to: "15551234567"
+});
 
 // Sending a plain text file
-const textResponse = await whatsapp.messages.document(
-  { 
+const textResponse = await whatsapp.messages.document({
+  body: { 
     link: "https://example.com/instructions.txt",
     caption: "Installation instructions",
     filename: "Instructions.txt"
   },
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ### Replying with a Document
@@ -118,15 +124,15 @@ const textResponse = await whatsapp.messages.document(
 ```typescript
 const originalMessageId = "wamid.abcd1234...";
 
-const response = await whatsapp.messages.document(
-  { 
+const response = await whatsapp.messages.document({
+  body: { 
     link: "https://example.com/requested-file.pdf",
     caption: "Here's the document you requested",
     filename: "Requested_Document.pdf"
   },
-  15551234567,
-  originalMessageId
-);
+  to: "15551234567",
+  replyMessageId: originalMessageId
+});
 ```
 
 ## Uploading Documents
@@ -141,17 +147,17 @@ const uploadResponse = await whatsapp.media.upload({
 });
 
 // Get the media ID from the response
-const mediaId = uploadResponse.data.id;
+const mediaId = uploadResponse.id;
 
 // Now send the document using the media ID
-const messageResponse = await whatsapp.messages.document(
-  { 
+const messageResponse = await whatsapp.messages.document({
+  body: { 
     id: mediaId,
     caption: "Document uploaded and sent",
     filename: "Document.pdf"
   },
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ## Supported Formats and Limits
@@ -176,15 +182,15 @@ const messageResponse = await whatsapp.messages.document(
 
 ```typescript
 try {
-  const response = await whatsapp.messages.document(
-    { 
+  const response = await whatsapp.messages.document({
+    body: { 
       link: "https://example.com/report.pdf",
       caption: "Monthly report",
       filename: "Report.pdf"
     },
-    15551234567
-  );
-  console.log("Document message sent successfully:", response.data);
+    to: "15551234567"
+  });
+  console.log("Document message sent successfully:", response);
 } catch (error) {
   console.error("Error sending document message:", error);
   

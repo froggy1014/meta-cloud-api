@@ -8,7 +8,7 @@ Text messages are the simplest form of WhatsApp messages. They allow you to send
 
 ## Basic Usage
 
-To send a text message, use the `messages.text()` method with a message object and recipient phone number:
+To send a text message, use the `messages.text()` method:
 
 ```typescript
 import WhatsApp from 'meta-cloud-api';
@@ -20,25 +20,28 @@ const whatsapp = new WhatsApp({
 });
 
 // Send text message
-const response = await whatsapp.messages.text(
-  { body: "Hello from Meta Cloud API!" },
-  15551234567 // Phone number with country code
-);
+const response = await whatsapp.messages.text({
+  body: "Hello from Meta Cloud API!",
+  to: "15551234567" // Phone number with country code
+});
 
-console.log(`Message sent with ID: ${response.data.messages[0].id}`);
+console.log(`Message sent with ID: ${response.messages[0].id}`);
 ```
 
 ## Parameters
 
-The `text()` method accepts the following parameters:
+The `text()` method accepts a parameter object with the following properties:
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| message | object | The text message object containing the body text |
-| recipient | string or number | The recipient's phone number with country code |
+| body | string or TextObject | The text message content or object |
+| to | string | The recipient's phone number with country code |
+| previewUrl | boolean (optional) | Whether to show URL previews in the message |
 | replyMessageId | string (optional) | ID of a message to reply to |
 
-### Message Object Properties
+### TextObject Properties
+
+When using an object for the body parameter:
 
 | Property | Type | Description | Required |
 |----------|------|-------------|----------|
@@ -50,10 +53,10 @@ The `text()` method accepts the following parameters:
 ### Simple Text Message
 
 ```typescript
-const response = await whatsapp.messages.text(
-  { body: "Hello! How can I help you today?" },
-  15551234567
-);
+const response = await whatsapp.messages.text({
+  body: "Hello! How can I help you today?",
+  to: "15551234567"
+});
 ```
 
 ### Text Message with URL Preview
@@ -61,13 +64,20 @@ const response = await whatsapp.messages.text(
 When you include a URL in your message, you can enable URL previews:
 
 ```typescript
-const response = await whatsapp.messages.text(
-  { 
-    body: "Check out our website: https://example.com", 
+const response = await whatsapp.messages.text({
+  body: {
+    body: "Check out our website: https://example.com",
     preview_url: true
   },
-  15551234567
-);
+  to: "15551234567"
+});
+
+// Alternative syntax using previewUrl parameter
+const response = await whatsapp.messages.text({
+  body: "Check out our website: https://example.com",
+  to: "15551234567",
+  previewUrl: true
+});
 ```
 
 ### Formatting Text Messages
@@ -75,12 +85,10 @@ const response = await whatsapp.messages.text(
 You can use basic formatting in your text messages:
 
 ```typescript
-const response = await whatsapp.messages.text(
-  { 
-    body: "This text can be *bold*, _italic_, ~strikethrough~, or ```monospace```." 
-  },
-  15551234567
-);
+const response = await whatsapp.messages.text({
+  body: "This text can be *bold*, _italic_, ~strikethrough~, or ```monospace```.",
+  to: "15551234567"
+});
 ```
 
 ### Long Text Messages
@@ -88,23 +96,33 @@ const response = await whatsapp.messages.text(
 WhatsApp supports messages up to 4096 characters:
 
 ```typescript
-const response = await whatsapp.messages.text(
-  { 
-    body: "This is a longer message that can contain detailed information. WhatsApp text messages can be up to 4096 characters long, giving you plenty of space to provide detailed information to your customers..." 
-  },
-  15551234567
-);
+const response = await whatsapp.messages.text({
+  body: "This is a longer message that can contain detailed information. WhatsApp text messages can be up to 4096 characters long, giving you plenty of space to provide detailed information to your customers...",
+  to: "15551234567"
+});
+```
+
+### Replying to a Message
+
+```typescript
+const originalMessageId = "wamid.abcd1234...";
+
+const response = await whatsapp.messages.text({
+  body: "This is a reply to your question",
+  to: "15551234567",
+  replyMessageId: originalMessageId
+});
 ```
 
 ## Error Handling
 
 ```typescript
 try {
-  const response = await whatsapp.messages.text(
-    { body: "Hello from Meta Cloud API!" },
-    15551234567
-  );
-  console.log("Message sent successfully:", response.data);
+  const response = await whatsapp.messages.text({
+    body: "Hello from Meta Cloud API!",
+    to: "15551234567"
+  });
+  console.log("Message sent successfully:", response);
 } catch (error) {
   console.error("Error sending text message:", error);
   

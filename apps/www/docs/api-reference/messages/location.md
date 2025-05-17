@@ -18,17 +18,17 @@ const whatsapp = new WhatsApp({
 });
 
 // Send location message
-const response = await whatsapp.messages.location(
-  { 
+const response = await whatsapp.messages.location({
+  body: { 
     latitude: 37.483872,
     longitude: -122.148358,
     name: "Meta Headquarters",
     address: "1 Hacker Way, Menlo Park, CA 94025"
   },
-  15551234567
-);
+  to: "15551234567"
+});
 
-console.log(`Location message sent with ID: ${response.data.messages[0].id}`);
+console.log(`Location message sent with ID: ${response.messages[0].id}`);
 ```
 
 ## Parameters
@@ -37,11 +37,17 @@ The `location()` method accepts the following parameters:
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| message | object | The location message object |
-| recipient | string or number | The recipient's phone number with country code |
-| replyMessageId | string (optional) | ID of a message to reply to |
+| params | MessageRequestParams`LocationObject` | Object containing message parameters |
 
-### Message Object Properties
+### MessageRequestParams`LocationObject` Properties
+
+| Property | Type | Description | Required |
+|----------|------|-------------|----------|
+| body | LocationObject | The location message body | Required |
+| to | string | The recipient's phone number with country code | Required |
+| replyMessageId | string | ID of a message to reply to | Optional |
+
+### LocationObject Properties
 
 | Property | Type | Description | Required |
 |----------|------|-------------|----------|
@@ -55,41 +61,41 @@ The `location()` method accepts the following parameters:
 ### Basic Location with Coordinates Only
 
 ```typescript
-const response = await whatsapp.messages.location(
-  { 
+const response = await whatsapp.messages.location({
+  body: { 
     latitude: 40.730610,
     longitude: -73.935242
   },
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ### Location with Name and Address
 
 ```typescript
-const response = await whatsapp.messages.location(
-  { 
+const response = await whatsapp.messages.location({
+  body: { 
     latitude: 48.858844,
     longitude: 2.294351,
     name: "Eiffel Tower",
     address: "Champ de Mars, 5 Avenue Anatole France, 75007 Paris, France"
   },
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ### Sending a Business Location
 
 ```typescript
-const response = await whatsapp.messages.location(
-  { 
+const response = await whatsapp.messages.location({
+  body: { 
     latitude: 51.509865,
     longitude: -0.118092,
     name: "London Office",
     address: "123 Business Street, London, UK"
   },
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ### Replying with a Location
@@ -97,16 +103,16 @@ const response = await whatsapp.messages.location(
 ```typescript
 const originalMessageId = "wamid.abcd1234...";
 
-const response = await whatsapp.messages.location(
-  { 
+const response = await whatsapp.messages.location({
+  body: { 
     latitude: 34.052235,
     longitude: -118.243683,
     name: "Meeting Point",
     address: "Downtown Los Angeles, CA"
   },
-  15551234567,
-  originalMessageId
-);
+  to: "15551234567",
+  replyMessageId: originalMessageId
+});
 ```
 
 ## Obtaining Coordinates
@@ -133,31 +139,31 @@ async function getCoordinates(address) {
 
 // Then use the coordinates to send a location message
 const coordinates = await getCoordinates("1 Hacker Way, Menlo Park, CA");
-const response = await whatsapp.messages.location(
-  { 
+const response = await whatsapp.messages.location({
+  body: { 
     latitude: coordinates.latitude,
     longitude: coordinates.longitude,
     name: "Meta Headquarters",
     address: "1 Hacker Way, Menlo Park, CA 94025"
   },
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ## Error Handling
 
 ```typescript
 try {
-  const response = await whatsapp.messages.location(
-    { 
+  const response = await whatsapp.messages.location({
+    body: { 
       latitude: 37.483872,
       longitude: -122.148358,
       name: "Meta Headquarters",
       address: "1 Hacker Way, Menlo Park, CA 94025"
     },
-    15551234567
-  );
-  console.log("Location message sent successfully:", response.data);
+    to: "15551234567"
+  });
+  console.log("Location message sent successfully:", response);
 } catch (error) {
   console.error("Error sending location message:", error);
   

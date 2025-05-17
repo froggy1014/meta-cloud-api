@@ -18,35 +18,35 @@ const whatsapp = new WhatsApp({
 });
 
 // Send a reaction to a message
-const response = await whatsapp.messages.reaction(
-  "😊", // emoji
-  "wamid.abcd1234...", // message ID to react to
-  15551234567 // recipient
-);
+const response = await whatsapp.messages.reaction({
+  messageId: "wamid.abcd1234...",
+  emoji: "😊",
+  to: "15551234567"
+});
 
-console.log(`Reaction message sent with ID: ${response.data.messages[0].id}`);
+console.log(`Reaction message sent with ID: ${response.messages[0].id}`);
 ```
 
 ## Parameters
 
 The `reaction()` method accepts the following parameters:
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| emoji | string | The emoji to use as a reaction |
-| messageId | string | The ID of the message to react to |
-| recipient | string or number | The recipient's phone number with country code |
+| Parameter | Type | Description | Required |
+|-----------|------|-------------|----------|
+| messageId | string | The ID of the message to react to | Yes |
+| emoji | string | The emoji to use as a reaction | Yes |
+| to | string | The recipient's phone number with country code | Yes |
 
 ## Examples
 
 ### Reacting to a Message with an Emoji
 
 ```typescript
-const response = await whatsapp.messages.reaction(
-  "👍",
-  "wamid.HBgLMTY1MDUwNzY1MjAVAgARGBI5QTNDQTVCM0Q0Q0Q2RTY3RTcA",
-  15551234567
-);
+const response = await whatsapp.messages.reaction({
+  messageId: "wamid.HBgLMTY1MDUwNzY1MjAVAgARGBI5QTNDQTVCM0Q0Q0Q2RTY3RTcA",
+  emoji: "👍",
+  to: "15551234567"
+});
 ```
 
 ### Removing a Reaction
@@ -54,11 +54,11 @@ const response = await whatsapp.messages.reaction(
 To remove a reaction, send an empty string as the emoji:
 
 ```typescript
-const response = await whatsapp.messages.reaction(
-  "",
-  "wamid.HBgLMTY1MDUwNzY1MjAVAgARGBI5QTNDQTVCM0Q0Q0Q2RTY3RTcA",
-  15551234567
-);
+const response = await whatsapp.messages.reaction({
+  messageId: "wamid.HBgLMTY1MDUwNzY1MjAVAgARGBI5QTNDQTVCM0Q0Q0Q2RTY3RTcA",
+  emoji: "",
+  to: "15551234567"
+});
 ```
 
 ## Common Emoji Reactions
@@ -80,12 +80,12 @@ Here are some commonly used emoji reactions:
 
 ```typescript
 try {
-  const response = await whatsapp.messages.reaction(
-    "👍",
-    "wamid.HBgLMTY1MDUwNzY1MjAVAgARGBI5QTNDQTVCM0Q0Q0Q2RTY3RTcA",
-    15551234567
-  );
-  console.log("Reaction message sent successfully:", response.data);
+  const response = await whatsapp.messages.reaction({
+    messageId: "wamid.HBgLMTY1MDUwNzY1MjAVAgARGBI5QTNDQTVCM0Q0Q0Q2RTY3RTcA",
+    emoji: "👍",
+    to: "15551234567"
+  });
+  console.log("Reaction message sent successfully:", response);
 } catch (error) {
   console.error("Error sending reaction message:", error);
   
@@ -123,4 +123,4 @@ try {
 
 - [Text Messages](./text.md) - For sending text-based information
 - [Replying to Messages](../messaging-guide.md#replying-to-messages) - For sending replies to messages
-- [Marking Messages as Read](../messaging-guide.md#marking-messages-as-read) - For marking messages as read 
+- [Marking Messages as Read](../messaging-guide.md#marking-messages-as-read) - For marking messages as read

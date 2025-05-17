@@ -18,14 +18,14 @@ const whatsapp = new WhatsApp({
 });
 
 // Send sticker message using a URL
-const response = await whatsapp.messages.sticker(
-  { 
+const response = await whatsapp.messages.sticker({
+  body: { 
     link: "https://example.com/sticker.webp"
   },
-  15551234567
-);
+  to: "15551234567"
+});
 
-console.log(`Sticker message sent with ID: ${response.data.messages[0].id}`);
+console.log(`Sticker message sent with ID: ${response.messages[0].id}`);
 ```
 
 ## Parameters
@@ -34,11 +34,17 @@ The `sticker()` method accepts the following parameters:
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| message | object | The sticker message object |
-| recipient | string or number | The recipient's phone number with country code |
-| replyMessageId | string (optional) | ID of a message to reply to |
+| params | MessageRequestParams`StickerMediaObject` | Object containing message parameters |
 
-### Message Object Properties
+### MessageRequestParams`StickerMediaObject` Properties
+
+| Property | Type | Description | Required |
+|----------|------|-------------|----------|
+| body | StickerMediaObject | The sticker message body | Required |
+| to | string | The recipient's phone number with country code | Required |
+| replyMessageId | string | ID of a message to reply to | Optional |
+
+### StickerMediaObject Properties
 
 | Property | Type | Description | Required |
 |----------|------|-------------|----------|
@@ -50,23 +56,23 @@ The `sticker()` method accepts the following parameters:
 ### Sending a Static Sticker with a URL
 
 ```typescript
-const response = await whatsapp.messages.sticker(
-  { 
+const response = await whatsapp.messages.sticker({
+  body: { 
     link: "https://example.com/static-sticker.webp"
   },
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ### Sending an Animated Sticker with a URL
 
 ```typescript
-const response = await whatsapp.messages.sticker(
-  { 
+const response = await whatsapp.messages.sticker({
+  body: { 
     link: "https://example.com/animated-sticker.webp"
   },
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ### Sending a Sticker with a Media ID
@@ -74,12 +80,12 @@ const response = await whatsapp.messages.sticker(
 If you've previously uploaded a sticker and have its Media ID:
 
 ```typescript
-const response = await whatsapp.messages.sticker(
-  { 
+const response = await whatsapp.messages.sticker({
+  body: { 
     id: "1234567890"
   },
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ### Replying with a Sticker
@@ -87,13 +93,13 @@ const response = await whatsapp.messages.sticker(
 ```typescript
 const originalMessageId = "wamid.abcd1234...";
 
-const response = await whatsapp.messages.sticker(
-  { 
+const response = await whatsapp.messages.sticker({
+  body: { 
     link: "https://example.com/response-sticker.webp"
   },
-  15551234567,
-  originalMessageId
-);
+  to: "15551234567",
+  replyMessageId: originalMessageId
+});
 ```
 
 ## Uploading Stickers
@@ -108,15 +114,15 @@ const uploadResponse = await whatsapp.media.upload({
 });
 
 // Get the media ID from the response
-const mediaId = uploadResponse.data.id;
+const mediaId = uploadResponse.id;
 
 // Now send the sticker using the media ID
-const messageResponse = await whatsapp.messages.sticker(
-  { 
+const messageResponse = await whatsapp.messages.sticker({
+  body: { 
     id: mediaId
   },
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ## Sticker Requirements
@@ -154,13 +160,13 @@ You can create WebP stickers using various tools:
 
 ```typescript
 try {
-  const response = await whatsapp.messages.sticker(
-    { 
+  const response = await whatsapp.messages.sticker({
+    body: { 
       link: "https://example.com/sticker.webp"
     },
-    15551234567
-  );
-  console.log("Sticker message sent successfully:", response.data);
+    to: "15551234567"
+  });
+  console.log("Sticker message sent successfully:", response);
 } catch (error) {
   console.error("Error sending sticker message:", error);
   

@@ -18,38 +18,65 @@ const whatsapp = new WhatsApp({
 });
 
 // Send template message
-const response = await whatsapp.messages.template(
-  "hello_world", // template name
-  "en_US",       // language
-  {
-    parameters: [
+const response = await whatsapp.messages.template({
+  body: {
+    name: "hello_world",
+    language: {
+      code: "en_US",
+      policy: "deterministic"
+    },
+    components: [
       {
-        type: "text",
-        text: "John"
+        type: "body",
+        parameters: [
+          {
+            type: "text",
+            text: "John"
+          }
+        ]
       }
     ]
   },
-  15551234567    // recipient
-);
+  to: "15551234567"
+});
 
-console.log(`Template message sent with ID: ${response.data.messages[0].id}`);
+console.log(`Template message sent with ID: ${response.messages[0].id}`);
 ```
 
 ## Parameters
 
-The `template()` method accepts the following parameters:
+The `template()` method accepts an object with the following parameters:
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| name | string | Name of the template |
-| language | string | Language code (e.g., "en_US") |
-| components | object | Components containing template parameters |
-| recipient | string or number | The recipient's phone number with country code |
+| body | MessageTemplateObject | Contains template configuration including name, language, and components |
+| to | string | The recipient's phone number with country code |
 | replyMessageId | string (optional) | ID of a message to reply to |
 
-### Components Object
+### MessageTemplateObject
 
-The components object contains parameters to personalize your template message:
+The template body object contains the template configuration:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| name | string | Name of the template |
+| language | object | Language configuration with code and policy |
+| components | array | Array of component objects for personalizing the template |
+
+### Language Object
+
+```typescript
+{
+  language: {
+    code: "en_US",  // Language code
+    policy: "deterministic"
+  }
+}
+```
+
+### Components Array
+
+The components array contains objects for header, body, footer, and buttons:
 
 ```typescript
 {
@@ -123,10 +150,13 @@ Templates can have several component types:
 ### Text-Only Template
 
 ```typescript
-const response = await whatsapp.messages.template(
-  "appointment_reminder",
-  "en_US",
-  {
+const response = await whatsapp.messages.template({
+  body: {
+    name: "appointment_reminder",
+    language: {
+      code: "en_US",
+      policy: "deterministic"
+    },
     components: [
       {
         type: "body",
@@ -147,17 +177,20 @@ const response = await whatsapp.messages.template(
       }
     ]
   },
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ### Template with Header Image
 
 ```typescript
-const response = await whatsapp.messages.template(
-  "order_confirmation",
-  "en_US",
-  {
+const response = await whatsapp.messages.template({
+  body: {
+    name: "order_confirmation",
+    language: {
+      code: "en_US",
+      policy: "deterministic"
+    },
     components: [
       {
         type: "header",
@@ -185,17 +218,20 @@ const response = await whatsapp.messages.template(
       }
     ]
   },
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ### Template with Dynamic URL Button
 
 ```typescript
-const response = await whatsapp.messages.template(
-  "shipping_update",
-  "en_US",
-  {
+const response = await whatsapp.messages.template({
+  body: {
+    name: "shipping_update",
+    language: {
+      code: "en_US",
+      policy: "deterministic"
+    },
     components: [
       {
         type: "body",
@@ -223,17 +259,20 @@ const response = await whatsapp.messages.template(
       }
     ]
   },
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ### Template with Currency and Date Parameters
 
 ```typescript
-const response = await whatsapp.messages.template(
-  "payment_receipt",
-  "en_US",
-  {
+const response = await whatsapp.messages.template({
+  body: {
+    name: "payment_receipt",
+    language: {
+      code: "en_US",
+      policy: "deterministic"
+    },
     components: [
       {
         type: "body",
@@ -259,8 +298,8 @@ const response = await whatsapp.messages.template(
       }
     ]
   },
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ### Replying with a Template
@@ -268,10 +307,13 @@ const response = await whatsapp.messages.template(
 ```typescript
 const originalMessageId = "wamid.abcd1234...";
 
-const response = await whatsapp.messages.template(
-  "support_response",
-  "en_US",
-  {
+const response = await whatsapp.messages.template({
+  body: {
+    name: "support_response",
+    language: {
+      code: "en_US",
+      policy: "deterministic"
+    },
     components: [
       {
         type: "body",
@@ -288,9 +330,9 @@ const response = await whatsapp.messages.template(
       }
     ]
   },
-  15551234567,
-  originalMessageId
-);
+  to: "15551234567",
+  replyMessageId: originalMessageId
+});
 ```
 
 ## Creating and Managing Templates
@@ -317,10 +359,13 @@ WhatsApp templates fall into different categories based on their purpose:
 
 ```typescript
 try {
-  const response = await whatsapp.messages.template(
-    "appointment_reminder",
-    "en_US",
-    {
+  const response = await whatsapp.messages.template({
+    body: {
+      name: "appointment_reminder",
+      language: {
+        code: "en_US",
+        policy: "deterministic"
+      },
       components: [
         {
           type: "body",
@@ -337,9 +382,9 @@ try {
         }
       ]
     },
-    15551234567
-  );
-  console.log("Template message sent successfully:", response.data);
+    to: "15551234567"
+  });
+  console.log("Template message sent successfully:", response);
 } catch (error) {
   console.error("Error sending template message:", error);
   
@@ -391,4 +436,4 @@ try {
 
 - [Interactive Messages](./interactive.md) - For creating interactive elements
 - [Text Messages](./text.md) - For sending text-based information
-- [Image Messages](./image.md) - For sending images 
+- [Image Messages](./image.md) - For sending images

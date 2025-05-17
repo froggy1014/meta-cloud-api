@@ -18,15 +18,15 @@ const whatsapp = new WhatsApp({
 });
 
 // Send image message using a URL
-const response = await whatsapp.messages.image(
-  { 
+const response = await whatsapp.messages.image({
+  body: { 
     link: "https://example.com/image.jpg",
     caption: "Check out this image!"
   },
-  15551234567
-);
+  to: "15551234567"
+});
 
-console.log(`Image message sent with ID: ${response.data.messages[0].id}`);
+console.log(`Image message sent with ID: ${response.messages[0].id}`);
 ```
 
 ## Parameters
@@ -35,11 +35,17 @@ The `image()` method accepts the following parameters:
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| message | object | The image message object |
-| recipient | string or number | The recipient's phone number with country code |
-| replyMessageId | string (optional) | ID of a message to reply to |
+| params | MessageRequestParams`ImageMediaObject` | Object containing message parameters |
 
-### Message Object Properties
+### MessageRequestParams`ImageMediaObject` Properties
+
+| Property | Type | Description | Required |
+|----------|------|-------------|----------|
+| body | ImageMediaObject | The image message body | Required |
+| to | string | The recipient's phone number with country code | Required |
+| replyMessageId | string | ID of a message to reply to | Optional |
+
+### ImageMediaObject Properties
 
 | Property | Type | Description | Required |
 |----------|------|-------------|----------|
@@ -52,13 +58,13 @@ The `image()` method accepts the following parameters:
 ### Sending an Image with a URL
 
 ```typescript
-const response = await whatsapp.messages.image(
-  { 
+const response = await whatsapp.messages.image({
+  body: { 
     link: "https://example.com/product.jpg",
     caption: "Our new product"
   },
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ### Sending an Image with a Media ID
@@ -66,24 +72,24 @@ const response = await whatsapp.messages.image(
 If you've previously uploaded an image and have its Media ID:
 
 ```typescript
-const response = await whatsapp.messages.image(
-  { 
+const response = await whatsapp.messages.image({
+  body: { 
     id: "1234567890",
     caption: "Image from our media library"
   },
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ### Sending an Image without Caption
 
 ```typescript
-const response = await whatsapp.messages.image(
-  { 
+const response = await whatsapp.messages.image({
+  body: { 
     link: "https://example.com/infographic.jpg"
   },
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ### Replying with an Image
@@ -91,14 +97,14 @@ const response = await whatsapp.messages.image(
 ```typescript
 const originalMessageId = "wamid.abcd1234...";
 
-const response = await whatsapp.messages.image(
-  { 
+const response = await whatsapp.messages.image({
+  body: { 
     link: "https://example.com/response-image.jpg",
     caption: "Here's the image you requested"
   },
-  15551234567,
-  originalMessageId
-);
+  to: "15551234567",
+  replyMessageId: originalMessageId
+});
 ```
 
 ## Uploading Images
@@ -113,16 +119,16 @@ const uploadResponse = await whatsapp.media.upload({
 });
 
 // Get the media ID from the response
-const mediaId = uploadResponse.data.id;
+const mediaId = uploadResponse.id;
 
 // Now send the image using the media ID
-const messageResponse = await whatsapp.messages.image(
-  { 
+const messageResponse = await whatsapp.messages.image({
+  body: { 
     id: mediaId,
     caption: "Image uploaded and sent"
   },
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ## Supported Formats and Limits
@@ -135,14 +141,14 @@ const messageResponse = await whatsapp.messages.image(
 
 ```typescript
 try {
-  const response = await whatsapp.messages.image(
-    { 
+  const response = await whatsapp.messages.image({
+    body: { 
       link: "https://example.com/image.jpg",
       caption: "Check out this image!"
     },
-    15551234567
-  );
-  console.log("Image message sent successfully:", response.data);
+    to: "15551234567"
+  });
+  console.log("Image message sent successfully:", response);
 } catch (error) {
   console.error("Error sending image message:", error);
   

@@ -18,14 +18,14 @@ const whatsapp = new WhatsApp({
 });
 
 // Send audio message using a URL
-const response = await whatsapp.messages.audio(
-  { 
-    link: "https://example.com/audio-file.mp3"
+const response = await whatsapp.messages.audio({
+  body: { 
+    link: "https://example.com/audio-file.mp3" 
   },
-  15551234567
-);
+  to: "15551234567"
+});
 
-console.log(`Audio message sent with ID: ${response.data.messages[0].id}`);
+console.log(`Audio message sent with ID: ${response.messages[0].id}`);
 ```
 
 ## Parameters
@@ -34,11 +34,17 @@ The `audio()` method accepts the following parameters:
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| message | object | The audio message object |
-| recipient | string or number | The recipient's phone number with country code |
-| replyMessageId | string (optional) | ID of a message to reply to |
+| params | MessageRequestParams`AudioMediaObject` | Object containing message parameters |
 
-### Message Object Properties
+### MessageRequestParams`AudioMediaObject` Properties
+
+| Property | Type | Description | Required |
+|----------|------|-------------|----------|
+| body | AudioMediaObject | The audio message body | Required |
+| to | string | The recipient's phone number with country code | Required |
+| replyMessageId | string | ID of a message to reply to | Optional |
+
+### AudioMediaObject Properties
 
 | Property | Type | Description | Required |
 |----------|------|-------------|----------|
@@ -50,12 +56,12 @@ The `audio()` method accepts the following parameters:
 ### Sending an Audio File with a URL
 
 ```typescript
-const response = await whatsapp.messages.audio(
-  { 
-    link: "https://example.com/voice-message.mp3"
+const response = await whatsapp.messages.audio({
+  body: { 
+    link: "https://example.com/voice-message.mp3" 
   },
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ### Sending an Audio File with a Media ID
@@ -63,12 +69,12 @@ const response = await whatsapp.messages.audio(
 If you've previously uploaded an audio file and have its Media ID:
 
 ```typescript
-const response = await whatsapp.messages.audio(
-  { 
-    id: "1234567890"
+const response = await whatsapp.messages.audio({
+  body: { 
+    id: "1234567890" 
   },
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ### Replying with an Audio Message
@@ -76,13 +82,13 @@ const response = await whatsapp.messages.audio(
 ```typescript
 const originalMessageId = "wamid.abcd1234...";
 
-const response = await whatsapp.messages.audio(
-  { 
-    link: "https://example.com/response-audio.mp3"
+const response = await whatsapp.messages.audio({
+  body: { 
+    link: "https://example.com/response-audio.mp3" 
   },
-  15551234567,
-  originalMessageId
-);
+  to: "15551234567",
+  replyMessageId: originalMessageId
+});
 ```
 
 ## Uploading Audio Files
@@ -97,15 +103,15 @@ const uploadResponse = await whatsapp.media.upload({
 });
 
 // Get the media ID from the response
-const mediaId = uploadResponse.data.id;
+const mediaId = uploadResponse.id;
 
 // Now send the audio using the media ID
-const messageResponse = await whatsapp.messages.audio(
-  { 
-    id: mediaId
+const messageResponse = await whatsapp.messages.audio({
+  body: { 
+    id: mediaId 
   },
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ## Supported Formats and Limits
@@ -127,13 +133,13 @@ const messageResponse = await whatsapp.messages.audio(
 
 ```typescript
 try {
-  const response = await whatsapp.messages.audio(
-    { 
-      link: "https://example.com/audio-file.mp3"
+  const response = await whatsapp.messages.audio({
+    body: { 
+      link: "https://example.com/audio-file.mp3" 
     },
-    15551234567
-  );
-  console.log("Audio message sent successfully:", response.data);
+    to: "15551234567"
+  });
+  console.log("Audio message sent successfully:", response);
 } catch (error) {
   console.error("Error sending audio message:", error);
   
@@ -164,4 +170,4 @@ try {
 
 - [Media API](../media-api.md) - For uploading and managing media
 - [Video Messages](./video.md) - For sending videos
-- [Sticker Messages](./sticker.md) - For sending stickers 
+- [Sticker Messages](./sticker.md) - For sending stickers

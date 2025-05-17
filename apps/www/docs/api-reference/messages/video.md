@@ -18,15 +18,15 @@ const whatsapp = new WhatsApp({
 });
 
 // Send video message using a URL
-const response = await whatsapp.messages.video(
-  { 
+const response = await whatsapp.messages.video({
+  body: { 
     link: "https://example.com/video.mp4",
     caption: "Check out this video!"
   },
-  15551234567
-);
+  to: "15551234567"
+});
 
-console.log(`Video message sent with ID: ${response.data.messages[0].id}`);
+console.log(`Video message sent with ID: ${response.messages[0].id}`);
 ```
 
 ## Parameters
@@ -35,11 +35,17 @@ The `video()` method accepts the following parameters:
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| message | object | The video message object |
-| recipient | string or number | The recipient's phone number with country code |
-| replyMessageId | string (optional) | ID of a message to reply to |
+| params | MessageRequestParams`VideoMediaObject` | Object containing message parameters |
 
-### Message Object Properties
+### MessageRequestParams `VideoMediaObject` Properties
+
+| Property | Type | Description | Required |
+|----------|------|-------------|----------|
+| body | VideoMediaObject | The video message body | Required |
+| to | string | The recipient's phone number with country code | Required |
+| replyMessageId | string | ID of a message to reply to | Optional |
+
+### VideoMediaObject Properties
 
 | Property | Type | Description | Required |
 |----------|------|-------------|----------|
@@ -52,13 +58,13 @@ The `video()` method accepts the following parameters:
 ### Sending a Video with a URL
 
 ```typescript
-const response = await whatsapp.messages.video(
-  { 
+const response = await whatsapp.messages.video({
+  body: { 
     link: "https://example.com/product-demo.mp4",
     caption: "Product demonstration video"
   },
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ### Sending a Video with a Media ID
@@ -66,24 +72,24 @@ const response = await whatsapp.messages.video(
 If you've previously uploaded a video and have its Media ID:
 
 ```typescript
-const response = await whatsapp.messages.video(
-  { 
+const response = await whatsapp.messages.video({
+  body: { 
     id: "1234567890",
     caption: "Video from our media library"
   },
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ### Sending a Video without Caption
 
 ```typescript
-const response = await whatsapp.messages.video(
-  { 
+const response = await whatsapp.messages.video({
+  body: { 
     link: "https://example.com/explainer.mp4"
   },
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ### Replying with a Video
@@ -91,14 +97,14 @@ const response = await whatsapp.messages.video(
 ```typescript
 const originalMessageId = "wamid.abcd1234...";
 
-const response = await whatsapp.messages.video(
-  { 
+const response = await whatsapp.messages.video({
+  body: { 
     link: "https://example.com/response-video.mp4",
     caption: "Here's the video you requested"
   },
-  15551234567,
-  originalMessageId
-);
+  to: "15551234567",
+  replyMessageId: originalMessageId
+});
 ```
 
 ## Uploading Videos
@@ -113,16 +119,16 @@ const uploadResponse = await whatsapp.media.upload({
 });
 
 // Get the media ID from the response
-const mediaId = uploadResponse.data.id;
+const mediaId = uploadResponse.id;
 
 // Now send the video using the media ID
-const messageResponse = await whatsapp.messages.video(
-  { 
+const messageResponse = await whatsapp.messages.video({
+  body: { 
     id: mediaId,
     caption: "Video uploaded and sent"
   },
-  15551234567
-);
+  to: "15551234567"
+});
 ```
 
 ## Supported Formats and Limits
@@ -143,14 +149,14 @@ const messageResponse = await whatsapp.messages.video(
 
 ```typescript
 try {
-  const response = await whatsapp.messages.video(
-    { 
+  const response = await whatsapp.messages.video({
+    body: { 
       link: "https://example.com/video.mp4",
       caption: "Check out this video!"
     },
-    15551234567
-  );
-  console.log("Video message sent successfully:", response.data);
+    to: "15551234567"
+  });
+  console.log("Video message sent successfully:", response);
 } catch (error) {
   console.error("Error sending video message:", error);
   
