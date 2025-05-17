@@ -1,27 +1,24 @@
 # Meta Cloud API
 
-A TypeScript SDK for the Meta Cloud API that provides a clean, strongly-typed interface for interacting with WhatsApp's Cloud API and other Meta platform services.
+<div style="display: flex; align-items: center;">
+  <img src="../../public/README.svg" alt="Meta Cloud API" style="flex: 1; width: 100px;">
+  <div style="flex: 1; padding-left: 20px;">
+    <p>Meta Cloud API - A powerful TypeScript wrapper for Meta's Cloud API, providing a clean and type-safe interface for WhatsApp Business Platform integration.</p>
+  </div>
+</div>
 
-[![npm version](https://img.shields.io/npm/v/meta-cloud-api.svg)](https://www.npmjs.com/package/meta-cloud-api)
-[![npm downloads](https://img.shields.io/npm/dm/meta-cloud-api.svg)](https://www.npmjs.com/package/meta-cloud-api)
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/froggy1014/meta-cloud-api/blob/main/LICENSE)
+## Resources
+
+- [Documentation](https://www.meta-cloud-api.xyz/)
+- [API Reference (Swagger)](https://meta-cloud-api-swagger.vercel.app/api-docs/)
 
 ## Features
 
-- **Strongly Typed**: Full TypeScript support with comprehensive type definitions
-- **Modular Design**: API components are organized logically for ease of use
-- **Error Handling**: Standardized error handling for Meta API responses
-- **Complete API Coverage**: Support for all WhatsApp Cloud API functionality
-  - Messages API (text, templates, media, interactive, etc.)
-  - Templates API
-  - Media API
-  - Phone Number API
-  - Flow API
-  - QR Code API
-  - Registration API
-  - WABA (WhatsApp Business Account) API
-  - Two-Step Verification API
-  - Encryption API
+- **Type-Safe Development** - Built with TypeScript to provide code completion and catch errors during development
+- **Comprehensive Coverage** - Full support for WhatsApp Business Platform APIs
+- **Clean Interface** - Intuitive methods organized by domain for improved code readability
+- **Error Handling** - Standardized error handling with detailed Meta API error information
+- **Webhook Handler** - Built-in support for webhook verification and message handling
 
 ## Installation
 
@@ -36,122 +33,193 @@ pnpm add meta-cloud-api
 ## Quick Start
 
 ```typescript
-import WhatsApp from 'meta-cloud-api';
+import WhatsApp, { MessageTypesEnum } from 'meta-cloud-api';
 
-// Initialize with configuration object
-const whatsapp = new WhatsApp({
-  phoneNumberId: YOUR_PHONE_NUMBER_ID,
-  accessToken: 'YOUR_ACCESS_TOKEN'
+// Initialize the client
+const client = new WhatsApp({
+  accessToken: process.env.CLOUD_API_ACCESS_TOKEN,
+  phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+  businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID
 });
 
-// You can also use environment variables (.env file)
-// const whatsapp = new WhatsApp();
+// Send a WhatsApp text message
+const response = await client.messages.text({
+  to: '+1234567890',
+  body: 'Hello from Meta Cloud API!'
+});
 
-// Send a text message
-async function sendMessage() {
-  try {
-    const response = await whatsapp.messages.text(
-      { body: "Hello from Meta Cloud API!" },
-      15551234567
-    );
-    console.log(`Message sent successfully with ID: ${response.messages[0].id}`);
-  } catch (error) {
-    console.error('Error sending message:', error);
-  }
-}
+console.log(`Message ID: ${response.messages[0].id}`);
 ```
 
-## Environment Variables
+## Usage Examples
 
-Create a `.env` file with your WhatsApp Cloud API credentials:
+### Messaging
 
-```
-WA_BASE_URL=graph.facebook.com
-M4D_APP_ID=your_app_id
-M4D_APP_SECRET=your_app_secret
-WA_PHONE_NUMBER_ID=your_phone_number_id
-WA_BUSINESS_ACCOUNT_ID=your_business_account_id
-CLOUD_API_ACCESS_TOKEN=your_access_token
-CLOUD_API_VERSION=17.0
-```
+Send different types of messages through WhatsApp Business Platform:
 
-## API Documentation
-
-### Messages API
-
-Send various types of WhatsApp messages:
+#### Text Message
 
 ```typescript
-// Text message
-await whatsapp.messages.text(
-  { body: "Hello world!" },
-  15551234567
-);
+const result = await client.messages.text({
+  to: "15551234567",
+  body: "Hello from Meta Cloud API!"
+});
+```
 
-// Image message
-await whatsapp.messages.image(
-  { link: "https://example.com/image.jpg" },
-  15551234567
-);
+#### Template Message
 
-// Document message
-await whatsapp.messages.document(
-  { 
-    link: "https://example.com/document.pdf",
-    filename: "Important Document.pdf"
-  },
-  15551234567
-);
+```typescript
+import { ComponentTypesEnum, LanguagesEnum, ParametersTypesEnum } from 'meta-cloud-api';
 
-// Template message
-await whatsapp.messages.template(
-  {
-    name: "sample_shipping_confirmation",
-    language: { code: "en_US" },
+const result = await client.messages.template({
+  to: "15551234567",
+  body: {
+    name: "shipping_confirmation",
+    language: {
+      code: LanguagesEnum.English_US,
+      policy: "deterministic"
+    },
     components: [
       {
-        type: "body",
+        type: ComponentTypesEnum.Body,
         parameters: [
-          { type: "text", text: "John" },
-          { type: "text", text: "12345" }
+          {
+            type: ParametersTypesEnum.Text,
+            text: "John Doe"
+          },
+          {
+            type: ParametersTypesEnum.Text,
+            text: "12345"
+          }
         ]
       }
     ]
-  },
-  15551234567
-);
-
-// Interactive message with buttons
-await whatsapp.messages.interactive(
-  {
-    type: "button",
-    body: { text: "Please select an option:" },
-    action: {
-      buttons: [
-        { type: "reply", reply: { id: "btn1", title: "Option 1" } },
-        { type: "reply", reply: { id: "btn2", title: "Option 2" } }
-      ]
-    }
-  },
-  15551234567
-);
+  }
+});
 ```
 
-### Templates API
-
-Work with message templates:
+#### Media Message
 
 ```typescript
-// Get all templates
-const templates = await whatsapp.template.getTemplates({
-  limit: 20
+const result = await client.messages.image({
+  to: "15551234567",
+  body: {
+    link: "https://example.com/image.jpg"
+  }
+});
+```
+
+#### Interactive Message
+
+```typescript
+import { InteractiveTypesEnum } from 'meta-cloud-api';
+
+const result = await client.messages.interactive({
+  to: "15551234567",
+  body: {
+    type: InteractiveTypesEnum.Button,
+    body: {
+      text: "What would you like to do?"
+    },
+    action: {
+      buttons: [
+        {
+          type: "reply",
+          reply: {
+            id: "help_button",
+            title: "Get Help"
+          }
+        },
+        {
+          type: "reply",
+          reply: {
+            id: "info_button",
+            title: "Account Info"
+          }
+        }
+      ]
+    }
+  }
+});
+```
+
+## Example Projects
+
+We provide ready-to-use example projects demonstrating how to integrate Meta Cloud API in different frameworks:
+
+- [Express.js Example](./examples/express-example) - A simple Express.js server with webhook handling for WhatsApp messages
+- [Next.js Example](./examples/nextjs-page-router-example) - Integration with Next.js Pages Router, showing how to handle webhooks in a Next.js API route
+
+Each example includes its own README with setup instructions and demonstration of core features.
+
+### Webhook Integration
+
+Set up a webhook to receive messages and events from the WhatsApp API:
+
+```typescript
+import WhatsApp, { 
+  WebhookHandler, 
+  MessageTypesEnum, 
+  WebhookMessage 
+} from 'meta-cloud-api';
+
+// Initialize the handler
+const webhookHandler = new WebhookHandler({
+  accessToken: process.env.CLOUD_API_ACCESS_TOKEN,
+  phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+  businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+  webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN
+});
+
+// Handle webhook verification
+app.get('/webhook', (req, res) => {
+  webhookHandler.handleVerificationRequest(req, res);
+});
+
+// Handle incoming messages
+app.post('/webhook', (req, res) => {
+  webhookHandler.handleWebhookRequest(req, res);
+});
+
+// Pre-process all messages (e.g., mark as read)
+webhookHandler.onMessagePreProcess(async (client: WhatsApp, message: WebhookMessage) => {
+  await client.messages.markAsRead({ messageId: message.id });
+});
+
+// Handle text messages
+webhookHandler.onMessage(MessageTypesEnum.Text, async (client: WhatsApp, message: WebhookMessage) => {
+  if (message.text?.body) {
+    await client.messages.text({
+      body: `You said: "${message.text.body}"`,
+      to: message.from
+    });
+  }
+});
+
+// Handle image messages
+webhookHandler.onMessage(MessageTypesEnum.Image, async (client: WhatsApp, message: WebhookMessage) => {
+  await client.messages.text({
+    body: "Thanks for the image!",
+    to: message.from
+  });
+});
+```
+
+### Templates
+
+Manage message templates for your WhatsApp Business account:
+
+```typescript
+// List all templates
+const templates = await client.templates.list({
+  businessId: process.env.WA_BUSINESS_ACCOUNT_ID
 });
 
 // Create a new template
-await whatsapp.template.createTemplate({
-  name: "my_template",
+const newTemplate = await client.templates.create({
+  businessId: process.env.WA_BUSINESS_ACCOUNT_ID,
+  name: "my_special_template",
   category: "MARKETING",
-  language: "en_US",
   components: [
     {
       type: "HEADER",
@@ -160,57 +228,59 @@ await whatsapp.template.createTemplate({
     },
     {
       type: "BODY",
-      text: "Hi {{1}}, check out our latest offer: {{2}}!"
+      text: "Hi {{1}}, we have a special offer for you: {{2}}% off your next purchase!"
+    },
+    {
+      type: "FOOTER",
+      text: "Tap the button below to shop now"
     }
-  ]
+  ],
+  language: "en_US"
 });
 ```
 
-### Media API
+### Media Management
 
-Handle media files:
+Upload and retrieve media for your messages:
 
 ```typescript
+import fs from 'fs';
+
 // Upload media
-const mediaResponse = await whatsapp.media.uploadMedia(
-  new File(['...'], 'image.jpg', { type: 'image/jpeg' })
-);
+const mediaUpload = await client.media.upload({
+  file: fs.createReadStream("./path/to/image.jpg"),
+  type: "image/jpeg"
+});
 
-// Get media details
-const mediaDetails = await whatsapp.media.getMediaById(mediaResponse.id);
-
-// Delete media
-await whatsapp.media.deleteMedia(mediaResponse.id);
+// Get media URL
+const media = await client.media.get({
+  mediaId: mediaUpload.id
+});
 ```
 
-## Error Handling
+### Business Profile
 
-The package provides standard error handling for Meta API responses:
+Update your WhatsApp Business profile information:
 
 ```typescript
-try {
-  await whatsapp.messages.text(
-    { body: "Hello world!" },
-    15551234567
-  );
-} catch (error) {
-  if (error.name === 'MetaError') {
-    console.error(`Meta API Error: ${error.error.message}`);
-    console.error(`Error Code: ${error.error.code}`);
-    
-    if (error.error.error_data) {
-      console.error(`Details: ${error.error.error_data.details}`);
-    }
-  } else {
-    console.error('Unexpected error:', error);
-  }
-}
+const profile = await client.businessProfile.update({
+  about: "We provide the best service!",
+  address: "123 Business St, City",
+  description: "Premium products and services",
+  email: "contact@business.com",
+  websites: ["https://www.business.com"]
+});
 ```
 
-## License
+## Requirements
 
-This project is licensed under the MIT License - see the [LICENSE](https://github.com/froggy1014/meta-cloud-api/blob/main/LICENSE) file for details.
+- TypeScript 4.5+
+- Node.js 18 LTS or later
 
 ## Contributing
 
-Contributions welcome! Please feel free to submit a Pull Request. 
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
