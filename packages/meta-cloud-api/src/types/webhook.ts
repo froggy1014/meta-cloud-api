@@ -352,6 +352,14 @@ export interface WebhookMessage {
      */
     context?: {
         /**
+         * ID of the message
+         */
+        id?: string;
+        /**
+         * ID of the sender
+         */
+        from?: string;
+        /**
          * ID of the message being replied to or interacted with
          */
         message_id: string;
