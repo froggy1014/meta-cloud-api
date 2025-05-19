@@ -294,7 +294,7 @@ export default class WebhookHandler {
         LOGGER.log('Registered post-processing handler for all messages');
     }
 
-    public async handleFlowRequest<Req extends IRequest, Res extends IResponse>(
+    public async handleFlowRequest<Req extends IRequest & { rawBody: string }, Res extends IResponse>(
         req: Req,
         res: Res,
         screenFn: (decryptedBody: FlowDataExchangeRequest | FlowErrorNotificationRequest) => Promise<any>,
@@ -338,7 +338,7 @@ export default class WebhookHandler {
         res.status(200).send(encryptedResponse);
     }
 
-    public isRequestSignatureValid(req: IRequest): boolean {
+    public isRequestSignatureValid(req: IRequest & { rawBody: string }): boolean {
         const appSecret = this.config.M4D_APP_SECRET;
 
         if (!appSecret) {
@@ -356,7 +356,7 @@ export default class WebhookHandler {
         const signatureBuffer = Buffer.from(signatureHeader.replace('sha256=', ''), 'utf-8');
         const hmac = crypto.createHmac('sha256', appSecret);
 
-        const digestString = hmac.update(JSON.stringify(req.body)).digest('hex');
+        const digestString = hmac.update(req.rawBody).digest('hex');
         const digestBuffer = Buffer.from(digestString, 'utf-8');
 
         // Note: This is corrected from the original code which had inverted logic
