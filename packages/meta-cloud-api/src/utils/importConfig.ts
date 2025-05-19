@@ -39,6 +39,8 @@ export const importConfig = (inputConfig?: WhatsAppConfig) => {
         [WabaConfigEnum.RequestTimeout]:
             inputConfig?.requestTimeout || parseInt(process.env.REQUEST_TIMEOUT || '') || DEFAULT_REQUEST_TIMEOUT,
         [WabaConfigEnum.Debug]: inputConfig?.debug || process.env.DEBUG === 'true',
+        [WabaConfigEnum.PrivatePem]: inputConfig?.privatePem || process.env.FLOW_API_PRIVATE_PEM || '',
+        [WabaConfigEnum.Passphrase]: inputConfig?.passphrase || process.env.FLOW_API_PASSPHRASE || '',
     };
 
     LOGGER.log(`Configuration loaded for App Id ${wabaConfig[WabaConfigEnum.AppId]}`);
