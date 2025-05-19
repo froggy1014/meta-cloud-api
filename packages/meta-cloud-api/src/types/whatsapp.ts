@@ -31,6 +31,8 @@ export type WhatsAppConfig = {
     debug?: boolean;
     maxRetriesAfterWait?: number;
     requestTimeout?: number;
+    privatePem?: string;
+    passphrase?: string;
 };
 
 export declare class WhatsAppClass {

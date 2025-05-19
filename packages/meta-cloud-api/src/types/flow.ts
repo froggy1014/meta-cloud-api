@@ -1,10 +1,4 @@
-/**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- * All rights reserved.
- *
- * This source code is licensed under the license found in the
- * LICENSE file in the root directory of this source tree.
- */
+import { IncomingHttpHeaders, IncomingMessage } from 'http';
 import { ResponseSuccess } from './request';
 
 /**
@@ -30,6 +24,12 @@ export enum FlowCategoryEnum {
     CustomerSupport = 'CUSTOMER_SUPPORT',
     Survey = 'SURVEY',
     Other = 'OTHER',
+}
+
+export enum FlowActionEnum {
+    INIT = 'INIT',
+    BACK = 'BACK',
+    DATA_EXCHANGE = 'data_exchange',
 }
 
 /**
@@ -175,6 +175,126 @@ export interface ValidateFlowJsonResponse {
     success: boolean;
     validation_errors?: FlowValidationError[];
 }
+
+/**
+ * WhatsApp Flow Endpoint - Encrypted Request Payload
+ * Represents the raw encrypted data received from WhatsApp
+ */
+export interface FlowEncryptedRequestPayload {
+    encrypted_aes_key: string;
+    encrypted_flow_data: string;
+    initial_vector: string;
+}
+
+/**
+ * WhatsApp Flow Endpoint - Decrypted Request Response
+ * Represents the successfully decrypted data and encryption keys
+ */
+export interface FlowDecryptedRequestResponse {
+    decryptedBody: any;
+    aesKeyBuffer: Buffer;
+    initialVectorBuffer: Buffer;
+}
+
+/**
+ * WhatsApp Flow Endpoint - HTTP Request with Body
+ * Represents an HTTP request with the encrypted payload
+ */
+export interface FlowHttpRequest extends IncomingMessage {
+    body: FlowEncryptedRequestPayload;
+    headers: IncomingHttpHeaders;
+}
+
+/**
+ * WhatsApp Flow Endpoint - Health Check Request
+ * Represents the structure of a health check request
+ */
+export interface FlowHealthCheckRequest {
+    action: 'ping';
+    version: '3.0';
+}
+
+/**
+ * WhatsApp Flow Endpoint - Health Check Response
+ * The expected response structure for health check requests
+ */
+export interface FlowHealthCheckResponse {
+    data: {
+        status: 'active';
+    };
+}
+
+/**
+ * WhatsApp Flow Endpoint - Data Exchange Request
+ * Represents the structure of a data exchange request
+ */
+export interface FlowDataExchangeRequest {
+    version: '3.0';
+    action: FlowActionEnum;
+    screen: string;
+    flow_token: string;
+    data?: Record<string, any>;
+}
+
+/**
+ * WhatsApp Flow Endpoint - Data Exchange Response
+ * The expected response structure for data exchange requests
+ */
+export interface FlowDataExchangeResponse {
+    screen?: string;
+    data?: Record<string, any | { error_message?: string }>;
+}
+
+/**
+ * WhatsApp Flow Endpoint - Success Screen Response
+ * The expected response structure for success screen requests
+ */
+export interface FlowSuccessScreenResponse {
+    screen: 'SUCCESS';
+    data: {
+        extension_message_response?: {
+            params?: {
+                flow_token: string;
+                [key: string]: string;
+            };
+        };
+    };
+}
+
+/**
+ * WhatsApp Flow Endpoint - Error Notification Request
+ * Represents the structure of an error notification request
+ */
+export interface FlowErrorNotificationRequest {
+    version: '3.0';
+    action: Exclude<FlowActionEnum, FlowActionEnum.BACK>;
+    screen: string;
+    flow_token: string;
+    data: {
+        error_key?: string;
+        error_message?: string;
+    };
+}
+
+/**
+ * WhatsApp Flow Endpoint - Error Notification Response
+ * The expected response structure for error notification requests
+ */
+export interface FlowErrorNotificationResponse {
+    acknowledged: boolean;
+}
+
+export type FlowEndpointRequest = FlowHealthCheckRequest | FlowDataExchangeRequest | FlowErrorNotificationRequest;
+
+/**
+ * WhatsApp Flow Endpoint - Response
+ * Union type for all possible response types from a Flow endpoint
+ */
+export type FlowEndpointResponse =
+    | FlowHealthCheckResponse
+    | FlowDataExchangeResponse
+    | FlowErrorNotificationResponse
+    | FlowSuccessScreenResponse;
 
 export interface FlowClass {
     /**

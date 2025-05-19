@@ -89,6 +89,8 @@ export enum WabaConfigEnum {
     MaxRetriesAfterWait = 'MAX_RETRIES_AFTER_WAIT',
     RequestTimeout = 'REQUEST_TIMEOUT',
     Debug = 'DEBUG',
+    PrivatePem = 'FLOW_API_PRIVATE_PEM',
+    Passphrase = 'FLOW_API_PASSPHRASE',
 }
 
 export enum ConversationTypesEnum {

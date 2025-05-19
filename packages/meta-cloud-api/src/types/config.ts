@@ -59,4 +59,14 @@ export type WabaConfigType = {
      * The timeout period for a request to quit and destroy the attempt in ms.
      */
     [WabaConfigEnum.RequestTimeout]: number;
+
+    /**
+     * The private key for the Meta for Developers business.
+     */
+    [WabaConfigEnum.PrivatePem]: string;
+
+    /**
+     * The passphrase for the Meta for Developers business.
+     */
+    [WabaConfigEnum.Passphrase]: string;
 };

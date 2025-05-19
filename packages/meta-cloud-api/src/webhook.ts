@@ -1,16 +1,23 @@
-import { MessageTypesEnum, WhatsAppConfig } from './types';
+import { IncomingMessage } from 'http';
+import {
+    FlowDataExchangeRequest,
+    FlowEndpointRequest,
+    FlowErrorNotificationRequest,
+    MessageTypesEnum,
+    WhatsAppConfig,
+} from './types';
 import { WabaConfigType } from './types/config';
 
+import crypto from 'crypto';
 import { EventField, WebhookEvent, WebhookMessage } from './types/webhook';
 import { importConfig } from './utils';
 import Logger from './utils/logger';
 import WhatsApp from './whatsapp';
-
 const LIB_NAME = 'WEBHOOK';
 const LOG_LOCAL = false;
 const LOGGER = new Logger(LIB_NAME, process.env.DEBUG === 'true' || LOG_LOCAL);
 
-export interface IRequest {
+export interface IRequest extends IncomingMessage {
     body: any;
     query: Record<string, any>;
     method?: string;
@@ -285,5 +292,151 @@ export default class WebhookHandler {
     public onMessagePostProcess(handler: (whatsapp: WhatsApp, message: WebhookMessage) => void | Promise<void>): void {
         this.postProcessHandler = handler;
         LOGGER.log('Registered post-processing handler for all messages');
+    }
+
+    public async handleFlowRequest<Req extends IRequest, Res extends IResponse>(
+        req: Req,
+        res: Res,
+        screenFn: (decryptedBody: FlowDataExchangeRequest | FlowErrorNotificationRequest) => Promise<any>,
+    ): Promise<void> {
+        if (!this.isRequestSignatureValid(req)) {
+            res.status(403).end();
+            return;
+        }
+
+        let flowRequestData: {
+            decryptedBody: FlowEndpointRequest;
+            aesKeyBuffer: Buffer;
+            initialVectorBuffer: Buffer;
+        };
+
+        try {
+            flowRequestData = this.decryptRequest(req.body);
+        } catch (error) {
+            LOGGER.error(error);
+            if (error instanceof Error) {
+                res.status(421).send(error.message);
+                return;
+            }
+
+            res.status(500).send('internal server error, please check with logs');
+            return;
+        }
+
+        const { decryptedBody, aesKeyBuffer, initialVectorBuffer } = flowRequestData;
+
+        if (decryptedBody.action === 'ping') {
+            res.status(200).send(
+                this.encryptResponse({ data: { status: 'active' } }, aesKeyBuffer, initialVectorBuffer),
+            );
+            return;
+        }
+
+        const response = await screenFn(decryptedBody);
+
+        const encryptedResponse = this.encryptResponse(response, aesKeyBuffer, initialVectorBuffer);
+        res.status(200).send(encryptedResponse);
+    }
+
+    public isRequestSignatureValid(req: IRequest): boolean {
+        const appSecret = this.config.M4D_APP_SECRET;
+
+        if (!appSecret) {
+            LOGGER.warn('App Secret is not set up. Please Add M4D_APP_SECRET or configuration');
+            return false;
+        }
+
+        const signatureHeader = req.headers['x-hub-signature-256'];
+
+        if (!signatureHeader || typeof signatureHeader !== 'string') {
+            LOGGER.warn('x-hub-signature-256 header is missing');
+            return false;
+        }
+
+        const signatureBuffer = Buffer.from(signatureHeader.replace('sha256=', ''), 'utf-8');
+        const hmac = crypto.createHmac('sha256', appSecret);
+
+        const digestString = hmac.update(JSON.stringify(req.body)).digest('hex');
+        const digestBuffer = Buffer.from(digestString, 'utf-8');
+
+        // Note: This is corrected from the original code which had inverted logic
+        if (!crypto.timingSafeEqual(digestBuffer, signatureBuffer)) {
+            LOGGER.error('Error: Request Signature did not match');
+            return false;
+        }
+        return true;
+    }
+
+    public decryptRequest(body: any): {
+        decryptedBody: FlowEndpointRequest;
+        aesKeyBuffer: Buffer;
+        initialVectorBuffer: Buffer;
+    } {
+        const { encrypted_aes_key, encrypted_flow_data, initial_vector } = body;
+
+        const privatePem = this.config.FLOW_API_PRIVATE_PEM;
+        const passphrase = this.config.FLOW_API_PASSPHRASE;
+
+        const privateKey = crypto.createPrivateKey({ key: privatePem, passphrase });
+        let decryptedAesKey = null;
+        try {
+            decryptedAesKey = crypto.privateDecrypt(
+                {
+                    key: privateKey,
+                    padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+                    oaepHash: 'sha256',
+                },
+                Buffer.from(encrypted_aes_key, 'base64'),
+            );
+        } catch (error) {
+            LOGGER.error(error);
+            /*
+          Failed to decrypt. Please verify your private key.
+          If you change your public key. You need to return HTTP status code 421 to refresh the public key on the client
+          */
+            throw new Error('Failed to decrypt the request. Please verify your private key.');
+        }
+
+        // decrypt flow data
+        const flowDataBuffer = Buffer.from(encrypted_flow_data, 'base64');
+        const initialVectorBuffer = Buffer.from(initial_vector, 'base64');
+
+        const TAG_LENGTH = 16;
+        const encrypted_flow_data_body = flowDataBuffer.subarray(0, -TAG_LENGTH);
+        const encrypted_flow_data_tag = flowDataBuffer.subarray(-TAG_LENGTH);
+
+        const decipher = crypto.createDecipheriv('aes-128-gcm', decryptedAesKey, initialVectorBuffer);
+        decipher.setAuthTag(encrypted_flow_data_tag);
+
+        const decryptedJSONString = Buffer.concat([
+            decipher.update(encrypted_flow_data_body),
+            decipher.final(),
+        ]).toString('utf-8');
+
+        return {
+            decryptedBody: JSON.parse(decryptedJSONString),
+            aesKeyBuffer: decryptedAesKey,
+            initialVectorBuffer,
+        };
+    }
+
+    private encryptResponse(response: any, aesKeyBuffer: Buffer, initialVectorBuffer: Buffer) {
+        const flipped_iv: number[] = [];
+        for (const pair of Array.from(initialVectorBuffer.entries())) {
+            flipped_iv.push(~pair[1]);
+        }
+
+        try {
+            // encrypt response data
+            const cipher = crypto.createCipheriv('aes-128-gcm', aesKeyBuffer, Buffer.from(flipped_iv));
+            return Buffer.concat([
+                cipher.update(JSON.stringify(response), 'utf-8'),
+                cipher.final(),
+                cipher.getAuthTag(),
+            ]).toString('base64');
+        } catch (error) {
+            LOGGER.error('Response encryption error:', error);
+            throw new Error('Failed to encrypt response. Internal server error.');
+        }
     }
 }
