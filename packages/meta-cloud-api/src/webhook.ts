@@ -357,7 +357,10 @@ export default class WebhookHandler {
             }
         }
 
-        return res.status(200).end();
+        // No handler found, send an empty response
+        // Add an empty response here for consistency
+        const encryptedResponse = this.encryptResponse({}, aesKeyBuffer, initialVectorBuffer);
+        res.status(200).send(encryptedResponse);
     }
 
     public isRequestSignatureValid(req: IRequest & { rawBody: string }): boolean {
@@ -452,7 +455,7 @@ export default class WebhookHandler {
             // encrypt response data
             const cipher = crypto.createCipheriv('aes-128-gcm', aesKeyBuffer, Buffer.from(flipped_iv));
             return Buffer.concat([
-                cipher.update(JSON.stringify(response), 'utf-8'),
+                cipher.update(JSON.stringify(response || {}), 'utf-8'),
                 cipher.final(),
                 cipher.getAuthTag(),
             ]).toString('base64');
