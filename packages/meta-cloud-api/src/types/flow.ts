@@ -248,7 +248,7 @@ export interface FlowDataExchangeRequest {
     action: FlowActionEnum;
     screen: string;
     flow_token: string;
-    data?: Record<string, any>;
+    data?: Record<string, any> & { error_message?: string };
 }
 
 /**
