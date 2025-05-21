@@ -1,11 +1,5 @@
 import { IncomingMessage } from 'http';
-import {
-    FlowDataExchangeRequest,
-    FlowEndpointRequest,
-    FlowErrorNotificationRequest,
-    MessageTypesEnum,
-    WhatsAppConfig,
-} from './types';
+import { FlowEndpointRequest, MessageTypesEnum, WhatsAppConfig } from './types';
 import { WabaConfigType } from './types/config';
 
 import crypto from 'crypto';
@@ -297,7 +291,7 @@ export default class WebhookHandler {
     public async handleFlowRequest<Req extends IRequest & { rawBody: string }, Res extends IResponse>(
         req: Req,
         res: Res,
-        screenFn: (decryptedBody: FlowDataExchangeRequest | FlowErrorNotificationRequest) => Promise<any>,
+        screenFn: (decryptedBody: FlowEndpointRequest) => Promise<any>,
     ): Promise<void> {
         if (!this.isRequestSignatureValid(req)) {
             res.status(403).end();
@@ -324,13 +318,6 @@ export default class WebhookHandler {
         }
 
         const { decryptedBody, aesKeyBuffer, initialVectorBuffer } = flowRequestData;
-
-        // if (decryptedBody.action === 'ping') {
-        //     res.status(200).send(
-        //         this.encryptResponse({ data: { status: 'active' } }, aesKeyBuffer, initialVectorBuffer),
-        //     );
-        //     return;
-        // }
 
         const response = await screenFn(decryptedBody);
 

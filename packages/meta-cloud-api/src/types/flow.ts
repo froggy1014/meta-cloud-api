@@ -284,7 +284,7 @@ export interface FlowErrorNotificationResponse {
     acknowledged: boolean;
 }
 
-export type FlowEndpointRequest = FlowDataExchangeRequest | FlowErrorNotificationRequest;
+export type FlowEndpointRequest = FlowHealthCheckRequest | FlowDataExchangeRequest | FlowErrorNotificationRequest;
 
 /**
  * WhatsApp Flow Endpoint - Response
