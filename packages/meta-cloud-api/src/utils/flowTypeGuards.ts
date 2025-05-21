@@ -21,12 +21,17 @@ export function isFlowPingRequest(request: FlowEndpointRequest): request is Flow
  * @returns True if the request is a Data Exchange request, false otherwise
  */
 export function isFlowDataExchangeRequest(request: FlowEndpointRequest): request is FlowDataExchangeRequest & {
-    action: FlowActionEnum.DATA_EXCHANGE;
+    action: FlowActionEnum.DATA_EXCHANGE | FlowActionEnum.INIT | FlowActionEnum.BACK;
     screen: string;
     flow_token: string;
     data?: Record<string, any>;
 } {
-    return 'action' in request && request.action === FlowActionEnum.DATA_EXCHANGE;
+    return (
+        'action' in request &&
+        (request.action === FlowActionEnum.DATA_EXCHANGE ||
+            request.action === FlowActionEnum.INIT ||
+            request.action === FlowActionEnum.BACK)
+    );
 }
 
 /**
@@ -49,7 +54,7 @@ export function isFlowErrorRequest(request: FlowEndpointRequest): request is Flo
         'data' in request &&
         typeof request.data === 'object' &&
         request.data !== null &&
-        (('error_key' in request.data && request.data.error_key !== undefined) ||
-            ('error_message' in request.data && request.data.error_message !== undefined))
+        'error_message' in request.data &&
+        request.data.error_message !== undefined
     );
 }
