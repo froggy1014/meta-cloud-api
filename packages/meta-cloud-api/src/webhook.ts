@@ -325,12 +325,12 @@ export default class WebhookHandler {
 
         const { decryptedBody, aesKeyBuffer, initialVectorBuffer } = flowRequestData;
 
-        if (decryptedBody.action === 'ping') {
-            res.status(200).send(
-                this.encryptResponse({ data: { status: 'active' } }, aesKeyBuffer, initialVectorBuffer),
-            );
-            return;
-        }
+        // if (decryptedBody.action === 'ping') {
+        //     res.status(200).send(
+        //         this.encryptResponse({ data: { status: 'active' } }, aesKeyBuffer, initialVectorBuffer),
+        //     );
+        //     return;
+        // }
 
         const response = await screenFn(decryptedBody);
 
