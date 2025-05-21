@@ -312,12 +312,10 @@ export interface FlowEndpointRequest {
     screen?: string;
     flow_token?: string;
 
-    data?:
-        | Record<string, any>
-        | {
-              error_key?: string;
-              error_message?: string;
-          };
+    data?: Record<string, any> & {
+        error_key?: string;
+        error_message?: string;
+    };
 }
 
 /**
