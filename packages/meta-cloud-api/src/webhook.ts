@@ -359,6 +359,7 @@ export default class WebhookHandler {
 
         // No handler found, send an empty response
         // Add an empty response here for consistency
+        LOGGER.log('No handler found, sending an empty response');
         const encryptedResponse = this.encryptResponse({}, aesKeyBuffer, initialVectorBuffer);
         res.status(200).send(encryptedResponse);
     }
