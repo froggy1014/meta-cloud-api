@@ -332,14 +332,11 @@ export default class WebhookHandler {
             flowType = FlowTypeEnum.Error;
         }
 
-        // Create a comprehensive request object
-        const processedRequest: FlowEndpointRequest = decryptedBody;
-
         // If we have a registered handler for this flow type, use it
         if (flowType && this.flowHandlers.has(flowType)) {
             const handler = this.flowHandlers.get(flowType);
             if (handler) {
-                const response = await Promise.resolve(handler(this.client, processedRequest));
+                const response = await Promise.resolve(handler(this.client, decryptedBody));
                 const encryptedResponse = this.encryptResponse(response, aesKeyBuffer, initialVectorBuffer);
                 res.status(200).send(encryptedResponse);
                 return;
@@ -350,7 +347,7 @@ export default class WebhookHandler {
         if (this.flowHandlers.has(FlowTypeEnum.All)) {
             const handler = this.flowHandlers.get(FlowTypeEnum.All);
             if (handler) {
-                const response = await Promise.resolve(handler(this.client, processedRequest));
+                const response = await Promise.resolve(handler(this.client, decryptedBody));
                 const encryptedResponse = this.encryptResponse(response, aesKeyBuffer, initialVectorBuffer);
                 res.status(200).send(encryptedResponse);
                 return;
@@ -359,7 +356,7 @@ export default class WebhookHandler {
 
         // No handler found, send an empty response
         // Add an empty response here for consistency
-        LOGGER.log('No handler found, sending an empty response');
+        LOGGER.log('No handler found, sending an empty response body: ', decryptedBody);
         const encryptedResponse = this.encryptResponse({}, aesKeyBuffer, initialVectorBuffer);
         res.status(200).send(encryptedResponse);
     }
