@@ -286,8 +286,8 @@ export interface FlowErrorNotificationRequest {
     screen: string;
     flow_token: string;
     data: {
-        error_key?: string;
-        error_message?: string;
+        error: string;
+        error_message: string;
     };
 }
 

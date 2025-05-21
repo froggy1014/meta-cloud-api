@@ -78,7 +78,7 @@ export function isFlowErrorRequest(request: FlowEndpointRequest): request is Flo
     screen: string;
     flow_token: string;
     data: {
-        error_key: string;
+        error: string;
         error_message: string;
     };
 } {
@@ -99,7 +99,7 @@ export function isFlowErrorRequest(request: FlowEndpointRequest): request is Flo
     const hasValidData =
         isObject(data) &&
         'error_key' in data &&
-        isString(data.error_key) &&
+        isString(data.error) &&
         'error_message' in data &&
         isString(data.error_message);
 
