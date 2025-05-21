@@ -399,7 +399,7 @@ export default class WebhookHandler {
     } {
         const { encrypted_aes_key, encrypted_flow_data, initial_vector } = body;
 
-        const privatePem = this.config.FLOW_API_PRIVATE_PEM;
+        const privatePem = this.config.FLOW_API_PRIVATE_PEM.replace(/\\n/g, '\n');
         const passphrase = this.config.FLOW_API_PASSPHRASE;
 
         const privateKey = crypto.createPrivateKey({ key: privatePem, passphrase });
