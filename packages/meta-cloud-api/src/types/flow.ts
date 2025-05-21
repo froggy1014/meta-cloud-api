@@ -299,7 +299,26 @@ export interface FlowErrorNotificationResponse {
     acknowledged: boolean;
 }
 
-export type FlowEndpointRequest = FlowHealthCheckRequest | FlowDataExchangeRequest | FlowErrorNotificationRequest;
+/**
+ * WhatsApp Flow Endpoint - Comprehensive Request Object
+ * A combined type that includes all possible fields from different request types
+ * with all fields being optional for flexibility
+ */
+export interface FlowEndpointRequest {
+    // Common fields
+    version?: '3.0';
+    action?: 'ping' | FlowActionEnum;
+
+    screen?: string;
+    flow_token?: string;
+
+    data?:
+        | Record<string, any>
+        | {
+              error_key?: string;
+              error_message?: string;
+          };
+}
 
 /**
  * WhatsApp Flow Endpoint - Response

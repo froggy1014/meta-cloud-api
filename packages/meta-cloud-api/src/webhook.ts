@@ -5,6 +5,7 @@ import { WabaConfigType } from './types/config';
 import crypto from 'crypto';
 import { EventField, WebhookEvent, WebhookMessage } from './types/webhook';
 import { importConfig } from './utils';
+import { isFlowDataExchangeRequest, isFlowErrorRequest, isFlowPingRequest } from './utils/flowTypeGuards';
 import Logger from './utils/logger';
 import WhatsApp from './whatsapp';
 const LIB_NAME = 'WEBHOOK';
@@ -321,25 +322,24 @@ export default class WebhookHandler {
         const { decryptedBody, aesKeyBuffer, initialVectorBuffer } = flowRequestData;
 
         // Determine flow type
-        let flowType: FlowTypeEnum | null = null;
+        let flowType: FlowTypeEnum | undefined = undefined;
 
-        if ('action' in decryptedBody) {
-            const action = decryptedBody.action as string;
-
-            if (action === 'ping') {
-                flowType = FlowTypeEnum.Ping;
-            } else if (action === 'data_exchange') {
-                flowType = FlowTypeEnum.Change;
-            } else if (action === 'error') {
-                flowType = FlowTypeEnum.Error;
-            }
+        if (isFlowPingRequest(decryptedBody)) {
+            flowType = FlowTypeEnum.Ping;
+        } else if (isFlowDataExchangeRequest(decryptedBody)) {
+            flowType = FlowTypeEnum.Change;
+        } else if (isFlowErrorRequest(decryptedBody)) {
+            flowType = FlowTypeEnum.Error;
         }
+
+        // Create a comprehensive request object
+        const processedRequest: FlowEndpointRequest = decryptedBody;
 
         // If we have a registered handler for this flow type, use it
         if (flowType && this.flowHandlers.has(flowType)) {
             const handler = this.flowHandlers.get(flowType);
             if (handler) {
-                const response = await Promise.resolve(handler(this.client, decryptedBody));
+                const response = await Promise.resolve(handler(this.client, processedRequest));
                 const encryptedResponse = this.encryptResponse(response, aesKeyBuffer, initialVectorBuffer);
                 res.status(200).send(encryptedResponse);
                 return;
@@ -350,7 +350,7 @@ export default class WebhookHandler {
         if (this.flowHandlers.has(FlowTypeEnum.All)) {
             const handler = this.flowHandlers.get(FlowTypeEnum.All);
             if (handler) {
-                const response = await Promise.resolve(handler(this.client, decryptedBody));
+                const response = await Promise.resolve(handler(this.client, processedRequest));
                 const encryptedResponse = this.encryptResponse(response, aesKeyBuffer, initialVectorBuffer);
                 res.status(200).send(encryptedResponse);
                 return;
