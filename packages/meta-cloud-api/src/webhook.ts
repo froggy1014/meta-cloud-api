@@ -1,5 +1,5 @@
 import { IncomingMessage } from 'http';
-import { FlowEndpointRequest, MessageTypesEnum, WhatsAppConfig } from './types';
+import { FlowEndpointRequest, FlowTypeEnum, MessageTypesEnum, WhatsAppConfig } from './types';
 import { WabaConfigType } from './types/config';
 
 import crypto from 'crypto';
@@ -36,6 +36,8 @@ export default class WebhookHandler {
     private eventHandlers: Map<string, (event: WebhookEvent) => void | Promise<void>> = new Map();
     private preProcessHandler: ((whatsapp: WhatsApp, message: WebhookMessage) => void | Promise<void>) | null = null;
     private postProcessHandler: ((whatsapp: WhatsApp, message: WebhookMessage) => void | Promise<void>) | null = null;
+    private flowHandlers: Map<FlowTypeEnum, (whatsapp: WhatsApp, request: FlowEndpointRequest) => any | Promise<any>> =
+        new Map();
 
     /**
      * Create a new WebhookHandler
@@ -291,7 +293,6 @@ export default class WebhookHandler {
     public async handleFlowRequest<Req extends IRequest & { rawBody: string }, Res extends IResponse>(
         req: Req,
         res: Res,
-        screenFn: (decryptedBody: FlowEndpointRequest) => Promise<any>,
     ): Promise<void> {
         if (!this.isRequestSignatureValid(req)) {
             res.status(403).end();
@@ -319,10 +320,44 @@ export default class WebhookHandler {
 
         const { decryptedBody, aesKeyBuffer, initialVectorBuffer } = flowRequestData;
 
-        const response = await screenFn(decryptedBody);
+        // Determine flow type
+        let flowType: FlowTypeEnum | null = null;
 
-        const encryptedResponse = this.encryptResponse(response, aesKeyBuffer, initialVectorBuffer);
-        res.status(200).send(encryptedResponse);
+        if ('action' in decryptedBody) {
+            const action = decryptedBody.action as string;
+
+            if (action === 'ping') {
+                flowType = FlowTypeEnum.Ping;
+            } else if (action === 'data_exchange') {
+                flowType = FlowTypeEnum.Change;
+            } else if (action === 'error') {
+                flowType = FlowTypeEnum.Error;
+            }
+        }
+
+        // If we have a registered handler for this flow type, use it
+        if (flowType && this.flowHandlers.has(flowType)) {
+            const handler = this.flowHandlers.get(flowType);
+            if (handler) {
+                const response = await Promise.resolve(handler(this.client, decryptedBody));
+                const encryptedResponse = this.encryptResponse(response, aesKeyBuffer, initialVectorBuffer);
+                res.status(200).send(encryptedResponse);
+                return;
+            }
+        }
+
+        // If we have a catch-all handler, use it
+        if (this.flowHandlers.has(FlowTypeEnum.All)) {
+            const handler = this.flowHandlers.get(FlowTypeEnum.All);
+            if (handler) {
+                const response = await Promise.resolve(handler(this.client, decryptedBody));
+                const encryptedResponse = this.encryptResponse(response, aesKeyBuffer, initialVectorBuffer);
+                res.status(200).send(encryptedResponse);
+                return;
+            }
+        }
+
+        return res.status(200).end();
     }
 
     public isRequestSignatureValid(req: IRequest & { rawBody: string }): boolean {
@@ -425,5 +460,18 @@ export default class WebhookHandler {
             LOGGER.error('Response encryption error:', error);
             throw new Error('Failed to encrypt response. Internal server error.');
         }
+    }
+
+    /**
+     * Register a Flow action handler for a specific flow type
+     * @param type The flow type to handle (ping, change, error), or '*' for all types
+     * @param handler The handler function that receives the WhatsApp client and the Flow request
+     */
+    public onFlow(
+        type: FlowTypeEnum,
+        handler: (whatsapp: WhatsApp, request: FlowEndpointRequest) => any | Promise<any>,
+    ): void {
+        this.flowHandlers.set(type, handler);
+        LOGGER.log(`Registered handler for Flow type: ${type}`);
     }
 }

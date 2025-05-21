@@ -33,6 +33,21 @@ export enum FlowActionEnum {
 }
 
 /**
+ * Enum for Flow Types in webhook handlers
+ * Used to register handlers for specific flow events
+ */
+export enum FlowTypeEnum {
+    /** Health check/ping requests */
+    Ping = 'ping',
+    /** Data exchange requests */
+    Change = 'data_exchange',
+    /** Error notification requests */
+    Error = 'error',
+    /** Match all flow action types */
+    All = '*',
+}
+
+/**
  * Flow Validation Error Pointer
  */
 export interface FlowValidationErrorPointer {
