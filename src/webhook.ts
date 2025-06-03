@@ -395,7 +395,22 @@ export default class WebhookHandler {
         aesKeyBuffer: Buffer;
         initialVectorBuffer: Buffer;
     } {
+        LOGGER.log('Received body for decryption:', JSON.stringify(body, null, 2));
+
         const { encrypted_aes_key, encrypted_flow_data, initial_vector } = body;
+
+        if (!encrypted_aes_key) {
+            throw new Error('Missing required property: encrypted_aes_key');
+        }
+        if (!encrypted_flow_data) {
+            throw new Error('Missing required property: encrypted_flow_data');
+        }
+        if (!initial_vector) {
+            throw new Error('Missing required property: initial_vector');
+        }
+
+        LOGGER.log('Received body for privatePem:', JSON.stringify(this.config.FLOW_API_PRIVATE_PEM, null, 2));
+        LOGGER.log('Received body for passphrase:', JSON.stringify(this.config.FLOW_API_PASSPHRASE, null, 2));
 
         const privatePem = this.config.FLOW_API_PRIVATE_PEM.replace(/\\n/g, '\n');
         const passphrase = this.config.FLOW_API_PASSPHRASE;
