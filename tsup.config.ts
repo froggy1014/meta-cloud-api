@@ -16,13 +16,5 @@ export default defineConfig({
     treeshake: true,
     target: 'es2022',
     platform: 'node',
-    external: [
-        // Node.js 내장 모듈들
-        'node:*',
-        'crypto',
-        'fs',
-        'path',
-        'url',
-        'util',
-    ],
+    external: ['node:*', 'crypto', 'fs', 'path', 'url', 'util'],
 });
