@@ -1,6 +1,7 @@
 {
   "name": "meta-cloud-api-express-example",
   "version": "1.0.0",
+  "private": true,
   "description": "Example Express app using the meta-cloud-api package",
   "main": "dist/server.js",
   "scripts": {
@@ -11,7 +12,7 @@
   "dependencies": {
     "dotenv": "^16.4.7",
     "express": "^4.18.2",
-    "meta-cloud-api": "^0.1.21"
+    "meta-cloud-api": "^0.2.12"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",

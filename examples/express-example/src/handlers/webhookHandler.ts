@@ -13,6 +13,8 @@ const config = {
     phoneNumberId: process.env.WA_PHONE_NUMBER_ID ? Number(process.env.WA_PHONE_NUMBER_ID) : undefined,
     businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID || '',
     webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN || '',
+    privatePem: process.env.FLOW_API_PRIVATE_PEM as string,
+    passphrase: process.env.FLOW_API_PASSPHRASE as string,
 };
 
 export const webhookHandler = new WebhookHandler(config);
@@ -57,7 +59,7 @@ Our phone: ${message.displayPhoneNumber}`,
                 await client.messages.template({
                     to: message.from,
                     body: {
-                        name: 'smaple_template', // Replace with your approved template name
+                        name: 'meta_cloud_api_example', // Replace with your approved template name
                         language: {
                             code: LanguagesEnum.English_US,
                             policy: 'deterministic',
