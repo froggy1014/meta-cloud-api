@@ -1,15 +1,84 @@
 {
   "name": "meta-cloud-api",
-  "private": true,
+  "version": "0.2.12",
+  "description": "TypeScript wrapper for Meta's Cloud API",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "prepare": "husky",
     "cz": "cz",
-    "dev": "turbo dev",
-    "build": "turbo build",
-    "lint": "turbo lint",
-    "format": "turbo format",
-    "publish-packages": "turbo run build lint && changeset version && changeset publish",
-    "clean": "rm -rf node_modules && turbo clean"
+    "dev": "tsup --watch",
+    "build": "tsup --clean",
+    "format": "prettier .",
+    "lint": "eslint .",
+    "clean": "rm -rf dist node_modules",
+    "typecheck": "tsc --noEmit"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./api": {
+      "types": "./dist/api/index.d.ts",
+      "import": "./dist/api/index.js",
+      "default": "./dist/api/index.js"
+    },
+    "./types": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/types/index.js",
+      "default": "./dist/types/index.js"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils/index.js",
+      "default": "./dist/utils/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "keywords": [
+    "whatsapp-api",
+    "cloud-api",
+    "meta-api",
+    "typescript-sdk",
+    "whatsapp-business",
+    "whatsapp-cloud-api",
+    "messaging-api",
+    "node-api-client",
+    "meta-cloud",
+    "whatsapp-messaging",
+    "api-wrapper",
+    "typescript",
+    "nodejs",
+    "meta",
+    "facebook-api",
+    "whatsapp-integration",
+    "whatsapp-templates",
+    "media-api",
+    "flow-api",
+    "waba",
+    "business-messaging"
+  ],
+  "author": "froggy1014",
+  "license": "MIT",
+  "homepage": "https://github.com/froggy1014/meta-cloud-api#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/froggy1014/meta-cloud-api.git"
+  },
+  "bugs": {
+    "url": "https://github.com/froggy1014/meta-cloud-api/issues"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
   },
   "devDependencies": {
     "@changesets/cli": "^2.28.1",
@@ -17,39 +86,36 @@
     "@commitlint/config-conventional": "^19.6.0",
     "@commitlint/cz-commitlint": "^19.6.1",
     "@commitlint/types": "^19.5.0",
+    "@eslint/eslintrc": "^3.2.0",
+    "@eslint/js": "^9.17.0",
+    "@types/eslint-config-prettier": "^6.11.3",
+    "@types/eslint__eslintrc": "^2.1.2",
+    "@types/node": "^22.15.29",
+    "@typescript-eslint/eslint-plugin": "^8.15.0",
+    "@typescript-eslint/parser": "^8.15.0",
     "commitizen": "^4.3.1",
+    "dotenv": "^16.4.7",
     "eslint": "^9.20.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-only-warn": "^1.1.0",
+    "eslint-plugin-unused-imports": "^4.1.4",
     "husky": "^9.1.7",
     "lint-staged": "^15.3.0",
     "prettier": "^3.5.0",
-    "prettier-plugin-tailwindcss": "^0.6.10",
-    "turbo": "^2.4.2",
-    "typescript": "5.7.3"
+    "tsup": "^8.3.6",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.23.0"
   },
-  "packageManager": "pnpm@10.0.0",
-  "engines": {
-    "node": ">=18"
-  },
-  "files": [
-    "dist"
-  ],
   "lint-staged": {
     "**/*.{ts,tsx}": [
-      "prettier --write --ignore-unknown"
-    ],
-    "./apps/playground/**/*.{ts,tsx}": [
-      "pnpm --filter playground lint"
-    ],
-    "./apps/www/**/*.{ts,tsx}": [
-      "pnpm --filter www lint"
-    ],
-    "./packages/ui/**/*.{ts,tsx}": [
-      "pnpm --filter ui lint"
+      "prettier --write --ignore-unknown",
+      "eslint --fix"
     ]
   },
   "config": {
     "commitizen": {
       "path": "@commitlint/cz-commitlint"
     }
-  }
+  },
+  "packageManager": "pnpm@10.11.0+sha512.6540583f41cc5f628eb3d9773ecee802f4f9ef9923cc45b69890fb47991d4b092964694ec3a4f738a420c918a333062c8b925d312f42e4f0c263eb603551f977"
 }

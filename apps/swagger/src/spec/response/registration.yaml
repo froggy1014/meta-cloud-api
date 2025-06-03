@@ -1,6 +1,0 @@
-components:
-  schemas:
-    DataLocalizationRegionEnum:
-      type: string
-      enum: [INDIA, SINGAPORE, UNITED_STATES]
-      description: Regions available for data localization

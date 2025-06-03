@@ -1,6 +1,0 @@
-{
-    "events": {
-        "restart": "bash -c \"if [[ \"$FILENAME\" == *| \"src/routes/\"* || \"$FILENAME\" == *| \"src/spec/\"* ]]; then npm run schemas:openapi; fi\""
-    },
-    "ext": "js,ts,json,yaml,yml"
-}
