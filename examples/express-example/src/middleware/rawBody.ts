@@ -1,4 +1,4 @@
-import express, { NextFunction, Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 
 declare global {
     namespace Express {
@@ -8,53 +8,121 @@ declare global {
     }
 }
 
-/**
- * Middleware to capture raw body for webhook signature verification
- * Similar to Next.js API approach with text() and json()
- */
-export const rawBodyMiddleware = express.raw({
-    type: 'application/json',
-    verify: (req: Request, res: Response, buf: Buffer) => {
-        // Store the raw body as string for signature verification
-        req.rawBody = buf.toString('utf8');
-    },
-});
+// Constants for configuration values
+const MIDDLEWARE_CONFIG = {
+    TIMEOUT_MS: 10000, // 10 second timeout
+    CONTENT_TYPE: 'application/json',
+    ENCODING: 'utf8',
+} as const;
 
 /**
- * Alternative middleware that manually parses both raw and JSON
+ * Advanced raw body middleware for WhatsApp Flows webhook processing
+ *
+ * Handles concurrent access to both raw body (for signature verification) and parsed JSON
+ * without causing Express stream conflicts. Essential for WhatsApp Flows webhook endpoints that
+ * must simultaneously:
+ *
+ * Security Requirements:
+ * - Verify X-Hub-Signature-256 header using raw body content
+ * - Authenticate Flow completion messages containing sensitive user data
+ * - Validate endpoint availability checks (90% uptime threshold monitoring)
+ *
+ * Performance Monitoring:
+ * - Process client error rate webhooks (5%, 10%, 50% thresholds)
+ * - Handle endpoint latency alerts (1s, 5s, 7s p90 thresholds)
+ * - Manage endpoint error rate notifications (30-minute detection windows)
+ *
+ * Flow Management:
+ * - Parse Flow status change notifications (DRAFT→PUBLISHED transitions)
+ * - Process Flow version freeze/expiry warnings
+ * - Handle Flow response messages with encrypted flow_token data
+ *
+ * Implements timeout protection, proper cleanup, and graceful error handling
+ * required for production WhatsApp Business Platform integration.
+ *
+ * @see https://developers.facebook.com/docs/whatsapp/flows/reference/flowswebhooks
+ * @see https://developers.facebook.com/docs/whatsapp/sample-app-endpoints
  */
-export const manualRawBodyMiddleware = (req: Request, res: Response, next: NextFunction) => {
-    if (req.method === 'POST' && req.headers['content-type']?.includes('application/json')) {
-        const chunks: Buffer[] = [];
+export const rawBodyMiddleware = (req: Request, res: Response, next: NextFunction) => {
+    // Skip if body has already been parsed
+    if (req.body !== undefined || req.rawBody !== undefined) {
+        return next();
+    }
 
-        req.on('data', (chunk: Buffer) => {
-            chunks.push(chunk);
-        });
+    // Only process POST requests with JSON content
+    const isValidRequest =
+        req.method === 'POST' && req.headers['content-type']?.includes(MIDDLEWARE_CONFIG.CONTENT_TYPE);
 
-        req.on('end', () => {
-            const rawBody = Buffer.concat(chunks).toString('utf8');
+    if (!isValidRequest) {
+        return next();
+    }
+
+    const chunks: Buffer[] = [];
+    let hasFinished = false;
+
+    const cleanup = () => {
+        req.removeAllListeners('data');
+        req.removeAllListeners('end');
+        req.removeAllListeners('error');
+        req.removeAllListeners('close');
+    };
+
+    const finish = (error?: Error) => {
+        if (hasFinished) return;
+        hasFinished = true;
+
+        clearTimeout(timeoutId);
+        cleanup();
+
+        if (error) {
+            return next(error);
+        }
+
+        try {
+            const rawBody = Buffer.concat(chunks).toString(MIDDLEWARE_CONFIG.ENCODING);
             req.rawBody = rawBody;
 
-            // Parse JSON similar to Next.js json() helper
-            try {
+            // Only parse JSON if rawBody is not empty
+            if (rawBody.trim()) {
                 req.body = JSON.parse(rawBody);
-            } catch (error) {
-                console.error('Error parsing JSON:', error);
+            } else {
                 req.body = {};
             }
 
-            console.log('🚀 ~ rawBodyMiddleware ~ method:', req.method, 'path:', req.path);
-            console.log('🚀 ~ rawBodyMiddleware ~ rawBody length:', rawBody.length);
             next();
-        });
+        } catch (parseError) {
+            console.error('Error parsing JSON from raw body:', parseError);
+            next(new Error('Invalid JSON in request body'));
+        }
+    };
 
-        req.on('error', (error) => {
-            console.error('Error reading request body:', error);
-            next(error);
-        });
-    } else {
-        next();
-    }
+    req.on('data', (chunk: Buffer) => {
+        if (!hasFinished) {
+            chunks.push(chunk);
+        }
+    });
+
+    req.on('end', () => {
+        finish();
+    });
+
+    req.on('error', (error) => {
+        console.error('Error reading request body:', error);
+        finish(error);
+    });
+
+    req.on('close', () => {
+        if (!hasFinished) {
+            finish(new Error('Request closed before completion'));
+        }
+    });
+
+    // Add timeout protection with named constant
+    const timeoutId = setTimeout(() => {
+        if (!hasFinished) {
+            finish(new Error('Request body read timeout'));
+        }
+    }, MIDDLEWARE_CONFIG.TIMEOUT_MS);
 };
 
 export default rawBodyMiddleware;

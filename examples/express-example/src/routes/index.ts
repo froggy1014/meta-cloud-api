@@ -1,29 +1,27 @@
 import express, { Router } from 'express';
+
 import { IRequest } from 'meta-cloud-api';
-import { webhookHandler } from '../handlers/webhookHandler';
+import { rawBodyMiddleware } from '../middleware/rawBody';
+
+// Import handlers to register them
+import '../handlers';
+import { webhookHandler as wa } from '../instance';
 
 const router: Router = express.Router();
 
-// Set up webhook endpoints
+// Set up webhook endpoints with standard express.json() middleware
 router.get('/webhook', (req, res) => {
-    webhookHandler.handleVerificationRequest(req, res);
+    wa.handleVerificationRequest(req, res);
 });
 
-// Handle webhook requests
-router.post('/webhook', (req, res) => {
-    webhookHandler.handleWebhookRequest(req, res);
+// Handle webhook requests with express.json() middleware
+router.post('/webhook', express.json(), (req, res) => {
+    wa.handleWebhookRequest(req, res);
 });
 
-// Handle Flow requests - similar to Next.js API approach
-router.post('/flow', (req, res) => {
-    // Raw body is available from middleware
-    const extendedReq = req as IRequest & { rawBody: string };
-
-    console.log('🚀 ~ Flow request ~ method:', req.method, 'path:', req.path);
-    console.log('🚀 ~ Flow request ~ rawBody length:', extendedReq.rawBody?.length || 0);
-    console.log('🚀 ~ Flow request ~ body:', req.body);
-
-    webhookHandler.handleFlowRequest(extendedReq, res);
+// Handle Flow requests with rawBodyMiddleware
+router.post('/flow', rawBodyMiddleware, (req, res) => {
+    wa.handleFlowRequest(req as IRequest & { rawBody: string }, res);
 });
 
 export default router;
