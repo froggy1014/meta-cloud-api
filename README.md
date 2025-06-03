@@ -14,7 +14,6 @@
 ## Resources
 
 - [Documentation](https://www.meta-cloud-api.xyz/)
-- [API Reference (Swagger)](https://meta-cloud-api-swagger.vercel.app/api-docs/)
 
 ## Features
 
