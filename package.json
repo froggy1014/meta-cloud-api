@@ -13,7 +13,9 @@
     "format": "prettier .",
     "lint": "eslint .",
     "clean": "rm -rf dist node_modules",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest --watch"
   },
   "publishConfig": {
     "access": "public"
@@ -102,10 +104,12 @@
     "eslint-plugin-unused-imports": "^4.1.4",
     "husky": "^9.1.7",
     "lint-staged": "^15.3.0",
+    "msw": "^2.9.0",
     "prettier": "^3.5.0",
     "tsup": "^8.3.6",
     "typescript": "^5.7.3",
-    "typescript-eslint": "^8.23.0"
+    "typescript-eslint": "^8.23.0",
+    "vitest": "^2.1.8"
   },
   "lint-staged": {
     "**/*.{ts,tsx}": [

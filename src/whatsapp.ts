@@ -7,7 +7,6 @@ import {
     EncryptionAPI,
     FlowAPI,
     MediaAPI,
-    MessagesAPI,
     PhoneNumberAPI,
     QrCodeAPI,
     RegistrationAPI,
@@ -18,6 +17,7 @@ import {
 import Requester from './request';
 import { WhatsAppClass, WhatsAppConfig } from './types/whatsapp';
 import { importConfig } from './utils/importConfig';
+import MessagesApi from './messages';
 
 const LIB_NAME = 'WHATSAPP';
 const LOG_LOCAL = false;
@@ -30,7 +30,7 @@ export default class WhatsApp implements WhatsAppClass {
 
     requester: Readonly<Requester>;
 
-    readonly messages: MessagesAPI;
+    readonly messages: MessagesApi;
     readonly templates: TemplateAPI;
     readonly phoneNumber: PhoneNumberAPI;
     readonly qrCode: QrCodeAPI;
@@ -53,7 +53,7 @@ export default class WhatsApp implements WhatsAppClass {
             this.userAgent(),
         );
 
-        this.messages = new MessagesAPI(this.config, this.requester);
+        this.messages = new MessagesApi(this.config, this.requester);
         this.templates = new TemplateAPI(this.config, this.requester);
         this.phoneNumber = new PhoneNumberAPI(this.config, this.requester);
         this.qrCode = new QrCodeAPI(this.config, this.requester);

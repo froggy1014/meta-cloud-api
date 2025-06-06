@@ -31,10 +31,10 @@ export default class TemplateApi extends BaseAPI implements TemplateClass {
         );
     }
 
-    async getTemplates(params: TemplateGetParams): Promise<ResponsePagination<TemplateResponse>> {
+    async getTemplates(params?: TemplateGetParams): Promise<ResponsePagination<TemplateResponse>> {
         return this.sendJson(
             HttpMethodsEnum.Get,
-            `${this.config[WabaConfigEnum.BusinessAcctId]}/${this.endpoint}${objectToQueryString(params)}`,
+            `${this.config[WabaConfigEnum.BusinessAcctId]}/${this.endpoint}${objectToQueryString(params ?? {})}`,
             this.config[WabaConfigEnum.RequestTimeout],
             null,
         );

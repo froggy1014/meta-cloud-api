@@ -125,7 +125,7 @@ export type TemplateDeleteParams = {
 export declare class TemplateClass {
     getTemplate(templateId: string): Promise<TemplateResponse>;
     updateTemplate(templateId: string, template: Partial<TemplateRequestBody>): Promise<ResponseSuccess>;
-    getTemplates(params: TemplateGetParams): Promise<ResponsePagination<TemplateResponse>>;
+    getTemplates(params?: TemplateGetParams): Promise<ResponsePagination<TemplateResponse>>;
     createTemplate(template: TemplateRequestBody): Promise<TemplateResponse>;
     deleteTemplate(params: TemplateDeleteParams): Promise<ResponseSuccess>;
 }

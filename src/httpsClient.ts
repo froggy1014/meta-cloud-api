@@ -1,8 +1,8 @@
 import { Agent } from 'https';
 
-import Logger from './utils/logger';
 import { HttpMethodsEnum } from './types/enums';
 import { HttpsClientClass, HttpsClientResponseClass, ResponseHeaders, ResponseJSONBody } from './types/httpsClient';
+import Logger from './utils/logger';
 
 const LIB_NAME = 'HttpsClient';
 const LOG_LOCAL = false;
@@ -44,6 +44,7 @@ export default class HttpsClient implements HttpsClientClass {
             clearTimeout(timeoutId);
             return new HttpsClientResponse(response);
         } catch (error) {
+            LOGGER.error(`${method} : ${url} - ${JSON.stringify(error)}`);
             throw error;
         }
     }
