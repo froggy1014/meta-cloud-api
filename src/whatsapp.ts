@@ -3,7 +3,6 @@ import * as SDKEnums from './types/enums';
 import Logger from './utils/logger';
 
 import {
-    BusinessProfileAPI,
     EncryptionAPI,
     FlowAPI,
     MediaAPI,
@@ -14,10 +13,11 @@ import {
     TwoStepVerificationAPI,
     WabaAPI,
 } from './api';
+import BusinessProfileApi from './businessProfile/BusinessProfileApi';
+import MessagesApi from './messages';
 import Requester from './request';
 import { WhatsAppClass, WhatsAppConfig } from './types/whatsapp';
 import { importConfig } from './utils/importConfig';
-import MessagesApi from './messages';
 
 const LIB_NAME = 'WHATSAPP';
 const LOG_LOCAL = false;
@@ -40,7 +40,7 @@ export default class WhatsApp implements WhatsAppClass {
     readonly media: MediaAPI;
     readonly waba: WabaAPI;
     readonly flow: FlowAPI;
-    readonly businessProfile: BusinessProfileAPI;
+    readonly businessProfile: BusinessProfileApi;
     static readonly Enums = SDKEnums;
 
     constructor(config?: WhatsAppConfig) {
@@ -63,7 +63,7 @@ export default class WhatsApp implements WhatsAppClass {
         this.media = new MediaAPI(this.config, this.requester);
         this.waba = new WabaAPI(this.config, this.requester);
         this.flow = new FlowAPI(this.config, this.requester);
-        this.businessProfile = new BusinessProfileAPI(this.config, this.requester);
+        this.businessProfile = new BusinessProfileApi(this.config, this.requester);
         LOGGER.log('WhatsApp Node.js SDK instantiated!');
     }
 

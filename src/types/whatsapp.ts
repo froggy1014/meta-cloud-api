@@ -6,7 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { BusinessProfileClass } from './businessProfile';
+import { BusinessProfileClass } from 'src/businessProfile';
 import { EncryptionClass } from './encryption';
 import { FlowClass } from './flow';
 import { MediaClass } from './media';

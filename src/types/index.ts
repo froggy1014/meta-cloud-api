@@ -1,5 +1,4 @@
 export * from './base';
-export * from './businessProfile';
 export * from './config';
 export * from './encryption';
 export * from './enums';

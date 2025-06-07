@@ -1,5 +1,15 @@
-import { BusinessVerticalEnum } from './enums';
-import { ResponseSuccess } from './request';
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * All rights reserved.
+ *
+ * This source code is licensed under the license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+import { BaseClass } from '../../types/base';
+import { BusinessVerticalEnum } from '../../types/enums';
+import { ResponseSuccess } from '../../types/request';
+import { UploadBusinessProfileResponse, UploadHandle, UploadSessionResponse } from './upload';
 
 /**
  * Available fields that can be requested when retrieving a business profile.
@@ -13,8 +23,11 @@ export type BusinessProfileField =
     | 'websites'
     | 'vertical';
 
-export type BusinessProfileFieldsParam = BusinessProfileField[];
+export type BusinessProfileFieldsParam = BusinessProfileField[] | string;
 
+/**
+ * Business profile data structure containing all profile information.
+ */
 export interface BusinessProfileData {
     /**
      * The business's About text. This text appears in the business's profile, beneath its profile image,
@@ -61,10 +74,16 @@ export interface BusinessProfileData {
     vertical?: BusinessVerticalEnum | string;
 }
 
+/**
+ * Response structure for business profile GET requests.
+ */
 export interface BusinessProfileResponse {
     data: BusinessProfileData[];
 }
 
+/**
+ * Request structure for updating business profile.
+ */
 export interface UpdateBusinessProfileRequest {
     /**
      * The messaging service used for the request. Always set it to "whatsapp" if you are using
@@ -113,34 +132,13 @@ export interface UpdateBusinessProfileRequest {
     profile_picture_handle?: string;
 }
 
-export interface UploadSession {
-    id: string;
-    video?: boolean;
-}
-
-export interface UploadSessionResponse {
-    id: string;
-}
-
-export interface UploadBusinessProfileResponse {
-    h: string;
-}
-
-export interface UploadHandle {
-    handle: string;
-    file_size: number;
-    upload_result: {
-        handle_type: string;
-        name: string;
-    };
-}
-
-export interface BusinessProfileClass {
+// Business Profile API Class Interface - Complete definition
+export declare class BusinessProfileClass extends BaseClass {
     /**
      * Get your business profile.
      * @param fields Specific fields to be returned in the response. If not specified, all fields will be returned.
      */
-    getBusinessProfile(fields?: BusinessProfileFieldsParam | string): Promise<BusinessProfileResponse>;
+    getBusinessProfile(fields?: BusinessProfileFieldsParam): Promise<BusinessProfileResponse>;
 
     /**
      * Update your business profile.

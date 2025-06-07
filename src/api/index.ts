@@ -1,5 +1,5 @@
+import BusinessProfileAPI from '../businessProfile/BusinessProfileApi';
 import BaseAPI from './base';
-import BusinessProfileAPI from './businessProfile';
 import EncryptionAPI from './encryption';
 import FlowAPI from './flow';
 import MediaAPI from './media';
