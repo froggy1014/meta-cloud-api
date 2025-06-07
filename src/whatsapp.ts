@@ -1,23 +1,20 @@
-import { WabaConfigType } from './types/config';
-import * as SDKEnums from './types/enums';
-import Logger from './utils/logger';
+import * as SDKEnums from './shared/types/enums';
+import Logger from './shared/utils/logger';
 
-import {
-    BusinessProfileAPI,
-    EncryptionAPI,
-    FlowAPI,
-    MediaAPI,
-    MessagesAPI,
-    PhoneNumberAPI,
-    QrCodeAPI,
-    RegistrationAPI,
-    TemplateAPI,
-    TwoStepVerificationAPI,
-    WabaAPI,
-} from './api';
-import Requester from './request';
-import { WhatsAppClass, WhatsAppConfig } from './types/whatsapp';
-import { importConfig } from './utils/importConfig';
+import { WhatsAppClass } from '@core/whatsapp';
+import EncryptionApi from '@features/encryption';
+import FlowApi from '@features/flow';
+import MediaApi from '@features/media';
+import MessagesApi from '@features/messages';
+import PhoneNumberApi from '@features/phone';
+import BusinessProfileApi from '@features/profile';
+import QrCodeApi from '@features/qrCode';
+import RegistrationApi from '@features/registration';
+import TemplateApi from '@features/template';
+import TwoStepVerificationApi from '@features/twoStepVerification';
+import WabaApi from '@features/waba';
+import { WhatsAppConfig } from '@shared/types';
+import { importConfig, Requester, WabaConfigType } from './shared';
 
 const LIB_NAME = 'WHATSAPP';
 const LOG_LOCAL = false;
@@ -30,17 +27,17 @@ export default class WhatsApp implements WhatsAppClass {
 
     requester: Readonly<Requester>;
 
-    readonly messages: MessagesAPI;
-    readonly templates: TemplateAPI;
-    readonly phoneNumber: PhoneNumberAPI;
-    readonly qrCode: QrCodeAPI;
-    readonly encryption: EncryptionAPI;
-    readonly twoStepVerification: TwoStepVerificationAPI;
-    readonly registration: RegistrationAPI;
-    readonly media: MediaAPI;
-    readonly waba: WabaAPI;
-    readonly flow: FlowAPI;
-    readonly businessProfile: BusinessProfileAPI;
+    readonly messages: MessagesApi;
+    readonly templates: TemplateApi;
+    readonly phoneNumber: PhoneNumberApi;
+    readonly qrCode: QrCodeApi;
+    readonly encryption: EncryptionApi;
+    readonly twoStepVerification: TwoStepVerificationApi;
+    readonly registration: RegistrationApi;
+    readonly media: MediaApi;
+    readonly waba: WabaApi;
+    readonly flow: FlowApi;
+    readonly businessProfile: BusinessProfileApi;
     static readonly Enums = SDKEnums;
 
     constructor(config?: WhatsAppConfig) {
@@ -53,17 +50,17 @@ export default class WhatsApp implements WhatsAppClass {
             this.userAgent(),
         );
 
-        this.messages = new MessagesAPI(this.config, this.requester);
-        this.templates = new TemplateAPI(this.config, this.requester);
-        this.phoneNumber = new PhoneNumberAPI(this.config, this.requester);
-        this.qrCode = new QrCodeAPI(this.config, this.requester);
-        this.encryption = new EncryptionAPI(this.config, this.requester);
-        this.twoStepVerification = new TwoStepVerificationAPI(this.config, this.requester);
-        this.registration = new RegistrationAPI(this.config, this.requester);
-        this.media = new MediaAPI(this.config, this.requester);
-        this.waba = new WabaAPI(this.config, this.requester);
-        this.flow = new FlowAPI(this.config, this.requester);
-        this.businessProfile = new BusinessProfileAPI(this.config, this.requester);
+        this.messages = new MessagesApi(this.config, this.requester);
+        this.templates = new TemplateApi(this.config, this.requester);
+        this.phoneNumber = new PhoneNumberApi(this.config, this.requester);
+        this.qrCode = new QrCodeApi(this.config, this.requester);
+        this.encryption = new EncryptionApi(this.config, this.requester);
+        this.twoStepVerification = new TwoStepVerificationApi(this.config, this.requester);
+        this.registration = new RegistrationApi(this.config, this.requester);
+        this.media = new MediaApi(this.config, this.requester);
+        this.waba = new WabaApi(this.config, this.requester);
+        this.flow = new FlowApi(this.config, this.requester);
+        this.businessProfile = new BusinessProfileApi(this.config, this.requester);
         LOGGER.log('WhatsApp Node.js SDK instantiated!');
     }
 

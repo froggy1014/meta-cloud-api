@@ -22,7 +22,12 @@
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
         "skipLibCheck": false,
-        "preserveConstEnums": true
+        "preserveConstEnums": true,
+        "paths": {
+            "@core/*": ["src/core/*"],
+            "@features/*": ["src/features/*"],
+            "@shared/*": ["src/shared/*"]
+        }
     },
     "include": ["src/**/*"],
     "exclude": ["node_modules", "dist"]
