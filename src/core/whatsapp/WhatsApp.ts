@@ -1,19 +1,21 @@
-import * as SDKEnums from './shared/types/enums';
-import Logger from './shared/utils/logger';
+import { WabaConfigType } from '../../shared/types/config';
+import * as SDKEnums from '../../shared/types/enums';
+import Logger from '../../shared/utils/logger';
 
-import EncryptionApi from './features/encryption';
-import FlowApi from './features/flow';
-import MediaApi from './features/media';
-import MessagesApi from './features/messages';
-import BusinessProfileApi from './features/profile';
-import QrCodeApi from './features/qrCode/QrCodeApi';
-
-import PhoneNumberApi from './features/phone';
-import RegistrationApi from './features/registration';
-import TemplateApi from './features/template/TemplateApi';
-import TwoStepVerificationApi from './features/twoStepVerification';
-import WabaApi from './features/waba';
-import { importConfig, Requester, WabaConfigType, WhatsAppClass, WhatsAppConfig } from './shared';
+import EncryptionApi from '../../features/encryption';
+import FlowApi from '../../features/flow';
+import MediaApi from '../../features/media';
+import MessagesApi from '../../features/messages';
+import PhoneNumberApi from '../../features/phone';
+import BusinessProfileApi from '../../features/profile';
+import QrCodeApi from '../../features/qrCode/QrCodeApi';
+import RegistrationApi from '../../features/registration';
+import TemplateApi from '../../features/template/TemplateApi';
+import TwoStepVerificationApi from '../../features/twoStepVerification';
+import WabaApi from '../../features/waba';
+import { importConfig } from '../../shared/config/importConfig';
+import Requester from '../../shared/http/request';
+import { WhatsAppClass, WhatsAppConfig } from './types';
 
 const LIB_NAME = 'WHATSAPP';
 const LOG_LOCAL = false;

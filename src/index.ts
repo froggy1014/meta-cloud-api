@@ -1,9 +1,15 @@
-import WebhookHandler, { IRequest, IResponse } from './webhook';
-import WhatsApp from './whatsapp';
+// Core exports
+import { IRequest, IResponse, WebhookHandler } from './core/webhook';
+import { WhatsApp } from './core/whatsapp';
 
+// Default export
 export default WhatsApp;
-export * from './businessProfile';
-export * from './media';
-export * from './types';
-export * from './utils';
+
+// Core exports
 export { WebhookHandler, type IRequest, type IResponse };
+
+// Feature exports
+export * from './features';
+
+// Shared exports
+export * from './shared';
