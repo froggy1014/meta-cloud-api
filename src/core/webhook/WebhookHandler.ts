@@ -1,5 +1,5 @@
 import { IncomingMessage } from 'http';
-import { MessageTypesEnum, WhatsAppConfig } from '../../shared/types';
+import { MessageTypesEnum } from '../../shared/types';
 import { WabaConfigType } from '../../shared/types/config';
 
 import crypto from 'crypto';
@@ -8,6 +8,8 @@ import { importConfig } from '../../shared/config';
 import { isFlowDataExchangeRequest, isFlowErrorRequest, isFlowPingRequest } from '../../shared/utils/flowTypeGuards';
 import Logger from '../../shared/utils/logger';
 import { WhatsApp } from '../whatsapp';
+
+import { WhatsAppConfig } from 'src/shared/config/importConfig';
 import { EventField, WebhookEvent, WebhookMessage } from './types';
 const LIB_NAME = 'WEBHOOK';
 const LOG_LOCAL = false;

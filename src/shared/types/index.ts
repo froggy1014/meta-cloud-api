@@ -5,5 +5,3 @@ export * from './enums';
 export * from './httpsClient';
 export * from './logger';
 export * from './request';
-export * from './webhook';
-export * from './whatsapp';

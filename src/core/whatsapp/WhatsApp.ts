@@ -13,9 +13,9 @@ import RegistrationApi from '../../features/registration';
 import TemplateApi from '../../features/template/TemplateApi';
 import TwoStepVerificationApi from '../../features/twoStepVerification';
 import WabaApi from '../../features/waba';
-import { importConfig } from '../../shared/config/importConfig';
+import { importConfig, WhatsAppConfig } from '../../shared/config/importConfig';
 import Requester from '../../shared/http/request';
-import { WhatsAppClass, WhatsAppConfig } from './types';
+import { WhatsAppClass } from './types';
 
 const LIB_NAME = 'WHATSAPP';
 const LOG_LOCAL = false;

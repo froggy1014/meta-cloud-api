@@ -1,33 +1,31 @@
-export type WhatsAppConfig = {
-    accessToken: string;
-    appId?: string;
-    appSecret?: string;
-    phoneNumberId?: number;
-    businessAcctId?: string;
-    apiVersion?: string;
-    webhookEndpoint?: string;
-    webhookVerificationToken?: string;
-    listenerPort?: number;
-    debug?: boolean;
-    maxRetriesAfterWait?: number;
-    requestTimeout?: number;
-    privatePem?: string;
-    passphrase?: string;
-};
+import {
+    BusinessProfileApi,
+    EncryptionApi,
+    FlowApi,
+    MediaApi,
+    MessagesApi,
+    PhoneNumberApi,
+    QrCodeApi,
+    RegistrationApi,
+    TemplateApi,
+    TwoStepVerificationApi,
+    WabaApi,
+} from 'src/features';
+import { WhatsAppConfig } from 'src/shared/config/importConfig';
 
 export declare class WhatsAppClass {
     constructor(config?: WhatsAppConfig);
-    readonly messages: any;
-    readonly templates: any;
-    readonly phoneNumber: any;
-    readonly qrCode: any;
-    readonly encryption: any;
-    readonly twoStepVerification: any;
-    readonly registration: any;
-    readonly media: any;
-    readonly waba: any;
-    readonly flow: any;
-    readonly businessProfile: any;
+    readonly messages: MessagesApi;
+    readonly templates: TemplateApi;
+    readonly phoneNumber: PhoneNumberApi;
+    readonly qrCode: QrCodeApi;
+    readonly encryption: EncryptionApi;
+    readonly twoStepVerification: TwoStepVerificationApi;
+    readonly registration: RegistrationApi;
+    readonly media: MediaApi;
+    readonly waba: WabaApi;
+    readonly flow: FlowApi;
+    readonly businessProfile: BusinessProfileApi;
     updateTimeout(ms: number): boolean;
     updatePhoneNumberId(phoneNumberId: number): boolean;
     updateAccessToken(accessToken: string): boolean;
