@@ -3,14 +3,15 @@ export const objectToQueryString = (params: Record<string, any>): string => {
         return '';
     }
 
-    const searchParams = new URLSearchParams();
+    const queryParts: string[] = [];
 
     for (const [key, value] of Object.entries(params)) {
         if (value !== undefined) {
-            searchParams.append(key, String(value));
+            const encodedKey = encodeURIComponent(key);
+            const encodedValue = encodeURIComponent(String(value));
+            queryParts.push(`${encodedKey}=${encodedValue}`);
         }
     }
 
-    const queryString = searchParams.toString();
-    return queryString ? `?${queryString}` : '';
+    return queryParts.length > 0 ? `?${queryParts.join('&')}` : '';
 };
