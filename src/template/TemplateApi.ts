@@ -1,15 +1,15 @@
-import { objectToQueryString } from '../utils/objectToQueryString';
+import BaseAPI from '../api/base';
 import type { WabaConfigType } from '../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../types/enums';
 import type { RequesterClass, ResponsePagination, ResponseSuccess } from '../types/request';
+import { objectToQueryString } from '../utils/objectToQueryString';
 import type {
     TemplateClass,
     TemplateDeleteParams,
     TemplateGetParams,
     TemplateRequestBody,
     TemplateResponse,
-} from '../types/template';
-import BaseAPI from './base';
+} from './types';
 
 export default class TemplateApi extends BaseAPI implements TemplateClass {
     private readonly endpoint = 'message_templates';

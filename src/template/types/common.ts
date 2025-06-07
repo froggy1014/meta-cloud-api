@@ -1,5 +1,5 @@
-import { CategoryEnum, LanguagesEnum, TemplateStatusEnum } from './enums';
-import { GeneralRequestBody, ResponsePagination, ResponseSuccess } from './request';
+import { CategoryEnum, LanguagesEnum, TemplateStatusEnum } from '../../types/enums';
+import { GeneralRequestBody, ResponsePagination, ResponseSuccess } from '../../types/request';
 
 export type TemplateFormat = 'TEXT' | 'IMAGE' | 'VIDEO' | 'DOCUMENT' | 'LOCATION';
 

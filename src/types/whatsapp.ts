@@ -1,20 +1,12 @@
-/**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- * All rights reserved.
- *
- * This source code is licensed under the license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
 import { BusinessProfileClass } from 'src/businessProfile';
 import { EncryptionClass } from 'src/encryption';
 import { MediaClass } from '../media';
+import { TemplateClass } from '../template';
 import { FlowClass } from './flow';
 import { MessagesClass } from './messages';
 import { PhoneNumberClass } from './phoneNumber';
 import { QrCodeClass } from './qrCode';
 import { RegistrationClass } from './registration';
-import { TemplateClass } from './template';
 import { TwoStepVerificationClass } from './twoStepVerification';
 import { WABAClass } from './waba';
 

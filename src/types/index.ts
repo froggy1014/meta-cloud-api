@@ -10,7 +10,6 @@ export * from './phoneNumber';
 export * from './qrCode';
 export * from './registration';
 export * from './request';
-export * from './template';
 export * from './twoStepVerification';
 export * from './waba';
 export * from './webhook';

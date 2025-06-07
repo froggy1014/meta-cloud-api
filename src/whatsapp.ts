@@ -2,12 +2,13 @@ import { WabaConfigType } from './types/config';
 import * as SDKEnums from './types/enums';
 import Logger from './utils/logger';
 
-import { FlowAPI, PhoneNumberAPI, RegistrationAPI, TemplateAPI, TwoStepVerificationAPI, WabaAPI } from './api';
+import { FlowAPI, PhoneNumberAPI, RegistrationAPI, TwoStepVerificationAPI, WabaAPI } from './api';
 import BusinessProfileApi from './businessProfile/BusinessProfileApi';
 import EncryptionApi from './encryption/EncryptionApi';
 import MediaApi from './media';
 import MessagesApi from './messages';
 import QrCodeApi from './qrCode/QrCodeApi';
+import TemplateApi from './template/TemplateApi';
 import Requester from './request';
 import { WhatsAppClass, WhatsAppConfig } from './types/whatsapp';
 import { importConfig } from './utils/importConfig';
@@ -24,7 +25,7 @@ export default class WhatsApp implements WhatsAppClass {
     requester: Readonly<Requester>;
 
     readonly messages: MessagesApi;
-    readonly templates: TemplateAPI;
+    readonly templates: TemplateApi;
     readonly phoneNumber: PhoneNumberAPI;
     readonly qrCode: QrCodeApi;
     readonly encryption: EncryptionApi;
@@ -47,7 +48,7 @@ export default class WhatsApp implements WhatsAppClass {
         );
 
         this.messages = new MessagesApi(this.config, this.requester);
-        this.templates = new TemplateAPI(this.config, this.requester);
+        this.templates = new TemplateApi(this.config, this.requester);
         this.phoneNumber = new PhoneNumberAPI(this.config, this.requester);
         this.qrCode = new QrCodeApi(this.config, this.requester);
         this.encryption = new EncryptionApi(this.config, this.requester);
