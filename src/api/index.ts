@@ -2,7 +2,7 @@ import BusinessProfileAPI from '../businessProfile/BusinessProfileApi';
 import BaseAPI from './base';
 
 import FlowAPI from './flow';
-import MediaAPI from './media';
+
 import MessagesAPI from './messages';
 import PhoneNumberAPI from './phoneNumber';
 import QrCodeAPI from './qrCode';
@@ -15,7 +15,6 @@ export {
     BaseAPI,
     BusinessProfileAPI,
     FlowAPI,
-    MediaAPI,
     MessagesAPI,
     PhoneNumberAPI,
     QrCodeAPI,

@@ -5,7 +5,6 @@ export * from './enums';
 export * from './flow';
 export * from './httpsClient';
 export * from './logger';
-export * from './media';
 export * from './messages';
 export * from './phoneNumber';
 export * from './qrCode';

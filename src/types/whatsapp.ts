@@ -7,8 +7,9 @@
  */
 
 import { BusinessProfileClass } from 'src/businessProfile';
+import { EncryptionClass } from 'src/encryption';
+import { MediaClass } from '../media';
 import { FlowClass } from './flow';
-import { MediaClass } from './media';
 import { MessagesClass } from './messages';
 import { PhoneNumberClass } from './phoneNumber';
 import { QrCodeClass } from './qrCode';
@@ -16,7 +17,6 @@ import { RegistrationClass } from './registration';
 import { TemplateClass } from './template';
 import { TwoStepVerificationClass } from './twoStepVerification';
 import { WABAClass } from './waba';
-import { EncryptionClass } from 'src/encryption';
 
 export type WhatsAppConfig = {
     accessToken: string;

@@ -3,6 +3,7 @@ import WhatsApp from './whatsapp';
 
 export default WhatsApp;
 export * from './businessProfile';
+export * from './media';
 export * from './types';
 export * from './utils';
 export { WebhookHandler, type IRequest, type IResponse };

@@ -4,7 +4,6 @@ import Logger from './utils/logger';
 
 import {
     FlowAPI,
-    MediaAPI,
     PhoneNumberAPI,
     QrCodeAPI,
     RegistrationAPI,
@@ -14,6 +13,7 @@ import {
 } from './api';
 import BusinessProfileApi from './businessProfile/BusinessProfileApi';
 import { EncryptionApi } from './encryption';
+import MediaApi from './media';
 import MessagesApi from './messages';
 import Requester from './request';
 import { WhatsAppClass, WhatsAppConfig } from './types/whatsapp';
@@ -37,7 +37,7 @@ export default class WhatsApp implements WhatsAppClass {
     readonly encryption: EncryptionApi;
     readonly twoStepVerification: TwoStepVerificationAPI;
     readonly registration: RegistrationAPI;
-    readonly media: MediaAPI;
+    readonly media: MediaApi;
     readonly waba: WabaAPI;
     readonly flow: FlowAPI;
     readonly businessProfile: BusinessProfileApi;
@@ -60,7 +60,7 @@ export default class WhatsApp implements WhatsAppClass {
         this.encryption = new EncryptionApi(this.config, this.requester);
         this.twoStepVerification = new TwoStepVerificationAPI(this.config, this.requester);
         this.registration = new RegistrationAPI(this.config, this.requester);
-        this.media = new MediaAPI(this.config, this.requester);
+        this.media = new MediaApi(this.config, this.requester);
         this.waba = new WabaAPI(this.config, this.requester);
         this.flow = new FlowAPI(this.config, this.requester);
         this.businessProfile = new BusinessProfileApi(this.config, this.requester);

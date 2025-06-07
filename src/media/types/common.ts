@@ -1,4 +1,4 @@
-import type { ResponseSuccess } from './request';
+import type { ResponseSuccess } from '../../types/request';
 
 export type MediaResponse = {
     id: string;
