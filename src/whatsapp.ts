@@ -2,14 +2,15 @@ import { WabaConfigType } from './types/config';
 import * as SDKEnums from './types/enums';
 import Logger from './utils/logger';
 
-import { FlowAPI, PhoneNumberAPI, RegistrationAPI, TwoStepVerificationAPI, WabaAPI } from './api';
+import { PhoneNumberAPI, RegistrationAPI, TwoStepVerificationAPI, WabaAPI } from './api';
 import BusinessProfileApi from './businessProfile/BusinessProfileApi';
 import EncryptionApi from './encryption/EncryptionApi';
+import FlowApi from './flow';
 import MediaApi from './media';
 import MessagesApi from './messages';
 import QrCodeApi from './qrCode/QrCodeApi';
-import TemplateApi from './template/TemplateApi';
 import Requester from './request';
+import TemplateApi from './template/TemplateApi';
 import { WhatsAppClass, WhatsAppConfig } from './types/whatsapp';
 import { importConfig } from './utils/importConfig';
 
@@ -33,7 +34,7 @@ export default class WhatsApp implements WhatsAppClass {
     readonly registration: RegistrationAPI;
     readonly media: MediaApi;
     readonly waba: WabaAPI;
-    readonly flow: FlowAPI;
+    readonly flow: FlowApi;
     readonly businessProfile: BusinessProfileApi;
     static readonly Enums = SDKEnums;
 
@@ -56,7 +57,7 @@ export default class WhatsApp implements WhatsAppClass {
         this.registration = new RegistrationAPI(this.config, this.requester);
         this.media = new MediaApi(this.config, this.requester);
         this.waba = new WabaAPI(this.config, this.requester);
-        this.flow = new FlowAPI(this.config, this.requester);
+        this.flow = new FlowApi(this.config, this.requester);
         this.businessProfile = new BusinessProfileApi(this.config, this.requester);
         LOGGER.log('WhatsApp Node.js SDK instantiated!');
     }
