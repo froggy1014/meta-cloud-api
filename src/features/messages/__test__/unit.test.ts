@@ -1,6 +1,6 @@
+import { WhatsApp } from '@core/whatsapp';
+import { ComponentTypesEnum, InteractiveTypesEnum, LanguagesEnum } from '@shared/types';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ComponentTypesEnum, InteractiveTypesEnum, LanguagesEnum } from '../../../shared/types';
-import WhatsApp from '../../../whatsapp';
 import { ContactObject, InteractiveObject, MessageRequestParams, MessageTemplateObject } from '../types';
 
 describe('Messages API - Unit Tests', () => {

@@ -4,7 +4,7 @@ import {
     FlowEndpointRequest,
     FlowErrorNotificationRequest,
     FlowHealthCheckRequest,
-} from '../../features/flow/types';
+} from '@features/flow/types';
 
 /**
  * Helper function to check if a value is an object

@@ -1,32 +1,102 @@
-// Messages
-export * from './messages';
+export { default as MessagesApi } from './messages';
+export type {
+    AudioMediaObject,
+    ContactObject,
+    DocumentMediaObject,
+    ImageMediaObject,
+    InteractiveObject,
+    LocationObject,
+    MessageRequestParams,
+    MessagesResponse,
+    MessageTemplateObject,
+    ReactionParams,
+    StatusParams,
+    StickerMediaObject,
+    TextMessageParams,
+    TextObject,
+    VideoMediaObject,
+} from './messages';
 
-// Media
-export * from './media';
+export { default as MediaApi } from './media';
+export type { MediaClass, MediaResponse, MediasResponse, UploadMediaResponse } from './media';
 
-// Business features
-export * from './profile';
+export { default as BusinessProfileApi } from './profile';
+export type {
+    BusinessProfileClass,
+    BusinessProfileData,
+    BusinessProfileField,
+    BusinessProfileFieldsParam,
+    BusinessProfileResponse,
+    CreateUploadSessionParams,
+    GetUploadHandleParams,
+    UpdateBusinessProfileRequest,
+    UploadBusinessProfileResponse,
+    UploadHandle,
+    UploadMediaParams,
+    UploadSession,
+    UploadSessionResponse,
+} from './profile';
 
-// Security features
-export * from './encryption';
+export { default as EncryptionApi } from './encryption';
+export type { EncryptionClass, EncryptionPublicKeyResponse } from './encryption';
 
-// Flow features
-export * from './flow';
+export { default as FlowApi } from './flow';
+export type {
+    CreateFlowResponse,
+    Flow,
+    FlowActionEnum,
+    FlowAssetsResponse,
+    FlowCategoryEnum,
+    FlowClass,
+    FlowEndpointRequest,
+    FlowEndpointResponse,
+    FlowMigrationResponse,
+    FlowPreviewResponse,
+    FlowsListResponse,
+    FlowStatusEnum,
+    FlowValidationError,
+    UpdateFlowResponse,
+    ValidateFlowJsonResponse,
+} from './flow';
 
-// Phone Number features
-export * from './phone';
+export { default as PhoneNumberApi } from './phone';
+export type {
+    AccountMode,
+    CodeVerificationStatus,
+    Cursors,
+    HealthStatus,
+    HealthStatusEntity,
+    MessagingLimitTier,
+    PhoneNumberClass,
+    PhoneNumberResponse,
+    PhoneNumbersResponse,
+    PlatformType,
+    QualityRating,
+    QualityScore,
+    RequestVerificationCodeRequest,
+    Throughput,
+    ThroughputLevel,
+    TwoStepVerificationParams,
+    VerifyCodeRequest,
+} from './phone';
 
-// Registration features
-export * from './registration';
+export { default as RegistrationApi } from './registration';
+export type { RegistrationClass, RegistrationRequest } from './registration';
 
-// Template features
-export * from './template';
+export { default as TemplateApi } from './template';
+export type {
+    TemplateClass,
+    TemplateDeleteParams,
+    TemplateGetParams,
+    TemplateRequestBody,
+    TemplateResponse,
+} from './template';
 
-// QR Code features
-export * from './qrCode';
+export { default as QrCodeApi } from './qrCode';
+export type { CreateQrCodeRequest, QrCodeClass, QrCodeResponse, QrCodesResponse, UpdateQrCodeRequest } from './qrCode';
 
-// Two Step Verification features
-export * from './twoStepVerification';
+export { default as TwoStepVerificationApi } from './twoStepVerification';
+export type { TwoStepVerificationClass, TwoStepVerificationRequest } from './twoStepVerification';
 
-// WABA features
-export * from './waba';
+export { default as WabaApi } from './waba';
+export type { UpdateWabaSubscription, WabaAccount, WABAClass, WabaSubscriptions } from './waba';

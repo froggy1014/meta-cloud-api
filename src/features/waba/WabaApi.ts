@@ -1,8 +1,8 @@
-import { BaseAPI } from '../../shared/types/base';
-import type { WabaConfigType } from '../../shared/types/config';
-import { HttpMethodsEnum, WabaConfigEnum } from '../../shared/types/enums';
-import type { RequesterClass, ResponseSuccess } from '../../shared/types/request';
-import { buildFieldsQueryString } from '../../shared/utils/buildFieldsQueryString';
+import { BaseAPI } from '@shared/types/base';
+import type { WabaConfigType } from '@shared/types/config';
+import { HttpMethodsEnum, WabaConfigEnum } from '@shared/types/enums';
+import type { RequesterClass, ResponseSuccess } from '@shared/types/request';
+import { buildFieldsQueryString } from '@shared/utils/buildFieldsQueryString';
 
 import type * as waba from './types';
 

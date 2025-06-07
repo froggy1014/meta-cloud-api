@@ -1,5 +1,22 @@
 import { WabaConfigEnum } from './enums';
 
+export type WhatsAppConfig = {
+    accessToken: string;
+    appId?: string;
+    appSecret?: string;
+    phoneNumberId?: number;
+    businessAcctId?: string;
+    apiVersion?: string;
+    webhookEndpoint?: string;
+    webhookVerificationToken?: string;
+    listenerPort?: number;
+    debug?: boolean;
+    maxRetriesAfterWait?: number;
+    requestTimeout?: number;
+    privatePem?: string;
+    passphrase?: string;
+};
+
 export type WabaConfigType = {
     /**
      * The Meta for Developers business application Id for this registered application.

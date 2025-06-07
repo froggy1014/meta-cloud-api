@@ -11,7 +11,7 @@ import {
     TwoStepVerificationApi,
     WabaApi,
 } from 'src/features';
-import { WhatsAppConfig } from 'src/shared/config/importConfig';
+import { WhatsAppConfig } from '@shared/types/config';
 
 export declare class WhatsAppClass {
     constructor(config?: WhatsAppConfig);

@@ -1,4 +1,4 @@
-import type { ResponseData, ResponseSuccess } from '../../../shared/types/request';
+import type { ResponseData, ResponseSuccess } from '@shared/types/request';
 
 export type QrCodeResponse = {
     code: string;

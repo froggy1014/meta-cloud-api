@@ -1,5 +1,5 @@
+import { ResponseSuccess } from '@shared/types';
 import { IncomingHttpHeaders, IncomingMessage } from 'http';
-import { ResponseSuccess } from '../../../shared';
 
 /**
  * Enum for Flow Status

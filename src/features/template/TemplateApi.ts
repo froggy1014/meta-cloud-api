@@ -1,8 +1,8 @@
-import { BaseAPI } from '../../shared/types/base';
-import type { WabaConfigType } from '../../shared/types/config';
-import { HttpMethodsEnum, WabaConfigEnum } from '../../shared/types/enums';
-import type { RequesterClass, ResponsePagination, ResponseSuccess } from '../../shared/types/request';
-import { objectToQueryString } from '../../shared/utils/objectToQueryString';
+import { BaseAPI } from '@shared/types/base';
+import type { WabaConfigType } from '@shared/types/config';
+import { HttpMethodsEnum, WabaConfigEnum } from '@shared/types/enums';
+import type { RequesterClass, ResponsePagination, ResponseSuccess } from '@shared/types/request';
+import { objectToQueryString } from '@shared/utils/objectToQueryString';
 import type {
     TemplateClass,
     TemplateDeleteParams,

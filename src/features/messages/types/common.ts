@@ -1,6 +1,6 @@
-import { BaseClass } from '../../../shared/types/base';
-import { ComponentTypesEnum, InteractiveTypesEnum, MessageTypesEnum } from '../../../shared/types/enums';
-import { GeneralRequestBody } from '../../../shared/types/request';
+import { BaseClass } from '@shared/types/base';
+import { ComponentTypesEnum, InteractiveTypesEnum, MessageTypesEnum } from '@shared/types/enums';
+import { GeneralRequestBody } from '@shared/types/request';
 
 export type GeneralMessageBody = GeneralRequestBody & {
     /**

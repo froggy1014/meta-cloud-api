@@ -1,4 +1,4 @@
-import type { ResponseSuccess } from '../../../shared/types/request';
+import type { ResponseSuccess } from '@shared/types/request';
 
 export type TwoStepVerificationRequest = {
     pin: string;

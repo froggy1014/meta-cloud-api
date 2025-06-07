@@ -1,15 +1,61 @@
-// Core exports
-import { IRequest, IResponse, WebhookHandler } from './core/webhook';
+import { WebhookHandler } from './core/webhook';
 import { WhatsApp } from './core/whatsapp';
 
-// Default export
 export default WhatsApp;
 
-// Core exports
-export { WebhookHandler, type IRequest, type IResponse };
+export type { IRequest, IResponse } from './core/webhook';
+export { WebhookHandler };
 
-// Feature exports
-export * from './features';
+export {
+    BusinessProfileApi,
+    EncryptionApi,
+    FlowApi,
+    MessagesApi,
+    PhoneNumberApi,
+    QrCodeApi,
+    RegistrationApi,
+    TemplateApi,
+    TwoStepVerificationApi,
+    WabaApi,
+} from './features';
 
-// Shared exports
-export * from './shared';
+export type {
+    AudioMediaObject,
+    BusinessProfileClass,
+    BusinessProfileResponse,
+    ContactObject,
+    DocumentMediaObject,
+    Flow,
+    FlowClass,
+    FlowEndpointRequest,
+    FlowEndpointResponse,
+    ImageMediaObject,
+    InteractiveObject,
+    LocationObject,
+    MediaClass,
+    MediaResponse,
+    MediasResponse,
+    MessageRequestParams,
+    MessagesResponse,
+    MessageTemplateObject,
+    PhoneNumberClass,
+    PhoneNumberResponse,
+    QrCodeClass,
+    QrCodeResponse,
+    ReactionParams,
+    RegistrationClass,
+    StatusParams,
+    StickerMediaObject,
+    TemplateClass,
+    TemplateResponse,
+    TextMessageParams,
+    TextObject,
+    UploadMediaResponse,
+    VideoMediaObject,
+    WabaAccount,
+    WABAClass,
+} from './features';
+
+export { HttpMethodsEnum, importConfig, isMetaError, MessageTypesEnum, StatusEnum, WebhookTypesEnum } from './shared';
+
+export type { MetaError, WabaConfigType } from './shared';

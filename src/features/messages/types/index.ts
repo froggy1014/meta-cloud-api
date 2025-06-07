@@ -1,13 +1,12 @@
-export * from './common';
-export * from './contact';
-export * from './interactive';
-export * from './location';
-export * from './media';
-export * from './reaction';
-export * from './template';
-export * from './text';
-
-export type { GeneralMessageBody, MessageRequestParams, MessagesClass, MessagesResponse, StatusParams } from './common';
+// 중복 export 제거, 명시적 export만 사용
+export type {
+    GeneralMessageBody,
+    MessageRequestBody,
+    MessageRequestParams,
+    MessagesClass,
+    MessagesResponse,
+    StatusParams,
+} from './common';
 
 export type { TextMessageParams, TextObject } from './text';
 

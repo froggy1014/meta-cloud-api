@@ -1,6 +1,6 @@
-import { BaseClass } from '../../../shared/types/base';
-import { BusinessVerticalEnum } from '../../../shared/types/enums';
-import { ResponseSuccess } from '../../../shared/types/request';
+import { BaseClass } from '@shared/types/base';
+import { BusinessVerticalEnum } from '@shared/types/enums';
+import { ResponseSuccess } from '@shared/types/request';
 import { UploadBusinessProfileResponse, UploadHandle, UploadSessionResponse } from './upload';
 
 /**

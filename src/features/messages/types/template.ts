@@ -6,7 +6,7 @@ import {
     LanguagesEnum,
     MessageTypesEnum,
     ParametersTypesEnum,
-} from '../../../shared/types/enums';
+} from '@shared/types/enums';
 import { MessageRequestBody } from './common';
 
 // Template Message Types

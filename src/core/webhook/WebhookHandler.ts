@@ -1,15 +1,15 @@
+import { MessageTypesEnum } from '@shared/types';
+import { WabaConfigType, WhatsAppConfig } from '@shared/types/config';
 import { IncomingMessage } from 'http';
-import { MessageTypesEnum } from '../../shared/types';
-import { WabaConfigType } from '../../shared/types/config';
 
+import { FlowEndpointRequest } from '@features/flow';
+import { isFlowDataExchangeRequest, isFlowErrorRequest, isFlowPingRequest } from '@shared/utils/flowTypeGuards';
+import Logger from '@shared/utils/logger';
 import crypto from 'crypto';
-import { FlowEndpointRequest, FlowTypeEnum } from '../../features/flow';
-import { importConfig } from '../../shared/config';
-import { isFlowDataExchangeRequest, isFlowErrorRequest, isFlowPingRequest } from '../../shared/utils/flowTypeGuards';
-import Logger from '../../shared/utils/logger';
 import { WhatsApp } from '../whatsapp';
 
-import { WhatsAppConfig } from 'src/shared/config/importConfig';
+import { FlowTypeEnum } from '@features/flow/types';
+import { importConfig } from '@shared/config/importConfig';
 import { EventField, WebhookEvent, WebhookMessage } from './types';
 const LIB_NAME = 'WEBHOOK';
 const LOG_LOCAL = false;

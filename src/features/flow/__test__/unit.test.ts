@@ -1,5 +1,5 @@
+import { WhatsApp } from '@core/whatsapp';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import WhatsApp from '../../../whatsapp';
 import { FlowCategoryEnum, FlowStatusEnum } from '../types/common';
 
 describe('Flow API - Unit Tests', () => {

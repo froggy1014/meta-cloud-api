@@ -1,4 +1,4 @@
-import { InteractiveTypesEnum, MessageTypesEnum } from '../../../shared/types/enums';
+import { InteractiveTypesEnum, MessageTypesEnum } from '@shared/types/enums';
 import { MessageRequestBody } from './common';
 
 // Import media types to avoid circular dependencies

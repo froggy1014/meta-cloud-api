@@ -1,5 +1,5 @@
+import { WhatsApp } from '@core/whatsapp';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import WhatsApp from '../../../whatsapp';
 import { WabaAccountFields } from '../types/common';
 
 describe('WABA API - Unit Tests', () => {

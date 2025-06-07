@@ -1,1 +1,0 @@
-export { importConfig } from './importConfig';

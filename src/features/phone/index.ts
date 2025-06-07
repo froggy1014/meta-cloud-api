@@ -1,5 +1,12 @@
-export { default, default as PhoneNumberApi } from './PhoneNumberApi';
-export * from './types';
+import PhoneNumberApi from './PhoneNumberApi';
+
+// 기본 export 유지
+export default PhoneNumberApi;
+
+// 명시적 named export
+export { PhoneNumberApi };
+
+// 필요한 타입만 명시적으로 export
 export type {
     AccountMode,
     CodeVerificationStatus,

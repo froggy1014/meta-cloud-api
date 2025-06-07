@@ -1,5 +1,5 @@
-import { DataLocalizationRegionEnum } from '../../../shared/types/enums';
-import type { ResponseSuccess } from '../../../shared/types/request';
+import { DataLocalizationRegionEnum } from '@shared/types/enums';
+import type { ResponseSuccess } from '@shared/types/request';
 
 export type RegistrationRequest = {
     messaging_product: 'whatsapp';

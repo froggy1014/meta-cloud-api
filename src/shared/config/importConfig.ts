@@ -1,23 +1,6 @@
-import type { WabaConfigType } from '../types/config';
+import type { WabaConfigType, WhatsAppConfig } from '../types/config';
 import { WabaConfigEnum } from '../types/enums';
 import Logger from '../utils/logger';
-
-export type WhatsAppConfig = {
-    accessToken: string;
-    appId?: string;
-    appSecret?: string;
-    phoneNumberId?: number;
-    businessAcctId?: string;
-    apiVersion?: string;
-    webhookEndpoint?: string;
-    webhookVerificationToken?: string;
-    listenerPort?: number;
-    debug?: boolean;
-    maxRetriesAfterWait?: number;
-    requestTimeout?: number;
-    privatePem?: string;
-    passphrase?: string;
-};
 
 const LIB_NAME = 'UTILS';
 const LOG_LOCAL = false;

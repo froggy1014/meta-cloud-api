@@ -5,6 +5,7 @@
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "sideEffects": false,
   "scripts": {
     "prepare": "husky",
     "cz": "cz",
@@ -25,6 +26,81 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./messages": {
+      "types": "./dist/features/messages/index.d.ts",
+      "import": "./dist/features/messages/index.js",
+      "default": "./dist/features/messages/index.js"
+    },
+    "./media": {
+      "types": "./dist/features/media/index.d.ts",
+      "import": "./dist/features/media/index.js",
+      "default": "./dist/features/media/index.js"
+    },
+    "./profile": {
+      "types": "./dist/features/profile/index.d.ts",
+      "import": "./dist/features/profile/index.js",
+      "default": "./dist/features/profile/index.js"
+    },
+    "./flow": {
+      "types": "./dist/features/flow/index.d.ts",
+      "import": "./dist/features/flow/index.js",
+      "default": "./dist/features/flow/index.js"
+    },
+    "./phone": {
+      "types": "./dist/features/phone/index.d.ts",
+      "import": "./dist/features/phone/index.js",
+      "default": "./dist/features/phone/index.js"
+    },
+    "./template": {
+      "types": "./dist/features/template/index.d.ts",
+      "import": "./dist/features/template/index.js",
+      "default": "./dist/features/template/index.js"
+    },
+    "./waba": {
+      "types": "./dist/features/waba/index.d.ts",
+      "import": "./dist/features/waba/index.js",
+      "default": "./dist/features/waba/index.js"
+    },
+    "./qrCode": {
+      "types": "./dist/features/qrCode/index.d.ts",
+      "import": "./dist/features/qrCode/index.js",
+      "default": "./dist/features/qrCode/index.js"
+    },
+    "./twoStepVerification": {
+      "types": "./dist/features/twoStepVerification/index.d.ts",
+      "import": "./dist/features/twoStepVerification/index.js",
+      "default": "./dist/features/twoStepVerification/index.js"
+    },
+    "./encryption": {
+      "types": "./dist/features/encryption/index.d.ts",
+      "import": "./dist/features/encryption/index.js",
+      "default": "./dist/features/encryption/index.js"
+    },
+    "./registration": {
+      "types": "./dist/features/registration/index.d.ts",
+      "import": "./dist/features/registration/index.js",
+      "default": "./dist/features/registration/index.js"
+    },
+    "./shared/types": {
+      "types": "./dist/shared/types/index.d.ts",
+      "import": "./dist/shared/types/index.js",
+      "default": "./dist/shared/types/index.js"
+    },
+    "./shared/utils": {
+      "types": "./dist/shared/utils/index.d.ts",
+      "import": "./dist/shared/utils/index.js",
+      "default": "./dist/shared/utils/index.js"
+    },
+    "./core/webhook": {
+      "types": "./dist/core/webhook/index.d.ts",
+      "import": "./dist/core/webhook/index.js",
+      "default": "./dist/core/webhook/index.js"
+    },
+    "./core/whatsapp": {
+      "types": "./dist/core/whatsapp/index.d.ts",
+      "import": "./dist/core/whatsapp/index.js",
+      "default": "./dist/core/whatsapp/index.js"
     },
     "./package.json": "./package.json"
   },

@@ -1,13 +1,13 @@
-import { BaseAPI } from '../../shared/types/base';
-import type { WabaConfigType } from '../../shared/types/config';
+import { BaseAPI } from '@shared/types/base';
+import type { WabaConfigType } from '@shared/types/config';
 import {
     type ComponentTypesEnum,
     HttpMethodsEnum,
     type InteractiveTypesEnum,
     MessageTypesEnum,
     WabaConfigEnum,
-} from '../../shared/types/enums';
-import type { RequesterClass } from '../../shared/types/request';
+} from '@shared/types/enums';
+import type { RequesterClass } from '@shared/types/request';
 
 import type * as m from './types';
 

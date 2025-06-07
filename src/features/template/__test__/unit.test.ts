@@ -1,6 +1,6 @@
+import { WhatsApp } from '@core/whatsapp';
+import { CategoryEnum, LanguagesEnum, TemplateStatusEnum, WabaConfigEnum } from '@shared/types/enums';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { CategoryEnum, LanguagesEnum, TemplateStatusEnum, WabaConfigEnum } from '../../../shared/types/enums';
-import WhatsApp from '../../../whatsapp';
 import type { TemplateDeleteParams, TemplateGetParams, TemplateRequestBody } from '../types';
 
 describe('Template API - Unit Tests', () => {

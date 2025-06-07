@@ -1,4 +1,4 @@
-import type { Paging, ResponseSuccess } from '../../../shared/types/request';
+import type { Paging, ResponseSuccess } from '@shared/types/request';
 
 export type QualityRating = 'GREEN' | 'YELLOW' | 'RED' | 'NA';
 
