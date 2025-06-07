@@ -1,10 +1,10 @@
+import BaseAPI from '../api/base';
 import type { WabaConfigType } from '../types/config';
-import type { EncryptionClass, EncryptionPublicKeyResponse } from '../types/encryption';
 import { HttpMethodsEnum, WabaConfigEnum } from '../types/enums';
 import type { RequesterClass, ResponseSuccess } from '../types/request';
-import BaseAPI from './base';
+import type { EncryptionClass, EncryptionPublicKeyResponse } from './types';
 
-export default class EncryptionAPI extends BaseAPI implements EncryptionClass {
+export default class EncryptionApi extends BaseAPI implements EncryptionClass {
     private readonly endpoint = 'whatsapp_business_encryption';
 
     constructor(config: WabaConfigType, client: RequesterClass) {

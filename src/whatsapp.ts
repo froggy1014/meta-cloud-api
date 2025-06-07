@@ -3,7 +3,6 @@ import * as SDKEnums from './types/enums';
 import Logger from './utils/logger';
 
 import {
-    EncryptionAPI,
     FlowAPI,
     MediaAPI,
     PhoneNumberAPI,
@@ -14,6 +13,7 @@ import {
     WabaAPI,
 } from './api';
 import BusinessProfileApi from './businessProfile/BusinessProfileApi';
+import { EncryptionApi } from './encryption';
 import MessagesApi from './messages';
 import Requester from './request';
 import { WhatsAppClass, WhatsAppConfig } from './types/whatsapp';
@@ -34,7 +34,7 @@ export default class WhatsApp implements WhatsAppClass {
     readonly templates: TemplateAPI;
     readonly phoneNumber: PhoneNumberAPI;
     readonly qrCode: QrCodeAPI;
-    readonly encryption: EncryptionAPI;
+    readonly encryption: EncryptionApi;
     readonly twoStepVerification: TwoStepVerificationAPI;
     readonly registration: RegistrationAPI;
     readonly media: MediaAPI;
@@ -57,7 +57,7 @@ export default class WhatsApp implements WhatsAppClass {
         this.templates = new TemplateAPI(this.config, this.requester);
         this.phoneNumber = new PhoneNumberAPI(this.config, this.requester);
         this.qrCode = new QrCodeAPI(this.config, this.requester);
-        this.encryption = new EncryptionAPI(this.config, this.requester);
+        this.encryption = new EncryptionApi(this.config, this.requester);
         this.twoStepVerification = new TwoStepVerificationAPI(this.config, this.requester);
         this.registration = new RegistrationAPI(this.config, this.requester);
         this.media = new MediaAPI(this.config, this.requester);

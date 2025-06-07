@@ -1,6 +1,6 @@
 import BusinessProfileAPI from '../businessProfile/BusinessProfileApi';
 import BaseAPI from './base';
-import EncryptionAPI from './encryption';
+
 import FlowAPI from './flow';
 import MediaAPI from './media';
 import MessagesAPI from './messages';
@@ -14,7 +14,6 @@ import WabaAPI from './waba';
 export {
     BaseAPI,
     BusinessProfileAPI,
-    EncryptionAPI,
     FlowAPI,
     MediaAPI,
     MessagesAPI,
