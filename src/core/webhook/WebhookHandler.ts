@@ -57,31 +57,60 @@ export default class WebhookHandler {
     /**
      * Handle a GET request for webhook verification
      */
-    public handleVerificationRequest<Req extends IRequest, Res extends IResponse>(req: Req, res: Res): void {
+    public handleVerificationRequest<Req extends IRequest, Res extends IResponse>(req: Req, res: Res): void;
+    public handleVerificationRequest<Req extends IRequest>(req: Req): string;
+    public handleVerificationRequest<Req extends IRequest, Res extends IResponse>(req: Req, res?: Res): void | string {
         const mode = req.query['hub.mode'];
         const token = req.query['hub.verify_token'];
         const challenge = req.query['hub.challenge'];
 
-        if (mode === 'subscribe' && token === this.config.WEBHOOK_VERIFICATION_TOKEN) {
+        const VERIFICATION_SUCCESS = mode === 'subscribe' && token === this.config.WEBHOOK_VERIFICATION_TOKEN;
+
+        if (VERIFICATION_SUCCESS) {
             LOGGER.log('Webhook verified successfully');
-            res.status(200).send(challenge);
+            if (res) {
+                res.status(200).send(challenge);
+                return;
+            } else {
+                LOGGER.log('Returning challenge for manual handling');
+                return challenge;
+            }
         } else {
             LOGGER.log('Webhook verification failed');
-            res.status(403).end();
+            if (res) {
+                res.status(403).end();
+                return;
+            } else {
+                LOGGER.log('Verification failed - throwing error for manual handling');
+                throw new Error('Webhook verification failed');
+            }
         }
     }
 
     /**
      * Handle a POST request for webhook events
      */
-    public async handleWebhookRequest<Req extends IRequest, Res extends IResponse>(req: Req, res: Res): Promise<void> {
+    public async handleWebhookRequest<Req extends IRequest, Res extends IResponse>(req: Req, res: Res): Promise<void>;
+    public async handleWebhookRequest<Req extends IRequest>(req: Req): Promise<{ success: boolean; errors?: string[] }>;
+    public async handleWebhookRequest<Req extends IRequest, Res extends IResponse>(
+        req: Req,
+        res?: Res,
+    ): Promise<void | { success: boolean; errors?: string[] }> {
         const body = req.body;
+        const errors: string[] = [];
 
         // Check this is a WhatsApp Business Account webhook
         if (body.object !== 'whatsapp_business_account') {
-            LOGGER.log('Received webhook for non-WhatsApp event');
-            res.status(404).end();
-            return;
+            const errorMsg = 'Received webhook for non-WhatsApp event';
+            LOGGER.log(errorMsg);
+
+            if (res) {
+                res.status(404).end();
+                return;
+            } else {
+                errors.push(errorMsg);
+                return { success: false, errors };
+            }
         }
 
         // Process each entry
@@ -97,24 +126,50 @@ export default class WebhookHandler {
                     }
                 }
             } catch (error) {
-                LOGGER.log(`Error processing webhook: ${error}`);
+                const errorMsg = `Error processing webhook: ${error}`;
+                LOGGER.log(errorMsg);
+                errors.push(errorMsg);
             }
         }
 
-        // Always respond with 200 to acknowledge receipt
-        res.status(200).end();
+        if (res) {
+            // Always respond with 200 to acknowledge receipt
+            res.status(200).end();
+            return;
+        } else {
+            // Return processing result
+            return { success: errors.length === 0, errors: errors.length > 0 ? errors : undefined };
+        }
     }
 
     /**
      * Handle webhook requests (both verification and events)
      */
-    public handleRequest(req: IRequest, res: IResponse): void | Promise<void> {
+    public handleRequest<Req extends IRequest, Res extends IResponse>(req: Req, res: Res): void | Promise<void>;
+    public handleRequest<Req extends IRequest>(req: Req): string | Promise<{ success: boolean; errors?: string[] }>;
+    public handleRequest<Req extends IRequest, Res extends IResponse>(
+        req: Req,
+        res?: Res,
+    ): void | string | Promise<void | { success: boolean; errors?: string[] }> {
         if (req.method === 'GET') {
-            return this.handleVerificationRequest(req, res);
+            if (res) {
+                return this.handleVerificationRequest(req, res);
+            } else {
+                return this.handleVerificationRequest(req);
+            }
         } else if (req.method === 'POST') {
-            return this.handleWebhookRequest(req, res);
+            if (res) {
+                return this.handleWebhookRequest(req, res);
+            } else {
+                return this.handleWebhookRequest(req);
+            }
         } else {
-            res.status(405).end(); // Method not allowed
+            if (res) {
+                res.status(405).end(); // Method not allowed
+                return;
+            } else {
+                throw new Error('Method not allowed');
+            }
         }
     }
 
@@ -288,13 +343,26 @@ export default class WebhookHandler {
     public async handleFlowRequest<Req extends IRequest & { rawBody: string }, Res extends IResponse>(
         req: Req,
         res: Res,
-    ): Promise<void> {
+    ): Promise<void>;
+    public async handleFlowRequest<Req extends IRequest & { rawBody: string }>(
+        req: Req,
+    ): Promise<{ statusCode: number; body: any; headers?: Record<string, string> }>;
+    public async handleFlowRequest<Req extends IRequest & { rawBody: string }, Res extends IResponse>(
+        req: Req,
+        res?: Res,
+    ): Promise<void | { statusCode: number; body: any; headers?: Record<string, string> }> {
         try {
             // Validate request signature
             if (!this.isRequestSignatureValid(req)) {
+                const error = { error: 'Unauthorized' };
                 LOGGER.log('Invalid request signature');
-                res.status(401).json({ error: 'Unauthorized' });
-                return;
+
+                if (res) {
+                    res.status(401).json(error);
+                    return;
+                } else {
+                    return { statusCode: 401, body: error };
+                }
             }
 
             const body = JSON.parse(req.rawBody);
@@ -305,9 +373,15 @@ export default class WebhookHandler {
             // Get the flow handler
             const handler = this.flowHandlers.get(FlowTypeEnum.All);
             if (!handler) {
+                const error = { error: 'Handler not found' };
                 LOGGER.log(`No handler registered for flow action: ${decryptedBody.action}`);
-                res.status(404).json({ error: 'Handler not found' });
-                return;
+
+                if (res) {
+                    res.status(404).json(error);
+                    return;
+                } else {
+                    return { statusCode: 404, body: error };
+                }
             }
 
             // Handle different flow types
@@ -319,14 +393,25 @@ export default class WebhookHandler {
                         status: 'active',
                     },
                 };
-                res.status(200).json(response);
-                return;
+
+                if (res) {
+                    res.status(200).json(response);
+                    return;
+                } else {
+                    return { statusCode: 200, body: response };
+                }
             }
 
             if (isFlowErrorRequest(decryptedBody)) {
                 LOGGER.log(`Flow error: ${JSON.stringify(decryptedBody)}`);
-                res.status(200).json({});
-                return;
+                const response = {};
+
+                if (res) {
+                    res.status(200).json(response);
+                    return;
+                } else {
+                    return { statusCode: 200, body: response };
+                }
             }
 
             if (isFlowDataExchangeRequest(decryptedBody)) {
@@ -340,16 +425,34 @@ export default class WebhookHandler {
                     Buffer.from(body.initial_vector, 'base64'),
                 );
 
-                res.status(200).json(encryptedResponse);
-                return;
+                if (res) {
+                    res.status(200).json(encryptedResponse);
+                    return;
+                } else {
+                    return { statusCode: 200, body: encryptedResponse };
+                }
             }
 
             // Unknown flow type
+            const error = { error: 'Unknown request type' };
             LOGGER.log(`Unknown flow request type: ${JSON.stringify(decryptedBody)}`);
-            res.status(400).json({ error: 'Unknown request type' });
+
+            if (res) {
+                res.status(400).json(error);
+                return;
+            } else {
+                return { statusCode: 400, body: error };
+            }
         } catch (error) {
+            const errorResponse = { error: 'Internal server error' };
             LOGGER.log(`Error handling flow request: ${error}`);
-            res.status(500).json({ error: 'Internal server error' });
+
+            if (res) {
+                res.status(500).json(errorResponse);
+                return;
+            } else {
+                return { statusCode: 500, body: errorResponse };
+            }
         }
     }
 

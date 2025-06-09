@@ -1,6 +1,6 @@
 {
   "name": "meta-cloud-api",
-  "version": "0.2.16",
+  "version": "0.2.17",
   "description": "TypeScript wrapper for Meta's Cloud API",
   "type": "module",
   "main": "./dist/index.js",
