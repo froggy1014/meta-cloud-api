@@ -24,6 +24,7 @@ type SimpleTextObject = {
 };
 
 type TextParametersObject = ParametersObject<ParametersTypesEnum.Text> & SimpleTextObject;
+type CouponCodeParametersObject = ParametersObject<ParametersTypesEnum.CouponCode> & SimpleTextObject;
 
 type CurrencyObject = {
     fallback_value: string;
@@ -69,17 +70,6 @@ type ImageParametersObject = ParametersObject<ParametersTypesEnum.Image> & Image
 
 type VideoParametersObject = ParametersObject<ParametersTypesEnum.Video> & VideoMediaObject;
 
-type QuickReplyButtonParametersObject = {
-    type: ParametersTypesEnum.Payload;
-    payload: string;
-};
-
-type URLButtonParametersObject = SimpleTextObject & {
-    type: ParametersTypesEnum.Text;
-};
-
-type ButtonParameterObject = QuickReplyButtonParametersObject | URLButtonParametersObject;
-
 type ComponentObject<T extends ComponentTypesEnum> = {
     type: T;
     parameters: (
@@ -89,11 +79,12 @@ type ComponentObject<T extends ComponentTypesEnum> = {
         | ImageParametersObject
         | TextParametersObject
         | VideoParametersObject
+        | CouponCodeParametersObject
     )[];
 };
 
 type ButtonComponentObject = ComponentObject<ComponentTypesEnum.Button> & {
-    parameters: ButtonParameterObject;
+    parameters: Array<ParametersTypesEnum>;
     sub_type: SubTypeEnum;
     index: ButtonPositionEnum;
 };

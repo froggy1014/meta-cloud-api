@@ -10,7 +10,7 @@ export type {
 
 export type { TextMessageParams, TextObject } from './text';
 
-export type { MessageTemplateObject } from './template';
+export * from './template';
 
 export type {
     AudioMediaObject,
