@@ -1,11 +1,11 @@
 import {
     ButtonPositionEnum,
-    ButtonTypesEnum,
     ComponentTypesEnum,
     CurrencyCodesEnum,
     LanguagesEnum,
     MessageTypesEnum,
     ParametersTypesEnum,
+    SubTypeEnum,
 } from '@shared/types/enums';
 import { MessageRequestBody } from './common';
 
@@ -94,7 +94,7 @@ type ComponentObject<T extends ComponentTypesEnum> = {
 
 type ButtonComponentObject = ComponentObject<ComponentTypesEnum.Button> & {
     parameters: ButtonParameterObject;
-    sub_type: ButtonTypesEnum;
+    sub_type: SubTypeEnum;
     index: ButtonPositionEnum;
 };
 

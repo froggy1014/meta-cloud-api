@@ -68,11 +68,6 @@ export enum InteractiveTypesEnum {
     Flow = 'flow',
 }
 
-export enum ButtonTypesEnum {
-    QuickReply = 'quick_reply',
-    URL = 'url',
-}
-
 export enum ButtonPositionEnum {
     First = 1,
     Second = 2,
