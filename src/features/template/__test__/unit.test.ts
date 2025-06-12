@@ -201,13 +201,18 @@ describe('Template API - Unit Tests', () => {
                         text: 'Would you like to learn more?',
                     },
                     {
-                        type: 'QUICK_REPLY',
-                        text: 'Yes, tell me more',
-                    },
-                    {
-                        type: 'URL',
-                        text: 'Visit Website',
-                        url: 'https://example.com',
+                        type: 'BUTTONS',
+                        buttons: [
+                            {
+                                type: 'QUICK_REPLY',
+                                text: 'Yes, tell me more',
+                            },
+                            {
+                                type: 'URL',
+                                text: 'Visit Website',
+                                url: 'https://example.com',
+                            },
+                        ],
                     },
                 ],
             };
@@ -217,9 +222,11 @@ describe('Template API - Unit Tests', () => {
             const [_, __, ___, body] = mockRequestSend.mock.calls[0];
             const parsedBody = JSON.parse(body);
 
-            expect(parsedBody.components).toHaveLength(3);
-            expect(parsedBody.components[1].type).toBe('QUICK_REPLY');
-            expect(parsedBody.components[2].type).toBe('URL');
+            expect(parsedBody.components).toHaveLength(2);
+            expect(parsedBody.components[1].type).toBe('BUTTONS');
+            expect(parsedBody.components[1].buttons).toHaveLength(2);
+            expect(parsedBody.components[1].buttons[0].type).toBe('QUICK_REPLY');
+            expect(parsedBody.components[1].buttons[1].type).toBe('URL');
         });
 
         it('should create template with named parameters', async () => {

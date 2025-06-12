@@ -38,13 +38,23 @@ export enum MessageTypesEnum {
 }
 
 export enum ParametersTypesEnum {
-    Currency = 'currency',
-    DateTime = 'date_time',
-    Document = 'document',
-    Image = 'image',
-    Text = 'text',
-    Video = 'video',
-    Payload = 'payload',
+    Action = 'ACTION',
+    CouponCode = 'COUPON_CODE',
+    Currency = 'CURRENCY',
+    DateTime = 'DATE_TIME',
+    Document = 'DOCUMENT',
+    ExpirationTimeMs = 'EXPIRATION_TIME_MS',
+    Image = 'IMAGE',
+    LimitedTimeOffer = 'LIMITED_TIME_OFFER',
+    Location = 'LOCATION',
+    OrderStatus = 'ORDER_STATUS',
+    Payload = 'PAYLOAD',
+    Product = 'PRODUCT',
+    Text = 'TEXT',
+    TtlMinutes = 'TTL_MINUTES',
+    Video = 'VIDEO',
+    WebviewInteraction = 'WEBVIEW_INTERACTION',
+    WebviewPresentation = 'WEBVIEW_PRESENTATION',
 }
 
 export enum InteractiveTypesEnum {

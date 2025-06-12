@@ -1,7 +1,7 @@
 import { CategoryEnum, LanguagesEnum, TemplateStatusEnum } from '@shared/types/enums';
 import { GeneralRequestBody, ResponsePagination, ResponseSuccess } from '@shared/types/request';
 
-export type TemplateFormat = 'TEXT' | 'IMAGE' | 'VIDEO' | 'DOCUMENT' | 'LOCATION';
+export type TemplateFormat = 'TEXT' | 'IMAGE' | 'VIDEO' | 'DOCUMENT' | 'LOCATION' | 'PRODUCT';
 
 export type PhoneNumberButton = {
     type: 'PHONE_NUMBER';
@@ -38,6 +38,15 @@ export type FlowButton = {
 
 export type MPMButton = {
     type: 'MPM';
+    action?: {
+        thumbnail_product_retailer_id: string;
+        sections: Array<{
+            title?: string;
+            product_items: Array<{
+                product_retailer_id: string;
+            }>;
+        }>;
+    };
 };
 
 export type OTPButton = {
@@ -46,6 +55,16 @@ export type OTPButton = {
 
 export type SPMButton = {
     type: 'SPM';
+    action?: {
+        product_retailer_id: string;
+    };
+};
+
+export type CatalogButton = {
+    type: 'CATALOG';
+    action?: {
+        thumbnail_product_retailer_id: string;
+    };
 };
 
 export type TemplateButton =
@@ -56,7 +75,8 @@ export type TemplateButton =
     | FlowButton
     | MPMButton
     | OTPButton
-    | SPMButton;
+    | SPMButton
+    | CatalogButton;
 
 export type TemplateHeaderExample = {
     header_text?: string[];
@@ -91,7 +111,33 @@ export type TemplateFooter = {
     text: string; // max 60 chars
 };
 
-export type ComponentTypes = TemplateHeader | TemplateBody | TemplateFooter | TemplateButton;
+export type TemplateButtons = {
+    type: 'BUTTONS';
+    buttons: TemplateButton[];
+};
+
+export type TemplateLimitedTimeOffer = {
+    type: 'LIMITED_TIME_OFFER';
+    limited_time_offer: {
+        expiration_time_ms: number;
+    };
+};
+
+export type TemplateCarousel = {
+    type: 'CAROUSEL';
+    cards: Array<{
+        card_index: number;
+        components: ComponentTypes[];
+    }>;
+};
+
+export type ComponentTypes =
+    | TemplateHeader
+    | TemplateBody
+    | TemplateFooter
+    | TemplateButtons
+    | TemplateLimitedTimeOffer
+    | TemplateCarousel;
 
 export type TemplateRequestBody = GeneralRequestBody & {
     name: string;
