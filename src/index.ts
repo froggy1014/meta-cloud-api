@@ -1,7 +1,4 @@
 import { WebhookHandler } from './core/webhook';
-import { WhatsApp } from './core/whatsapp';
-
-export default WhatsApp;
 
 export type { IRequest, IResponse } from './core/webhook';
 export { WebhookHandler };
@@ -18,7 +15,6 @@ export {
     TwoStepVerificationApi,
     WabaApi,
 } from './features';
-
 export type {
     AudioMediaObject,
     BusinessProfileClass,
@@ -29,6 +25,8 @@ export type {
     FlowClass,
     FlowEndpointRequest,
     FlowEndpointResponse,
+    FlowType,
+    FlowTypeEnum,
     ImageMediaObject,
     InteractiveObject,
     LocationObject,
@@ -55,7 +53,15 @@ export type {
     WabaAccount,
     WABAClass,
 } from './features';
-
-export { HttpMethodsEnum, importConfig, isMetaError, MessageTypesEnum, StatusEnum, WebhookTypesEnum } from './shared';
-
+export {
+    HttpMethodsEnum,
+    importConfig,
+    isFlowDataExchangeRequest,
+    isFlowErrorRequest,
+    isFlowPingRequest,
+    isMetaError,
+    MessageTypesEnum,
+    StatusEnum,
+    WebhookTypesEnum,
+} from './shared';
 export type { MetaError, WabaConfigType } from './shared';

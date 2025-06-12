@@ -8,7 +8,7 @@ import Logger from '@shared/utils/logger';
 import crypto from 'crypto';
 import { WhatsApp } from '../whatsapp';
 
-import { FlowTypeEnum } from '@features/flow/types';
+import { FlowType, FlowTypeEnum } from '@features/flow/types';
 import { importConfig } from '@shared/config/importConfig';
 import { EventField, WebhookEvent, WebhookMessage } from './types';
 const LIB_NAME = 'WEBHOOK';
@@ -573,7 +573,7 @@ export default class WebhookHandler {
      * Register a flow handler for a specific flow type
      */
     public onFlow(
-        type: FlowTypeEnum,
+        type: FlowType,
         handler: (whatsapp: WhatsApp, request: FlowEndpointRequest) => any | Promise<any>,
     ): void {
         this.flowHandlers.set(type, handler);

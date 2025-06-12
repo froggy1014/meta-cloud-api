@@ -47,6 +47,8 @@ export enum FlowTypeEnum {
     All = '*',
 }
 
+export type FlowType = (typeof FlowTypeEnum)[keyof typeof FlowTypeEnum];
+
 /**
  * Flow Validation Error Pointer
  */
