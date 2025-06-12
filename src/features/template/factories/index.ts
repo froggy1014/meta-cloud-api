@@ -1,8 +1,11 @@
 import { CategoryEnum } from '@shared/types/enums';
 import type {
     ComponentTypes,
+    MediaCarouselCard,
+    ProductCarouselCard,
     TemplateBody,
     TemplateButton,
+    TemplateButtons,
     TemplateFooter,
     TemplateHeader,
     TemplateRequestBody,
@@ -134,7 +137,7 @@ function createButtons(options: ButtonOptions): ComponentTypes[] {
         ? [
               {
                   type: 'BUTTONS',
-                  buttons: buttons as any,
+                  buttons: buttons,
               },
           ]
         : [];
@@ -223,7 +226,7 @@ export function createTemplate(options: TemplateOptions): TemplateRequestBody {
             limited_time_offer: {
                 expiration_time_ms: options.limitedTimeOffer.expiration_time_ms,
             },
-        } as any);
+        });
     }
 
     return {
@@ -258,7 +261,7 @@ export function createOTPTemplate(options: OTPTemplateOptions): TemplateRequestB
     // Add OTP button
     components.push({
         type: 'BUTTONS',
-        buttons: [{ type: 'OTP' }] as any,
+        buttons: [{ type: 'OTP' }],
     });
 
     return {
@@ -299,7 +302,7 @@ export function createAuthenticationTemplate(options: AuthenticationTemplateOpti
                     type: 'COPY_CODE',
                     example: 'ABCD1234',
                 },
-            ] as any,
+            ],
         });
     }
 
@@ -335,7 +338,7 @@ export function createCatalogTemplate(options: CatalogTemplateOptions): Template
                     thumbnail_product_retailer_id: options.thumbnail_product_retailer_id,
                 },
             },
-        ] as any,
+        ],
     });
 
     return {
@@ -368,7 +371,7 @@ export function createCouponTemplate(options: CouponTemplateOptions): TemplateRe
                 type: 'COPY_CODE',
                 example: options.coupon_code,
             },
-        ] as any,
+        ],
     });
 
     return {
@@ -389,7 +392,7 @@ export function createLimitedTimeOfferTemplate(options: LimitedTimeOfferTemplate
         limited_time_offer: {
             expiration_time_ms: options.expiration_time_ms,
         },
-    } as any);
+    });
 
     if (options.header) {
         components.push(createHeader({ ...options.header, format: 'TEXT' }));
@@ -414,13 +417,13 @@ export function createMediaCardCarouselTemplate(options: MediaCardCarouselTempla
     const components: ComponentTypes[] = [];
 
     // Add carousel component
-    const carouselCards: any[] = [];
+    const carouselCards: MediaCarouselCard[] = [];
     options.cards.forEach((card, index) => {
-        const cardComponents: any[] = [];
+        const cardComponents: (TemplateHeader | TemplateBody | TemplateButtons)[] = [];
 
         // Add header (media)
         cardComponents.push({
-            type: 'HEADER',
+            type: 'HEADER' as const,
             format: card.header.format,
             example: card.header.example,
         });
@@ -430,7 +433,7 @@ export function createMediaCardCarouselTemplate(options: MediaCardCarouselTempla
 
         // Add buttons if any
         if (card.buttons) {
-            cardComponents.push(...createButtons(card.buttons));
+            cardComponents.push(...(createButtons(card.buttons) as TemplateButtons[]));
         }
 
         carouselCards.push({
@@ -442,7 +445,7 @@ export function createMediaCardCarouselTemplate(options: MediaCardCarouselTempla
     components.push({
         type: 'CAROUSEL',
         cards: carouselCards,
-    } as any);
+    });
 
     return {
         name: options.name,
@@ -477,7 +480,7 @@ export function createMPMTemplate(options: MPMTemplateOptions): TemplateRequestB
                     sections: options.sections,
                 },
             },
-        ] as any,
+        ],
     });
 
     return {
@@ -503,12 +506,12 @@ export function createProductCardCarouselTemplate(options: ProductCardCarouselTe
     }
 
     // Add carousel with product cards
-    const carouselCards: any[] = options.cards.map((card, index) => ({
+    const carouselCards: ProductCarouselCard[] = options.cards.map((card, index) => ({
         card_index: index,
         components: [
             {
-                type: 'HEADER',
-                format: 'PRODUCT',
+                type: 'HEADER' as const,
+                format: 'PRODUCT' as const,
                 example: {
                     header_handle: [card.product_retailer_id],
                 },
@@ -519,7 +522,7 @@ export function createProductCardCarouselTemplate(options: ProductCardCarouselTe
     components.push({
         type: 'CAROUSEL',
         cards: carouselCards,
-    } as any);
+    });
 
     return {
         name: options.name,
@@ -553,7 +556,7 @@ export function createSPMTemplate(options: SPMTemplateOptions): TemplateRequestB
                     product_retailer_id: options.product_retailer_id,
                 },
             },
-        ] as any,
+        ],
     });
 
     return {

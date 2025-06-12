@@ -131,6 +131,22 @@ export type TemplateCarousel = {
     }>;
 };
 
+// Reusable carousel card types
+export type CarouselCard = {
+    card_index: number;
+    components: ComponentTypes[];
+};
+
+export type MediaCarouselCard = {
+    card_index: number;
+    components: (TemplateHeader | TemplateBody | TemplateButtons)[];
+};
+
+export type ProductCarouselCard = {
+    card_index: number;
+    components: TemplateHeader[];
+};
+
 export type ComponentTypes =
     | TemplateHeader
     | TemplateBody
