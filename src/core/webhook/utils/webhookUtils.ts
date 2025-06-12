@@ -11,184 +11,131 @@ import { WebhookMessage, WebhookMessageValue } from '../types';
 const LIB_NAME = 'WEBHOOK_UTILS';
 const LOGGER = new Logger(LIB_NAME, process.env.DEBUG === 'true');
 
-export interface WebhookRequest {
-    method: string;
-    query: Record<string, any>;
-    body: any;
-    headers: Record<string, string | string[] | undefined>;
-    rawBody?: string;
-}
-
-export interface WebhookResponse {
-    statusCode: number;
-    body?: any;
-    headers?: Record<string, string>;
-}
-
 export type MessageHandler = (whatsapp: WhatsApp, message: WebhookMessage) => void | Promise<void>;
 export type FlowHandler = (whatsapp: WhatsApp, request: FlowEndpointRequest) => any | Promise<any>;
 
 /**
- * Pure function to handle webhook verification
- */
-export function verifyWebhook(request: Pick<WebhookRequest, 'query'>, verificationToken: string): WebhookResponse {
-    const mode = request.query['hub.mode'];
-    const token = request.query['hub.verify_token'];
-    const challenge = request.query['hub.challenge'];
-
-    // Check if this is actually a webhook verification request
-    const isWebhookVerificationRequest = mode !== undefined && token !== undefined && challenge !== undefined;
-
-    if (!isWebhookVerificationRequest) {
-        LOGGER.log('Not a webhook verification request - missing required parameters');
-        return {
-            statusCode: 400,
-            body: { error: 'Invalid webhook verification request' },
-        };
-    }
-
-    const VERIFICATION_SUCCESS = mode === 'subscribe' && token === verificationToken;
-
-    if (VERIFICATION_SUCCESS) {
-        LOGGER.log('Webhook verified successfully');
-        return {
-            statusCode: 200,
-            body: challenge,
-        };
-    } else {
-        LOGGER.log('Webhook verification failed');
-        return {
-            statusCode: 403,
-        };
-    }
-}
-
-/**
- * Pure function to process webhook messages
+ * Process webhook messages
  */
 export async function processWebhookMessages(
-    request: WebhookRequest,
+    request: Request,
     whatsapp: WhatsApp,
     handlers: {
         messageHandlers: Map<MessageTypesEnum, MessageHandler>;
         preProcessHandler?: MessageHandler;
         postProcessHandler?: MessageHandler;
     },
-): Promise<WebhookResponse> {
-    const body = request.body;
-    const errors: string[] = [];
+): Promise<Response> {
+    try {
+        const body = await request.json();
 
-    // Check this is a WhatsApp Business Account webhook
-    if (body.object !== 'whatsapp_business_account') {
-        const errorMsg = 'Received webhook for non-WhatsApp event';
-        LOGGER.log(errorMsg);
-        return {
-            statusCode: 404,
-            body: { error: errorMsg },
-        };
-    }
-
-    // Process each entry
-    for (const entry of body.entry) {
-        try {
-            const changes = entry.changes;
-            for (const change of changes) {
-                if (change.field === 'messages') {
-                    await processMessages(entry.id, change.value, whatsapp, handlers);
-                }
-            }
-        } catch (error) {
-            const errorMsg = `Error processing webhook: ${error}`;
+        // Check this is a WhatsApp Business Account webhook
+        if (body.object !== 'whatsapp_business_account') {
+            const errorMsg = 'Received webhook for non-WhatsApp event';
             LOGGER.log(errorMsg);
-            errors.push(errorMsg);
+            return new Response(JSON.stringify({ error: errorMsg }), { status: 404 });
         }
-    }
 
-    return {
-        statusCode: 200,
-        body: errors.length > 0 ? { errors } : undefined,
-    };
+        const errors: string[] = [];
+
+        // Process each entry
+        for (const entry of body.entry) {
+            try {
+                const changes = entry.changes;
+                for (const change of changes) {
+                    if (change.field === 'messages') {
+                        await processMessages(entry.id, change.value, whatsapp, handlers);
+                    }
+                }
+            } catch (error) {
+                const errorMsg = `Error processing webhook: ${error}`;
+                LOGGER.log(errorMsg);
+                errors.push(errorMsg);
+            }
+        }
+
+        return new Response(errors.length > 0 ? JSON.stringify({ errors }) : null, { status: 200 });
+    } catch (error) {
+        LOGGER.log(`Error processing webhook: ${error}`);
+        return new Response(JSON.stringify({ error: 'Internal Server Error' }), { status: 500 });
+    }
 }
 
 /**
- * Pure function to handle flow requests
+ * Handle flow requests
  */
 export async function processFlowRequest(
-    request: WebhookRequest,
+    request: Request,
     config: WabaConfigType,
     whatsapp: WhatsApp,
     flowHandlers: Map<FlowTypeEnum, FlowHandler>,
-): Promise<WebhookResponse> {
+): Promise<Response> {
     try {
+        const body = await request.text();
+        const signature = request.headers.get('x-hub-signature-256');
+
         // Validate request signature
-        if (!isRequestSignatureValid(request, config.WEBHOOK_VERIFICATION_TOKEN || '')) {
+        if (!verifySignature(body, signature, config.WEBHOOK_VERIFICATION_TOKEN || '')) {
             LOGGER.log('Invalid request signature');
-            return {
-                statusCode: 401,
-                body: { error: 'Unauthorized' },
-            };
+            return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
         }
 
-        const body = JSON.parse(request.rawBody || '{}');
+        const data = JSON.parse(body);
 
         // Decrypt the request
-        const { decryptedBody } = decryptFlowRequest(body, config);
+        const { decryptedBody } = decryptFlowRequest(data, config);
 
         // Get the flow handler
         const handler = flowHandlers.get(FlowTypeEnum.All);
         if (!handler) {
             LOGGER.log(`No handler registered for flow action: ${decryptedBody.action}`);
-            return {
-                statusCode: 404,
-                body: { error: 'Handler not found' },
-            };
+            return new Response(JSON.stringify({ error: 'Handler not found' }), { status: 404 });
         }
 
         // Handle different flow types
         if (isFlowPingRequest(decryptedBody)) {
-            return {
-                statusCode: 200,
-                body: {
+            return new Response(
+                JSON.stringify({
                     version: '3.0',
                     data: { status: 'active' },
-                },
-            };
+                }),
+                { status: 200 },
+            );
         }
 
         if (isFlowErrorRequest(decryptedBody)) {
             LOGGER.log(`Flow error: ${JSON.stringify(decryptedBody)}`);
-            return {
-                statusCode: 200,
-                body: {},
-            };
+            return new Response(null, { status: 200 });
         }
 
         if (isFlowDataExchangeRequest(decryptedBody)) {
             const result = await handler(whatsapp, decryptedBody);
             const encryptedResponse = encryptFlowResponse(
                 result,
-                Buffer.from(body.aes_key, 'base64'),
-                Buffer.from(body.initial_vector, 'base64'),
+                Buffer.from(data.aes_key, 'base64'),
+                Buffer.from(data.initial_vector, 'base64'),
             );
 
-            return {
-                statusCode: 200,
-                body: encryptedResponse,
-            };
+            return new Response(JSON.stringify(encryptedResponse), { status: 200 });
         }
 
         LOGGER.log(`Unknown flow request type: ${JSON.stringify(decryptedBody)}`);
-        return {
-            statusCode: 400,
-            body: { error: 'Unknown request type' },
-        };
+        return new Response(JSON.stringify({ error: 'Unknown request type' }), { status: 400 });
     } catch (error) {
         LOGGER.log(`Error handling flow request: ${error}`);
-        return {
-            statusCode: 500,
-            body: { error: 'Internal server error' },
-        };
+        return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500 });
     }
+}
+
+/**
+ * Verify webhook signature
+ */
+function verifySignature(body: string, signature: string | null, verificationToken: string): boolean {
+    if (!signature) return false;
+
+    const expectedSignature = crypto.createHmac('sha256', verificationToken).update(body).digest('hex');
+
+    return crypto.timingSafeEqual(Buffer.from(signature.replace('sha256=', '')), Buffer.from(expectedSignature));
 }
 
 /**
@@ -321,22 +268,6 @@ async function executeHandler(
             LOGGER.log(`Error in ${handlerType} handler: ${error}`);
         }
     }
-}
-
-function isRequestSignatureValid(request: WebhookRequest, verificationToken: string): boolean {
-    const signature = request.headers['x-hub-signature-256'] as string;
-    if (!signature || !request.rawBody) {
-        return false;
-    }
-
-    const expectedSignature = crypto
-        .createHmac('sha256', verificationToken)
-        .update(request.rawBody, 'utf8')
-        .digest('hex');
-
-    const formattedExpectedSignature = `sha256=${expectedSignature}`;
-
-    return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(formattedExpectedSignature));
 }
 
 function decryptFlowRequest(
