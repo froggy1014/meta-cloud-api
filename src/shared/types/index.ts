@@ -1,13 +1,10 @@
 // Base types
 export { BaseAPI, BaseClass } from './base';
 
-// Config types
 export type { WabaConfigType, WhatsAppConfig } from './config';
 
-// Logger types
 export type { LoggerInterface } from './logger';
 
-// HTTPS Client types
 export type {
     HttpsClientClass,
     HttpsClientResponseClass,
@@ -16,7 +13,6 @@ export type {
     ResponseJSONBody,
 } from './httpsClient';
 
-// Request types
 export type {
     GeneralHeaderInterface,
     GeneralRequestBody,
@@ -28,7 +24,6 @@ export type {
     ResponseSuccess,
 } from './request';
 
-// Enums - 명시적으로 필요한 것들만 export
 export {
     AudioMediaTypesEnum,
     BusinessVerticalEnum,

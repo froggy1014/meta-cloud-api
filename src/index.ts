@@ -55,15 +55,34 @@ export type {
     WabaAccount,
     WABAClass,
 } from './features';
-export {
+
+export * from './shared/utils';
+export type {
+    AudioMediaTypesEnum,
+    BusinessVerticalEnum,
+    ButtonPositionEnum,
+    ButtonTypesEnum,
+    CategoryEnum,
+    ComponentTypesEnum,
+    ConversationTypesEnum,
+    CurrencyCodesEnum,
+    DataLocalizationRegionEnum,
+    DocumentMediaTypesEnum,
     HttpMethodsEnum,
-    importConfig,
-    isFlowDataExchangeRequest,
-    isFlowErrorRequest,
-    isFlowPingRequest,
-    isMetaError,
+    ImageMediaTypesEnum,
+    InteractiveTypesEnum,
+    LanguagesEnum,
     MessageTypesEnum,
+    ParametersTypesEnum,
+    ReferralSourceTypesEnum,
+    RequestCodeMethodsEnum,
     StatusEnum,
+    StickerMediaTypesEnum,
+    SystemChangeTypesEnum,
+    TemplateStatusEnum,
+    VideoMediaTypesEnum,
+    WabaConfigEnum,
+    WabaConfigType,
     WebhookTypesEnum,
-} from './shared';
-export type { MetaError, WabaConfigType, WhatsAppConfig } from './shared';
+    WhatsAppConfig,
+} from './shared/types';
