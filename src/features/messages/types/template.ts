@@ -24,7 +24,9 @@ type SimpleTextObject = {
 };
 
 type TextParametersObject = ParametersObject<ParametersTypesEnum.Text> & SimpleTextObject;
-type CouponCodeParametersObject = ParametersObject<ParametersTypesEnum.CouponCode> & SimpleTextObject;
+type CouponCodeParametersObject = ParametersObject<ParametersTypesEnum.CouponCode> & {
+    coupon_code: string;
+};
 
 type CurrencyObject = {
     fallback_value: string;
