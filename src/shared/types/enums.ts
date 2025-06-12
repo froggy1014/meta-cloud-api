@@ -74,9 +74,23 @@ export enum ButtonTypesEnum {
 }
 
 export enum ButtonPositionEnum {
-    First,
-    Second,
-    Third,
+    First = 1,
+    Second = 2,
+    Third = 3,
+    Fourth = 4,
+    Fifth = 5,
+}
+
+export enum SubTypeEnum {
+    Catalog = 'CATALOG',
+    CopyCode = 'COPY_CODE',
+    Flow = 'FLOW',
+    Mpm = 'MPM',
+    OrderDetails = 'ORDER_DETAILS',
+    QuickReply = 'QUICK_REPLY',
+    Reminder = 'REMINDER',
+    Url = 'URL',
+    VoiceCall = 'VOICE_CALL',
 }
 
 export enum ComponentTypesEnum {
