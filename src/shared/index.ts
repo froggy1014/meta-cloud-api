@@ -35,6 +35,7 @@ export type {
     ResponsePagination,
     ResponseSuccess,
     WabaConfigType,
+    WhatsAppConfig,
 } from './types';
 
 // Enums - 자주 사용되는 것들만
