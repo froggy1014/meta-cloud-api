@@ -56,33 +56,5 @@ export type {
     WABAClass,
 } from './features';
 
+export * from './shared/types';
 export * from './shared/utils';
-export type {
-    AudioMediaTypesEnum,
-    BusinessVerticalEnum,
-    ButtonPositionEnum,
-    ButtonTypesEnum,
-    CategoryEnum,
-    ComponentTypesEnum,
-    ConversationTypesEnum,
-    CurrencyCodesEnum,
-    DataLocalizationRegionEnum,
-    DocumentMediaTypesEnum,
-    HttpMethodsEnum,
-    ImageMediaTypesEnum,
-    InteractiveTypesEnum,
-    LanguagesEnum,
-    MessageTypesEnum,
-    ParametersTypesEnum,
-    ReferralSourceTypesEnum,
-    RequestCodeMethodsEnum,
-    StatusEnum,
-    StickerMediaTypesEnum,
-    SystemChangeTypesEnum,
-    TemplateStatusEnum,
-    VideoMediaTypesEnum,
-    WabaConfigEnum,
-    WabaConfigType,
-    WebhookTypesEnum,
-    WhatsAppConfig,
-} from './shared/types';
