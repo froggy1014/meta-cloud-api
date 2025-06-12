@@ -4,6 +4,8 @@ import { defineConfig } from 'tsup';
 export default defineConfig({
     entry: {
         index: 'src/index.ts',
+        'core/webhook/index': 'src/core/webhook/index.ts',
+        'core/whatsapp/index': 'src/core/whatsapp/index.ts',
         'features/messages/index': 'src/features/messages/index.ts',
         'features/media/index': 'src/features/media/index.ts',
         'features/profile/index': 'src/features/profile/index.ts',

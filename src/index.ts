@@ -1,18 +1,22 @@
 import { WebhookHandler } from './core/webhook';
 
-export type {
-    EventHandler,
-    IRequest,
-    IResponse,
-    MessageHandler,
-    WebhookContact,
-    WebhookEvent,
-    WebhookMessage,
-} from './core/webhook';
+export type { WebhookContact, WebhookEvent, WebhookMessage } from './core/webhook';
 export { WhatsApp } from './core/whatsapp';
 
 export { WebhookHandler };
 
+export {
+    BusinessProfileApi,
+    EncryptionApi,
+    FlowApi,
+    MessagesApi,
+    PhoneNumberApi,
+    QrCodeApi,
+    RegistrationApi,
+    TemplateApi,
+    TwoStepVerificationApi,
+    WabaApi,
+} from './features';
 export type {
     AudioMediaObject,
     BusinessProfileClass,
@@ -48,22 +52,9 @@ export type {
     TextObject,
     UploadMediaResponse,
     VideoMediaObject,
-    WABAClass,
     WabaAccount,
+    WABAClass,
 } from './features';
-export {
-    BusinessProfileApi,
-    EncryptionApi,
-    FlowApi,
-    MessagesApi,
-    PhoneNumberApi,
-    QrCodeApi,
-    RegistrationApi,
-    TemplateApi,
-    TwoStepVerificationApi,
-    WabaApi,
-} from './features';
-export type { MetaError, WabaConfigType, WhatsAppConfig } from './shared';
 export {
     HttpMethodsEnum,
     importConfig,
@@ -75,3 +66,4 @@ export {
     StatusEnum,
     WebhookTypesEnum,
 } from './shared';
+export type { MetaError, WabaConfigType, WhatsAppConfig } from './shared';

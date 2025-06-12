@@ -1,11 +1,13 @@
-export type {
-    EventField,
-    EventHandler,
-    MessageHandler,
-    MessageStatus,
-    WebhookContact,
-    WebhookEvent,
-    WebhookMessage,
-} from './types';
-export { default as WebhookHandler } from './WebhookHandler';
-export type { IRequest, IResponse } from './WebhookHandler';
+export type { MessageStatus, WebhookContact, WebhookEvent, WebhookMessage } from './types';
+
+export { WebhookHandler } from './WebhookHandler';
+
+export * from './utils/generateXHub256Sig';
+export {
+    processFlowRequest,
+    processWebhookMessages,
+    verifyWebhook,
+    type FlowHandler,
+    type WebhookRequest,
+    type WebhookResponse,
+} from './utils/webhookUtils';

@@ -33,6 +33,7 @@ export enum MessageTypesEnum {
     Order = 'order',
     System = 'system',
     Unknown = 'unknown',
+    Statuses = 'statuses',
     '*' = '*',
 }
 
