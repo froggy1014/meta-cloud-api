@@ -10,8 +10,8 @@ import {
     TemplateApi,
     TwoStepVerificationApi,
     WabaApi,
-} from 'src/features';
-import { WhatsAppConfig } from '@shared/types/config';
+} from 'src/api';
+import { WhatsAppConfig } from '../../types/config';
 
 export declare class WhatsAppClass {
     constructor(config?: WhatsAppConfig);

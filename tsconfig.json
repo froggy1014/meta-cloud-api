@@ -25,7 +25,7 @@
         "preserveConstEnums": true,
         "paths": {
             "@core/*": ["src/core/*"],
-            "@features/*": ["src/features/*"],
+            "@api/*": ["src/api/*"],
             "@shared/*": ["src/shared/*"]
         }
     },

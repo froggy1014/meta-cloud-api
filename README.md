@@ -18,10 +18,11 @@
 ## Features
 
 - **Type-Safe Development** - Built with TypeScript to provide code completion and catch errors during development
-- **Comprehensive Coverage** - Full support for WhatsApp Business Platform APIs
-- **Clean Interface** - Intuitive methods organized by domain for improved code readability
+- **Comprehensive Coverage** - Full support for WhatsApp Business Platform APIs including Messages, Media, Templates, Flows, and more
+- **Modular Architecture** - Clean separation of concerns with dedicated API classes for each domain
+- **Framework-Specific Webhooks** - Built-in support for Express.js and Next.js webhook handling
+- **Advanced Features** - Support for Flows, Encryption, QR Codes, Two-Step Verification, and WABA management
 - **Error Handling** - Standardized error handling with detailed Meta API error information
-- **Webhook Handler** - Built-in support for webhook verification and message handling
 
 ## Installation
 
@@ -57,8 +58,6 @@ console.log(`Message ID: ${response.messages[0].id}`);
 ## Usage Examples
 
 ### Messaging
-
-Send different types of messages through WhatsApp Business Platform:
 
 #### Text Message
 
@@ -146,71 +145,96 @@ const result = await client.messages.interactive({
 });
 ```
 
-## Example Projects
-
-We provide ready-to-use example projects demonstrating how to integrate Meta Cloud API in different frameworks:
-
-- [Express.js Example](./examples/express-example) - A simple Express.js server with webhook handling for WhatsApp messages
-- [Next.js Example](./examples/nextjs-page-router-example) - Integration with Next.js Pages Router, showing how to handle webhooks in a Next.js API route
-
-Each example includes its own README with setup instructions and demonstration of core features.
-
 ### Webhook Integration
 
-Set up a webhook to receive messages and events from the WhatsApp API:
+#### Express.js Webhook
 
 ```typescript
-import WhatsApp, { 
-  WebhookHandler, 
-  MessageTypesEnum, 
-  WebhookMessage 
-} from 'meta-cloud-api';
+import express from 'express';
+import { MessageTypesEnum } from 'meta-cloud-api';
+import { webhookHandler } from 'meta-cloud-api/webhook/express';
 
-// Initialize the handler
-const webhookHandler = new WebhookHandler({
-  accessToken: process.env.CLOUD_API_ACCESS_TOKEN,
-  phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
-  businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
-  webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN
-});
+const app = express();
 
-// Handle webhook verification
-app.get('/webhook', (req, res) => {
-  webhookHandler.handleVerificationRequest(req, res);
-});
-
-// Handle incoming messages
-app.post('/webhook', (req, res) => {
-  webhookHandler.handleWebhookRequest(req, res);
-});
-
-// Pre-process all messages (e.g., mark as read)
-webhookHandler.onMessagePreProcess(async (client: WhatsApp, message: WebhookMessage) => {
-  await client.messages.markAsRead({ messageId: message.id });
+// Create webhook handler
+const bot = webhookHandler({
+  accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+  phoneNumberId: parseInt(process.env.WA_PHONE_NUMBER_ID!),
+  webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN!,
 });
 
 // Handle text messages
-webhookHandler.onMessage(MessageTypesEnum.Text, async (client: WhatsApp, message: WebhookMessage) => {
-  if (message.text?.body) {
-    await client.messages.text({
-      body: `You said: "${message.text.body}"`,
-      to: message.from
-    });
-  }
+bot.processor.onMessage(MessageTypesEnum.Text, async (whatsapp, message) => {
+  await whatsapp.messages.text({
+    to: message.from,
+    body: `Echo: ${message.text?.body}`,
+  });
 });
 
-// Handle image messages
-webhookHandler.onMessage(MessageTypesEnum.Image, async (client: WhatsApp, message: WebhookMessage) => {
-  await client.messages.text({
-    body: "Thanks for the image!",
-    to: message.from
+// Setup webhook endpoints
+app.get('/webhook', bot.webhook);
+app.post('/webhook', express.json(), bot.webhook);
+
+app.listen(3000);
+```
+
+#### Next.js Webhook
+
+```typescript
+// pages/api/webhook.ts
+import { NextApiRequest, NextApiResponse } from 'next';
+import { MessageTypesEnum } from 'meta-cloud-api';
+import { webhookHandler } from 'meta-cloud-api/webhook/nextjs';
+
+const bot = webhookHandler({
+  accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+  phoneNumberId: parseInt(process.env.WA_PHONE_NUMBER_ID!),
+  webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN!,
+});
+
+// Handle text messages
+bot.processor.onMessage(MessageTypesEnum.Text, async (whatsapp, message) => {
+  await whatsapp.messages.text({
+    to: message.from,
+    body: `Echo: ${message.text?.body}`,
   });
+});
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  return bot.webhook(req, res);
+}
+```
+
+### Advanced Message Handling
+
+```typescript
+import { MessageTypesEnum } from 'meta-cloud-api';
+
+// Pre-process all messages (e.g., mark as read)
+bot.processor.onMessagePreProcess(async (whatsapp, message) => {
+  await whatsapp.messages.markAsRead({ messageId: message.id });
+});
+
+// Handle different message types
+bot.processor.onMessage(MessageTypesEnum.Text, async (whatsapp, message) => {
+  // Handle text messages
+});
+
+bot.processor.onMessage(MessageTypesEnum.Image, async (whatsapp, message) => {
+  // Handle image messages
+});
+
+bot.processor.onMessage(MessageTypesEnum.Document, async (whatsapp, message) => {
+  // Handle document messages
+});
+
+// Handle message status updates
+bot.processor.onMessageStatus(async (whatsapp, status) => {
+  console.log(`Message ${status.id} status: ${status.status}`);
 });
 ```
 
-### Templates
-
-Manage message templates for your WhatsApp Business account:
+### Templates Management
 
 ```typescript
 // List all templates
@@ -221,21 +245,17 @@ const templates = await client.templates.list({
 // Create a new template
 const newTemplate = await client.templates.create({
   businessId: process.env.WA_BUSINESS_ACCOUNT_ID,
-  name: "my_special_template",
+  name: "welcome_message",
   category: "MARKETING",
   components: [
     {
       type: "HEADER",
       format: "TEXT",
-      text: "Special Offer"
+      text: "Welcome!"
     },
     {
       type: "BODY",
-      text: "Hi {{1}}, we have a special offer for you: {{2}}% off your next purchase!"
-    },
-    {
-      type: "FOOTER",
-      text: "Tap the button below to shop now"
+      text: "Hi {{1}}, welcome to our service!"
     }
   ],
   language: "en_US"
@@ -243,8 +263,6 @@ const newTemplate = await client.templates.create({
 ```
 
 ### Media Management
-
-Upload and retrieve media for your messages:
 
 ```typescript
 import fs from 'fs';
@@ -259,13 +277,17 @@ const mediaUpload = await client.media.upload({
 const media = await client.media.get({
   mediaId: mediaUpload.id
 });
+
+// Download media
+const mediaBuffer = await client.media.download({
+  mediaId: mediaUpload.id
+});
 ```
 
-### Business Profile
-
-Update your WhatsApp Business profile information:
+### Business Profile Management
 
 ```typescript
+// Update business profile
 const profile = await client.businessProfile.update({
   about: "We provide the best service!",
   address: "123 Business St, City",
@@ -273,12 +295,106 @@ const profile = await client.businessProfile.update({
   email: "contact@business.com",
   websites: ["https://www.business.com"]
 });
+
+// Get current profile
+const currentProfile = await client.businessProfile.get();
+```
+
+### WhatsApp Flows
+
+```typescript
+// Create a flow
+const flow = await client.flows.create({
+  name: "Customer Survey",
+  categories: ["SURVEY"],
+  clone_flow_id: "existing_flow_id" // Optional
+});
+
+// Update flow
+const updatedFlow = await client.flows.update({
+  flowId: flow.id,
+  name: "Updated Survey",
+  categories: ["SURVEY", "FEEDBACK"]
+});
+```
+
+## Example Projects
+
+We provide ready-to-use example projects demonstrating integration with different frameworks:
+
+### [Express.js Echo Bot](./examples/express-example)
+A simple echo bot that responds to any text message. Perfect for getting started!
+
+```bash
+cd examples/express-example
+npm install
+cp env.example .env  # Configure your credentials
+npm run dev
+```
+
+### [Next.js Echo Bot](./examples/nextjs-page-router-example)
+Next.js implementation with API routes for webhook handling.
+
+```bash
+cd examples/nextjs-page-router-example
+npm install
+cp env.example .env.local  # Configure your credentials
+npm run dev
+```
+
+## Modular Imports
+
+Use specific imports for better tree-shaking:
+
+```typescript
+// Import specific API classes
+import { MessagesApi } from 'meta-cloud-api/messages';
+import { MediaApi } from 'meta-cloud-api/media';
+import { TemplateApi } from 'meta-cloud-api/template';
+
+// Import specific webhook handlers
+import { webhookHandler } from 'meta-cloud-api/webhook/express';
+import { webhookHandler } from 'meta-cloud-api/webhook/nextjs';
+
+// Import types and enums
+import { MessageTypesEnum, InteractiveTypesEnum } from 'meta-cloud-api/types/enums';
+import type { WhatsAppConfig } from 'meta-cloud-api/types/config';
+```
+
+## Configuration
+
+```typescript
+interface WhatsAppConfig {
+  accessToken: string;           // Required: Meta Cloud API access token
+  phoneNumberId: number;         // Required: WhatsApp phone number ID
+  businessAcctId?: string;       // Optional: Business account ID
+  apiVersion?: string;           // Optional: API version (default: v21.0)
+  webhookVerificationToken?: string; // Optional: For webhook verification
+  requestTimeout?: number;       // Optional: Request timeout in ms
+}
+```
+
+## Error Handling
+
+```typescript
+try {
+  const result = await client.messages.text({
+    to: "15551234567",
+    body: "Hello World"
+  });
+} catch (error) {
+  if (error.response?.data?.error) {
+    console.error('Meta API Error:', error.response.data.error);
+  } else {
+    console.error('Network Error:', error.message);
+  }
+}
 ```
 
 ## Requirements
 
-- TypeScript 4.5+
-- Node.js 18 LTS or later
+- **Node.js** 18 LTS or later
+- **TypeScript** 4.5+ (for TypeScript projects)
 
 ## Contributing
 

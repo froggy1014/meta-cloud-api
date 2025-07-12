@@ -16,19 +16,104 @@ export default function Home() {
             className={`${geistSans.className} ${geistMono.className} grid min-h-screen grid-rows-[20px_1fr_20px] items-center justify-items-center gap-16 p-8 pb-20 font-[family-name:var(--font-geist-sans)] sm:p-20`}
         >
             <main className="row-start-2 flex flex-col items-center gap-[32px] sm:items-start">
-                <div className="mt-8 w-full max-w-[600px] rounded-lg border border-solid border-black/[.08] p-6 dark:border-white/[.145]">
-                    <h2 className="mb-4 text-xl font-bold">Meta Cloud API</h2>
-                    <p className="mb-4">
-                        For more detailed information about the Meta Cloud API, please visit our website. Contributions
-                        to the project are always welcome!
+                <div className="flex flex-col items-center gap-4">
+                    <h1 className="text-4xl font-bold text-center">WhatsApp Echo Bot</h1>
+                    <p className="text-lg text-center text-gray-600 dark:text-gray-300">
+                        A simple echo bot built with Next.js and Meta Cloud API
                     </p>
+                </div>
+
+                <div className="w-full max-w-[600px] rounded-lg border border-solid border-black/[.08] p-6 dark:border-white/[.145]">
+                    <h2 className="mb-4 text-xl font-bold">How it works</h2>
+                    <div className="space-y-3">
+                        <div className="flex items-start gap-3">
+                            <span className="text-2xl">💬</span>
+                            <div>
+                                <p className="font-medium">Text Messages</p>
+                                <p className="text-sm text-gray-600 dark:text-gray-300">
+                                    Send any text message and the bot will echo it back with "Echo: " prefix
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                            <span className="text-2xl">📷</span>
+                            <div>
+                                <p className="font-medium">Media Messages</p>
+                                <p className="text-sm text-gray-600 dark:text-gray-300">
+                                    Send images, documents, audio, video, stickers, locations, or contacts
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                            <span className="text-2xl">✅</span>
+                            <div>
+                                <p className="font-medium">Read Receipts</p>
+                                <p className="text-sm text-gray-600 dark:text-gray-300">
+                                    All messages are automatically marked as read
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="w-full max-w-[600px] rounded-lg border border-solid border-black/[.08] p-6 dark:border-white/[.145]">
+                    <h2 className="mb-4 text-xl font-bold">Example Interactions</h2>
+                    <div className="space-y-4">
+                        <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded">
+                            <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">You send:</p>
+                            <p className="font-mono">"Hello World!"</p>
+                        </div>
+                        <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded">
+                            <p className="text-sm text-blue-600 dark:text-blue-300 mb-1">Bot responds:</p>
+                            <p className="font-mono">"Echo: Hello World!"</p>
+                        </div>
+                        <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded">
+                            <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">You send:</p>
+                            <p className="font-mono">[Image]</p>
+                        </div>
+                        <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded">
+                            <p className="text-sm text-blue-600 dark:text-blue-300 mb-1">Bot responds:</p>
+                            <p className="font-mono">"Echo: I received your image!"</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="w-full max-w-[600px] rounded-lg border border-solid border-black/[.08] p-6 dark:border-white/[.145]">
+                    <h2 className="mb-4 text-xl font-bold">Getting Started</h2>
+                    <ol className="list-decimal list-inside space-y-2 text-sm">
+                        <li>
+                            Configure your environment variables in{' '}
+                            <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">.env.local</code>
+                        </li>
+                        <li>
+                            Start the development server with{' '}
+                            <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">npm run dev</code>
+                        </li>
+                        <li>
+                            Use ngrok to expose your local server:{' '}
+                            <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">ngrok http 3000</code>
+                        </li>
+                        <li>Configure your webhook URL in Meta Developer Dashboard</li>
+                        <li>Start sending messages to your WhatsApp Business number!</li>
+                    </ol>
+                </div>
+
+                <div className="flex gap-4">
                     <a
-                        className="mx-auto flex h-10 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-4 text-sm font-medium transition-colors hover:border-transparent hover:bg-[#f2f2f2] sm:mx-0 sm:h-12 sm:w-auto sm:px-5 sm:text-base dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"
+                        className="flex h-10 items-center justify-center rounded-full border border-solid border-black/[.08] px-4 text-sm font-medium transition-colors hover:border-transparent hover:bg-[#f2f2f2] sm:h-12 sm:px-5 sm:text-base dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"
                         href="https://www.meta-cloud-api.xyz/"
                         target="_blank"
                         rel="noopener noreferrer"
                     >
                         Visit Meta Cloud API
+                    </a>
+                    <a
+                        className="flex h-10 items-center justify-center rounded-full border border-solid border-black/[.08] px-4 text-sm font-medium transition-colors hover:border-transparent hover:bg-[#f2f2f2] sm:h-12 sm:px-5 sm:text-base dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"
+                        href="https://github.com/froggy1014/meta-cloud-api/tree/main/examples/nextjs-page-router-example"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        View Source Code
                     </a>
                 </div>
             </main>

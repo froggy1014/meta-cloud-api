@@ -1,10 +1,10 @@
-import { FlowEndpointRequest } from '@features/flow';
-import { FlowTypeEnum } from '@features/flow/types';
-import { MessageTypesEnum } from '@shared/types';
-import { WabaConfigType } from '@shared/types/config';
-import { isFlowDataExchangeRequest, isFlowErrorRequest, isFlowPingRequest } from '@shared/utils/flowTypeGuards';
-import Logger from '@shared/utils/logger';
 import crypto from 'crypto';
+import { FlowEndpointRequest } from '../../../api/flow';
+import { FlowTypeEnum } from '../../../api/flow/types';
+import { WabaConfigType } from '../../../types/config';
+import { MessageTypesEnum } from '../../../types/enums';
+import { isFlowDataExchangeRequest, isFlowErrorRequest, isFlowPingRequest } from '../../../utils/flowTypeGuards';
+import Logger from '../../../utils/logger';
 import { WhatsApp } from '../../whatsapp';
 import { WebhookMessage, WebhookMessageValue } from '../types';
 
@@ -150,6 +150,13 @@ function verifySignature(body: string, signature: string | null, verificationTok
         return false;
     }
 
+    LOGGER.info('Signature verification details:', {
+        bodyLength: body.length,
+        verificationTokenLength: verificationToken.length,
+        rawSignature: signature,
+        cleanedSignature: signature.replace('sha256=', ''),
+    });
+
     const expectedSignature = crypto.createHmac('sha256', verificationToken).update(body).digest('hex');
     LOGGER.info('Signature verification:', {
         received: signature.replace('sha256=', ''),
@@ -157,6 +164,19 @@ function verifySignature(body: string, signature: string | null, verificationTok
     });
 
     return crypto.timingSafeEqual(Buffer.from(signature.replace('sha256=', '')), Buffer.from(expectedSignature));
+}
+
+/**
+ * Constructs a full URL from framework-specific request headers and URL
+ * @param headers - Request headers containing host and protocol information
+ * @param url - Relative URL path
+ * @returns Full URL string
+ */
+export function constructFullUrl(headers: Record<string, string | string[] | undefined>, url?: string): string {
+    const protocol = headers['x-forwarded-proto'] || 'http';
+    const host = headers.host || 'localhost';
+    const path = url || '/';
+    return `${protocol}://${host}${path}`;
 }
 
 /**

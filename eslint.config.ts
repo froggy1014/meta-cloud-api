@@ -18,6 +18,7 @@ const config = [
         files: ['**/*.ts', '**/*.tsx'],
         rules: {
             '@typescript-eslint/no-unused-vars': 'off',
+            '@typescript-eslint/no-explicit-any': 'off',
             'unused-imports/no-unused-vars': [
                 'error',
                 {

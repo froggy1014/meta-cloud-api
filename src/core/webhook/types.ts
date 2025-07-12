@@ -1,4 +1,4 @@
-import type { MessageTypesEnum } from '@shared/types/enums';
+import type { MessageTypesEnum } from '../../types/enums';
 
 export interface WebhookContact {
     /**

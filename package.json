@@ -1,6 +1,6 @@
 {
   "name": "meta-cloud-api",
-  "version": "0.2.44",
+  "version": "1.0.0",
   "description": "TypeScript wrapper for Meta's Cloud API",
   "type": "module",
   "main": "./dist/index.js",
@@ -29,59 +29,59 @@
       "default": "./dist/index.js"
     },
     "./messages": {
-      "types": "./dist/features/messages/index.d.ts",
-      "import": "./dist/features/messages/index.js",
-      "default": "./dist/features/messages/index.js"
+      "types": "./dist/api/messages/index.d.ts",
+      "import": "./dist/api/messages/index.js",
+      "default": "./dist/api/messages/index.js"
     },
     "./media": {
-      "types": "./dist/features/media/index.d.ts",
-      "import": "./dist/features/media/index.js",
-      "default": "./dist/features/media/index.js"
+      "types": "./dist/api/media/index.d.ts",
+      "import": "./dist/api/media/index.js",
+      "default": "./dist/api/media/index.js"
     },
     "./profile": {
-      "types": "./dist/features/profile/index.d.ts",
-      "import": "./dist/features/profile/index.js",
-      "default": "./dist/features/profile/index.js"
+      "types": "./dist/api/profile/index.d.ts",
+      "import": "./dist/api/profile/index.js",
+      "default": "./dist/api/profile/index.js"
     },
     "./flow": {
-      "types": "./dist/features/flow/index.d.ts",
-      "import": "./dist/features/flow/index.js",
-      "default": "./dist/features/flow/index.js"
+      "types": "./dist/api/flow/index.d.ts",
+      "import": "./dist/api/flow/index.js",
+      "default": "./dist/api/flow/index.js"
     },
     "./phone": {
-      "types": "./dist/features/phone/index.d.ts",
-      "import": "./dist/features/phone/index.js",
-      "default": "./dist/features/phone/index.js"
+      "types": "./dist/api/phone/index.d.ts",
+      "import": "./dist/api/phone/index.js",
+      "default": "./dist/api/phone/index.js"
     },
     "./template": {
-      "types": "./dist/features/template/index.d.ts",
-      "import": "./dist/features/template/index.js",
-      "default": "./dist/features/template/index.js"
+      "types": "./dist/api/template/index.d.ts",
+      "import": "./dist/api/template/index.js",
+      "default": "./dist/api/template/index.js"
     },
     "./waba": {
-      "types": "./dist/features/waba/index.d.ts",
-      "import": "./dist/features/waba/index.js",
-      "default": "./dist/features/waba/index.js"
+      "types": "./dist/api/waba/index.d.ts",
+      "import": "./dist/api/waba/index.js",
+      "default": "./dist/api/waba/index.js"
     },
     "./qrCode": {
-      "types": "./dist/features/qrCode/index.d.ts",
-      "import": "./dist/features/qrCode/index.js",
-      "default": "./dist/features/qrCode/index.js"
+      "types": "./dist/api/qrCode/index.d.ts",
+      "import": "./dist/api/qrCode/index.js",
+      "default": "./dist/api/qrCode/index.js"
     },
     "./twoStepVerification": {
-      "types": "./dist/features/twoStepVerification/index.d.ts",
-      "import": "./dist/features/twoStepVerification/index.js",
-      "default": "./dist/features/twoStepVerification/index.js"
+      "types": "./dist/api/twoStepVerification/index.d.ts",
+      "import": "./dist/api/twoStepVerification/index.js",
+      "default": "./dist/api/twoStepVerification/index.js"
     },
     "./encryption": {
-      "types": "./dist/features/encryption/index.d.ts",
-      "import": "./dist/features/encryption/index.js",
-      "default": "./dist/features/encryption/index.js"
+      "types": "./dist/api/encryption/index.d.ts",
+      "import": "./dist/api/encryption/index.js",
+      "default": "./dist/api/encryption/index.js"
     },
     "./registration": {
-      "types": "./dist/features/registration/index.d.ts",
-      "import": "./dist/features/registration/index.js",
-      "default": "./dist/features/registration/index.js"
+      "types": "./dist/api/registration/index.d.ts",
+      "import": "./dist/api/registration/index.js",
+      "default": "./dist/api/registration/index.js"
     },
     "./shared/types": {
       "types": "./dist/shared/types/index.d.ts",
@@ -92,6 +92,61 @@
       "types": "./dist/shared/utils/index.d.ts",
       "import": "./dist/shared/utils/index.js",
       "default": "./dist/shared/utils/index.js"
+    },
+    "./api": {
+      "types": "./dist/api/index.d.ts",
+      "import": "./dist/api/index.js",
+      "default": "./dist/api/index.js"
+    },
+    "./api/messages": {
+      "types": "./dist/api/messages.d.ts",
+      "import": "./dist/api/messages.js",
+      "default": "./dist/api/messages.js"
+    },
+    "./api/media": {
+      "types": "./dist/api/media.d.ts",
+      "import": "./dist/api/media.js",
+      "default": "./dist/api/media.js"
+    },
+    "./api/flows": {
+      "types": "./dist/api/flows.d.ts",
+      "import": "./dist/api/flows.js",
+      "default": "./dist/api/flows.js"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils/index.js",
+      "default": "./dist/utils/index.js"
+    },
+    "./webhook": {
+      "types": "./dist/core/webhook/index.d.ts",
+      "import": "./dist/core/webhook/index.js",
+      "default": "./dist/core/webhook/index.js"
+    },
+    "./webhook/express": {
+      "types": "./dist/core/webhook/frameworks/express.d.ts",
+      "import": "./dist/core/webhook/frameworks/express.js",
+      "default": "./dist/core/webhook/frameworks/express.js"
+    },
+    "./webhook/nextjs": {
+      "types": "./dist/core/webhook/frameworks/nextjs.d.ts",
+      "import": "./dist/core/webhook/frameworks/nextjs.js",
+      "default": "./dist/core/webhook/frameworks/nextjs.js"
+    },
+    "./types": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/types/index.js",
+      "default": "./dist/types/index.js"
+    },
+    "./types/enums": {
+      "types": "./dist/types/enums.d.ts",
+      "import": "./dist/types/enums.js",
+      "default": "./dist/types/enums.js"
+    },
+    "./types/config": {
+      "types": "./dist/types/config.d.ts",
+      "import": "./dist/types/config.js",
+      "default": "./dist/types/config.js"
     },
     "./core/webhook": {
       "types": "./dist/core/webhook/index.d.ts",
@@ -155,6 +210,7 @@
     "@eslint/js": "^9.17.0",
     "@types/eslint-config-prettier": "^6.11.3",
     "@types/eslint__eslintrc": "^2.1.2",
+    "@types/express": "^5.0.3",
     "@types/node": "^22.15.29",
     "@typescript-eslint/eslint-plugin": "^8.15.0",
     "@typescript-eslint/parser": "^8.15.0",
@@ -166,6 +222,7 @@
     "eslint-plugin-unused-imports": "^4.1.4",
     "husky": "^9.1.7",
     "lint-staged": "^15.3.0",
+    "next": "^15.3.5",
     "prettier": "^3.5.0",
     "tsup": "^8.3.6",
     "typescript": "^5.7.3",

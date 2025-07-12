@@ -1,60 +1,36 @@
-import { WebhookHandler } from './core/webhook';
+// Main SDK class following official patterns
+export { default as WhatsApp } from './core/whatsapp/WhatsApp';
 
-export type { WebhookContact, WebhookEvent, WebhookMessage } from './core/webhook';
-export { WhatsApp } from './core/whatsapp';
-
-export { WebhookHandler };
-
+// Official API classes for advanced usage
 export {
     BusinessProfileApi,
-    EncryptionApi,
     FlowApi,
+    MediaApi,
     MessagesApi,
     PhoneNumberApi,
-    QrCodeApi,
-    RegistrationApi,
     TemplateApi,
     TwoStepVerificationApi,
-    WabaApi,
-} from './features';
-export type {
-    AudioMediaObject,
-    BusinessProfileClass,
-    BusinessProfileResponse,
-    ContactObject,
-    DocumentMediaObject,
-    Flow,
-    FlowClass,
-    FlowEndpointRequest,
-    FlowEndpointResponse,
-    FlowType,
-    FlowTypeEnum,
-    ImageMediaObject,
-    InteractiveObject,
-    LocationObject,
-    MediaClass,
-    MediaResponse,
-    MediasResponse,
-    MessageRequestParams,
-    MessagesResponse,
-    MessageTemplateObject,
-    PhoneNumberClass,
-    PhoneNumberResponse,
-    QrCodeClass,
-    QrCodeResponse,
-    ReactionParams,
-    RegistrationClass,
-    StatusParams,
-    StickerMediaObject,
-    TemplateClass,
-    TemplateResponse,
-    TextMessageParams,
-    TextObject,
-    UploadMediaResponse,
-    VideoMediaObject,
-    WabaAccount,
-    WABAClass,
-} from './features';
+} from './api';
 
-export * from './shared/types';
-export * from './shared/utils';
+// Essential types for basic usage
+export type { WebhookContact, WebhookEvent, WebhookMessage } from './core/webhook/types';
+export type { WabaConfigType, WhatsAppConfig } from './types/config';
+
+// Common enums that users need frequently
+export {
+    ComponentTypesEnum,
+    InteractiveTypesEnum,
+    LanguagesEnum,
+    MessageTypesEnum,
+    ParametersTypesEnum,
+} from './types/enums';
+
+// For backwards compatibility - deprecated, use specific imports instead
+/** @deprecated Use 'meta-cloud-api/webhook/express' instead */
+export { ExpressWebhook } from './core/webhook';
+/** @deprecated Use 'meta-cloud-api/webhook/nextjs' instead */
+export { NextJsWebhook } from './core/webhook';
+
+// Legacy WhatsApp class for backwards compatibility
+/** @deprecated Use the main WhatsApp export instead */
+export { WhatsApp as WhatsAppLegacy } from './core/whatsapp';

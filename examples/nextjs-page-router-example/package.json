@@ -9,8 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "meta-cloud-api": "^0.1.21",
-    "micro": "^10.0.1",
+    "meta-cloud-api": "file:../../",
     "next": "15.3.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
