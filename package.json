@@ -17,7 +17,11 @@
     "clean": "rm -rf dist node_modules",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest --watch"
+    "test:watch": "vitest --watch",
+    "changeset": "changeset",
+    "changeset:version": "changeset version",
+    "changeset:publish": "changeset publish",
+    "release": "pnpm build && changeset publish"
   },
   "publishConfig": {
     "access": "public"
