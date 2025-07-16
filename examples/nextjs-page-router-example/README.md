@@ -1,74 +1,87 @@
-# Next.js WhatsApp Echo Bot
+# Next.js Page Router WhatsApp Bot Example
 
-A simple WhatsApp echo bot built with Next.js that responds to incoming messages.
+Next.js Page Router WhatsApp bot using Meta Cloud API with modular message handlers and builder pattern.
 
-## Features
+## Setup
 
-- Echo text messages with "Echo: [message]" prefix
-- Handle media messages (images, documents, audio, video, etc.)
-- Auto-mark messages as read
-- Webhook verification
+1. **Install dependencies:**
+   ```bash
+   pnpm install
+   ```
 
-## Quick Start
+2. **Configure environment:**
+   ```bash
+   cp env.example .env.local
+   ```
+   
+   Add your credentials:
+   ```env
+   CLOUD_API_ACCESS_TOKEN=your_access_token
+   WA_PHONE_NUMBER_ID=your_phone_number_id
+   WEBHOOK_VERIFICATION_TOKEN=your_verification_token
+   ```
 
-1. **Install dependencies**
-```bash
-cd examples/nextjs-page-router-example
-npm install
+3. **Run development server:**
+   ```bash
+   pnpm run dev
+   ```
+
+4. **Expose with ngrok:**
+   ```bash
+   ngrok http 3000
+   ```
+
+5. **Configure webhook:**
+   - URL: `https://your-ngrok-url.ngrok.io/api/webhook`
+   - Token: `your_verification_token`
+
+## Implementation
+
+### Webhook Handler (`/api/webhook.ts`)
+
+The webhook processes incoming messages and routes them to specific handlers:
+
+```typescript
+const bot = NextJsWebhook(whatsappConfig);
+
+// Currently only interactive handler is active
+bot.processor.onMessage(MessageTypesEnum.Text, handleInteractiveMessage);
 ```
 
-2. **Setup environment**
-```bash
-cp env.example .env.local
+### Message Handlers (`/lib/messageHandlers/`)
+
+Each message type has its own handler with builder pattern:
+
+**Text Handler** - Echoes messages with typing indicator:
+```typescript
+const textMessage = new TextMessageBuilder()
+    .setBody(`Echo: ${message.text?.body}`)
+    .setPreviewUrl(true)
+    .build();
 ```
 
-Edit `.env.local`:
-```env
-CLOUD_API_ACCESS_TOKEN=your_access_token
-WA_PHONE_NUMBER_ID=your_phone_number_id
-WA_BUSINESS_ACCOUNT_ID=your_business_account_id
-WEBHOOK_VERIFICATION_TOKEN=your_verification_token
+**Interactive Handler** - Sends menu list:
+```typescript
+const interactiveMessage = new InteractiveMessageBuilder()
+    .setType(InteractiveTypesEnum.List)
+    .setTextHeader('Our Menu')
+    .setBody('Select items from our menu')
+    .setListButtonText('View Menu')
+    .addListSections([...])
+    .build();
 ```
 
-3. **Run development server**
-```bash
-npm run dev
+**Image Handler** - Responds with sample image:
+```typescript
+const imageMessage = new ImageMessageBuilder()
+    .setLink('https://example.com/image.jpg')
+    .setCaption('Sample Image! 📸')
+    .build();
 ```
 
-## Webhook Setup
+## Current Configuration
 
-### Local Development
-1. Use ngrok: `ngrok http 3000`
-2. Set webhook URL in Meta Dashboard: `https://your-ngrok-url.ngrok.io/api/webhook`
-
-### Production
-Deploy to Vercel/Netlify and use production URL for webhook.
-
-## How It Works
-
-- Text messages → "Echo: [your message]"
-- Media messages → Acknowledgment response
-- All messages marked as read automatically
-
-## Project Structure
-
-```
-src/
-├── pages/api/webhook.ts     # Webhook endpoint
-├── lib/webhookHandler.ts    # Bot logic
-└── pages/index.tsx          # Home page
-```
-
-## Environment Variables
-
-Required in `.env.local`:
-- `CLOUD_API_ACCESS_TOKEN` - WhatsApp Cloud API token
-- `WA_PHONE_NUMBER_ID` - Phone number ID
-- `WA_BUSINESS_ACCOUNT_ID` - Business account ID  
-- `WEBHOOK_VERIFICATION_TOKEN` - Webhook verification token
-
-## Troubleshooting
-
-- **Webhook fails**: Check verification token matches Meta Dashboard
-- **No echo**: Verify access token and phone number ID
-- **Local issues**: Ensure ngrok is running with correct URL
+- **Active:** Interactive handler responds to all text messages with menu
+- **Available:** Text, image, document, contact, location handlers
+- **Raw body parsing** disabled for webhook verification
+- **Auto-features:** Read receipts, typing indicators, response delays

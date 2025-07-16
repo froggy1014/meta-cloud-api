@@ -1,5 +1,7 @@
+import {
+    handleInteractiveMessage,
+} from '@/lib/messageHandlers';
 import { MessageTypesEnum } from 'meta-cloud-api';
-import type { NextApiRequest as WebhookRequest, NextApiResponse as WebhookResponse } from 'meta-cloud-api/webhook';
 import { NextJsWebhook } from 'meta-cloud-api/webhook';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -17,30 +19,35 @@ const whatsappConfig = {
     webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN!,
 };
 
-// 🤖 Create Echo Bot
+// 🤖 Create WhatsApp Bot
 const bot = NextJsWebhook(whatsappConfig);
 
-// 💬 Echo any text message back with typing indicator
-bot.processor.onMessage(MessageTypesEnum.Text, async (whatsapp, message) => {
-    console.log(`📨 "${message.text?.body}" from ${message.from}`);
+// ===================================
+// 🎯 REGISTER MESSAGE HANDLERS
+// ===================================
+// Uncomment the handlers you want to use:
 
-    await whatsapp.messages.markAsRead({ messageId: message.id });
+// Text message handler (enabled by default)
+// bot.processor.onMessage(MessageTypesEnum.Text, handleTextMessage);
 
-    await whatsapp.messages.showTypingIndicator({ messageId: message.id });
+// Image message handler
+// bot.processor.onMessage(MessageTypesEnum.Text, handleImageMessage);
 
-    const thinkingTime = Math.random() * 1000 + 1000;
-    await new Promise((resolve) => setTimeout(resolve, thinkingTime));
+// Document message handler
+// bot.processor.onMessage(MessageTypesEnum.Text, handleDocumentMessage);
 
-    // 🔄 Send the echo response
-    await whatsapp.messages.text({
-        to: message.from,
-        body: `🔄 ${message.text?.body}`,
-    });
+// Contact message handler
+// bot.processor.onMessage(MessageTypesEnum.Text, handleContactMessage);
 
-    console.log(`✅ Echoed back to ${message.from}`);
-});
+// Location message handler
+// bot.processor.onMessage(MessageTypesEnum.Text, handleLocationMessage);
 
-// Main API route handler
+// Interactive message handler
+bot.processor.onMessage(MessageTypesEnum.Text, handleInteractiveMessage);
+
+// ===================================
+// 🌐 MAIN API ROUTE HANDLER
+// ===================================
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     console.log(`[Webhook] ${req.method} ${req.url}`);
 
@@ -62,5 +69,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
     }
 
-    return await bot.webhook(req as unknown as WebhookRequest, res as unknown as WebhookResponse);
+    return await bot.webhook(req, res);
 }
