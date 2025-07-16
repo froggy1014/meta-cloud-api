@@ -86,9 +86,13 @@ type ComponentObject<T extends ComponentTypesEnum> = {
 };
 
 type ButtonComponentObject = ComponentObject<ComponentTypesEnum.Button> & {
-    parameters: Array<ParametersTypesEnum>;
+    parameters?: (TextParametersObject | PayloadParametersObject)[];
     sub_type: SubTypeEnum;
     index: ButtonPositionEnum;
+};
+
+type PayloadParametersObject = ParametersObject<ParametersTypesEnum.Payload> & {
+    payload: string;
 };
 
 export type MessageTemplateObject<T extends ComponentTypesEnum> = {

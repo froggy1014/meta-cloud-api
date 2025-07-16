@@ -107,6 +107,11 @@
       "import": "./dist/api/messages.js",
       "default": "./dist/api/messages.js"
     },
+    "./api/messages/builders": {
+      "types": "./dist/api/messages/builders/index.d.ts",
+      "import": "./dist/api/messages/builders/index.js",
+      "default": "./dist/api/messages/builders/index.js"
+    },
     "./api/media": {
       "types": "./dist/api/media.d.ts",
       "import": "./dist/api/media.js",

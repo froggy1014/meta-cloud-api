@@ -2,7 +2,7 @@ import { MessageTypesEnum } from '../../../types/enums';
 import { MessageRequestBody } from './common';
 
 // Contact Message Types
-type AddressesObject = {
+export type AddressesObject = {
     street?: string;
     city?: string;
     state?: string;
@@ -12,12 +12,12 @@ type AddressesObject = {
     type?: 'HOME' | 'WORK' | string;
 };
 
-type EmailObject = {
+export type EmailObject = {
     email?: string;
     type?: 'HOME' | 'WORK' | string;
 };
 
-type NameObject = {
+export type NameObject = {
     formatted_name: string;
     first_name?: string;
     last_name?: string;
@@ -26,19 +26,19 @@ type NameObject = {
     prefix?: string;
 };
 
-type OrgObject = {
+export type OrgObject = {
     company?: string;
     department?: string;
     title?: string;
 };
 
-type PhoneObject = {
+export type PhoneObject = {
     phone?: 'PHONE_NUMBER';
     type?: 'CELL' | 'MAIN' | 'IPHONE' | 'HOME' | 'WORK' | string;
     wa_id?: string;
 };
 
-type URLObject = {
+export type URLObject = {
     url?: string;
     type?: 'HOME' | 'WORK' | string;
 };
