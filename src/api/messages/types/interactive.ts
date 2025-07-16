@@ -64,7 +64,7 @@ type ActionObject = {
     buttons?: ReplyButtonObject[];
     catalog_id?: string;
     product_retailer_id?: string;
-    sections?: SectionObject;
+    sections?: SectionObject[];
 };
 
 type HeaderObject = {

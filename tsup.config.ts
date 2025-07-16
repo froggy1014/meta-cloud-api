@@ -6,6 +6,7 @@ export default defineConfig({
         index: 'src/index.ts',
         'api/index': 'src/api/index.ts',
         'api/messages/index': 'src/api/messages/index.ts',
+        'api/messages/builders/index': 'src/api/messages/builders/index.ts',
         'api/media/index': 'src/api/media/index.ts',
         'api/profile/index': 'src/api/profile/index.ts',
         'api/flow/index': 'src/api/flow/index.ts',
