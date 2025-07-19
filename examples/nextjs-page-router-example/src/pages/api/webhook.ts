@@ -1,9 +1,7 @@
-import {
-    handleInteractiveMessage,
-} from '@/lib/messageHandlers';
 import { MessageTypesEnum } from 'meta-cloud-api';
 import { NextJsWebhook } from 'meta-cloud-api/webhook';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { handleInteractiveMessage } from '@/lib/messageHandlers/interactive';
 
 // Disable Next.js body parser to handle raw body for webhook verification
 export const config = {

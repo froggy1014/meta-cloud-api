@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "🤖 Simple WhatsApp Echo Bot using meta-cloud-api",
+  "description": "Simple WhatsApp Bot using meta-cloud-api",
   "main": "dist/server.js",
   "scripts": {
     "start": "node dist/server.js",
-    "dev": "NODE_OPTIONS='--no-warnings' nodemon --watch \"src/**/*.ts\" --exec \"ts-node\" src/server.ts",
+    "dev": "NODE_OPTIONS='--no-warnings' nodemon --watch \"src/*.ts\" --exec \"ts-node\" src/server.ts",
     "build": "tsc"
   },
   "dependencies": {
