@@ -16,6 +16,13 @@ export {
 export type { WebhookContact, WebhookEvent, WebhookMessage } from './core/webhook/types';
 export type { WabaConfigType, WhatsAppConfig } from './types/config';
 
+// Flow types and enums
+export { FlowTypeEnum } from './api/flow/types';
+export type { FlowEndpointRequest, FlowEndpointResponse } from './api/flow/types';
+
+// Utility functions
+export { isFlowDataExchangeRequest, isFlowErrorRequest, isFlowPingRequest } from './utils/flowTypeGuards';
+
 // Common enums that users need frequently
 export {
     ComponentTypesEnum,
