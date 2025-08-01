@@ -22,6 +22,8 @@ export type { FlowEndpointRequest, FlowEndpointResponse } from './api/flow/types
 
 // Utility functions
 export { isFlowDataExchangeRequest, isFlowErrorRequest, isFlowPingRequest } from './utils/flowTypeGuards';
+export { isMetaError } from './utils/isMetaError';
+export type { MetaError } from './utils/isMetaError';
 
 // Common enums that users need frequently
 export {
