@@ -1,20 +1,15 @@
-import { MessageTypesEnum } from 'meta-cloud-api';
-import { webhookHandler } from 'meta-cloud-api/webhook/nextjs';
+import { MessageTypesEnum } from 'meta-cloud-api/types/enums';
+import { webhookHandler } from 'meta-cloud-api/webhook/nextjs-app';
 
 // Import all message handlers
-import { handleContactMessage } from '@/lib/messageHandlers/contact';
-import { handleDocumentMessage } from '@/lib/messageHandlers/document';
-import { handleImageMessage } from '@/lib/messageHandlers/image';
-import { handleInteractiveMessage } from '@/lib/messageHandlers/interactive';
-import { handleLocationMessage } from '@/lib/messageHandlers/location';
-import { handleTextMessage } from '@/lib/messageHandlers/text';
-
-// Disable Next.js body parser to handle raw body for webhook verification
-export const config = {
-    api: {
-        bodyParser: false,
-    },
-};
+import {
+    handleTextMessage,
+    handleImageMessage,
+    handleDocumentMessage,
+    handleContactMessage,
+    handleLocationMessage,
+    handleInteractiveMessage,
+} from '@/lib/messageHandlers';
 
 // 🔧 Configuration from environment variables
 const whatsappConfig = {
@@ -24,7 +19,7 @@ const whatsappConfig = {
     webhookVerificationToken: process.env.WHATSAPP_WEBHOOK_VERIFICATION_TOKEN!,
 };
 
-// 🤖 Create WhatsApp Bot with new clean architecture
+// 🤖 Create WhatsApp Bot
 const Whatsapp = webhookHandler(whatsappConfig);
 
 // ===================================
@@ -47,11 +42,11 @@ Whatsapp.processor.onMessage(MessageTypesEnum.Contacts, handleContactMessage);
 // Location message handler
 Whatsapp.processor.onMessage(MessageTypesEnum.Location, handleLocationMessage);
 
-// Interactive message handler
+// Interactive message handler (for button/list responses)
 Whatsapp.processor.onMessage(MessageTypesEnum.Interactive, handleInteractiveMessage);
 
 // ===================================
-// 🌐 MAIN API ROUTE HANDLER
+// 🌐 CLEAN EXPORT PATTERN
 // ===================================
-// The webhook handler automatically handles body parsing and method routing
-export default Whatsapp.webhook;
+// Clean export pattern following whatsapp-api-js methodology
+export const { GET, POST } = Whatsapp.webhook;
