@@ -24,6 +24,7 @@ export default defineConfig({
         'core/webhook/index': 'src/core/webhook/index.ts',
         'core/webhook/frameworks/express': 'src/core/webhook/frameworks/express.ts',
         'core/webhook/frameworks/nextjs': 'src/core/webhook/frameworks/nextjs.ts',
+        'core/webhook/frameworks/nextjs-app': 'src/core/webhook/frameworks/nextjs-app.ts',
         'core/whatsapp/index': 'src/core/whatsapp/index.ts',
     },
     format: ['esm'],
