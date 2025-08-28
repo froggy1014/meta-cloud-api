@@ -180,8 +180,8 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
         // Handle both string and TextObject types
         const textPayload: m.TextObject =
             typeof body === 'string'
-                ? { body, preview_url: previewUrl }
-                : { ...body, preview_url: previewUrl ?? body.preview_url };
+                ? { body, preview_url: previewUrl ?? true }
+                : { ...body, preview_url: previewUrl ?? body.preview_url ?? true };
 
         return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Text, textPayload, to, replyMessageId)));
     }
