@@ -18,18 +18,10 @@ export {
 
 // Essential types for basic usage
 export type { WebhookContact, WebhookEvent, WebhookMessage } from './core/webhook/types';
-export type { WabaConfigType, WhatsAppConfig } from './types/config';
 
-// Shared response types
-export type {
-    GeneralHeaderInterface,
-    GeneralRequestBody,
-    Paging,
-    RequesterResponseInterface,
-    ResponseData,
-    ResponsePagination,
-    ResponseSuccess,
-} from './types/request';
+// Re-export all types and enums for convenience
+export * from './types/enums';
+export * from './types/index';
 
 // Business Profile types
 export type {

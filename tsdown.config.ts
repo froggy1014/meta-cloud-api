@@ -47,7 +47,7 @@ export default defineConfig([
     },
     // Standalone types for client-side
     {
-        entry: 'src/types/index.ts',
+        entry: 'src/client.ts',
         outDir: 'dist',
         format: ['esm'],
         dts: true,

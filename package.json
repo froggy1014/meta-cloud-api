@@ -1,6 +1,6 @@
 {
   "name": "meta-cloud-api",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "TypeScript wrapper for Meta's Cloud API",
   "type": "module",
   "main": "./dist/index.js",
@@ -29,14 +29,20 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
       "default": "./dist/index.js"
     },
     "./enums": {
       "types": "./dist/enums.d.ts",
+      "import": "./dist/enums.js",
+      "require": "./dist/enums.js",
       "default": "./dist/enums.js"
     },
     "./types": {
       "types": "./dist/client.d.ts",
+      "import": "./dist/client.js",
+      "require": "./dist/client.js",
       "default": "./dist/client.js"
     },
     "./package.json": "./package.json"
