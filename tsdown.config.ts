@@ -4,13 +4,17 @@ import { defineConfig } from 'tsdown';
 export default defineConfig([
     // Main bundle for Node.js
     {
-        entry: 'src/index.ts',
+        entry: {
+            index: 'src/index.ts',
+            types: 'src/types/index.ts',
+        },
         format: ['esm'],
         dts: true,
         sourcemap: true,
         clean: true,
         minify: false,
         treeshake: false,
+        exports: true,
         target: 'es2022',
         platform: 'node',
         external: ['node:*', 'crypto', 'fs', 'path', 'url', 'util'],
@@ -31,31 +35,5 @@ export default defineConfig([
                 },
             },
         ],
-    },
-    // Standalone enums for client-side
-    {
-        entry: 'src/types/enums.ts',
-        outDir: 'dist',
-        format: ['esm'],
-        dts: true,
-        clean: false,
-        minify: false,
-        treeshake: false,
-        target: 'es2022',
-        platform: 'neutral',
-        unbundle: true,
-    },
-    // Standalone types for client-side
-    {
-        entry: 'src/client.ts',
-        outDir: 'dist',
-        format: ['esm'],
-        dts: true,
-        clean: false,
-        minify: false,
-        treeshake: false,
-        target: 'es2022',
-        platform: 'neutral',
-        unbundle: true,
     },
 ]);
