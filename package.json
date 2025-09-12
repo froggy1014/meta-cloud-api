@@ -1,6 +1,6 @@
 {
   "name": "meta-cloud-api",
-  "version": "1.1.0",
+  "version": "1.1.4",
   "description": "TypeScript wrapper for Meta's Cloud API",
   "type": "module",
   "main": "./dist/index.js",
@@ -10,8 +10,8 @@
     "prepublishOnly": "pnpm build",
     "prepare": "husky",
     "cz": "cz",
-    "dev": "tsup --watch",
-    "build": "tsup --clean",
+    "dev": "tsdown --watch",
+    "build": "tsdown --clean",
     "format": "prettier .",
     "lint": "eslint .",
     "clean": "rm -rf dist node_modules",
@@ -27,126 +27,27 @@
     "access": "public"
   },
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "default": "./dist/index.js"
-    },
-    "./api": {
-      "types": "./dist/api/index.d.ts",
-      "import": "./dist/api/index.js",
-      "default": "./dist/api/index.js"
-    },
-    "./api/messages": {
-      "types": "./dist/api/messages/index.d.ts",
-      "import": "./dist/api/messages/index.js",
-      "default": "./dist/api/messages/index.js"
-    },
-    "./api/messages/builders": {
-      "types": "./dist/api/messages/builders/index.d.ts",
-      "import": "./dist/api/messages/builders/index.js",
-      "default": "./dist/api/messages/builders/index.js"
-    },
-    "./api/media": {
-      "types": "./dist/api/media/index.d.ts",
-      "import": "./dist/api/media/index.js",
-      "default": "./dist/api/media/index.js"
-    },
-    "./api/flow": {
-      "types": "./dist/api/flow/index.d.ts",
-      "import": "./dist/api/flow/index.js",
-      "default": "./dist/api/flow/index.js"
-    },
-    "./api/phone": {
-      "types": "./dist/api/phone/index.d.ts",
-      "import": "./dist/api/phone/index.js",
-      "default": "./dist/api/phone/index.js"
-    },
-    "./api/profile": {
-      "types": "./dist/api/profile/index.d.ts",
-      "import": "./dist/api/profile/index.js",
-      "default": "./dist/api/profile/index.js"
-    },
-    "./api/template": {
-      "types": "./dist/api/template/index.d.ts",
-      "import": "./dist/api/template/index.js",
-      "default": "./dist/api/template/index.js"
-    },
-    "./api/qrCode": {
-      "types": "./dist/api/qrCode/index.d.ts",
-      "import": "./dist/api/qrCode/index.js",
-      "default": "./dist/api/qrCode/index.js"
-    },
-    "./api/registration": {
-      "types": "./dist/api/registration/index.d.ts",
-      "import": "./dist/api/registration/index.js",
-      "default": "./dist/api/registration/index.js"
-    },
-    "./api/encryption": {
-      "types": "./dist/api/encryption/index.d.ts",
-      "import": "./dist/api/encryption/index.js",
-      "default": "./dist/api/encryption/index.js"
-    },
-    "./api/twoStepVerification": {
-      "types": "./dist/api/twoStepVerification/index.d.ts",
-      "import": "./dist/api/twoStepVerification/index.js",
-      "default": "./dist/api/twoStepVerification/index.js"
-    },
-    "./api/waba": {
-      "types": "./dist/api/waba/index.d.ts",
-      "import": "./dist/api/waba/index.js",
-      "default": "./dist/api/waba/index.js"
-    },
-    "./utils": {
-      "types": "./dist/utils/index.d.ts",
-      "import": "./dist/utils/index.js",
-      "default": "./dist/utils/index.js"
-    },
-    "./webhook": {
-      "types": "./dist/core/webhook/index.d.ts",
-      "import": "./dist/core/webhook/index.js",
-      "default": "./dist/core/webhook/index.js"
-    },
-    "./webhook/express": {
-      "types": "./dist/core/webhook/frameworks/express.d.ts",
-      "import": "./dist/core/webhook/frameworks/express.js",
-      "default": "./dist/core/webhook/frameworks/express.js"
-    },
-    "./webhook/nextjs": {
-      "types": "./dist/core/webhook/frameworks/nextjs.d.ts",
-      "import": "./dist/core/webhook/frameworks/nextjs.js",
-      "default": "./dist/core/webhook/frameworks/nextjs.js"
-    },
-    "./webhook/nextjs-app": {
-      "types": "./dist/core/webhook/frameworks/nextjs-app.d.ts",
-      "import": "./dist/core/webhook/frameworks/nextjs-app.js",
-      "default": "./dist/core/webhook/frameworks/nextjs-app.js"
-    },
-    "./types": {
-      "types": "./dist/types/index.d.ts",
-      "import": "./dist/types/index.js",
-      "default": "./dist/types/index.js"
-    },
-    "./types/enums": {
-      "types": "./dist/types/enums.d.ts",
-      "import": "./dist/types/enums.js",
-      "default": "./dist/types/enums.js"
-    },
-    "./types/config": {
-      "types": "./dist/types/config.d.ts",
-      "import": "./dist/types/config.js",
-      "default": "./dist/types/config.js"
-    },
-    "./core/webhook": {
-      "types": "./dist/core/webhook/index.d.ts",
-      "import": "./dist/core/webhook/index.js",
-      "default": "./dist/core/webhook/index.js"
-    },
-    "./core/whatsapp": {
-      "types": "./dist/core/whatsapp/index.d.ts",
-      "import": "./dist/core/whatsapp/index.js",
-      "default": "./dist/core/whatsapp/index.js"
-    },
+    ".": "./dist/index.js",
+    "./api": "./dist/api/index.js",
+    "./api/encryption": "./dist/api/encryption/index.js",
+    "./api/flow": "./dist/api/flow/index.js",
+    "./api/media": "./dist/api/media/index.js",
+    "./api/messages": "./dist/api/messages/index.js",
+    "./api/messages/builders": "./dist/api/messages/builders/index.js",
+    "./api/phone": "./dist/api/phone/index.js",
+    "./api/profile": "./dist/api/profile/index.js",
+    "./api/qrCode": "./dist/api/qrCode/index.js",
+    "./api/registration": "./dist/api/registration/index.js",
+    "./api/template": "./dist/api/template/index.js",
+    "./api/twoStepVerification": "./dist/api/twoStepVerification/index.js",
+    "./api/waba": "./dist/api/waba/index.js",
+    "./core/webhook": "./dist/core/webhook/index.js",
+    "./core/webhook/frameworks/express": "./dist/core/webhook/frameworks/express.js",
+    "./core/webhook/frameworks/nextjs": "./dist/core/webhook/frameworks/nextjs.js",
+    "./core/webhook/frameworks/nextjs-app": "./dist/core/webhook/frameworks/nextjs-app.js",
+    "./core/whatsapp": "./dist/core/whatsapp/index.js",
+    "./types": "./dist/types/index.js",
+    "./utils": "./dist/utils/index.js",
     "./package.json": "./package.json"
   },
   "keywords": [
@@ -215,7 +116,7 @@
     "lint-staged": "^15.3.0",
     "next": "^15.3.5",
     "prettier": "^3.5.0",
-    "tsup": "^8.3.6",
+    "tsdown": "^0.15.0",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.23.0",
     "vitest": "^2.1.8"
@@ -230,5 +131,6 @@
     "commitizen": {
       "path": "@commitlint/cz-commitlint"
     }
-  }
+  },
+  "module": "./dist/index.js"
 }
