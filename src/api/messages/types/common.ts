@@ -1,4 +1,4 @@
-import { BaseClass } from '../../../types/base';
+import type { BaseClass } from '../../../types/base';
 import { ComponentTypesEnum, InteractiveTypesEnum, MessageTypesEnum } from '../../../types/enums';
 import { GeneralRequestBody } from '../../../types/request';
 

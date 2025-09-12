@@ -1,7 +1,7 @@
 import { WhatsApp } from '@core/whatsapp';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { DataLocalizationRegionEnum } from '../../../types';
+import { DataLocalizationRegionEnum } from 'src/types/enums';
 
 describe('Registration API - Unit Tests', () => {
     let whatsApp: WhatsApp;

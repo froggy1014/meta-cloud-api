@@ -1,6 +1,6 @@
 import { WhatsApp } from '@core/whatsapp';
 
-import { BusinessVerticalEnum } from '../../../types';
+import { BusinessVerticalEnum } from 'src/types/enums';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { UpdateBusinessProfileRequest } from '../types';
 

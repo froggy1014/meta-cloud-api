@@ -1,6 +1,3 @@
-// Base types
-export { BaseAPI, BaseClass } from './base';
-
 // Configuration types
 export type { WabaConfigType, WhatsAppConfig } from './config';
 
@@ -8,25 +5,16 @@ export type { WabaConfigType, WhatsAppConfig } from './config';
 export type { LoggerInterface } from './logger';
 
 // HTTP client types
+export type { RequesterClass, ResponseSuccess, GeneralRequestBody } from './request';
+
+// HTTPS client types
 export type {
     HttpsClientClass,
     HttpsClientResponseClass,
     ResponseHeaders,
-    ResponseHeaderValue,
     ResponseJSONBody,
+    ResponseHeaderValue,
 } from './httpsClient';
 
-// Request types
-export type {
-    GeneralHeaderInterface,
-    GeneralRequestBody,
-    Paging,
-    RequesterClass,
-    RequesterResponseInterface,
-    ResponseData,
-    ResponsePagination,
-    ResponseSuccess,
-} from './request';
-
-// All enums
-export * from './enums';
+// Base class interface (type-only)
+export type { BaseClass } from './base';

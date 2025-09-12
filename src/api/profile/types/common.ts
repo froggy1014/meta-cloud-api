@@ -1,4 +1,4 @@
-import { BaseClass } from '../../../types/base';
+import type { BaseClass } from 'src/types/base';
 import { BusinessVerticalEnum } from '../../../types/enums';
 import { ResponseSuccess } from '../../../types/request';
 import { UploadBusinessProfileResponse, UploadHandle, UploadSessionResponse } from './upload';

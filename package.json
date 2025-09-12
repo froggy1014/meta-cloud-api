@@ -1,6 +1,6 @@
 {
   "name": "meta-cloud-api",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "TypeScript wrapper for Meta's Cloud API",
   "type": "module",
   "main": "./dist/index.js",
@@ -27,27 +27,18 @@
     "access": "public"
   },
   "exports": {
-    ".": "./dist/index.js",
-    "./api": "./dist/api/index.js",
-    "./api/encryption": "./dist/api/encryption/index.js",
-    "./api/flow": "./dist/api/flow/index.js",
-    "./api/media": "./dist/api/media/index.js",
-    "./api/messages": "./dist/api/messages/index.js",
-    "./api/messages/builders": "./dist/api/messages/builders/index.js",
-    "./api/phone": "./dist/api/phone/index.js",
-    "./api/profile": "./dist/api/profile/index.js",
-    "./api/qrCode": "./dist/api/qrCode/index.js",
-    "./api/registration": "./dist/api/registration/index.js",
-    "./api/template": "./dist/api/template/index.js",
-    "./api/twoStepVerification": "./dist/api/twoStepVerification/index.js",
-    "./api/waba": "./dist/api/waba/index.js",
-    "./core/webhook": "./dist/core/webhook/index.js",
-    "./core/webhook/frameworks/express": "./dist/core/webhook/frameworks/express.js",
-    "./core/webhook/frameworks/nextjs": "./dist/core/webhook/frameworks/nextjs.js",
-    "./core/webhook/frameworks/nextjs-app": "./dist/core/webhook/frameworks/nextjs-app.js",
-    "./core/whatsapp": "./dist/core/whatsapp/index.js",
-    "./types": "./dist/types/index.js",
-    "./utils": "./dist/utils/index.js",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./enums": {
+      "types": "./dist/enums.d.ts",
+      "default": "./dist/enums.js"
+    },
+    "./types": {
+      "types": "./dist/client.d.ts",
+      "default": "./dist/client.js"
+    },
     "./package.json": "./package.json"
   },
   "keywords": [
