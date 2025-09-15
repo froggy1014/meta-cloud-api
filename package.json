@@ -39,6 +39,10 @@
       "types": "./dist/types/enums.d.ts",
       "import": "./dist/types/enums.js"
     },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils/index.js"
+    },
     "./package.json": "./package.json"
   },
   "keywords": [

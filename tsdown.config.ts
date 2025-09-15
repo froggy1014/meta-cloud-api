@@ -44,4 +44,15 @@ export default defineConfig([
         target: 'es2022',
         platform: 'neutral',
     },
+    {
+        entry: ['src/utils/index.ts'],
+        outDir: 'dist/utils',
+        format: ['esm'],
+        dts: true,
+        clean: true,
+        minify: true,
+        treeshake: true,
+        target: 'es2022',
+        platform: 'neutral',
+    },
 ]);
