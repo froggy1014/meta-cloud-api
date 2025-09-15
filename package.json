@@ -45,6 +45,14 @@
     },
     "./package.json": "./package.json"
   },
+  "typesVersions": {
+    "*": {
+      "types": "./dist/types/index.d.ts",
+      "types/*": "./dist/types/*",
+      "enums": "./dist/types/enums.d.ts",
+      "utils": "./dist/utils/index.d.ts"
+    }
+  },
   "keywords": [
     "whatsapp-api",
     "cloud-api",
@@ -128,4 +136,5 @@
     }
   },
   "module": "./dist/index.js"
+  
 }
