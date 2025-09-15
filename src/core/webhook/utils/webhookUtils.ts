@@ -1,12 +1,14 @@
 import crypto from 'crypto';
+
+import WhatsApp from '../../whatsapp/WhatsApp';
+import { WebhookMessage } from '../types';
 import { FlowEndpointRequest } from '../../../api/flow';
 import { FlowTypeEnum } from '../../../api/flow/types';
 import { WabaConfigType } from '../../../types/config';
 import { MessageTypesEnum } from '../../../types/enums';
 import { isFlowDataExchangeRequest, isFlowErrorRequest, isFlowPingRequest } from '../../../utils/flowTypeGuards';
 import Logger from '../../../utils/logger';
-import { WhatsApp } from '../../whatsapp';
-import { WebhookMessage, WebhookMessageValue } from '../types';
+import { WebhookMessageValue } from '../types';
 
 const LIB_NAME = 'WEBHOOK_UTILS';
 const LOGGER = new Logger(LIB_NAME, process.env.DEBUG === 'true');

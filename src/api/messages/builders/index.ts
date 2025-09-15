@@ -1,15 +1,7 @@
-// Builder Patterns
-export { ContactMessageBuilder, ContactMessageFactory } from './ContactMessageBuilder';
-export { InteractiveMessageBuilder, InteractiveMessageFactory } from './InteractiveMessageBuilder';
-export { LocationMessageBuilder, LocationMessageFactory } from './LocationMessageBuilder';
-export {
-    AudioMessageBuilder,
-    DocumentMessageBuilder,
-    ImageMessageBuilder,
-    MediaMessageFactory,
-    StickerMessageBuilder,
-    VideoMessageBuilder,
-} from './MediaMessageBuilder';
-export { ReactionMessageBuilder, ReactionMessageFactory } from './ReactionMessageBuilder';
-export { TemplateMessageBuilder, TemplateMessageFactory } from './TemplateMessageBuilder';
-export { TextMessageBuilder, TextMessageFactory } from './TextMessageBuilder';
+export * from './ContactMessageBuilder';
+export * from './InteractiveMessageBuilder';
+export * from './LocationMessageBuilder';
+export * from './MediaMessageBuilder';
+export * from './ReactionMessageBuilder';
+export * from './TemplateMessageBuilder';
+export * from './TextMessageBuilder';

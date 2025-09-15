@@ -3,7 +3,7 @@ import {
     EncryptionApi,
     FlowApi,
     MediaApi,
-    MessagesApi,
+    MessageApi,
     PhoneNumberApi,
     QrCodeApi,
     RegistrationApi,
@@ -15,7 +15,7 @@ import { WhatsAppConfig } from '../../types/config';
 
 export declare class WhatsAppClass {
     constructor(config?: WhatsAppConfig);
-    readonly messages: MessagesApi;
+    readonly messages: MessageApi;
     readonly templates: TemplateApi;
     readonly phoneNumber: PhoneNumberApi;
     readonly qrCode: QrCodeApi;

@@ -1,5 +1,4 @@
-import { LocationMessageBuilder } from 'meta-cloud-api/api/messages/builders';
-import type { WhatsApp, WebhookMessage } from 'meta-cloud-api';
+import { LocationMessageBuilder, type WebhookMessage, type WhatsApp } from 'meta-cloud-api';
 
 /**
  * Handler for location messages

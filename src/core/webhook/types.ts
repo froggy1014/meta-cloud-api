@@ -778,11 +778,6 @@ export interface WebhookEvent {
 }
 
 /**
- * Message handler function type
- */
-export type MessageHandler = (message: WebhookMessage) => void | Promise<void>;
-
-/**
  * Message status enum
  */
 export enum MessageStatus {
@@ -790,3 +785,6 @@ export enum MessageStatus {
     READ = 'read',
     SENT = 'sent',
 }
+
+// Remove conflicting export to prevent duplicate type definitions
+// export type { WhatsApp } from '../../types';

@@ -1,4 +1,4 @@
-import { BaseRequest, BaseResponse, BaseWebhookConfig, BaseWebhookHandler } from './handler';
+import { BaseRequest, BaseResponse, BaseWebhookConfig, BaseWebhookHandler } from '../handler';
 
 // Next.js specific interfaces
 export interface BaseApiRequest extends BaseRequest {
@@ -148,7 +148,7 @@ class NextJsWebhookHandler<
 }
 
 // Generic webhook handler that accepts any compatible request/response types
-export function webhookHandler<TRequest extends BaseApiRequest, TResponse extends BaseApiResponse>(
+export function nextjsWebhookHandler<TRequest extends BaseApiRequest, TResponse extends BaseApiResponse>(
     config: NextJsWebhookConfig,
 ) {
     const handler = new NextJsWebhookHandler<TRequest, TResponse>(config);

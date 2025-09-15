@@ -1,5 +1,5 @@
-import { WhatsAppConfig } from '../../../types/config';
-import { WebhookProcessor } from '../WebhookProcessor';
+import { WhatsAppConfig } from '../../../../types/config';
+import { WebhookProcessor } from '../../WebhookProcessor';
 
 // Define Next.js types locally to avoid requiring Next.js as a dependency
 export interface NextRequest extends Request {
@@ -16,7 +16,7 @@ export interface NextJsAppWebhookConfig extends WhatsAppConfig {
     // App Router specific config (currently none, but interface reserved for future use)
 }
 
-export function webhookHandler(config: NextJsAppWebhookConfig) {
+export function nextjsAppWebhookHandler(config: NextJsAppWebhookConfig) {
     const processor = new WebhookProcessor(config);
 
     return {

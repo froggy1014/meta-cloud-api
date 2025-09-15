@@ -1,5 +1,4 @@
-import type { WebhookMessage, WhatsApp } from 'meta-cloud-api';
-import { ContactMessageBuilder } from 'meta-cloud-api/api/messages/builders';
+import { ContactMessageBuilder, type WebhookMessage, type WhatsApp } from 'meta-cloud-api';
 
 /**
  * Handler for contact messages

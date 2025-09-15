@@ -1,6 +1,5 @@
-import type { WebhookMessage, WhatsApp } from 'meta-cloud-api';
-import { InteractiveTypesEnum } from 'meta-cloud-api';
-import { InteractiveMessageBuilder } from 'meta-cloud-api/api/messages/builders';
+import { InteractiveMessageBuilder, type WebhookMessage, type WhatsApp } from 'meta-cloud-api';
+import { InteractiveTypesEnum } from 'meta-cloud-api/enums';
 
 /**
  * Handler for interactive reply messages

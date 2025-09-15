@@ -1,4 +1,4 @@
-import { BaseRequest, BaseResponse, BaseWebhookConfig, BaseWebhookHandler } from './handler';
+import { BaseRequest, BaseResponse, BaseWebhookConfig, BaseWebhookHandler } from '../handler';
 
 // Express-like interfaces to avoid direct Express dependency
 export interface ExpressRequest extends BaseRequest {
@@ -113,7 +113,7 @@ class ExpressWebhookHandler extends BaseWebhookHandler<ExpressRequest, ExpressRe
     }
 }
 
-export function webhookHandler(config: ExpressWebhookConfig) {
+export function expressWebhookHandler(config: ExpressWebhookConfig) {
     const handler = new ExpressWebhookHandler(config);
     return handler.getHandlers();
 }

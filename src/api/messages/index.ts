@@ -1,8 +1,8 @@
-import MessageApi from './MessageApi';
+import MessagesApi from './MessageApi';
 
-export default MessageApi;
+export default MessagesApi;
 
-export { MessageApi };
+export { MessagesApi, MessagesApi as MessageApi };
 
 export type {
     AudioMediaObject,
@@ -12,8 +12,8 @@ export type {
     InteractiveObject,
     LocationObject,
     MessageRequestParams,
-    MessageTemplateObject,
     MessagesResponse,
+    MessageTemplateObject,
     ReactionParams,
     StatusParams,
     StickerMediaObject,
@@ -21,3 +21,5 @@ export type {
     TextObject,
     VideoMediaObject,
 } from './types';
+
+export * from './builders';

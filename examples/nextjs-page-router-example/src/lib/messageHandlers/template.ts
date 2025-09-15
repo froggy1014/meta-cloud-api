@@ -1,5 +1,4 @@
-import type { WhatsApp } from 'meta-cloud-api';
-import { TemplateMessageBuilder } from 'meta-cloud-api/api/messages/builders';
+import { TemplateMessageBuilder, type WhatsApp } from 'meta-cloud-api';
 
 /**
  * Send a template message

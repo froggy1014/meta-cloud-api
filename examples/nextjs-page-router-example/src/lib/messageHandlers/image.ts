@@ -1,5 +1,4 @@
-import type { WebhookMessage, WhatsApp } from 'meta-cloud-api';
-import { ImageMessageBuilder } from 'meta-cloud-api/api/messages/builders';
+import { ImageMessageBuilder, type WebhookMessage, type WhatsApp } from 'meta-cloud-api';
 
 /**
  * Handler for image messages
