@@ -223,3 +223,6 @@ export type { EncryptionPublicKeyResponse } from '../api/encryption/types';
 
 // Utility types
 export type { MetaError } from '../utils/isMetaError';
+
+// All enums (commonly used on client-side)
+export * from './enums';

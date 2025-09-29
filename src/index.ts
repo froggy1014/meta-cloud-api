@@ -6,3 +6,6 @@ export * from './api';
 
 // Webhooks
 export * from './core/webhook';
+
+// Types and enums
+export * from './types';
