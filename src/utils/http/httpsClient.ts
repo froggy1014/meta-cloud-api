@@ -5,8 +5,7 @@ import { HttpsClientClass, HttpsClientResponseClass, ResponseHeaders, ResponseJS
 import Logger from '../logger';
 
 const LIB_NAME = 'HttpsClient';
-const LOG_LOCAL = false;
-const LOGGER = new Logger(LIB_NAME, process.env.DEBUG === 'true' || LOG_LOCAL);
+const LOGGER = new Logger(LIB_NAME, process.env.DEBUG === 'true');
 
 export default class HttpsClient implements HttpsClientClass {
     agent: Agent;

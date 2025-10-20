@@ -5,8 +5,7 @@ import Logger from '../logger';
 import HttpsClient from './httpsClient';
 
 const LIB_NAME = 'REQUESTER';
-const LOG_LOCAL = false;
-const LOGGER = new Logger(LIB_NAME, process.env.DEBUG === 'true' || LOG_LOCAL);
+const LOGGER = new Logger(LIB_NAME, process.env.DEBUG === 'true');
 
 export default class Requester implements RequesterClass {
     client: Readonly<HttpsClient>;

@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { inspect } from 'util';
 import type { LoggerInterface } from '../types/logger';
 
 export default class Logger implements LoggerInterface {
@@ -10,13 +11,19 @@ export default class Logger implements LoggerInterface {
         this.debug = debug;
     }
 
+    private formatData(data: any[]): string {
+        return data
+            .map((item) => (typeof item === 'object' ? inspect(item, { depth: null, colors: true }) : item))
+            .join(' ');
+    }
+
     log(...data: any[]) {
         if (this.debug) {
             let prefix = `[ ${Date.now()} ]`;
             if (this.name) {
                 prefix += ` - ${this.name}`;
             }
-            console.log.apply(console, [prefix, ': ', ...data]);
+            console.log(prefix, ': ', this.formatData(data));
         }
     }
 
@@ -25,22 +32,26 @@ export default class Logger implements LoggerInterface {
         if (this.name) {
             prefix += ` - ${this.name}`;
         }
-        console.error.apply(console, [prefix, ': ', ...data]);
+        console.error(prefix, ': ', this.formatData(data));
     }
 
     warn(...data: any[]) {
-        let prefix = `[ ${Date.now()} ] - WARN`;
-        if (this.name) {
-            prefix += ` - ${this.name}`;
+        if (this.debug) {
+            let prefix = `[ ${Date.now()} ] - WARN`;
+            if (this.name) {
+                prefix += ` - ${this.name}`;
+            }
+            console.warn(prefix, ': ', this.formatData(data));
         }
-        console.warn.apply(console, [prefix, ': ', ...data]);
     }
 
     info(...data: any[]) {
-        let prefix = `[ ${Date.now()} ] - INFO`;
-        if (this.name) {
-            prefix += ` - ${this.name}`;
+        if (this.debug) {
+            let prefix = `[ ${Date.now()} ] - INFO`;
+            if (this.name) {
+                prefix += ` - ${this.name}`;
+            }
+            console.info(prefix, ': ', this.formatData(data));
         }
-        console.info.apply(console, [prefix, ': ', ...data]);
     }
 }
