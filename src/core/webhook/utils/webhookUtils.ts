@@ -1,14 +1,13 @@
 import crypto from 'crypto';
 
-import WhatsApp from '../../whatsapp/WhatsApp';
-import { WebhookMessage } from '../types';
 import { FlowEndpointRequest } from '../../../api/flow';
 import { FlowTypeEnum } from '../../../api/flow/types';
 import { WabaConfigType } from '../../../types/config';
 import { MessageTypesEnum } from '../../../types/enums';
 import { isFlowDataExchangeRequest, isFlowErrorRequest, isFlowPingRequest } from '../../../utils/flowTypeGuards';
 import Logger from '../../../utils/logger';
-import { WebhookMessageValue } from '../types';
+import WhatsApp from '../../whatsapp/WhatsApp';
+import { WebhookMessage, WebhookMessageValue } from '../types';
 
 const LIB_NAME = 'WEBHOOK_UTILS';
 const LOGGER = new Logger(LIB_NAME, process.env.DEBUG === 'true');
@@ -69,6 +68,29 @@ export async function processWebhookMessages(
 }
 
 /**
+ * Create a standard ping response for WhatsApp Flow health checks
+ * @returns Flow ping response object
+ */
+export function createFlowPingResponse() {
+    return {
+        version: '3.0',
+        data: { status: 'active' },
+    };
+}
+
+/**
+ * Create a standard error response for WhatsApp Flow error notifications
+ * @returns Acknowledgement response for error notification
+ */
+export function createFlowErrorResponse() {
+    return {
+        data: {
+            acknowledged: true,
+        },
+    };
+}
+
+/**
  * Handle flow requests
  */
 export async function processFlowRequest(
@@ -92,47 +114,78 @@ export async function processFlowRequest(
         const data = JSON.parse(body);
         LOGGER.info('Flow request data:', data);
 
-        // Decrypt the request
-        const { decryptedBody } = decryptFlowRequest(data, config);
+        // Decrypt the request and get decrypted AES key and IV
+        const { decryptedBody, aesKeyBuffer, initialVectorBuffer } = decryptFlowRequest(data, config);
         LOGGER.info('Decrypted flow request:', decryptedBody);
 
-        // Get the flow handler
-        const handler = flowHandlers.get(FlowTypeEnum.All);
+        // Determine flow type
+        const isPing = isFlowPingRequest(decryptedBody);
+        const isError = isFlowErrorRequest(decryptedBody);
+        const isDataExchange = isFlowDataExchangeRequest(decryptedBody);
+
+        let flowType: FlowTypeEnum;
+        if (isPing) {
+            flowType = FlowTypeEnum.Ping;
+        } else if (isError) {
+            flowType = FlowTypeEnum.Error;
+        } else if (isDataExchange) {
+            flowType = FlowTypeEnum.Change;
+        } else {
+            flowType = FlowTypeEnum.All;
+        }
+
+        // Get the flow handler based on type
+        let handler = flowHandlers.get(flowType);
+
+        // For Ping and Error, use default handlers if not registered
         if (!handler) {
-            LOGGER.warn('No handler registered for flow action:', { action: decryptedBody.action });
-            return new Response(JSON.stringify({ error: 'Handler not found' }), { status: 404 });
+            if (flowType === FlowTypeEnum.Ping) {
+                LOGGER.info('No Ping handler registered, using default');
+                handler = () => createFlowPingResponse();
+            } else if (flowType === FlowTypeEnum.Error) {
+                LOGGER.info('No Error handler registered, using default');
+                handler = () => createFlowErrorResponse();
+            } else {
+                // For Change and other types, try All handler as fallback
+                handler = flowHandlers.get(FlowTypeEnum.All);
+                if (!handler) {
+                    LOGGER.warn('No handler registered for flow type:', { flowType, action: decryptedBody.action });
+                    return new Response(JSON.stringify({ error: 'Handler not found' }), { status: 404 });
+                }
+            }
         }
 
-        // Handle different flow types
-        if (isFlowPingRequest(decryptedBody)) {
-            LOGGER.info('Handling flow ping request');
-            return new Response(
-                JSON.stringify({
-                    version: '3.0',
-                    data: { status: 'active' },
-                }),
-                { status: 200 },
-            );
+        // Call the user's handler for the flow type
+        const result = await handler(whatsapp, decryptedBody);
+        LOGGER.info('Flow handler result:', result);
+
+        // Return response based on flow type
+        if (isError) {
+            LOGGER.warn('Flow error notification received', { error: decryptedBody.data });
+
+            // If user handler didn't return a response, use default acknowledgement
+            const errorResponse = result || createFlowErrorResponse();
+
+            return new Response(JSON.stringify(errorResponse), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' },
+            });
         }
 
-        if (isFlowErrorRequest(decryptedBody)) {
-            LOGGER.warn('Flow error request received:', decryptedBody);
-            return new Response(null, { status: 200 });
-        }
+        // Both ping and data_exchange responses need to be encrypted
+        if (isPing || isDataExchange) {
+            const flowType = isPing ? 'PING' : 'DATA_EXCHANGE';
+            LOGGER.info(`Processing flow ${flowType.toLowerCase()} response`);
 
-        if (isFlowDataExchangeRequest(decryptedBody)) {
-            LOGGER.info('Processing flow data exchange request');
-            const result = await handler(whatsapp, decryptedBody);
-            LOGGER.info('Flow handler result:', result);
-
-            const encryptedResponse = encryptFlowResponse(
-                result,
-                Buffer.from(data.aes_key, 'base64'),
-                Buffer.from(data.initial_vector, 'base64'),
-            );
+            // Encrypt the response using decrypted AES key and IV
+            const encryptedResponse = encryptFlowResponse(result, aesKeyBuffer, initialVectorBuffer);
             LOGGER.info('Encrypted flow response generated');
 
-            return new Response(JSON.stringify(encryptedResponse), { status: 200 });
+            // Meta expects the encrypted response as a plain base64 string (not wrapped in JSON)
+            return new Response(encryptedResponse, {
+                status: 200,
+                headers: { 'Content-Type': 'text/plain' },
+            });
         }
 
         LOGGER.warn('Unknown flow request type:', decryptedBody);
@@ -340,10 +393,64 @@ function decryptFlowRequest(
         throw new Error('Missing required encryption properties');
     }
 
-    const privatePem = config.FLOW_API_PRIVATE_PEM.replace(/\\n/g, '\n');
+    // Handle both escaped and unescaped newlines
+    let privatePem = config.FLOW_API_PRIVATE_PEM;
+    if (privatePem.includes('\\n')) {
+        privatePem = privatePem.replace(/\\n/g, '\n');
+    }
+
     const passphrase = config.FLOW_API_PASSPHRASE;
 
-    const privateKey = crypto.createPrivateKey({ key: privatePem, passphrase });
+    const isPKCS1 = privatePem.includes('-----BEGIN RSA PRIVATE KEY-----');
+    const isPKCS8 =
+        privatePem.includes('-----BEGIN PRIVATE KEY-----') ||
+        privatePem.includes('-----BEGIN ENCRYPTED PRIVATE KEY-----');
+
+    LOGGER.info('Private key format check:', {
+        isPKCS1,
+        isPKCS8,
+        hasBeginMarker: privatePem.includes('-----BEGIN'),
+        hasEndMarker: privatePem.includes('-----END'),
+        length: privatePem.length,
+        firstLine: privatePem.split('\n')[0],
+    });
+
+    let privateKey;
+    try {
+        // Try to create private key with passphrase
+        if (passphrase) {
+            privateKey = crypto.createPrivateKey({
+                key: privatePem,
+                format: 'pem',
+                passphrase,
+            });
+        } else {
+            privateKey = crypto.createPrivateKey(privatePem);
+        }
+    } catch (error) {
+        LOGGER.error('Failed to create private key:', {
+            error: error instanceof Error ? error.message : error,
+            pemPreview: privatePem.substring(0, 100) + '...',
+            hasPassphrase: !!passphrase,
+            isPKCS1,
+            isPKCS8,
+        });
+
+        // Provide helpful error message
+        let errorMessage = `Failed to parse private key. Error: ${error instanceof Error ? error.message : error}`;
+
+        if (isPKCS1) {
+            errorMessage += '\n\nYour key is in PKCS#1 format (-----BEGIN RSA PRIVATE KEY-----).';
+            errorMessage += '\nPlease convert it to PKCS#8 format using:';
+            errorMessage += '\n  openssl pkcs8 -topk8 -inform PEM -outform PEM -in old_key.pem -out new_key.pem';
+            errorMessage += '\n\nOr ensure your key uses a supported encryption algorithm (not DES-EDE3-CBC).';
+        } else if (!isPKCS8) {
+            errorMessage += '\n\nYour key format is not recognized. Please ensure it is in PKCS#8 format.';
+        }
+
+        throw new Error(errorMessage);
+    }
+
     let decryptedAesKey: Buffer;
 
     try {

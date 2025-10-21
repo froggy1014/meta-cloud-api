@@ -1,4 +1,5 @@
 import { BaseRequest, BaseResponse, BaseWebhookConfig, BaseWebhookHandler } from '../handler';
+import { WebhookResponse } from '../../WebhookProcessor';
 
 // Express-like interfaces to avoid direct Express dependency
 export interface ExpressRequest extends BaseRequest {
@@ -33,7 +34,7 @@ class ExpressWebhookHandler extends BaseWebhookHandler<ExpressRequest, ExpressRe
         super(config);
     }
 
-    protected async handleGet(req: ExpressRequest, res: ExpressResponse, next: NextFunction): Promise<ExpressResponse> {
+    protected async handleGet(req: ExpressRequest, res: ExpressResponse, next: NextFunction): Promise<WebhookResponse> {
         try {
             const { 'hub.mode': mode, 'hub.verify_token': token, 'hub.challenge': challenge } = req.query;
 
@@ -44,10 +45,11 @@ class ExpressWebhookHandler extends BaseWebhookHandler<ExpressRequest, ExpressRe
             );
 
             this.applyHeaders(result, res);
-            return res.status(result.status).send(result.body);
+            res.status(result.status).send(result.body);
+            return result;
         } catch (error) {
             next(error);
-            return res;
+            throw error;
         }
     }
 
@@ -55,7 +57,7 @@ class ExpressWebhookHandler extends BaseWebhookHandler<ExpressRequest, ExpressRe
         req: ExpressRequest,
         res: ExpressResponse,
         next: NextFunction,
-    ): Promise<ExpressResponse> {
+    ): Promise<WebhookResponse> {
         try {
             const fullUrl = this.constructFullUrl(req.headers, req.url);
             const webRequest = new globalThis.Request(fullUrl, {
@@ -66,10 +68,11 @@ class ExpressWebhookHandler extends BaseWebhookHandler<ExpressRequest, ExpressRe
 
             const result = await this.processWebhook(webRequest);
             this.applyHeaders(result, res);
-            return res.status(result.status).send(result.body);
+            res.status(result.status).send(result.body);
+            return result;
         } catch (error) {
             next(error);
-            return res;
+            throw error;
         }
     }
 
@@ -77,21 +80,26 @@ class ExpressWebhookHandler extends BaseWebhookHandler<ExpressRequest, ExpressRe
         req: ExpressRequest,
         res: ExpressResponse,
         next: NextFunction,
-    ): Promise<ExpressResponse> {
+    ): Promise<WebhookResponse> {
         try {
             const fullUrl = this.constructFullUrl(req.headers, req.url);
+
+            // Use raw body if available (for signature verification), otherwise stringify parsed body
+            const bodyContent = req.rawBody || (req.method === 'POST' ? JSON.stringify(req.body) : undefined);
+
             const webRequest = new globalThis.Request(fullUrl, {
                 method: req.method,
                 headers: req.headers as HeadersInit,
-                body: req.method === 'POST' ? JSON.stringify(req.body) : undefined,
+                body: bodyContent,
             });
 
             const result = await this.processFlow(webRequest);
             this.applyHeaders(result, res);
-            return res.status(result.status).send(result.body);
+            res.status(result.status).send(result.body);
+            return result;
         } catch (error) {
             next(error);
-            return res;
+            throw error;
         }
     }
 

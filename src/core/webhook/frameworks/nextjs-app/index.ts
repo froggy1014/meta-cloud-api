@@ -1,3 +1,4 @@
+// Next.js App Router webhook handler
 export { nextjsAppWebhookHandler } from './nextjs-app';
 
 // Types

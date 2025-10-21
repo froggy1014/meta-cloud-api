@@ -16,6 +16,7 @@ export interface NextJsAppWebhookConfig extends WhatsAppConfig {
     // App Router specific config (currently none, but interface reserved for future use)
 }
 
+// Next.js App Router webhook handler
 export function nextjsAppWebhookHandler(config: NextJsAppWebhookConfig) {
     const processor = new WebhookProcessor(config);
 
@@ -96,13 +97,17 @@ export function nextjsAppWebhookHandler(config: NextJsAppWebhookConfig) {
                 try {
                     const result = await processor.processFlow(request);
 
-                    return Response.json(result.body, {
+                    // result.body is already a JSON string, don't double-encode it
+                    return new Response(result.body, {
                         status: result.status,
                         headers: result.headers,
                     });
                 } catch (error) {
                     console.error('Flow GET error:', error);
-                    return new Response('Internal Server Error', { status: 500 });
+                    return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
+                        status: 500,
+                        headers: { 'Content-Type': 'application/json' },
+                    });
                 }
             },
 
@@ -110,13 +115,17 @@ export function nextjsAppWebhookHandler(config: NextJsAppWebhookConfig) {
                 try {
                     const result = await processor.processFlow(request);
 
-                    return Response.json(result.body, {
+                    // result.body is already a JSON string, don't double-encode it
+                    return new Response(result.body, {
                         status: result.status,
                         headers: result.headers,
                     });
                 } catch (error) {
                     console.error('Flow POST error:', error);
-                    return new Response('Internal Server Error', { status: 500 });
+                    return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
+                        status: 500,
+                        headers: { 'Content-Type': 'application/json' },
+                    });
                 }
             },
         },

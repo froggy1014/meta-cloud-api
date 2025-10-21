@@ -1,4 +1,5 @@
 import { BaseRequest, BaseResponse, BaseWebhookConfig, BaseWebhookHandler } from '../handler';
+import { WebhookResponse } from '../../WebhookProcessor';
 
 // Next.js specific interfaces
 export interface BaseApiRequest extends BaseRequest {
@@ -33,7 +34,7 @@ class NextJsWebhookHandler<
     }
 
     // Helper function to parse request body for POST requests
-    private async parseRequestBody(req: TRequest): Promise<void> {
+    private async parseRequestBody(req: TRequest, preserveRaw: boolean = false): Promise<void> {
         if (req.method === 'POST' && !req.body) {
             const chunks: Buffer[] = [];
 
@@ -44,6 +45,11 @@ class NextJsWebhookHandler<
                 }
 
                 const body = Buffer.concat(chunks).toString();
+
+                // Store raw body if requested (for signature verification)
+                if (preserveRaw) {
+                    req.rawBody = body;
+                }
 
                 // Only attempt to parse if there's actual content
                 if (body.trim()) {
@@ -59,7 +65,7 @@ class NextJsWebhookHandler<
         }
     }
 
-    protected async handleGet(req: TRequest, res: TResponse): Promise<any> {
+    protected async handleGet(req: TRequest, res: TResponse): Promise<WebhookResponse> {
         try {
             const { 'hub.mode': mode, 'hub.verify_token': token, 'hub.challenge': challenge } = req.query;
 
@@ -70,14 +76,16 @@ class NextJsWebhookHandler<
             );
 
             this.applyHeaders(result, res);
-            return res.status(result.status).send(result.body);
+            res.status(result.status).send(result.body);
+            return result;
         } catch (error) {
             console.error('Webhook verification error:', error);
-            return res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ error: 'Internal Server Error' });
+            throw error;
         }
     }
 
-    protected async handlePost(req: TRequest, res: TResponse): Promise<any> {
+    protected async handlePost(req: TRequest, res: TResponse): Promise<WebhookResponse> {
         try {
             // Auto-parse body if needed
             await this.parseRequestBody(req);
@@ -86,10 +94,12 @@ class NextJsWebhookHandler<
 
             // Handle JSON parsing errors specifically
             if (error instanceof Error && error.message === 'Invalid JSON in request body') {
-                return res.status(400).json({ error: 'Invalid JSON' });
+                res.status(400).json({ error: 'Invalid JSON' });
+                throw error;
             }
 
-            return res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ error: 'Internal Server Error' });
+            throw error;
         }
 
         try {
@@ -103,29 +113,54 @@ class NextJsWebhookHandler<
 
             const result = await this.processWebhook(webRequest);
             this.applyHeaders(result, res);
-            return res.status(result.status).send(result.body);
+            res.status(result.status).send(result.body);
+            return result;
         } catch (error) {
             console.error('Webhook processing error:', error);
-            return res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ error: 'Internal Server Error' });
+            throw error;
         }
     }
 
-    protected async handleFlow(req: TRequest, res: TResponse): Promise<any> {
+    protected async handleFlow(req: TRequest, res: TResponse): Promise<WebhookResponse> {
+        try {
+            // Parse body and preserve raw body for signature verification
+            await this.parseRequestBody(req, true);
+        } catch (error) {
+            console.error('Flow body parsing error:', error);
+
+            // Handle JSON parsing errors specifically
+            if (error instanceof Error && error.message === 'Invalid JSON in request body') {
+                res.status(400).json({ error: 'Invalid JSON' });
+                throw error;
+            }
+
+            res.status(500).json({ error: 'Internal Server Error' });
+            throw error;
+        }
+
         try {
             const fullUrl = this.constructFullUrl(req.headers, req.url);
+
+            // Use raw body if available (for signature verification), otherwise stringify parsed body
+            const bodyContent = req.rawBody || (req.method === 'POST' ? JSON.stringify(req.body) : undefined);
 
             const webRequest = new Request(fullUrl, {
                 method: req.method,
                 headers: req.headers as HeadersInit,
-                body: req.method === 'POST' ? JSON.stringify(req.body) : undefined,
+                body: bodyContent,
             });
 
             const result = await this.processFlow(webRequest);
             this.applyHeaders(result, res);
-            return res.status(result.status).send(result.body);
+            res.status(result.status).send(result.body);
+
+            // Return result for user's custom handling
+            return result;
         } catch (error) {
             console.error('Flow error:', error);
-            return res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ error: 'Internal Server Error' });
+            throw error;
         }
     }
 
@@ -147,8 +182,8 @@ class NextJsWebhookHandler<
     }
 }
 
-// Generic webhook handler that accepts any compatible request/response types
-export function nextjsWebhookHandler<TRequest extends BaseApiRequest, TResponse extends BaseApiResponse>(
+// Next.js Pages Router webhook handler
+export function nextjsPagesWebhookHandler<TRequest extends BaseApiRequest, TResponse extends BaseApiResponse>(
     config: NextJsWebhookConfig,
 ) {
     const handler = new NextJsWebhookHandler<TRequest, TResponse>(config);

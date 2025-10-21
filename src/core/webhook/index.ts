@@ -1,11 +1,11 @@
 // Enhanced Framework-Specific Webhooks (Recommended)
 export * from './frameworks/express';
-export * from './frameworks/nextjs';
+export * from './frameworks/nextjs-page';
 export * from './frameworks/nextjs-app';
 
 // Framework interfaces
 export type { ExpressRequest, ExpressResponse, ExpressWebhookConfig, NextFunction } from './frameworks/express/express';
-export type { NextJsWebhookConfig } from './frameworks/nextjs/nextjs';
+export type { NextJsWebhookConfig } from './frameworks/nextjs-page/nextjs-page';
 
 // Core Processor (for advanced usage)
 export { WebhookProcessor } from './WebhookProcessor';

@@ -79,7 +79,7 @@ export class WebhookProcessor {
         try {
             const webResponse = await processFlowRequest(request, this.config, this.client, this.flowHandlers);
             const body = await webResponse.text();
-            const contentType = webResponse.headers.get('content-type') || 'application/json';
+            const contentType = webResponse.headers.get('content-type') || 'text/plain';
 
             return {
                 status: webResponse.status,
