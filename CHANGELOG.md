@@ -1,5 +1,90 @@
 # meta-cloud-api
 
+## 1.4.0
+
+### Minor Changes
+
+- bc8b13d: Add Conversational Automation API support for WhatsApp Business Phone Numbers
+
+    This release adds support for configuring conversational components on WhatsApp Business phone numbers:
+    - **Welcome Messages**: Configure automatic welcome messages for first-time users
+    - **Ice Breakers (Prompts)**: Set up to 4 tappable prompts (max 80 characters each) to help users start conversations
+    - **Commands**: Define up to 30 slash commands (max 32 chars name, 256 chars description) for easy user interactions
+
+    New API methods:
+    - `phoneNumber.setConversationalAutomation()` - Configure conversational components (POST)
+    - `phoneNumber.getConversationalAutomation()` - Retrieve current configuration (GET)
+
+    New TypeScript types:
+    - `ConversationalAutomationRequest` - Request payload for configuration
+    - `ConversationalAutomationResponse` - Response with current settings
+    - `ConversationalCommand` - Command configuration object
+    - `ConversationalPrompt` - Ice breaker prompt string
+
+    For more details, see: https://developers.facebook.com/docs/whatsapp/cloud-api/phone-numbers/conversational-components
+
+### Patch Changes
+
+- 34c7fc6: Add getThroughput API for phone number throughput monitoring
+    - Add `getThroughput()` method to PhoneNumberApi class
+    - Returns current throughput level (STANDARD, HIGH, or NOT_APPLICABLE)
+    - Add comprehensive unit tests for throughput API
+    - Add example file demonstrating throughput monitoring and eligibility checking
+    - Support for checking phone number messaging capacity (80 mps default, up to 1,000 mps)
+
+- 8ccdaa4: Add block user API for managing blocked WhatsApp users
+    - Add `blockUsers` API with block, unblock, and list methods
+    - Support for blocking/unblocking users by phone number or WhatsApp ID
+    - Pagination support for listing blocked users
+    - Comprehensive unit tests and examples included
+
+- 8144883: Enhanced type exports for improved type inference in onMessage webhook handler
+
+    **Changes:**
+    - Exported all specific message type interfaces (TextMessage, ImageMessage, VideoMessage, etc.) from the main package
+    - Exported discriminated union types for webhook values (MessageWebhookValue, StatusWebhookValue, ErrorWebhookValue)
+    - Exported complete webhook payload types (WebhookValue, StatusWebhook, WebhookPayload)
+
+    **Benefits:**
+    - Better TypeScript IntelliSense when working with `onMessage` callback parameters
+    - Proper type narrowing based on message type discriminators
+    - Users can now import and use specific message types for type annotations
+    - Improved developer experience with autocomplete for all message properties
+
+    **Example:**
+
+    ```typescript
+    import { TextMessage, ImageMessage, WhatsAppMessage } from 'meta-cloud-api';
+
+    client.onMessage((message: WhatsAppMessage) => {
+        if (message.type === 'text') {
+            // TypeScript now knows this is a TextMessage
+            console.log(message.text.body);
+        } else if (message.type === 'image') {
+            // TypeScript now knows this is an ImageMessage
+            console.log(message.image.id);
+        }
+    });
+    ```
+
+    **Migration:**
+    No breaking changes - existing code continues to work. The new exports simply provide better type support for developers who want explicit type annotations.
+
+- 82665d1: remove builder pattern for ease
+- 0ebca06: Improve webhook types based on WhatsApp official documentation
+
+    **Changes:**
+    - Added discriminated union types for webhook values (MessageWebhookValue, StatusWebhookValue, ErrorWebhookValue)
+    - Added specific message type interfaces for all WhatsApp message types (Text, Image, Video, Audio, Document, Sticker, Interactive, Button, Location, Contacts, Reaction, Order, System, Unsupported)
+    - Added context types for forwarded messages, product inquiries, and interactive replies (ForwardedContext, ProductContext, ReplyContext)
+    - Added Click to WhatsApp ad referral tracking support (ReferralInfo)
+    - Added support for group messages with group_id field
+    - Added Unsupported message type to MessageTypesEnum
+    - Interactive messages now properly discriminated between list_reply and button_reply
+
+    **Migration:**
+    No changes required - existing code continues to work as before. The new types provide better IntelliSense and type checking internally.
+
 ## 1.3.0
 
 ### Minor Changes
