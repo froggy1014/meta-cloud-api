@@ -32,6 +32,7 @@ export enum MessageTypesEnum {
     Button = 'button',
     Order = 'order',
     System = 'system',
+    Unsupported = 'unsupported',
     Unknown = 'unknown',
     Statuses = 'statuses',
     '*' = '*',
