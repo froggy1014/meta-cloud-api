@@ -148,7 +148,37 @@ export * from '../api/media/types';
 export * from '../api/flow/types';
 
 // Webhook types (essential for client-side)
-export type { WebhookContact, WebhookEvent, WebhookMessage } from '../core/webhook/types';
+export type {
+    WebhookContact,
+    WebhookEvent,
+    WebhookMessage,
+    // New message types
+    TextMessage,
+    ImageMessage,
+    VideoMessage,
+    AudioMessage,
+    DocumentMessage,
+    StickerMessage,
+    InteractiveMessage,
+    InteractiveListReplyMessage,
+    InteractiveButtonReplyMessage,
+    ButtonMessage,
+    LocationMessage,
+    ContactsMessage,
+    ReactionMessage,
+    OrderMessage,
+    SystemMessage,
+    UnsupportedMessage,
+    GroupMessage,
+    WhatsAppMessage,
+    // Webhook value types
+    MessageWebhookValue,
+    StatusWebhookValue,
+    ErrorWebhookValue,
+    WebhookValue,
+    StatusWebhook,
+    WebhookPayload,
+} from '../core/webhook/types';
 
 // Flow types and enums (for client-side flow handling)
 export { FlowActionEnum, FlowCategoryEnum, FlowStatusEnum, FlowTypeEnum } from '../api/flow/types';

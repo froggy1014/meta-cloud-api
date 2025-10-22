@@ -2,7 +2,37 @@
 // This allows tree-shaking and reduces bundle size when only types are needed
 
 // Essential webhook types
-export type { WebhookContact, WebhookEvent, WebhookMessage } from './core/webhook/types';
+export type {
+    WebhookContact,
+    WebhookEvent,
+    WebhookMessage,
+    // New message types
+    TextMessage,
+    ImageMessage,
+    VideoMessage,
+    AudioMessage,
+    DocumentMessage,
+    StickerMessage,
+    InteractiveMessage,
+    InteractiveListReplyMessage,
+    InteractiveButtonReplyMessage,
+    ButtonMessage,
+    LocationMessage,
+    ContactsMessage,
+    ReactionMessage,
+    OrderMessage,
+    SystemMessage,
+    UnsupportedMessage,
+    GroupMessage,
+    WhatsAppMessage,
+    // Webhook value types
+    MessageWebhookValue,
+    StatusWebhookValue,
+    ErrorWebhookValue,
+    WebhookValue,
+    StatusWebhook,
+    WebhookPayload,
+} from './core/webhook/types';
 
 // Base types and enums
 export * from './types/enums';
