@@ -101,9 +101,43 @@ export type TwoStepVerificationParams = {
     pin: string;
 };
 
+/**
+ * Conversational Components - Commands
+ */
+export type ConversationalCommand = {
+    command_name: string;
+    command_description: string;
+};
+
+/**
+ * Conversational Components - Ice Breakers (Prompts)
+ */
+export type ConversationalPrompt = string;
+
+/**
+ * Request payload for configuring conversational automation
+ */
+export type ConversationalAutomationRequest = {
+    enable_welcome_message?: boolean;
+    commands?: ConversationalCommand[];
+    prompts?: ConversationalPrompt[];
+};
+
+/**
+ * Response from conversational automation GET endpoint
+ */
+export type ConversationalAutomationResponse = {
+    enable_welcome_message?: boolean;
+    commands?: ConversationalCommand[];
+    prompts?: ConversationalPrompt[];
+    id: string;
+};
+
 export interface PhoneNumberClass {
     getPhoneNumberById(fields?: string): Promise<PhoneNumberResponse>;
     getPhoneNumbers(): Promise<PhoneNumbersResponse>;
     requestVerificationCode(params: RequestVerificationCodeRequest): Promise<ResponseSuccess>;
     verifyCode(params: VerifyCodeRequest): Promise<ResponseSuccess>;
+    setConversationalAutomation(params: ConversationalAutomationRequest): Promise<ResponseSuccess>;
+    getConversationalAutomation(): Promise<ConversationalAutomationResponse>;
 }

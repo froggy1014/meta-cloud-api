@@ -445,4 +445,182 @@ describe('PhoneNumber API - Unit Tests', () => {
             expect(mockRequestSend.mock.calls[0][1]).toBe(`${businessAcctId}/phone_numbers`);
         });
     });
+
+    describe('Conversational Automation', () => {
+        describe('setConversationalAutomation', () => {
+            it('should configure welcome message with correct endpoint and body', async () => {
+                const request = {
+                    enable_welcome_message: true,
+                };
+
+                await whatsApp.phoneNumbers.setConversationalAutomation(request);
+
+                expect(mockRequestSend).toHaveBeenCalled();
+                const [method, endpoint, timeout, body] = mockRequestSend.mock.calls[0];
+
+                expect(method).toBe('POST');
+                expect(endpoint).toBe(`${whatsApp.requester.phoneNumberId}/conversational_automation`);
+                expect(timeout).toBeGreaterThan(0);
+                expect(JSON.parse(body)).toEqual(request);
+            });
+
+            it('should configure ice breakers (prompts) with correct body', async () => {
+                const request = {
+                    prompts: ['Book a flight', 'Plan a vacation', 'Find hotels', 'Get travel tips'],
+                };
+
+                await whatsApp.phoneNumbers.setConversationalAutomation(request);
+
+                const [_, __, ___, body] = mockRequestSend.mock.calls[0];
+                const parsedBody = JSON.parse(body);
+
+                expect(parsedBody).toHaveProperty('prompts');
+                expect(parsedBody.prompts).toHaveLength(4);
+                expect(parsedBody.prompts).toEqual(request.prompts);
+            });
+
+            it('should configure commands with correct body', async () => {
+                const request = {
+                    commands: [
+                        { command_name: 'tickets', command_description: 'Book flight tickets' },
+                        { command_name: 'hotel', command_description: 'Book hotel rooms' },
+                    ],
+                };
+
+                await whatsApp.phoneNumbers.setConversationalAutomation(request);
+
+                const [_, __, ___, body] = mockRequestSend.mock.calls[0];
+                const parsedBody = JSON.parse(body);
+
+                expect(parsedBody).toHaveProperty('commands');
+                expect(parsedBody.commands).toHaveLength(2);
+                expect(parsedBody.commands[0]).toHaveProperty('command_name', 'tickets');
+                expect(parsedBody.commands[0]).toHaveProperty('command_description', 'Book flight tickets');
+            });
+
+            it('should configure all features at once', async () => {
+                const request = {
+                    enable_welcome_message: true,
+                    commands: [{ command_name: 'tickets', command_description: 'Book flight tickets' }],
+                    prompts: ['Book a flight', 'Plan a vacation'],
+                };
+
+                await whatsApp.phoneNumbers.setConversationalAutomation(request);
+
+                const [_, __, ___, body] = mockRequestSend.mock.calls[0];
+                const parsedBody = JSON.parse(body);
+
+                expect(parsedBody).toHaveProperty('enable_welcome_message', true);
+                expect(parsedBody).toHaveProperty('commands');
+                expect(parsedBody).toHaveProperty('prompts');
+                expect(parsedBody.commands).toHaveLength(1);
+                expect(parsedBody.prompts).toHaveLength(2);
+            });
+
+            it('should handle up to 4 ice breakers', async () => {
+                const request = {
+                    prompts: ['Prompt 1', 'Prompt 2', 'Prompt 3', 'Prompt 4'],
+                };
+
+                await whatsApp.phoneNumbers.setConversationalAutomation(request);
+
+                const [_, __, ___, body] = mockRequestSend.mock.calls[0];
+                const parsedBody = JSON.parse(body);
+
+                expect(parsedBody.prompts).toHaveLength(4);
+            });
+
+            it('should handle up to 30 commands', async () => {
+                const commands = Array.from({ length: 30 }, (_, i) => ({
+                    command_name: `cmd${i + 1}`,
+                    command_description: `Command ${i + 1} description`,
+                }));
+
+                const request = { commands };
+
+                await whatsApp.phoneNumbers.setConversationalAutomation(request);
+
+                const [_, __, ___, body] = mockRequestSend.mock.calls[0];
+                const parsedBody = JSON.parse(body);
+
+                expect(parsedBody.commands).toHaveLength(30);
+            });
+        });
+
+        describe('getConversationalAutomation', () => {
+            beforeEach(() => {
+                mockRequestSend.mockResolvedValue({
+                    enable_welcome_message: true,
+                    commands: [
+                        { command_name: 'tickets', command_description: 'Book flight tickets' },
+                        { command_name: 'hotel', command_description: 'Book hotel rooms' },
+                    ],
+                    prompts: ['Book a flight', 'Plan a vacation'],
+                    id: 'phone_123',
+                });
+            });
+
+            it('should get conversational automation with correct endpoint', async () => {
+                await whatsApp.phoneNumbers.getConversationalAutomation();
+
+                expect(mockRequestSend).toHaveBeenCalled();
+                const [method, endpoint, timeout, body] = mockRequestSend.mock.calls[0];
+
+                expect(method).toBe('GET');
+                expect(endpoint).toBe(
+                    `${whatsApp.requester.phoneNumberId}?fields=${encodeURIComponent('conversational_automation')}`,
+                );
+                expect(timeout).toBeGreaterThan(0);
+                expect(body).toBeNull();
+            });
+
+            it('should return current configuration', async () => {
+                const config = await whatsApp.phoneNumbers.getConversationalAutomation();
+
+                expect(config).toHaveProperty('enable_welcome_message', true);
+                expect(config).toHaveProperty('commands');
+                expect(config).toHaveProperty('prompts');
+                expect(config).toHaveProperty('id', 'phone_123');
+                expect(config.commands).toHaveLength(2);
+                expect(config.prompts).toHaveLength(2);
+            });
+        });
+
+        describe('Conversational Automation API Integration', () => {
+            it('should have conversational automation methods', () => {
+                expect(whatsApp.phoneNumbers).toBeDefined();
+                expect(typeof whatsApp.phoneNumbers.setConversationalAutomation).toBe('function');
+                expect(typeof whatsApp.phoneNumbers.getConversationalAutomation).toBe('function');
+            });
+
+            it('should use correct HTTP methods', async () => {
+                // Test setConversationalAutomation - POST
+                await whatsApp.phoneNumbers.setConversationalAutomation({ enable_welcome_message: true });
+                expect(mockRequestSend.mock.calls[0][0]).toBe('POST');
+
+                // Test getConversationalAutomation - GET
+                mockRequestSend.mockClear();
+                await whatsApp.phoneNumbers.getConversationalAutomation();
+                expect(mockRequestSend.mock.calls[0][0]).toBe('GET');
+            });
+        });
+
+        describe('Error Handling', () => {
+            it('should handle API errors for setConversationalAutomation', async () => {
+                mockRequestSend.mockRejectedValue(new Error('API Error: Failed to configure automation'));
+
+                await expect(
+                    whatsApp.phoneNumbers.setConversationalAutomation({ enable_welcome_message: true }),
+                ).rejects.toThrow('API Error: Failed to configure automation');
+            });
+
+            it('should handle API errors for getConversationalAutomation', async () => {
+                mockRequestSend.mockRejectedValue(new Error('API Error: Failed to retrieve configuration'));
+
+                await expect(whatsApp.phoneNumbers.getConversationalAutomation()).rejects.toThrow(
+                    'API Error: Failed to retrieve configuration',
+                );
+            });
+        });
+    });
 });

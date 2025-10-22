@@ -2,6 +2,10 @@ export * from './common';
 export type {
     AccountMode,
     CodeVerificationStatus,
+    ConversationalAutomationRequest,
+    ConversationalAutomationResponse,
+    ConversationalCommand,
+    ConversationalPrompt,
     Cursors,
     HealthStatus,
     HealthStatusEntity,

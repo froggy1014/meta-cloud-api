@@ -99,4 +99,71 @@ export default class PhoneNumberApi extends BaseAPI implements phoneNumber.Phone
             JSON.stringify(request),
         );
     }
+
+    /**
+     * Configure conversational automation features (Welcome Messages, Ice Breakers, Commands).
+     *
+     * @param request Configuration for conversational components
+     * @returns Response indicating success or failure
+     *
+     * @example
+     * // Enable welcome message
+     * await whatsappClient.phoneNumber.setConversationalAutomation({
+     *   enable_welcome_message: true
+     * });
+     *
+     * @example
+     * // Configure commands
+     * await whatsappClient.phoneNumber.setConversationalAutomation({
+     *   commands: [
+     *     { command_name: 'tickets', command_description: 'Book flight tickets' },
+     *     { command_name: 'hotel', command_description: 'Book hotel' }
+     *   ]
+     * });
+     *
+     * @example
+     * // Configure ice breakers (prompts)
+     * await whatsappClient.phoneNumber.setConversationalAutomation({
+     *   prompts: ['Book a flight', 'Plan a vacation']
+     * });
+     *
+     * @example
+     * // Configure all features
+     * await whatsappClient.phoneNumber.setConversationalAutomation({
+     *   enable_welcome_message: true,
+     *   commands: [
+     *     { command_name: 'tickets', command_description: 'Book flight tickets' }
+     *   ],
+     *   prompts: ['Book a flight']
+     * });
+     */
+    async setConversationalAutomation(request: phoneNumber.ConversationalAutomationRequest): Promise<ResponseSuccess> {
+        return this.sendJson(
+            HttpMethodsEnum.Post,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}/conversational_automation`,
+            this.config[WabaConfigEnum.RequestTimeout],
+            JSON.stringify(request),
+        );
+    }
+
+    /**
+     * Get the current configuration of conversational automation features.
+     *
+     * @returns Current configuration including welcome message status, commands, and prompts
+     *
+     * @example
+     * const config = await whatsappClient.phoneNumber.getConversationalAutomation();
+     * console.log(config.enable_welcome_message); // true/false
+     * console.log(config.commands); // Array of commands
+     * console.log(config.prompts); // Array of ice breakers
+     */
+    async getConversationalAutomation(): Promise<phoneNumber.ConversationalAutomationResponse> {
+        const queryParams = objectToQueryString({ fields: 'conversational_automation' });
+        return this.sendJson(
+            HttpMethodsEnum.Get,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}${queryParams}`,
+            this.config[WabaConfigEnum.RequestTimeout],
+            null,
+        );
+    }
 }

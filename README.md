@@ -300,6 +300,63 @@ const profile = await client.businessProfile.update({
 const currentProfile = await client.businessProfile.get();
 ```
 
+### Phone Number Management
+
+#### Conversational Automation
+
+Configure conversational components like Welcome Messages, Ice Breakers, and Commands to enhance user interactions:
+
+```typescript
+// Enable welcome message
+await client.phoneNumber.setConversationalAutomation({
+  enable_welcome_message: true
+});
+
+// Configure ice breakers (prompts) - up to 4, each max 80 characters
+await client.phoneNumber.setConversationalAutomation({
+  prompts: ['Book a flight', 'Plan a vacation', 'Find hotels', 'Get travel tips']
+});
+
+// Configure commands - up to 30, each command max 32 chars, description max 256 chars
+await client.phoneNumber.setConversationalAutomation({
+  commands: [
+    { command_name: 'tickets', command_description: 'Book flight tickets' },
+    { command_name: 'hotel', command_description: 'Book hotel rooms' },
+    { command_name: 'imagine', command_description: 'Create images using a text prompt' }
+  ]
+});
+
+// Configure all features at once
+await client.phoneNumber.setConversationalAutomation({
+  enable_welcome_message: true,
+  commands: [
+    { command_name: 'tickets', command_description: 'Book flight tickets' }
+  ],
+  prompts: ['Book a flight', 'Plan a vacation']
+});
+
+// Get current configuration
+const config = await client.phoneNumber.getConversationalAutomation();
+console.log('Welcome message enabled:', config.enable_welcome_message);
+console.log('Commands:', config.commands);
+console.log('Ice breakers:', config.prompts);
+```
+
+#### Phone Number Information
+
+```typescript
+// Get phone number details
+const phoneInfo = await client.phoneNumber.getPhoneNumberById();
+console.log('Display number:', phoneInfo.display_phone_number);
+console.log('Quality rating:', phoneInfo.quality_rating);
+console.log('Verified name:', phoneInfo.verified_name);
+
+// Get specific fields only
+const phoneDetails = await client.phoneNumber.getPhoneNumberById(
+  'display_phone_number,verified_name,code_verification_status'
+);
+```
+
 ### Block Users Management
 
 ```typescript
