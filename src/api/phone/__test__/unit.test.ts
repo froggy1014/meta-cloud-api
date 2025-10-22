@@ -623,4 +623,112 @@ describe('PhoneNumber API - Unit Tests', () => {
             });
         });
     });
+
+    describe('Throughput API', () => {
+        describe('getThroughput', () => {
+            beforeEach(() => {
+                mockRequestSend.mockResolvedValue({
+                    throughput: {
+                        level: 'STANDARD',
+                    },
+                    id: '435994439608339',
+                });
+            });
+
+            it('should get throughput with correct endpoint', async () => {
+                await whatsApp.phoneNumbers.getThroughput();
+
+                expect(mockRequestSend).toHaveBeenCalled();
+                const [method, endpoint, timeout, body] = mockRequestSend.mock.calls[0];
+
+                expect(method).toBe('GET');
+                expect(endpoint).toBe(`${whatsApp.requester.phoneNumberId}?fields=${encodeURIComponent('throughput')}`);
+                expect(timeout).toBeGreaterThan(0);
+                expect(body).toBeNull();
+            });
+
+            it('should return STANDARD throughput level', async () => {
+                mockRequestSend.mockResolvedValue({
+                    throughput: {
+                        level: 'STANDARD',
+                    },
+                    id: '435994439608339',
+                });
+
+                const result = await whatsApp.phoneNumbers.getThroughput();
+
+                expect(result).toHaveProperty('throughput');
+                expect(result.throughput).toHaveProperty('level', 'STANDARD');
+                expect(result).toHaveProperty('id', '435994439608339');
+            });
+
+            it('should return HIGH throughput level', async () => {
+                mockRequestSend.mockResolvedValue({
+                    throughput: {
+                        level: 'HIGH',
+                    },
+                    id: '435994439608339',
+                });
+
+                const result = await whatsApp.phoneNumbers.getThroughput();
+
+                expect(result).toHaveProperty('throughput');
+                expect(result.throughput).toHaveProperty('level', 'HIGH');
+                expect(result).toHaveProperty('id', '435994439608339');
+            });
+
+            it('should return NOT_APPLICABLE throughput level', async () => {
+                mockRequestSend.mockResolvedValue({
+                    throughput: {
+                        level: 'NOT_APPLICABLE',
+                    },
+                    id: '435994439608339',
+                });
+
+                const result = await whatsApp.phoneNumbers.getThroughput();
+
+                expect(result).toHaveProperty('throughput');
+                expect(result.throughput).toHaveProperty('level', 'NOT_APPLICABLE');
+                expect(result).toHaveProperty('id', '435994439608339');
+            });
+        });
+
+        describe('Throughput API Integration', () => {
+            it('should have getThroughput method', () => {
+                expect(whatsApp.phoneNumbers).toBeDefined();
+                expect(typeof whatsApp.phoneNumbers.getThroughput).toBe('function');
+            });
+
+            it('should use correct HTTP method', async () => {
+                await whatsApp.phoneNumbers.getThroughput();
+                expect(mockRequestSend.mock.calls[0][0]).toBe('GET');
+            });
+
+            it('should use phone number ID in endpoint', async () => {
+                const phoneNumberId = whatsApp.requester.phoneNumberId;
+
+                await whatsApp.phoneNumbers.getThroughput();
+                const endpoint = mockRequestSend.mock.calls[0][1];
+
+                expect(endpoint).toContain(phoneNumberId.toString());
+                expect(endpoint).toContain('fields=throughput');
+            });
+        });
+
+        describe('Error Handling', () => {
+            it('should handle API errors for getThroughput', async () => {
+                mockRequestSend.mockRejectedValue(new Error('API Error: Failed to retrieve throughput'));
+
+                await expect(whatsApp.phoneNumbers.getThroughput()).rejects.toThrow(
+                    'API Error: Failed to retrieve throughput',
+                );
+            });
+
+            it('should handle network timeout errors', async () => {
+                mockRequestSend.mockRejectedValue(new Error('Network timeout'));
+
+                await expect(whatsApp.phoneNumbers.getThroughput()).rejects.toThrow('Network timeout');
+            });
+        });
+    });
 });

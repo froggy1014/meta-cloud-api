@@ -133,6 +133,14 @@ export type ConversationalAutomationResponse = {
     id: string;
 };
 
+/**
+ * Response from throughput GET endpoint
+ */
+export type ThroughputResponse = {
+    throughput: Throughput;
+    id: string;
+};
+
 export interface PhoneNumberClass {
     getPhoneNumberById(fields?: string): Promise<PhoneNumberResponse>;
     getPhoneNumbers(): Promise<PhoneNumbersResponse>;
@@ -140,4 +148,5 @@ export interface PhoneNumberClass {
     verifyCode(params: VerifyCodeRequest): Promise<ResponseSuccess>;
     setConversationalAutomation(params: ConversationalAutomationRequest): Promise<ResponseSuccess>;
     getConversationalAutomation(): Promise<ConversationalAutomationResponse>;
+    getThroughput(): Promise<ThroughputResponse>;
 }

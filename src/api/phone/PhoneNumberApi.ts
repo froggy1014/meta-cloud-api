@@ -166,4 +166,28 @@ export default class PhoneNumberApi extends BaseAPI implements phoneNumber.Phone
             null,
         );
     }
+
+    /**
+     * Get the current throughput level for the phone number.
+     *
+     * Throughput represents the maximum messages per second (mps) that can be sent/received.
+     * - Default: 80 mps
+     * - Automatic upgrade to 1,000 mps available for eligible numbers
+     * - WhatsApp Business app coexistence numbers: fixed at 5 mps
+     *
+     * @returns Current throughput information including the level (STANDARD, HIGH, or NOT_APPLICABLE)
+     *
+     * @example
+     * const throughput = await whatsappClient.phoneNumber.getThroughput();
+     * console.log(throughput.throughput.level); // 'STANDARD' | 'HIGH' | 'NOT_APPLICABLE'
+     */
+    async getThroughput(): Promise<phoneNumber.ThroughputResponse> {
+        const queryParams = objectToQueryString({ fields: 'throughput' });
+        return this.sendJson(
+            HttpMethodsEnum.Get,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}${queryParams}`,
+            this.config[WabaConfigEnum.RequestTimeout],
+            null,
+        );
+    }
 }
