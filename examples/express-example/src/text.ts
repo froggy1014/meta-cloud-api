@@ -1,5 +1,4 @@
 import type { WebhookMessage, WhatsApp } from 'meta-cloud-api';
-import { TextMessageBuilder } from 'meta-cloud-api/api/messages/builders';
 
 export const handleTextMessage = async (whatsapp: WhatsApp, message: WebhookMessage) => {
     console.log(`📨 Text message: "${message.text?.body}" from ${message.from}`);
@@ -9,11 +8,10 @@ export const handleTextMessage = async (whatsapp: WhatsApp, message: WebhookMess
 
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    const textMessage = new TextMessageBuilder().setBody(`Echo: ${message.text?.body}`).setPreviewUrl(true).build();
-
     await whatsapp.messages.text({
         to: message.from,
-        ...textMessage,
+        body: `Echo: ${message.text?.body}`,
+        previewUrl: true,
     });
 
     console.log(`✅ Text response sent to ${message.from}`);
