@@ -48,6 +48,18 @@ export interface Paging {
     next: string;
 }
 
+/**
+ * Common error detail structure used in Meta API responses
+ * Used for individual item errors in bulk operations
+ */
+export interface MetaErrorDetail {
+    message: string;
+    code: string;
+    error_data?: {
+        details: string;
+    };
+}
+
 export declare class RequesterClass {
     constructor(
         apiVersion: string,

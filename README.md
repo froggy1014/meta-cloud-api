@@ -300,6 +300,51 @@ const profile = await client.businessProfile.update({
 const currentProfile = await client.businessProfile.get();
 ```
 
+### Block Users Management
+
+```typescript
+// Block a user (only works for users who messaged you in last 24 hours)
+const blockResult = await client.blockUsers.block(['1234567890']);
+console.log('Blocked users:', blockResult.block_users.added_users);
+console.log('Failed to block:', blockResult.block_users.failed_users);
+
+// Block multiple users at once
+const multiBlockResult = await client.blockUsers.block([
+  '1234567890',
+  '0987654321',
+  '1122334455'
+]);
+
+// Unblock users
+const unblockResult = await client.blockUsers.unblock(['1234567890']);
+
+// Get list of blocked users with pagination
+const blockedUsers = await client.blockUsers.listBlockedUsers({
+  limit: 10
+});
+
+// Iterate through all blocked users
+let cursor: string | undefined;
+const allBlockedUsers = [];
+
+do {
+  const page = await client.blockUsers.listBlockedUsers({
+    limit: 100,
+    after: cursor
+  });
+
+  page.data.forEach(item => {
+    if (item.block_users) {
+      allBlockedUsers.push(...item.block_users);
+    }
+  });
+
+  cursor = page.paging?.cursors?.after;
+} while (cursor);
+
+console.log(`Total blocked users: ${allBlockedUsers.length}`);
+```
+
 ### WhatsApp Flows
 
 ```typescript

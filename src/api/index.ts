@@ -1,3 +1,4 @@
+export * from './blockUsers';
 export * from './encryption';
 export * from './flow';
 export * from './media';

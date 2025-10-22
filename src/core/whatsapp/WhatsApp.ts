@@ -7,6 +7,7 @@ import Logger from '../../utils/logger';
 import { getUserAgent, getVersion } from '../../utils/version';
 
 import {
+    BlockUsersApi,
     BusinessProfileApi,
     EncryptionApi,
     FlowApi,
@@ -31,6 +32,7 @@ const LOGGER = new Logger(LIB_NAME, process.env.DEBUG === 'true');
 export default class WhatsApp {
     config: WabaConfigType;
     requester: Readonly<Requester>;
+    blockUsers: BlockUsersApi;
     messages: MessageApi;
     media: MediaApi;
     phoneNumbers: PhoneNumberApi;
@@ -55,6 +57,7 @@ export default class WhatsApp {
             this.getUserAgent(),
         );
 
+        this.blockUsers = new BlockUsersApi(this.config, this.requester);
         this.messages = new MessageApi(this.config, this.requester);
         this.media = new MediaApi(this.config, this.requester);
         this.phoneNumbers = new PhoneNumberApi(this.config, this.requester);

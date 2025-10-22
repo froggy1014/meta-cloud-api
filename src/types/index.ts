@@ -8,6 +8,7 @@ export type { LoggerInterface } from './logger';
 export type {
     GeneralHeaderInterface,
     GeneralRequestBody,
+    MetaErrorDetail,
     Paging,
     RequesterClass,
     RequesterResponseInterface,
@@ -220,6 +221,16 @@ export type { TwoStepVerificationClass, TwoStepVerificationRequest } from '../ap
 
 // Encryption types
 export type { EncryptionPublicKeyResponse } from '../api/encryption/types';
+
+// Block Users types
+export type {
+    BlockedUserInfo,
+    BlockUsersClass,
+    BlockUsersResponse,
+    FailedUserInfo,
+    ListBlockedUsersParams,
+    ListBlockedUsersResponse,
+} from '../api/blockUsers/types';
 
 // Utility types
 export type { MetaError } from '../utils/isMetaError';
