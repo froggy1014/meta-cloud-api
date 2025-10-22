@@ -7,3 +7,5 @@ export { objectToQueryString } from './objectToQueryString';
 // export { getVersion, getUserAgent } from './version';
 
 export { isFlowDataExchangeRequest, isFlowErrorRequest, isFlowPingRequest } from './flowTypeGuards';
+export { generateEncryption } from './generateEncryption';
+export type { EncryptionKeyPair } from './generateEncryption';

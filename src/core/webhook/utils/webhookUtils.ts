@@ -157,7 +157,7 @@ export async function processFlowRequest(
 
         // Call the user's handler for the flow type
         const result = await handler(whatsapp, decryptedBody);
-        LOGGER.info('Flow handler result:', result);
+        LOGGER.info('🔵 [meta-cloud-api] Flow handler result (평문):', result);
 
         // Return response based on flow type
         if (isError) {
@@ -175,11 +175,12 @@ export async function processFlowRequest(
         // Both ping and data_exchange responses need to be encrypted
         if (isPing || isDataExchange) {
             const flowType = isPing ? 'PING' : 'DATA_EXCHANGE';
-            LOGGER.info(`Processing flow ${flowType.toLowerCase()} response`);
+            LOGGER.info(`🟢 [meta-cloud-api] Processing flow ${flowType.toLowerCase()} response - 암호화 시작`);
 
             // Encrypt the response using decrypted AES key and IV
             const encryptedResponse = encryptFlowResponse(result, aesKeyBuffer, initialVectorBuffer);
-            LOGGER.info('Encrypted flow response generated');
+            LOGGER.info('🟢 [meta-cloud-api] 암호화 완료! Base64 길이:', encryptedResponse.length);
+            LOGGER.info('🟢 [meta-cloud-api] 암호화된 응답 (첫 100자):', encryptedResponse.substring(0, 100));
 
             // Meta expects the encrypted response as a plain base64 string (not wrapped in JSON)
             return new Response(encryptedResponse, {

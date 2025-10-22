@@ -2,6 +2,7 @@ import { importConfig } from '../../config/importConfig';
 import { WabaConfigType, WhatsAppConfig } from '../../types/config';
 import * as SDKEnums from '../../types/enums';
 import { formatConfigTable } from '../../utils/configTable';
+import { generateEncryption as generateEncryptionUtil, EncryptionKeyPair } from '../../utils/generateEncryption';
 import Requester from '../../utils/http/request';
 import Logger from '../../utils/logger';
 import { getUserAgent, getVersion } from '../../utils/version';
@@ -113,5 +114,39 @@ export default class WhatsApp {
      */
     getUserAgent(): string {
         return getUserAgent();
+    }
+
+    /**
+     * Generate RSA encryption key pair for WhatsApp Business Flow API
+     *
+     * This method generates a 2048-bit RSA key pair with:
+     * - Public key in SPKI format (PEM)
+     * - Private key in PKCS#8 format (PEM) encrypted with AES-256-CBC
+     *
+     * @param passphrase - Optional passphrase to encrypt the private key. If not provided, uses FLOW_API_PASSPHRASE from config
+     * @returns Object containing passphrase, privateKey, and publicKey
+     * @throws {Error} If passphrase is empty or key generation fails
+     * @throws {Error} If not running in Node.js environment
+     *
+     * @see https://developers.facebook.com/docs/whatsapp/cloud-api/reference/whatsapp-business-encryption/
+     *
+     * @example
+     * ```typescript
+     * const wa = new WhatsApp();
+     *
+     * // Uses FLOW_API_PASSPHRASE from environment/config
+     * const keys = wa.generateEncryption();
+     *
+     * // Or provide custom passphrase
+     * const customKeys = wa.generateEncryption('my-secret-passphrase');
+     *
+     * console.log('Public Key:', keys.publicKey);
+     * console.log('Private Key:', keys.privateKey);
+     * ```
+     */
+    generateEncryption(passphrase?: string): EncryptionKeyPair {
+        // If no passphrase provided, try to use from config
+        const effectivePassphrase = passphrase || this.config[SDKEnums.WabaConfigEnum.Passphrase];
+        return generateEncryptionUtil(effectivePassphrase);
     }
 }
