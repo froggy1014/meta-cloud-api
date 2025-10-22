@@ -21,5 +21,3 @@ export type {
     TextObject,
     VideoMediaObject,
 } from './types';
-
-export * from './builders';

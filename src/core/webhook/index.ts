@@ -17,9 +17,6 @@ export type { MessageStatus, WebhookContact, WebhookEvent, WebhookMessage } from
 // Main SDK class
 export { default as WhatsApp } from '../whatsapp/WhatsApp';
 
-// Message builders (for webhook handlers)
-export * from '../../api/messages/builders';
-
 // Utils
 export * from './utils/generateXHub256Sig';
 export * from './utils/webhookUtils';
