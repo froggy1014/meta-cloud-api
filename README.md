@@ -212,45 +212,47 @@ import { MessageTypesEnum } from 'meta-cloud-api';
 
 // Pre-process all messages (e.g., mark as read)
 bot.processor.onMessagePreProcess(async (whatsapp, message) => {
-  // For most message types
   await whatsapp.messages.markAsRead({ messageId: message.id });
-
-  // For nfm_reply (Flow responses), you may need to provide the 'to' parameter
-  // if you encounter "The parameter to is required" error
-  if (message.type === MessageTypesEnum.Interactive &&
-      'interactive' in message &&
-      message.interactive.type === 'nfm_reply') {
-    await whatsapp.messages.markAsRead({
-      messageId: message.id,
-      to: message.from
-    });
-  }
 });
 
-// Handle different message types
-bot.processor.onMessage(MessageTypesEnum.Text, async (whatsapp, message) => {
-  // Handle text messages
+// ✨ Type-safe specialized handlers (recommended)
+// These methods provide better type safety - no need for optional chaining!
+
+bot.processor.onText(async (whatsapp, { message }) => {
+  // message.text is guaranteed to exist - no need for message.text?.body
+  console.log('Received:', message.text.body);
+  await whatsapp.messages.text({
+    to: message.from,
+    text: { body: `Echo: ${message.text.body}` }
+  });
 });
 
-bot.processor.onMessage(MessageTypesEnum.Image, async (whatsapp, message) => {
-  // Handle image messages
+bot.processor.onImage(async (whatsapp, { message }) => {
+  // message.image is guaranteed to exist
+  console.log('Image ID:', message.image.id);
+  console.log('Caption:', message.image.caption);
 });
 
-bot.processor.onMessage(MessageTypesEnum.Document, async (whatsapp, message) => {
-  // Handle document messages
-});
-
-// Handle WhatsApp Flow responses (nfm_reply)
-bot.processor.onMessage(MessageTypesEnum.Interactive, async (whatsapp, message) => {
+bot.processor.onInteractive(async (whatsapp, { message }) => {
+  // message.interactive is guaranteed to exist
   if (message.interactive.type === 'nfm_reply') {
     const flowResponse = JSON.parse(message.interactive.nfm_reply.response_json);
     console.log('Flow response:', flowResponse);
-    // Process flow data: flowResponse.flow_token, flowResponse.age, etc.
   } else if (message.interactive.type === 'button_reply') {
-    console.log('Button reply:', message.interactive.button_reply);
+    console.log('Button clicked:', message.interactive.button_reply.id);
   } else if (message.interactive.type === 'list_reply') {
-    console.log('List reply:', message.interactive.list_reply);
+    console.log('List item selected:', message.interactive.list_reply.id);
   }
+});
+
+// Other specialized handlers available:
+// onVideo, onAudio, onDocument, onSticker, onButton,
+// onLocation, onContacts, onReaction, onOrder, onSystem
+
+// 📝 Legacy generic handler (still supported)
+bot.processor.onMessage(MessageTypesEnum.Text, async (whatsapp, { message }) => {
+  // With generic handler, you need optional chaining
+  console.log(message.text?.body); // ⚠️ Need ? because text might be undefined
 });
 
 // Handle message status updates

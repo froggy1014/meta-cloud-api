@@ -1,6 +1,5 @@
 import 'dotenv/config';
 import express from 'express';
-import { MessageTypesEnum } from 'meta-cloud-api';
 import { webhookHandler } from 'meta-cloud-api/webhook/express';
 
 // Import message handlers
@@ -27,23 +26,25 @@ const Whatsapp = webhookHandler(whatsappConfig);
 // ===================================
 // 🎯 REGISTER MESSAGE HANDLERS
 // ===================================
-// Text message handler (enabled by default)
-Whatsapp.processor.onMessage(MessageTypesEnum.Text, handleTextMessage);
+// Using type-safe specialized handlers (recommended)
+
+// Text message handler
+Whatsapp.processor.onText(handleTextMessage);
 
 // Image message handler
-Whatsapp.processor.onMessage(MessageTypesEnum.Image, handleImageMessage);
+Whatsapp.processor.onImage(handleImageMessage);
 
 // Document message handler
-Whatsapp.processor.onMessage(MessageTypesEnum.Document, handleDocumentMessage);
+Whatsapp.processor.onDocument(handleDocumentMessage);
 
 // Contact message handler
-Whatsapp.processor.onMessage(MessageTypesEnum.Contacts, handleContactMessage);
+Whatsapp.processor.onContacts(handleContactMessage);
 
 // Location message handler
-Whatsapp.processor.onMessage(MessageTypesEnum.Location, handleLocationMessage);
+Whatsapp.processor.onLocation(handleLocationMessage);
 
-// Interactive message handler
-Whatsapp.processor.onMessage(MessageTypesEnum.Interactive, handleInteractiveMessage);
+// Interactive message handler (for button/list/flow responses)
+Whatsapp.processor.onInteractive(handleInteractiveMessage);
 
 // ===================================
 // 🌐 EXPRESS ROUTES WITH CLEAN ARCHITECTURE

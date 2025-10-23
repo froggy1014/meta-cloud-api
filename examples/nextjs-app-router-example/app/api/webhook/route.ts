@@ -1,4 +1,3 @@
-import { MessageTypesEnum } from 'meta-cloud-api/types/enums';
 import { webhookHandler } from 'meta-cloud-api/webhook/nextjs-app';
 
 // Import all message handlers
@@ -25,25 +24,25 @@ const Whatsapp = webhookHandler(whatsappConfig);
 // ===================================
 // 🎯 REGISTER MESSAGE HANDLERS
 // ===================================
-// Uncomment the handlers you want to use:
+// Using type-safe specialized handlers (recommended)
 
-// Text message handler (enabled by default)
-Whatsapp.processor.onMessage(MessageTypesEnum.Text, handleTextMessage);
+// Text message handler
+Whatsapp.processor.onText(handleTextMessage);
 
 // Image message handler
-Whatsapp.processor.onMessage(MessageTypesEnum.Image, handleImageMessage);
+Whatsapp.processor.onImage(handleImageMessage);
 
 // Document message handler
-Whatsapp.processor.onMessage(MessageTypesEnum.Document, handleDocumentMessage);
+Whatsapp.processor.onDocument(handleDocumentMessage);
 
 // Contact message handler
-Whatsapp.processor.onMessage(MessageTypesEnum.Contacts, handleContactMessage);
+Whatsapp.processor.onContacts(handleContactMessage);
 
 // Location message handler
-Whatsapp.processor.onMessage(MessageTypesEnum.Location, handleLocationMessage);
+Whatsapp.processor.onLocation(handleLocationMessage);
 
-// Interactive message handler (for button/list responses)
-Whatsapp.processor.onMessage(MessageTypesEnum.Interactive, handleInteractiveMessage);
+// Interactive message handler (for button/list/flow responses)
+Whatsapp.processor.onInteractive(handleInteractiveMessage);
 
 // ===================================
 // 🌐 CLEAN EXPORT PATTERN

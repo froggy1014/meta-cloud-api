@@ -6,9 +6,22 @@ import Logger from '../../utils/logger';
 import { WhatsApp } from '../whatsapp';
 
 import {
+    AudioMessageHandler,
+    ButtonMessageHandler,
+    ContactsMessageHandler,
+    DocumentMessageHandler,
     FlowHandler,
+    ImageMessageHandler,
+    InteractiveMessageHandler,
+    LocationMessageHandler,
     MessageHandler,
+    OrderMessageHandler,
+    ReactionMessageHandler,
     StatusHandler,
+    StickerMessageHandler,
+    SystemMessageHandler,
+    TextMessageHandler,
+    VideoMessageHandler,
     processFlowRequest,
     processWebhookMessages,
 } from './utils/webhookUtils';
@@ -132,6 +145,127 @@ export class WebhookProcessor {
     onFlow(type: FlowTypeEnum, handler: FlowHandler): void {
         this.flowHandlers.set(type, handler);
         LOGGER.log(`Registered flow handler for ${type}`);
+    }
+
+    // ============================================================================
+    // Specialized type-safe message handlers
+    // ============================================================================
+
+    /**
+     * Register a handler for text messages
+     * @param handler Type-safe handler that receives text messages with guaranteed text field
+     */
+    onText(handler: TextMessageHandler): void {
+        this.messageHandlers.set(MessageTypesEnum.Text, handler as MessageHandler);
+        LOGGER.log('Registered text message handler');
+    }
+
+    /**
+     * Register a handler for image messages
+     * @param handler Type-safe handler that receives image messages with guaranteed image field
+     */
+    onImage(handler: ImageMessageHandler): void {
+        this.messageHandlers.set(MessageTypesEnum.Image, handler as MessageHandler);
+        LOGGER.log('Registered image message handler');
+    }
+
+    /**
+     * Register a handler for video messages
+     * @param handler Type-safe handler that receives video messages with guaranteed video field
+     */
+    onVideo(handler: VideoMessageHandler): void {
+        this.messageHandlers.set(MessageTypesEnum.Video, handler as MessageHandler);
+        LOGGER.log('Registered video message handler');
+    }
+
+    /**
+     * Register a handler for audio messages
+     * @param handler Type-safe handler that receives audio messages with guaranteed audio field
+     */
+    onAudio(handler: AudioMessageHandler): void {
+        this.messageHandlers.set(MessageTypesEnum.Audio, handler as MessageHandler);
+        LOGGER.log('Registered audio message handler');
+    }
+
+    /**
+     * Register a handler for document messages
+     * @param handler Type-safe handler that receives document messages with guaranteed document field
+     */
+    onDocument(handler: DocumentMessageHandler): void {
+        this.messageHandlers.set(MessageTypesEnum.Document, handler as MessageHandler);
+        LOGGER.log('Registered document message handler');
+    }
+
+    /**
+     * Register a handler for sticker messages
+     * @param handler Type-safe handler that receives sticker messages with guaranteed sticker field
+     */
+    onSticker(handler: StickerMessageHandler): void {
+        this.messageHandlers.set(MessageTypesEnum.Sticker, handler as MessageHandler);
+        LOGGER.log('Registered sticker message handler');
+    }
+
+    /**
+     * Register a handler for interactive messages (buttons, lists, flows)
+     * @param handler Type-safe handler that receives interactive messages with guaranteed interactive field
+     */
+    onInteractive(handler: InteractiveMessageHandler): void {
+        this.messageHandlers.set(MessageTypesEnum.Interactive, handler as MessageHandler);
+        LOGGER.log('Registered interactive message handler');
+    }
+
+    /**
+     * Register a handler for button messages
+     * @param handler Type-safe handler that receives button messages with guaranteed button field
+     */
+    onButton(handler: ButtonMessageHandler): void {
+        this.messageHandlers.set(MessageTypesEnum.Button, handler as MessageHandler);
+        LOGGER.log('Registered button message handler');
+    }
+
+    /**
+     * Register a handler for location messages
+     * @param handler Type-safe handler that receives location messages with guaranteed location field
+     */
+    onLocation(handler: LocationMessageHandler): void {
+        this.messageHandlers.set(MessageTypesEnum.Location, handler as MessageHandler);
+        LOGGER.log('Registered location message handler');
+    }
+
+    /**
+     * Register a handler for contact messages
+     * @param handler Type-safe handler that receives contact messages with guaranteed contacts field
+     */
+    onContacts(handler: ContactsMessageHandler): void {
+        this.messageHandlers.set(MessageTypesEnum.Contacts, handler as MessageHandler);
+        LOGGER.log('Registered contacts message handler');
+    }
+
+    /**
+     * Register a handler for reaction messages
+     * @param handler Type-safe handler that receives reaction messages with guaranteed reaction field
+     */
+    onReaction(handler: ReactionMessageHandler): void {
+        this.messageHandlers.set(MessageTypesEnum.Reaction, handler as MessageHandler);
+        LOGGER.log('Registered reaction message handler');
+    }
+
+    /**
+     * Register a handler for order messages
+     * @param handler Type-safe handler that receives order messages with guaranteed order field
+     */
+    onOrder(handler: OrderMessageHandler): void {
+        this.messageHandlers.set(MessageTypesEnum.Order, handler as MessageHandler);
+        LOGGER.log('Registered order message handler');
+    }
+
+    /**
+     * Register a handler for system messages
+     * @param handler Type-safe handler that receives system messages with guaranteed system field
+     */
+    onSystem(handler: SystemMessageHandler): void {
+        this.messageHandlers.set(MessageTypesEnum.System, handler as MessageHandler);
+        LOGGER.log('Registered system message handler');
     }
 
     getClient(): WhatsApp {

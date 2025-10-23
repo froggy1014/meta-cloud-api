@@ -34,9 +34,80 @@ export type ProcessedStatus = {
     status: StatusWebhook;
 };
 
+// Type-specific processed messages for specialized handlers
+export type TextProcessedMessage = ProcessedMessage & {
+    message: Extract<WhatsAppMessage, { type: MessageTypesEnum.Text }>;
+};
+
+export type ImageProcessedMessage = ProcessedMessage & {
+    message: Extract<WhatsAppMessage, { type: MessageTypesEnum.Image }>;
+};
+
+export type VideoProcessedMessage = ProcessedMessage & {
+    message: Extract<WhatsAppMessage, { type: MessageTypesEnum.Video }>;
+};
+
+export type AudioProcessedMessage = ProcessedMessage & {
+    message: Extract<WhatsAppMessage, { type: MessageTypesEnum.Audio }>;
+};
+
+export type DocumentProcessedMessage = ProcessedMessage & {
+    message: Extract<WhatsAppMessage, { type: MessageTypesEnum.Document }>;
+};
+
+export type StickerProcessedMessage = ProcessedMessage & {
+    message: Extract<WhatsAppMessage, { type: MessageTypesEnum.Sticker }>;
+};
+
+export type InteractiveProcessedMessage = ProcessedMessage & {
+    message: Extract<WhatsAppMessage, { type: MessageTypesEnum.Interactive }>;
+};
+
+export type ButtonProcessedMessage = ProcessedMessage & {
+    message: Extract<WhatsAppMessage, { type: MessageTypesEnum.Button }>;
+};
+
+export type LocationProcessedMessage = ProcessedMessage & {
+    message: Extract<WhatsAppMessage, { type: MessageTypesEnum.Location }>;
+};
+
+export type ContactsProcessedMessage = ProcessedMessage & {
+    message: Extract<WhatsAppMessage, { type: MessageTypesEnum.Contacts }>;
+};
+
+export type ReactionProcessedMessage = ProcessedMessage & {
+    message: Extract<WhatsAppMessage, { type: MessageTypesEnum.Reaction }>;
+};
+
+export type OrderProcessedMessage = ProcessedMessage & {
+    message: Extract<WhatsAppMessage, { type: MessageTypesEnum.Order }>;
+};
+
+export type SystemProcessedMessage = ProcessedMessage & {
+    message: Extract<WhatsAppMessage, { type: MessageTypesEnum.System }>;
+};
+
 export type MessageHandler = (whatsapp: WhatsApp, processed: ProcessedMessage) => void | Promise<void>;
 export type StatusHandler = (whatsapp: WhatsApp, processed: ProcessedStatus) => void | Promise<void>;
 export type FlowHandler = (whatsapp: WhatsApp, request: FlowEndpointRequest) => any | Promise<any>;
+
+// Type-specific handlers for specialized methods
+export type TextMessageHandler = (whatsapp: WhatsApp, processed: TextProcessedMessage) => void | Promise<void>;
+export type ImageMessageHandler = (whatsapp: WhatsApp, processed: ImageProcessedMessage) => void | Promise<void>;
+export type VideoMessageHandler = (whatsapp: WhatsApp, processed: VideoProcessedMessage) => void | Promise<void>;
+export type AudioMessageHandler = (whatsapp: WhatsApp, processed: AudioProcessedMessage) => void | Promise<void>;
+export type DocumentMessageHandler = (whatsapp: WhatsApp, processed: DocumentProcessedMessage) => void | Promise<void>;
+export type StickerMessageHandler = (whatsapp: WhatsApp, processed: StickerProcessedMessage) => void | Promise<void>;
+export type InteractiveMessageHandler = (
+    whatsapp: WhatsApp,
+    processed: InteractiveProcessedMessage,
+) => void | Promise<void>;
+export type ButtonMessageHandler = (whatsapp: WhatsApp, processed: ButtonProcessedMessage) => void | Promise<void>;
+export type LocationMessageHandler = (whatsapp: WhatsApp, processed: LocationProcessedMessage) => void | Promise<void>;
+export type ContactsMessageHandler = (whatsapp: WhatsApp, processed: ContactsProcessedMessage) => void | Promise<void>;
+export type ReactionMessageHandler = (whatsapp: WhatsApp, processed: ReactionProcessedMessage) => void | Promise<void>;
+export type OrderMessageHandler = (whatsapp: WhatsApp, processed: OrderProcessedMessage) => void | Promise<void>;
+export type SystemMessageHandler = (whatsapp: WhatsApp, processed: SystemProcessedMessage) => void | Promise<void>;
 
 /**
  * Process webhook messages

@@ -206,7 +206,6 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
             messaging_product: 'whatsapp',
             status: params.status,
             message_id: params.messageId,
-            ...(params.to && { to: params.to }),
             ...(params.typingIndicator && { typing_indicator: params.typingIndicator }),
         };
 
@@ -215,27 +214,25 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
 
     /**
      * Marks a message as read
-     * @param params Object containing messageId and optional to parameter
+     * @param params Object containing messageId
      * @returns Promise with the API response
      */
-    async markAsRead(params: { messageId: string; to?: string }): Promise<m.MessagesResponse> {
+    async markAsRead(params: { messageId: string }): Promise<m.MessagesResponse> {
         return this.status({
             status: 'read',
             messageId: params.messageId,
-            ...(params.to && { to: params.to }),
         });
     }
 
     /**
      * Shows typing indicator
-     * @param params Object containing messageId and optional to parameter
+     * @param params Object containing messageId
      * @returns Promise with the API response
      */
-    async showTypingIndicator(params: { messageId: string; to?: string }): Promise<m.MessagesResponse> {
+    async showTypingIndicator(params: { messageId: string }): Promise<m.MessagesResponse> {
         return this.status({
             status: 'read',
             messageId: params.messageId,
-            ...(params.to && { to: params.to }),
             typingIndicator: { type: 'text' },
         });
     }

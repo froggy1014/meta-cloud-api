@@ -43,7 +43,6 @@ export interface MessageRequestParams<T> {
 export interface StatusParams {
     status: string;
     messageId: string;
-    to?: string;
     typingIndicator?: {
         type: string;
     };
@@ -130,7 +129,7 @@ export declare class MessagesClass extends BaseClass {
 
     // Reaction and status messages
     reaction(params: import('./reaction').ReactionParams): Promise<MessagesResponse>;
-    markAsRead(params: { messageId: string; to?: string }): Promise<MessagesResponse>;
-    showTypingIndicator(params: { messageId: string; to?: string }): Promise<MessagesResponse>;
+    markAsRead(params: { messageId: string }): Promise<MessagesResponse>;
+    showTypingIndicator(params: { messageId: string }): Promise<MessagesResponse>;
     status(params: StatusParams): Promise<MessagesResponse>;
 }
