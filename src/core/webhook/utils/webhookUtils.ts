@@ -22,6 +22,12 @@ export type ProcessedMessage = {
     displayPhoneNumber: string;
     profileName: string;
     message: WhatsAppMessage;
+    /**
+     * The message ID extracted from the appropriate location based on message type.
+     * For most messages, this comes from message.id
+     * For certain types like nfm_reply, this comes from message.context.id
+     */
+    messageId: string;
 };
 
 /**
@@ -108,6 +114,69 @@ export type ContactsMessageHandler = (whatsapp: WhatsApp, processed: ContactsPro
 export type ReactionMessageHandler = (whatsapp: WhatsApp, processed: ReactionProcessedMessage) => void | Promise<void>;
 export type OrderMessageHandler = (whatsapp: WhatsApp, processed: OrderProcessedMessage) => void | Promise<void>;
 export type SystemMessageHandler = (whatsapp: WhatsApp, processed: SystemProcessedMessage) => void | Promise<void>;
+
+// ============================================================================
+// Type Guards for Message Type Narrowing
+// ============================================================================
+
+/**
+ * Type guard to check if a message is a text message
+ * @example
+ * if (isTextMessage(message)) {
+ *   console.log(message.text.body); // ✅ TypeScript knows message is TextMessage
+ * }
+ */
+export function isTextMessage(message: WhatsAppMessage): message is import('../types').TextMessage {
+    return message.type === MessageTypesEnum.Text;
+}
+
+export function isImageMessage(message: WhatsAppMessage): message is import('../types').ImageMessage {
+    return message.type === MessageTypesEnum.Image;
+}
+
+export function isVideoMessage(message: WhatsAppMessage): message is import('../types').VideoMessage {
+    return message.type === MessageTypesEnum.Video;
+}
+
+export function isAudioMessage(message: WhatsAppMessage): message is import('../types').AudioMessage {
+    return message.type === MessageTypesEnum.Audio;
+}
+
+export function isDocumentMessage(message: WhatsAppMessage): message is import('../types').DocumentMessage {
+    return message.type === MessageTypesEnum.Document;
+}
+
+export function isStickerMessage(message: WhatsAppMessage): message is import('../types').StickerMessage {
+    return message.type === MessageTypesEnum.Sticker;
+}
+
+export function isInteractiveMessage(message: WhatsAppMessage): message is import('../types').InteractiveMessage {
+    return message.type === MessageTypesEnum.Interactive;
+}
+
+export function isButtonMessage(message: WhatsAppMessage): message is import('../types').ButtonMessage {
+    return message.type === MessageTypesEnum.Button;
+}
+
+export function isLocationMessage(message: WhatsAppMessage): message is import('../types').LocationMessage {
+    return message.type === MessageTypesEnum.Location;
+}
+
+export function isContactsMessage(message: WhatsAppMessage): message is import('../types').ContactsMessage {
+    return message.type === MessageTypesEnum.Contacts;
+}
+
+export function isReactionMessage(message: WhatsAppMessage): message is import('../types').ReactionMessage {
+    return message.type === MessageTypesEnum.Reaction;
+}
+
+export function isOrderMessage(message: WhatsAppMessage): message is import('../types').OrderMessage {
+    return message.type === MessageTypesEnum.Order;
+}
+
+export function isSystemMessage(message: WhatsAppMessage): message is import('../types').SystemMessage {
+    return message.type === MessageTypesEnum.System;
+}
 
 /**
  * Process webhook messages
@@ -303,6 +372,28 @@ export function constructFullUrl(headers: Record<string, string | string[] | und
 }
 
 /**
+ * Extract message ID based on message type
+ * Some message types (like nfm_reply) have ID in context instead of root level
+ */
+function extractMessageId(message: WhatsAppMessage): string {
+    // If message has id at root level, use it
+    if (message.id) {
+        return message.id;
+    }
+
+    // For interactive and button messages, check context.id
+    if (message.type === MessageTypesEnum.Interactive || message.type === MessageTypesEnum.Button) {
+        const msgWithContext = message as any;
+        if (msgWithContext.context?.id) {
+            return msgWithContext.context.id;
+        }
+    }
+
+    // Fallback to empty string if no ID found
+    return '';
+}
+
+/**
  * Private helper functions
  */
 async function processMessages(
@@ -349,6 +440,7 @@ async function processMessages(
                 displayPhoneNumber,
                 profileName,
                 message,
+                messageId: extractMessageId(message),
             };
 
             const messageType = message.type;
@@ -371,7 +463,7 @@ async function executeMessageHandler(
         try {
             await handler(whatsapp, processed);
         } catch (error) {
-            LOGGER.error(`Error in ${handlerType} handler:`, { error, messageId: processed.message.id });
+            LOGGER.error(`Error in ${handlerType} handler:`, { error, messageId: processed.messageId });
         }
     }
 }

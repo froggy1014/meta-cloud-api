@@ -211,33 +211,45 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 import { MessageTypesEnum } from 'meta-cloud-api';
 
 // Pre-process all messages (e.g., mark as read)
-bot.processor.onMessagePreProcess(async (whatsapp, message) => {
-  await whatsapp.messages.markAsRead({ messageId: message.id });
+// ✨ Use processed.messageId for consistent ID access across all message types
+bot.processor.onMessagePreProcess(async (whatsapp, processed) => {
+  // messageId is automatically extracted from the correct location
+  // (message.id for most types, message.context.id for nfm_reply)
+  await whatsapp.messages.markAsRead({ messageId: processed.messageId });
 });
 
 // ✨ Type-safe specialized handlers (recommended)
 // These methods provide better type safety - no need for optional chaining!
 
-bot.processor.onText(async (whatsapp, { message }) => {
+bot.processor.onText(async (whatsapp, processed) => {
+  const { message, messageId } = processed;
   // message.text is guaranteed to exist - no need for message.text?.body
   console.log('Received:', message.text.body);
   await whatsapp.messages.text({
     to: message.from,
     text: { body: `Echo: ${message.text.body}` }
   });
+
+  // Mark as read using the extracted messageId
+  await whatsapp.messages.markAsRead({ messageId });
 });
 
-bot.processor.onImage(async (whatsapp, { message }) => {
+bot.processor.onImage(async (whatsapp, processed) => {
+  const { message } = processed;
   // message.image is guaranteed to exist
   console.log('Image ID:', message.image.id);
   console.log('Caption:', message.image.caption);
 });
 
-bot.processor.onInteractive(async (whatsapp, { message }) => {
+bot.processor.onInteractive(async (whatsapp, processed) => {
+  const { message, messageId } = processed;
   // message.interactive is guaranteed to exist
   if (message.interactive.type === 'nfm_reply') {
     const flowResponse = JSON.parse(message.interactive.nfm_reply.response_json);
     console.log('Flow response:', flowResponse);
+
+    // messageId works correctly for nfm_reply (uses context.id automatically)
+    await whatsapp.messages.markAsRead({ messageId });
   } else if (message.interactive.type === 'button_reply') {
     console.log('Button clicked:', message.interactive.button_reply.id);
   } else if (message.interactive.type === 'list_reply') {
@@ -250,9 +262,45 @@ bot.processor.onInteractive(async (whatsapp, { message }) => {
 // onLocation, onContacts, onReaction, onOrder, onSystem
 
 // 📝 Legacy generic handler (still supported)
-bot.processor.onMessage(MessageTypesEnum.Text, async (whatsapp, { message }) => {
+bot.processor.onMessage(MessageTypesEnum.Text, async (whatsapp, processed) => {
   // With generic handler, you need optional chaining
-  console.log(message.text?.body); // ⚠️ Need ? because text might be undefined
+  console.log(processed.message.text?.body); // ⚠️ Need ? because text might be undefined
+
+  // But messageId is always available regardless of message type!
+  await whatsapp.messages.markAsRead({ messageId: processed.messageId });
+});
+
+// 🎯 Type Guards for Manual Type Narrowing
+// Use these when you need to check message types dynamically
+import { isTextMessage, isImageMessage, isInteractiveMessage } from 'meta-cloud-api';
+
+bot.processor.onMessagePreProcess(async (whatsapp, processed) => {
+  const { message, messageId } = processed;
+
+  // TypeScript automatically narrows the type!
+  if (isTextMessage(message)) {
+    console.log(message.text.body); // ✅ No optional chaining needed!
+  } else if (isImageMessage(message)) {
+    console.log(message.image.id); // ✅ Type-safe!
+  } else if (isInteractiveMessage(message)) {
+    console.log(message.interactive.type); // ✅ Guaranteed to exist!
+  }
+
+  // messageId works for all types - no need to worry about message.id vs message.context.id
+  await whatsapp.messages.markAsRead({ messageId });
+});
+
+// 🔍 Native TypeScript Discriminated Union (also works!)
+bot.processor.onMessagePreProcess(async (whatsapp, processed) => {
+  const { message, messageId } = processed;
+
+  // TypeScript's built-in type narrowing also works
+  if (message.type === MessageTypesEnum.Text) {
+    console.log(message.text.body); // ✅ Automatically narrowed!
+  }
+
+  // messageId is always available
+  await whatsapp.messages.markAsRead({ messageId });
 });
 
 // Handle message status updates
