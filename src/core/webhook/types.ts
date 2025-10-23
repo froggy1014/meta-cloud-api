@@ -205,7 +205,23 @@ export interface InteractiveButtonReplyMessage extends BaseMessage {
     };
 }
 
-export type InteractiveMessage = InteractiveListReplyMessage | InteractiveButtonReplyMessage;
+export interface InteractiveNfmReplyMessage extends BaseMessage {
+    type: MessageTypesEnum.Interactive;
+    context: ReplyContext;
+    interactive: {
+        type: 'nfm_reply';
+        nfm_reply: {
+            name: string;
+            body: string;
+            response_json: string;
+        };
+    };
+}
+
+export type InteractiveMessage =
+    | InteractiveListReplyMessage
+    | InteractiveButtonReplyMessage
+    | InteractiveNfmReplyMessage;
 
 // ============================================================================
 // Message Types - Button (Quick Reply)

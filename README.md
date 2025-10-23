@@ -212,7 +212,19 @@ import { MessageTypesEnum } from 'meta-cloud-api';
 
 // Pre-process all messages (e.g., mark as read)
 bot.processor.onMessagePreProcess(async (whatsapp, message) => {
+  // For most message types
   await whatsapp.messages.markAsRead({ messageId: message.id });
+
+  // For nfm_reply (Flow responses), you may need to provide the 'to' parameter
+  // if you encounter "The parameter to is required" error
+  if (message.type === MessageTypesEnum.Interactive &&
+      'interactive' in message &&
+      message.interactive.type === 'nfm_reply') {
+    await whatsapp.messages.markAsRead({
+      messageId: message.id,
+      to: message.from
+    });
+  }
 });
 
 // Handle different message types
@@ -226,6 +238,19 @@ bot.processor.onMessage(MessageTypesEnum.Image, async (whatsapp, message) => {
 
 bot.processor.onMessage(MessageTypesEnum.Document, async (whatsapp, message) => {
   // Handle document messages
+});
+
+// Handle WhatsApp Flow responses (nfm_reply)
+bot.processor.onMessage(MessageTypesEnum.Interactive, async (whatsapp, message) => {
+  if (message.interactive.type === 'nfm_reply') {
+    const flowResponse = JSON.parse(message.interactive.nfm_reply.response_json);
+    console.log('Flow response:', flowResponse);
+    // Process flow data: flowResponse.flow_token, flowResponse.age, etc.
+  } else if (message.interactive.type === 'button_reply') {
+    console.log('Button reply:', message.interactive.button_reply);
+  } else if (message.interactive.type === 'list_reply') {
+    console.log('List reply:', message.interactive.list_reply);
+  }
 });
 
 // Handle message status updates
