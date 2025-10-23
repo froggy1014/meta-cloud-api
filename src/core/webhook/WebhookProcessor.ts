@@ -5,7 +5,13 @@ import { MessageTypesEnum } from '../../types/enums';
 import Logger from '../../utils/logger';
 import { WhatsApp } from '../whatsapp';
 
-import { FlowHandler, MessageHandler, processFlowRequest, processWebhookMessages } from './utils/webhookUtils';
+import {
+    FlowHandler,
+    MessageHandler,
+    StatusHandler,
+    processFlowRequest,
+    processWebhookMessages,
+} from './utils/webhookUtils';
 
 const LOGGER = new Logger('WEBHOOK_PROCESSOR', process.env.DEBUG === 'true');
 
@@ -19,6 +25,7 @@ export class WebhookProcessor {
     private config: WabaConfigType;
     private client: WhatsApp;
     private messageHandlers: Map<MessageTypesEnum, MessageHandler> = new Map();
+    private statusHandler: StatusHandler | undefined = undefined;
     private preProcessHandler: MessageHandler | undefined = undefined;
     private postProcessHandler: MessageHandler | undefined = undefined;
     private flowHandlers: Map<FlowTypeEnum, FlowHandler> = new Map();
@@ -53,6 +60,7 @@ export class WebhookProcessor {
         try {
             const webResponse = await processWebhookMessages(request, this.client, {
                 messageHandlers: this.messageHandlers,
+                statusHandler: this.statusHandler,
                 preProcessHandler: this.preProcessHandler,
                 postProcessHandler: this.postProcessHandler,
             });
@@ -97,8 +105,18 @@ export class WebhookProcessor {
     }
 
     onMessage(type: MessageTypesEnum, handler: MessageHandler): void {
+        if (type === ('statuses' as MessageTypesEnum)) {
+            throw new Error(
+                'MessageTypesEnum.Statuses is deprecated. Use onStatus(handler) instead of onMessage(MessageTypesEnum.Statuses, handler)',
+            );
+        }
         this.messageHandlers.set(type, handler);
         LOGGER.log(`Registered message handler for ${type}`);
+    }
+
+    onStatus(handler: StatusHandler): void {
+        this.statusHandler = handler;
+        LOGGER.log('Registered status handler');
     }
 
     onMessagePreProcess(handler: MessageHandler): void {

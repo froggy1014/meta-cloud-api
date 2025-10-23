@@ -34,6 +34,9 @@ export enum MessageTypesEnum {
     System = 'system',
     Unsupported = 'unsupported',
     Unknown = 'unknown',
+    /**
+     * @deprecated Use WebhookProcessor.onStatus() instead of onMessage(MessageTypesEnum.Statuses)
+     */
     Statuses = 'statuses',
     '*' = '*',
 }

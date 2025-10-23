@@ -12,12 +12,27 @@ export { WebhookProcessor } from './WebhookProcessor';
 export type { WebhookResponse } from './WebhookProcessor';
 
 // Types
-export type { MessageStatus, WebhookContact, WebhookEvent, WebhookMessage } from './types';
+export type {
+    MessageStatus,
+    WebhookContact,
+    WebhookEvent,
+    WebhookValue,
+    MessageWebhookValue,
+    StatusWebhookValue,
+    WhatsAppMessage,
+    StatusWebhook,
+} from './types';
 
 // Main SDK class
 export { default as WhatsApp } from '../whatsapp/WhatsApp';
 
 // Utils
 export * from './utils/generateXHub256Sig';
-export * from './utils/webhookUtils';
-export type { MessageHandler } from './utils/webhookUtils';
+export type {
+    ProcessedMessage,
+    ProcessedStatus,
+    MessageHandler,
+    StatusHandler,
+    FlowHandler,
+} from './utils/webhookUtils';
+export { processWebhookMessages, processFlowRequest, constructFullUrl } from './utils/webhookUtils';
