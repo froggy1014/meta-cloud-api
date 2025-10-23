@@ -61,21 +61,4 @@ export type {
     VideoMessageHandler,
     VideoProcessedMessage,
 } from './utils/webhookUtils';
-export {
-    constructFullUrl,
-    isAudioMessage,
-    isButtonMessage,
-    isContactsMessage,
-    isDocumentMessage,
-    isImageMessage,
-    isInteractiveMessage,
-    isLocationMessage,
-    isOrderMessage,
-    isReactionMessage,
-    isStickerMessage,
-    isSystemMessage,
-    isTextMessage,
-    isVideoMessage,
-    processFlowRequest,
-    processWebhookMessages,
-} from './utils/webhookUtils';
+export { constructFullUrl, processFlowRequest, processWebhookMessages } from './utils/webhookUtils';

@@ -270,36 +270,21 @@ bot.processor.onMessage(MessageTypesEnum.Text, async (whatsapp, processed) => {
   await whatsapp.messages.markAsRead({ messageId: processed.messageId });
 });
 
-// 🎯 Type Guards for Manual Type Narrowing
-// Use these when you need to check message types dynamically
-import { isTextMessage, isImageMessage, isInteractiveMessage } from 'meta-cloud-api';
-
+// 🔍 TypeScript Discriminated Union for Manual Type Narrowing
+// Use this when you need to check message types dynamically in pre/post-process handlers
 bot.processor.onMessagePreProcess(async (whatsapp, processed) => {
   const { message, messageId } = processed;
 
-  // TypeScript automatically narrows the type!
-  if (isTextMessage(message)) {
+  // TypeScript automatically narrows the type based on the type property!
+  if (message.type === MessageTypesEnum.Text) {
     console.log(message.text.body); // ✅ No optional chaining needed!
-  } else if (isImageMessage(message)) {
+  } else if (message.type === MessageTypesEnum.Image) {
     console.log(message.image.id); // ✅ Type-safe!
-  } else if (isInteractiveMessage(message)) {
+  } else if (message.type === MessageTypesEnum.Interactive) {
     console.log(message.interactive.type); // ✅ Guaranteed to exist!
   }
 
-  // messageId works for all types - no need to worry about message.id vs message.context.id
-  await whatsapp.messages.markAsRead({ messageId });
-});
-
-// 🔍 Native TypeScript Discriminated Union (also works!)
-bot.processor.onMessagePreProcess(async (whatsapp, processed) => {
-  const { message, messageId } = processed;
-
-  // TypeScript's built-in type narrowing also works
-  if (message.type === MessageTypesEnum.Text) {
-    console.log(message.text.body); // ✅ Automatically narrowed!
-  }
-
-  // messageId is always available
+  // messageId works for all types - automatically extracted from the correct location
   await whatsapp.messages.markAsRead({ messageId });
 });
 
