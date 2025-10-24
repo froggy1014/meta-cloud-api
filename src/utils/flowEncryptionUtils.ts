@@ -62,8 +62,6 @@ function validateNodeEnvironment(): void {
             throw error;
         }
     }
-
-    LOGGER.info('Environment validation passed');
 }
 
 /**
@@ -98,7 +96,7 @@ function validateNodeEnvironment(): void {
  * ```
  */
 export function generateEncryption(passphrase?: string): EncryptionKeyPair {
-    LOGGER.info('Starting encryption key generation');
+    LOGGER.info('[generateEncryption] Starting key pair generation');
 
     // Validate environment first
     validateNodeEnvironment();
@@ -111,19 +109,19 @@ export function generateEncryption(passphrase?: string): EncryptionKeyPair {
         const error = new Error(
             'Passphrase is empty. Please provide a passphrase as parameter or set FLOW_API_PASSPHRASE environment variable.',
         );
-        LOGGER.error('Passphrase validation failed:', error);
+        LOGGER.error('[generateEncryption] Passphrase validation failed:', error);
         throw error;
     }
 
     // Warn if passphrase is too short
     if (effectivePassphrase.length < 8) {
         LOGGER.warn(
-            'Passphrase is shorter than 8 characters. ' + 'Consider using a longer passphrase for better security.',
+            '[generateEncryption] Passphrase is shorter than 8 characters. Consider using a longer passphrase for better security.',
         );
     }
 
     try {
-        LOGGER.info('Generating RSA key pair with 2048-bit modulus');
+        LOGGER.info('[generateEncryption] Generating 2048-bit RSA key pair');
 
         // Generate RSA key pair
         const keyPair = crypto.generateKeyPairSync('rsa', {
@@ -140,7 +138,7 @@ export function generateEncryption(passphrase?: string): EncryptionKeyPair {
             },
         });
 
-        LOGGER.info('Key pair generated successfully');
+        LOGGER.info('[generateEncryption] Key pair generated successfully');
 
         return {
             passphrase: effectivePassphrase,
@@ -150,7 +148,7 @@ export function generateEncryption(passphrase?: string): EncryptionKeyPair {
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         const generationError = new Error(`Failed to generate key pair: ${errorMessage}`);
-        LOGGER.error('Key generation failed:', generationError);
+        LOGGER.error('[generateEncryption] Key generation failed:', generationError);
         throw generationError;
     }
 }
@@ -170,13 +168,35 @@ export function decryptFlowRequest(
     aesKeyBuffer: Buffer;
     initialVectorBuffer: Buffer;
 } {
-    LOGGER.info('Decrypting flow request');
+    LOGGER.info('[decryptFlowRequest] Starting Flow request decryption');
+
+    // Validate required environment variables
+    if (!config.FLOW_API_PRIVATE_PEM || config.FLOW_API_PRIVATE_PEM.trim() === '') {
+        const error = new Error(
+            'Missing FLOW_API_PRIVATE_PEM. Please set the FLOW_API_PRIVATE_PEM environment variable or pass privatePem via config.',
+        );
+        LOGGER.error('[decryptFlowRequest] Configuration error:', error);
+        throw error;
+    }
+
+    if (!config.FLOW_API_PASSPHRASE || config.FLOW_API_PASSPHRASE.trim() === '') {
+        const error = new Error(
+            'Missing FLOW_API_PASSPHRASE. Please set the FLOW_API_PASSPHRASE environment variable or pass passphrase via config.',
+        );
+        LOGGER.error('[decryptFlowRequest] Configuration error:', error);
+        throw error;
+    }
+
+    LOGGER.info('[decryptFlowRequest] Configuration validated');
+
     const { encrypted_aes_key, encrypted_flow_data, initial_vector } = body;
 
     if (!encrypted_aes_key || !encrypted_flow_data || !initial_vector) {
-        LOGGER.error('Missing required encryption properties');
+        LOGGER.error('[decryptFlowRequest] Missing required encryption properties in request body');
         throw new Error('Missing required encryption properties');
     }
+
+    LOGGER.info('[decryptFlowRequest] Request body validated');
 
     // Handle both escaped and unescaped newlines
     let privatePem = config.FLOW_API_PRIVATE_PEM;
@@ -191,13 +211,8 @@ export function decryptFlowRequest(
         privatePem.includes('-----BEGIN PRIVATE KEY-----') ||
         privatePem.includes('-----BEGIN ENCRYPTED PRIVATE KEY-----');
 
-    LOGGER.info('Private key format check:', {
-        isPKCS1,
-        isPKCS8,
-        hasBeginMarker: privatePem.includes('-----BEGIN'),
-        hasEndMarker: privatePem.includes('-----END'),
-        length: privatePem.length,
-        firstLine: privatePem.split('\n')[0],
+    LOGGER.info('[decryptFlowRequest] Loading private key', {
+        format: isPKCS8 ? 'PKCS#8' : isPKCS1 ? 'PKCS#1' : 'Unknown',
     });
 
     let privateKey;
@@ -212,13 +227,12 @@ export function decryptFlowRequest(
         } else {
             privateKey = crypto.createPrivateKey(privatePem);
         }
+        LOGGER.info('[decryptFlowRequest] Private key loaded successfully');
     } catch (error) {
-        LOGGER.error('Failed to create private key:', {
+        LOGGER.error('[decryptFlowRequest] Failed to load private key:', {
             error: error instanceof Error ? error.message : error,
-            pemPreview: privatePem.substring(0, 100) + '...',
             hasPassphrase: !!passphrase,
-            isPKCS1,
-            isPKCS8,
+            format: isPKCS8 ? 'PKCS#8' : isPKCS1 ? 'PKCS#1' : 'Unknown',
         });
 
         // Provide helpful error message
@@ -239,7 +253,7 @@ export function decryptFlowRequest(
     let decryptedAesKey: Buffer;
 
     try {
-        LOGGER.info('Decrypting AES key');
+        LOGGER.info('[decryptFlowRequest] Decrypting AES key with RSA private key');
         decryptedAesKey = crypto.privateDecrypt(
             {
                 key: privateKey,
@@ -248,8 +262,9 @@ export function decryptFlowRequest(
             },
             Buffer.from(encrypted_aes_key, 'base64'),
         );
+        LOGGER.info('[decryptFlowRequest] AES key decrypted successfully');
     } catch (error) {
-        LOGGER.error('Failed to decrypt AES key:', error);
+        LOGGER.error('[decryptFlowRequest] Failed to decrypt AES key:', error);
         throw new Error('Failed to decrypt the request. Please verify your private key.');
     }
 
@@ -260,7 +275,8 @@ export function decryptFlowRequest(
     const encrypted_flow_data_body = flowDataBuffer.subarray(0, -TAG_LENGTH);
     const encrypted_flow_data_tag = flowDataBuffer.subarray(-TAG_LENGTH);
 
-    LOGGER.info('Decrypting flow data');
+    LOGGER.info('[decryptFlowRequest] Decrypting flow data with AES-128-GCM');
+
     const decipher = crypto.createDecipheriv('aes-128-gcm', decryptedAesKey, initialVectorBuffer);
     decipher.setAuthTag(encrypted_flow_data_tag);
 
@@ -268,7 +284,8 @@ export function decryptFlowRequest(
         'utf-8',
     );
 
-    LOGGER.info('Flow request decryption complete');
+    LOGGER.info('[decryptFlowRequest] Flow request decrypted successfully');
+
     return {
         decryptedBody: JSON.parse(decryptedJSONString),
         aesKeyBuffer: decryptedAesKey,
@@ -285,13 +302,15 @@ export function decryptFlowRequest(
  * @throws {Error} If encryption fails
  */
 export function encryptFlowResponse(response: any, aesKeyBuffer: Buffer, initialVectorBuffer: Buffer): string {
-    LOGGER.info('Encrypting flow response');
+    LOGGER.info('[encryptFlowResponse] Starting Flow response encryption');
+
     const flipped_iv: number[] = [];
     for (const pair of Array.from(initialVectorBuffer.entries())) {
         flipped_iv.push(~pair[1]);
     }
 
     try {
+        LOGGER.info('[encryptFlowResponse] Encrypting response with AES-128-GCM');
         const cipher = crypto.createCipheriv('aes-128-gcm', aesKeyBuffer, Buffer.from(flipped_iv));
         const encryptedResponse = Buffer.concat([
             cipher.update(JSON.stringify(response || {}), 'utf-8'),
@@ -299,10 +318,11 @@ export function encryptFlowResponse(response: any, aesKeyBuffer: Buffer, initial
             cipher.getAuthTag(),
         ]).toString('base64');
 
-        LOGGER.info('Flow response encryption complete');
+        LOGGER.info('[encryptFlowResponse] Flow response encrypted successfully');
+
         return encryptedResponse;
     } catch (error) {
-        LOGGER.error('Response encryption error:', error);
+        LOGGER.error('[encryptFlowResponse] Response encryption failed:', error);
         throw new Error('Failed to encrypt response. Internal server error.');
     }
 }
