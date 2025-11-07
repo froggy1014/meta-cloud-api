@@ -229,25 +229,67 @@ export function decryptFlowRequest(
         }
         LOGGER.info('[decryptFlowRequest] Private key loaded successfully');
     } catch (error) {
-        LOGGER.error('[decryptFlowRequest] Failed to load private key:', {
+        LOGGER.error('[decryptFlowRequest] Failed to load private key (first attempt):', {
             error: error instanceof Error ? error.message : error,
             hasPassphrase: !!passphrase,
             format: isPKCS8 ? 'PKCS#8' : isPKCS1 ? 'PKCS#1' : 'Unknown',
         });
 
-        // Provide helpful error message
-        let errorMessage = `Failed to parse private key. Error: ${error instanceof Error ? error.message : error}`;
+        // If PKCS#1 key failed, try to convert it to PKCS#8 format automatically
+        if (isPKCS1 && passphrase) {
+            try {
+                LOGGER.info('[decryptFlowRequest] Attempting to convert PKCS#1 to PKCS#8 format');
 
-        if (isPKCS1) {
-            errorMessage += '\n\nYour key is in PKCS#1 format (-----BEGIN RSA PRIVATE KEY-----).';
-            errorMessage += '\nPlease convert it to PKCS#8 format using:';
-            errorMessage += '\n  openssl pkcs8 -topk8 -inform PEM -outform PEM -in old_key.pem -out new_key.pem';
-            errorMessage += '\n\nOr ensure your key uses a supported encryption algorithm (not DES-EDE3-CBC).';
-        } else if (!isPKCS8) {
-            errorMessage += '\n\nYour key format is not recognized. Please ensure it is in PKCS#8 format.';
+                // First, load the PKCS#1 key with passphrase
+                const pkcs1Key = crypto.createPrivateKey({
+                    key: privatePem,
+                    format: 'pem',
+                    passphrase,
+                });
+
+                // Export it as PKCS#8 with the same passphrase
+                const pkcs8Pem = pkcs1Key.export({
+                    type: 'pkcs8',
+                    format: 'pem',
+                    cipher: 'aes-256-cbc',
+                    passphrase,
+                });
+
+                // Now create the private key from PKCS#8 format
+                privateKey = crypto.createPrivateKey({
+                    key: pkcs8Pem as string,
+                    format: 'pem',
+                    passphrase,
+                });
+
+                LOGGER.info('[decryptFlowRequest] Successfully converted PKCS#1 to PKCS#8 and loaded private key');
+            } catch (conversionError) {
+                LOGGER.error('[decryptFlowRequest] Failed to convert PKCS#1 to PKCS#8:', {
+                    error: conversionError instanceof Error ? conversionError.message : conversionError,
+                });
+
+                // Provide helpful error message
+                let errorMessage = `Failed to parse private key. Error: ${error instanceof Error ? error.message : error}`;
+                errorMessage += '\n\nYour key is in PKCS#1 format with unsupported encryption (DES-EDE3-CBC).';
+                errorMessage += '\nPlease convert it to PKCS#8 format using:';
+                errorMessage += '\n  openssl pkcs8 -topk8 -inform PEM -outform PEM -in old_key.pem -out new_key.pem';
+
+                throw new Error(errorMessage);
+            }
+        } else {
+            // Provide helpful error message
+            let errorMessage = `Failed to parse private key. Error: ${error instanceof Error ? error.message : error}`;
+
+            if (isPKCS1) {
+                errorMessage += '\n\nYour key is in PKCS#1 format (-----BEGIN RSA PRIVATE KEY-----).';
+                errorMessage += '\nPlease convert it to PKCS#8 format using:';
+                errorMessage += '\n  openssl pkcs8 -topk8 -inform PEM -outform PEM -in old_key.pem -out new_key.pem';
+            } else if (!isPKCS8) {
+                errorMessage += '\n\nYour key format is not recognized. Please ensure it is in PKCS#8 format.';
+            }
+
+            throw new Error(errorMessage);
         }
-
-        throw new Error(errorMessage);
     }
 
     let decryptedAesKey: Buffer;

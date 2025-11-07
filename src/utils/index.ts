@@ -8,5 +8,5 @@ export { objectToQueryString } from './objectToQueryString';
 
 export { isFlowDataExchangeRequest, isFlowErrorRequest, isFlowPingRequest } from './flowTypeGuards';
 
-export { generateEncryption } from './flowEncryptionUtils';
+export { generateEncryption, decryptFlowRequest, encryptFlowResponse } from './flowEncryptionUtils';
 export type { EncryptionKeyPair } from './flowEncryptionUtils';
