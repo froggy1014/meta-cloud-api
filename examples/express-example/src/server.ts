@@ -10,6 +10,11 @@ import { handleContactMessage } from './contact.ts';
 import { handleLocationMessage } from './location.ts';
 import { handleInteractiveMessage } from './interactive.ts';
 
+// Import webhook field handlers
+import { handleFlowsWebhook } from './webhookFieldHandlers/flows.ts';
+import { handleAccountUpdateWebhook } from './webhookFieldHandlers/accountUpdate.ts';
+import { handleHistoryWebhook } from './webhookFieldHandlers/history.ts';
+
 const app = express();
 
 // 🔧 Configuration from environment variables
@@ -45,6 +50,21 @@ Whatsapp.processor.onLocation(handleLocationMessage);
 
 // Interactive message handler (for button/list/flow responses)
 Whatsapp.processor.onInteractive(handleInteractiveMessage);
+
+// ===================================
+// 🎯 REGISTER WEBHOOK FIELD HANDLERS
+// ===================================
+// These handlers process webhook fields other than 'messages'
+// @see https://developers.facebook.com/docs/graph-api/webhooks/reference/whatsapp-business-account
+
+// Flows webhook handler
+Whatsapp.processor.onFlows(handleFlowsWebhook);
+
+// Account update webhook handler
+Whatsapp.processor.onAccountUpdate(handleAccountUpdateWebhook);
+
+// History sync webhook handler
+Whatsapp.processor.onHistory(handleHistoryWebhook);
 
 // ===================================
 // 🌐 EXPRESS ROUTES WITH CLEAN ARCHITECTURE

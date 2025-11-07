@@ -6,20 +6,34 @@ import Logger from '../../utils/logger';
 import { WhatsApp } from '../whatsapp';
 
 import {
+    AccountAlertsHandler,
+    AccountReviewUpdateHandler,
+    AccountUpdateHandler,
     AudioMessageHandler,
+    BusinessCapabilityUpdateHandler,
     ButtonMessageHandler,
     ContactsMessageHandler,
     DocumentMessageHandler,
     FlowHandler,
+    FlowsHandler,
+    HistoryHandler,
     ImageMessageHandler,
     InteractiveMessageHandler,
     LocationMessageHandler,
     MessageHandler,
+    MessageTemplateQualityUpdateHandler,
+    MessageTemplateStatusUpdateHandler,
     OrderMessageHandler,
+    PhoneNumberNameUpdateHandler,
+    PhoneNumberQualityUpdateHandler,
     ReactionMessageHandler,
+    SecurityHandler,
+    SmbAppStateSyncHandler,
+    SmbMessageEchoesHandler,
     StatusHandler,
     StickerMessageHandler,
     SystemMessageHandler,
+    TemplateCategoryUpdateHandler,
     TextMessageHandler,
     VideoMessageHandler,
     processFlowRequest,
@@ -42,6 +56,22 @@ export class WebhookProcessor {
     private preProcessHandler: MessageHandler | undefined = undefined;
     private postProcessHandler: MessageHandler | undefined = undefined;
     private flowHandlers: Map<FlowTypeEnum, FlowHandler> = new Map();
+
+    // Webhook field handlers
+    private accountUpdateHandler: AccountUpdateHandler | undefined = undefined;
+    private accountReviewUpdateHandler: AccountReviewUpdateHandler | undefined = undefined;
+    private accountAlertsHandler: AccountAlertsHandler | undefined = undefined;
+    private businessCapabilityUpdateHandler: BusinessCapabilityUpdateHandler | undefined = undefined;
+    private phoneNumberNameUpdateHandler: PhoneNumberNameUpdateHandler | undefined = undefined;
+    private phoneNumberQualityUpdateHandler: PhoneNumberQualityUpdateHandler | undefined = undefined;
+    private messageTemplateStatusUpdateHandler: MessageTemplateStatusUpdateHandler | undefined = undefined;
+    private templateCategoryUpdateHandler: TemplateCategoryUpdateHandler | undefined = undefined;
+    private messageTemplateQualityUpdateHandler: MessageTemplateQualityUpdateHandler | undefined = undefined;
+    private flowsHandler: FlowsHandler | undefined = undefined;
+    private securityHandler: SecurityHandler | undefined = undefined;
+    private historyHandler: HistoryHandler | undefined = undefined;
+    private smbMessageEchoesHandler: SmbMessageEchoesHandler | undefined = undefined;
+    private smbAppStateSyncHandler: SmbAppStateSyncHandler | undefined = undefined;
 
     constructor(config: WhatsAppConfig) {
         this.config = importConfig(config);
@@ -76,6 +106,21 @@ export class WebhookProcessor {
                 statusHandler: this.statusHandler,
                 preProcessHandler: this.preProcessHandler,
                 postProcessHandler: this.postProcessHandler,
+                // Webhook field handlers
+                accountUpdateHandler: this.accountUpdateHandler,
+                accountReviewUpdateHandler: this.accountReviewUpdateHandler,
+                accountAlertsHandler: this.accountAlertsHandler,
+                businessCapabilityUpdateHandler: this.businessCapabilityUpdateHandler,
+                phoneNumberNameUpdateHandler: this.phoneNumberNameUpdateHandler,
+                phoneNumberQualityUpdateHandler: this.phoneNumberQualityUpdateHandler,
+                messageTemplateStatusUpdateHandler: this.messageTemplateStatusUpdateHandler,
+                templateCategoryUpdateHandler: this.templateCategoryUpdateHandler,
+                messageTemplateQualityUpdateHandler: this.messageTemplateQualityUpdateHandler,
+                flowsHandler: this.flowsHandler,
+                securityHandler: this.securityHandler,
+                historyHandler: this.historyHandler,
+                smbMessageEchoesHandler: this.smbMessageEchoesHandler,
+                smbAppStateSyncHandler: this.smbAppStateSyncHandler,
             });
 
             const body = await webResponse.text();
@@ -266,6 +311,137 @@ export class WebhookProcessor {
     onSystem(handler: SystemMessageHandler): void {
         this.messageHandlers.set(MessageTypesEnum.System, handler as MessageHandler);
         LOGGER.log('Registered system message handler');
+    }
+
+    // ============================================================================
+    // Webhook field handlers
+    // @see https://developers.facebook.com/docs/graph-api/webhooks/reference/whatsapp-business-account
+    // ============================================================================
+
+    /**
+     * Register a handler for account_update webhook field
+     * @see https://developers.facebook.com/docs/whatsapp/business-management-api/webhooks/components#account_update
+     */
+    onAccountUpdate(handler: AccountUpdateHandler): void {
+        this.accountUpdateHandler = handler;
+        LOGGER.log('Registered account_update handler');
+    }
+
+    /**
+     * Register a handler for account_review_update webhook field
+     * @see https://developers.facebook.com/docs/whatsapp/business-management-api/webhooks/components#account_review_update
+     */
+    onAccountReviewUpdate(handler: AccountReviewUpdateHandler): void {
+        this.accountReviewUpdateHandler = handler;
+        LOGGER.log('Registered account_review_update handler');
+    }
+
+    /**
+     * Register a handler for account_alerts webhook field
+     * @see https://developers.facebook.com/docs/whatsapp/business-management-api/webhooks/components#account_alerts
+     */
+    onAccountAlerts(handler: AccountAlertsHandler): void {
+        this.accountAlertsHandler = handler;
+        LOGGER.log('Registered account_alerts handler');
+    }
+
+    /**
+     * Register a handler for business_capability_update webhook field
+     * @see https://developers.facebook.com/docs/whatsapp/business-management-api/webhooks/components#business_capability_update
+     */
+    onBusinessCapabilityUpdate(handler: BusinessCapabilityUpdateHandler): void {
+        this.businessCapabilityUpdateHandler = handler;
+        LOGGER.log('Registered business_capability_update handler');
+    }
+
+    /**
+     * Register a handler for phone_number_name_update webhook field
+     * @see https://developers.facebook.com/docs/whatsapp/business-management-api/webhooks/components#phone_number_name_update
+     */
+    onPhoneNumberNameUpdate(handler: PhoneNumberNameUpdateHandler): void {
+        this.phoneNumberNameUpdateHandler = handler;
+        LOGGER.log('Registered phone_number_name_update handler');
+    }
+
+    /**
+     * Register a handler for phone_number_quality_update webhook field
+     * @see https://developers.facebook.com/docs/whatsapp/business-management-api/webhooks/components#phone_number_quality_update
+     */
+    onPhoneNumberQualityUpdate(handler: PhoneNumberQualityUpdateHandler): void {
+        this.phoneNumberQualityUpdateHandler = handler;
+        LOGGER.log('Registered phone_number_quality_update handler');
+    }
+
+    /**
+     * Register a handler for message_template_status_update webhook field
+     * @see https://developers.facebook.com/docs/whatsapp/business-management-api/webhooks/components#message_template_status_update
+     */
+    onMessageTemplateStatusUpdate(handler: MessageTemplateStatusUpdateHandler): void {
+        this.messageTemplateStatusUpdateHandler = handler;
+        LOGGER.log('Registered message_template_status_update handler');
+    }
+
+    /**
+     * Register a handler for template_category_update webhook field
+     * @see https://developers.facebook.com/docs/whatsapp/business-management-api/webhooks/components#template_category_update
+     */
+    onTemplateCategoryUpdate(handler: TemplateCategoryUpdateHandler): void {
+        this.templateCategoryUpdateHandler = handler;
+        LOGGER.log('Registered template_category_update handler');
+    }
+
+    /**
+     * Register a handler for message_template_quality_update webhook field
+     * @see https://developers.facebook.com/docs/whatsapp/business-management-api/webhooks/components#message_template_quality_update
+     */
+    onMessageTemplateQualityUpdate(handler: MessageTemplateQualityUpdateHandler): void {
+        this.messageTemplateQualityUpdateHandler = handler;
+        LOGGER.log('Registered message_template_quality_update handler');
+    }
+
+    /**
+     * Register a handler for flows webhook field
+     * @see https://developers.facebook.com/docs/whatsapp/flows/guides/implementingyourflowendpoint#webhooks
+     */
+    onFlows(handler: FlowsHandler): void {
+        this.flowsHandler = handler;
+        LOGGER.log('Registered flows handler');
+    }
+
+    /**
+     * Register a handler for security webhook field
+     * @see https://developers.facebook.com/docs/whatsapp/business-management-api/webhooks/components#security
+     */
+    onSecurity(handler: SecurityHandler): void {
+        this.securityHandler = handler;
+        LOGGER.log('Registered security handler');
+    }
+
+    /**
+     * Register a handler for history webhook field
+     * @see https://developers.facebook.com/docs/graph-api/webhooks/reference/whatsapp-business-account#history
+     */
+    onHistory(handler: HistoryHandler): void {
+        this.historyHandler = handler;
+        LOGGER.log('Registered history handler');
+    }
+
+    /**
+     * Register a handler for smb_message_echoes webhook field
+     * @see https://developers.facebook.com/docs/graph-api/webhooks/reference/whatsapp-business-account#smb_message_echoes
+     */
+    onSmbMessageEchoes(handler: SmbMessageEchoesHandler): void {
+        this.smbMessageEchoesHandler = handler;
+        LOGGER.log('Registered smb_message_echoes handler');
+    }
+
+    /**
+     * Register a handler for smb_app_state_sync webhook field
+     * @see https://developers.facebook.com/docs/graph-api/webhooks/reference/whatsapp-business-account#smb_app_state_sync
+     */
+    onSmbAppStateSync(handler: SmbAppStateSyncHandler): void {
+        this.smbAppStateSyncHandler = handler;
+        LOGGER.log('Registered smb_app_state_sync handler');
     }
 
     getClient(): WhatsApp {

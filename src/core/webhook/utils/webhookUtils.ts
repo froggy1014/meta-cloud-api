@@ -8,7 +8,27 @@ import { decryptFlowRequest, encryptFlowResponse } from '../../../utils/flowEncr
 import { isFlowDataExchangeRequest, isFlowErrorRequest, isFlowPingRequest } from '../../../utils/flowTypeGuards';
 import Logger from '../../../utils/logger';
 import WhatsApp from '../../whatsapp/WhatsApp';
-import { MessageWebhookValue, StatusWebhook, StatusWebhookValue, WebhookValue, WhatsAppMessage } from '../types';
+import {
+    AccountAlertsWebhookValue,
+    AccountReviewUpdateWebhookValue,
+    AccountUpdateWebhookValue,
+    BusinessCapabilityUpdateWebhookValue,
+    FlowsWebhookValue,
+    HistoryWebhookValue,
+    MessageTemplateQualityUpdateWebhookValue,
+    MessageTemplateStatusUpdateWebhookValue,
+    MessageWebhookValue,
+    PhoneNumberNameUpdateWebhookValue,
+    PhoneNumberQualityUpdateWebhookValue,
+    SecurityWebhookValue,
+    SmbAppStateSyncWebhookValue,
+    SmbMessageEchoesWebhookValue,
+    StatusWebhook,
+    StatusWebhookValue,
+    TemplateCategoryUpdateWebhookValue,
+    WebhookValue,
+    WhatsAppMessage,
+} from '../types';
 
 const LIB_NAME = 'WEBHOOK_UTILS';
 const LOGGER = new Logger(LIB_NAME, process.env.DEBUG === 'true');
@@ -38,6 +58,79 @@ export type ProcessedStatus = {
     phoneNumberId: string;
     displayPhoneNumber: string;
     status: StatusWebhook;
+};
+
+/**
+ * Processed webhook field types for specialized handlers
+ */
+export type ProcessedAccountUpdate = {
+    wabaId: string;
+    value: AccountUpdateWebhookValue['value'];
+};
+
+export type ProcessedAccountReviewUpdate = {
+    wabaId: string;
+    value: AccountReviewUpdateWebhookValue['value'];
+};
+
+export type ProcessedAccountAlerts = {
+    wabaId: string;
+    value: AccountAlertsWebhookValue['value'];
+};
+
+export type ProcessedBusinessCapabilityUpdate = {
+    wabaId: string;
+    value: BusinessCapabilityUpdateWebhookValue['value'];
+};
+
+export type ProcessedPhoneNumberNameUpdate = {
+    wabaId: string;
+    value: PhoneNumberNameUpdateWebhookValue['value'];
+};
+
+export type ProcessedPhoneNumberQualityUpdate = {
+    wabaId: string;
+    value: PhoneNumberQualityUpdateWebhookValue['value'];
+};
+
+export type ProcessedMessageTemplateStatusUpdate = {
+    wabaId: string;
+    value: MessageTemplateStatusUpdateWebhookValue['value'];
+};
+
+export type ProcessedTemplateCategoryUpdate = {
+    wabaId: string;
+    value: TemplateCategoryUpdateWebhookValue['value'];
+};
+
+export type ProcessedMessageTemplateQualityUpdate = {
+    wabaId: string;
+    value: MessageTemplateQualityUpdateWebhookValue['value'];
+};
+
+export type ProcessedFlows = {
+    wabaId: string;
+    value: FlowsWebhookValue['value'];
+};
+
+export type ProcessedSecurity = {
+    wabaId: string;
+    value: SecurityWebhookValue['value'];
+};
+
+export type ProcessedHistory = {
+    wabaId: string;
+    value: HistoryWebhookValue['value'];
+};
+
+export type ProcessedSmbMessageEchoes = {
+    wabaId: string;
+    value: SmbMessageEchoesWebhookValue['value'];
+};
+
+export type ProcessedSmbAppStateSync = {
+    wabaId: string;
+    value: SmbAppStateSyncWebhookValue['value'];
 };
 
 // Type-specific processed messages for specialized handlers
@@ -97,6 +190,46 @@ export type MessageHandler = (whatsapp: WhatsApp, processed: ProcessedMessage) =
 export type StatusHandler = (whatsapp: WhatsApp, processed: ProcessedStatus) => void | Promise<void>;
 export type FlowHandler = (whatsapp: WhatsApp, request: FlowEndpointRequest) => any | Promise<any>;
 
+// Webhook field handlers
+export type AccountUpdateHandler = (whatsapp: WhatsApp, processed: ProcessedAccountUpdate) => void | Promise<void>;
+export type AccountReviewUpdateHandler = (
+    whatsapp: WhatsApp,
+    processed: ProcessedAccountReviewUpdate,
+) => void | Promise<void>;
+export type AccountAlertsHandler = (whatsapp: WhatsApp, processed: ProcessedAccountAlerts) => void | Promise<void>;
+export type BusinessCapabilityUpdateHandler = (
+    whatsapp: WhatsApp,
+    processed: ProcessedBusinessCapabilityUpdate,
+) => void | Promise<void>;
+export type PhoneNumberNameUpdateHandler = (
+    whatsapp: WhatsApp,
+    processed: ProcessedPhoneNumberNameUpdate,
+) => void | Promise<void>;
+export type PhoneNumberQualityUpdateHandler = (
+    whatsapp: WhatsApp,
+    processed: ProcessedPhoneNumberQualityUpdate,
+) => void | Promise<void>;
+export type MessageTemplateStatusUpdateHandler = (
+    whatsapp: WhatsApp,
+    processed: ProcessedMessageTemplateStatusUpdate,
+) => void | Promise<void>;
+export type TemplateCategoryUpdateHandler = (
+    whatsapp: WhatsApp,
+    processed: ProcessedTemplateCategoryUpdate,
+) => void | Promise<void>;
+export type MessageTemplateQualityUpdateHandler = (
+    whatsapp: WhatsApp,
+    processed: ProcessedMessageTemplateQualityUpdate,
+) => void | Promise<void>;
+export type FlowsHandler = (whatsapp: WhatsApp, processed: ProcessedFlows) => void | Promise<void>;
+export type SecurityHandler = (whatsapp: WhatsApp, processed: ProcessedSecurity) => void | Promise<void>;
+export type HistoryHandler = (whatsapp: WhatsApp, processed: ProcessedHistory) => void | Promise<void>;
+export type SmbMessageEchoesHandler = (
+    whatsapp: WhatsApp,
+    processed: ProcessedSmbMessageEchoes,
+) => void | Promise<void>;
+export type SmbAppStateSyncHandler = (whatsapp: WhatsApp, processed: ProcessedSmbAppStateSync) => void | Promise<void>;
+
 // Type-specific handlers for specialized methods
 export type TextMessageHandler = (whatsapp: WhatsApp, processed: TextProcessedMessage) => void | Promise<void>;
 export type ImageMessageHandler = (whatsapp: WhatsApp, processed: ImageProcessedMessage) => void | Promise<void>;
@@ -126,6 +259,21 @@ export async function processWebhookMessages(
         statusHandler?: StatusHandler;
         preProcessHandler?: MessageHandler;
         postProcessHandler?: MessageHandler;
+        // Webhook field handlers
+        accountUpdateHandler?: AccountUpdateHandler;
+        accountReviewUpdateHandler?: AccountReviewUpdateHandler;
+        accountAlertsHandler?: AccountAlertsHandler;
+        businessCapabilityUpdateHandler?: BusinessCapabilityUpdateHandler;
+        phoneNumberNameUpdateHandler?: PhoneNumberNameUpdateHandler;
+        phoneNumberQualityUpdateHandler?: PhoneNumberQualityUpdateHandler;
+        messageTemplateStatusUpdateHandler?: MessageTemplateStatusUpdateHandler;
+        templateCategoryUpdateHandler?: TemplateCategoryUpdateHandler;
+        messageTemplateQualityUpdateHandler?: MessageTemplateQualityUpdateHandler;
+        flowsHandler?: FlowsHandler;
+        securityHandler?: SecurityHandler;
+        historyHandler?: HistoryHandler;
+        smbMessageEchoesHandler?: SmbMessageEchoesHandler;
+        smbAppStateSyncHandler?: SmbAppStateSyncHandler;
     },
 ): Promise<Response> {
     try {
@@ -147,6 +295,106 @@ export async function processWebhookMessages(
                 for (const change of changes) {
                     if (change.field === 'messages') {
                         await processMessages(entry.id, change.value, whatsapp, handlers);
+                    } else if (change.field === 'account_update') {
+                        await processWebhookField(
+                            entry.id,
+                            change as AccountUpdateWebhookValue,
+                            handlers.accountUpdateHandler,
+                            whatsapp,
+                        );
+                    } else if (change.field === 'account_review_update') {
+                        await processWebhookField(
+                            entry.id,
+                            change as AccountReviewUpdateWebhookValue,
+                            handlers.accountReviewUpdateHandler,
+                            whatsapp,
+                        );
+                    } else if (change.field === 'account_alerts') {
+                        await processWebhookField(
+                            entry.id,
+                            change as AccountAlertsWebhookValue,
+                            handlers.accountAlertsHandler,
+                            whatsapp,
+                        );
+                    } else if (change.field === 'business_capability_update') {
+                        await processWebhookField(
+                            entry.id,
+                            change as BusinessCapabilityUpdateWebhookValue,
+                            handlers.businessCapabilityUpdateHandler,
+                            whatsapp,
+                        );
+                    } else if (change.field === 'phone_number_name_update') {
+                        await processWebhookField(
+                            entry.id,
+                            change as PhoneNumberNameUpdateWebhookValue,
+                            handlers.phoneNumberNameUpdateHandler,
+                            whatsapp,
+                        );
+                    } else if (change.field === 'phone_number_quality_update') {
+                        await processWebhookField(
+                            entry.id,
+                            change as PhoneNumberQualityUpdateWebhookValue,
+                            handlers.phoneNumberQualityUpdateHandler,
+                            whatsapp,
+                        );
+                    } else if (change.field === 'message_template_status_update') {
+                        await processWebhookField(
+                            entry.id,
+                            change as MessageTemplateStatusUpdateWebhookValue,
+                            handlers.messageTemplateStatusUpdateHandler,
+                            whatsapp,
+                        );
+                    } else if (change.field === 'template_category_update') {
+                        await processWebhookField(
+                            entry.id,
+                            change as TemplateCategoryUpdateWebhookValue,
+                            handlers.templateCategoryUpdateHandler,
+                            whatsapp,
+                        );
+                    } else if (change.field === 'message_template_quality_update') {
+                        await processWebhookField(
+                            entry.id,
+                            change as MessageTemplateQualityUpdateWebhookValue,
+                            handlers.messageTemplateQualityUpdateHandler,
+                            whatsapp,
+                        );
+                    } else if (change.field === 'flows') {
+                        await processWebhookField(
+                            entry.id,
+                            change as FlowsWebhookValue,
+                            handlers.flowsHandler,
+                            whatsapp,
+                        );
+                    } else if (change.field === 'security') {
+                        await processWebhookField(
+                            entry.id,
+                            change as SecurityWebhookValue,
+                            handlers.securityHandler,
+                            whatsapp,
+                        );
+                    } else if (change.field === 'history') {
+                        await processWebhookField(
+                            entry.id,
+                            change as HistoryWebhookValue,
+                            handlers.historyHandler,
+                            whatsapp,
+                        );
+                    } else if (change.field === 'smb_message_echoes') {
+                        await processWebhookField(
+                            entry.id,
+                            change as SmbMessageEchoesWebhookValue,
+                            handlers.smbMessageEchoesHandler,
+                            whatsapp,
+                        );
+                    } else if (change.field === 'smb_app_state_sync') {
+                        await processWebhookField(
+                            entry.id,
+                            change as SmbAppStateSyncWebhookValue,
+                            handlers.smbAppStateSyncHandler,
+                            whatsapp,
+                        );
+                    } else {
+                        LOGGER.warn(`Unhandled webhook field: ${change.field}`);
                     }
                 }
             } catch (error) {
@@ -415,6 +663,30 @@ async function executeStatusHandler(
             await handler(whatsapp, processed);
         } catch (error) {
             LOGGER.error('Error in status handler:', { error, statusId: processed.status.id });
+        }
+    }
+}
+
+/**
+ * Generic webhook field processor
+ * Processes webhook fields other than 'messages'
+ */
+async function processWebhookField<T extends { field: string; value: any }>(
+    wabaId: string,
+    webhookValue: T,
+    handler:
+        | ((whatsapp: WhatsApp, processed: { wabaId: string; value: T['value'] }) => void | Promise<void>)
+        | undefined,
+    whatsapp: WhatsApp,
+): Promise<void> {
+    if (handler) {
+        try {
+            await handler(whatsapp, {
+                wabaId,
+                value: webhookValue.value,
+            });
+        } catch (error) {
+            LOGGER.error(`Error in ${webhookValue.field} handler:`, { error, wabaId });
         }
     }
 }
