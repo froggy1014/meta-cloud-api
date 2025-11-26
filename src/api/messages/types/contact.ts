@@ -33,7 +33,7 @@ export type OrgObject = {
 };
 
 export type PhoneObject = {
-    phone?: 'PHONE_NUMBER';
+    phone?: string;
     type?: 'CELL' | 'MAIN' | 'IPHONE' | 'HOME' | 'WORK' | string;
     wa_id?: string;
 };
