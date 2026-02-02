@@ -32,8 +32,9 @@ export default class PhoneNumberApi extends BaseAPI implements phoneNumber.Phone
      * const phoneNumber = await whatsappClient.phoneNumber.getPhoneNumberById();
      * const phoneNumberWithFields = await whatsappClient.phoneNumber.getPhoneNumberById('display_phone_number,verified_name');
      */
-    async getPhoneNumberById(fields?: string): Promise<phoneNumber.PhoneNumberResponse> {
-        const queryParams = fields ? objectToQueryString({ fields }) : '';
+    async getPhoneNumberById(fields?: phoneNumber.PhoneNumberFieldsParam): Promise<phoneNumber.PhoneNumberResponse> {
+        const fieldValue = Array.isArray(fields) ? fields.join(',') : fields;
+        const queryParams = fieldValue ? objectToQueryString({ fields: fieldValue }) : '';
         return this.sendJson(
             HttpMethodsEnum.Get,
             `${this.config[WabaConfigEnum.PhoneNumberId]}${queryParams}`,

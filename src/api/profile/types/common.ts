@@ -11,6 +11,7 @@ export type BusinessProfileField =
     | 'address'
     | 'description'
     | 'email'
+    | 'messaging_product'
     | 'profile_picture_url'
     | 'websites'
     | 'vertical';

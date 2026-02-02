@@ -51,6 +51,34 @@ export type Throughput = {
     level: ThroughputLevel;
 };
 
+export type PhoneNumberField =
+    | 'display_phone_number'
+    | 'id'
+    | 'quality_rating'
+    | 'verified_name'
+    | 'account_mode'
+    | 'certificate'
+    | 'code_verification_status'
+    | 'conversational_automation'
+    | 'eligibility_for_api_business_global_search'
+    | 'health_status'
+    | 'is_official_business_account'
+    | 'is_on_biz_app'
+    | 'is_pin_enabled'
+    | 'is_preverified_number'
+    | 'last_onboarded_time'
+    | 'messaging_limit_tier'
+    | 'name_status'
+    | 'new_certificate'
+    | 'new_name_status'
+    | 'platform_type'
+    | 'quality_score'
+    | 'search_visibility'
+    | 'status'
+    | 'throughput';
+
+export type PhoneNumberFieldsParam = PhoneNumberField[] | string;
+
 export type PhoneNumberResponse = {
     display_phone_number: string;
     id: string;
@@ -142,7 +170,7 @@ export type ThroughputResponse = {
 };
 
 export interface PhoneNumberClass {
-    getPhoneNumberById(fields?: string): Promise<PhoneNumberResponse>;
+    getPhoneNumberById(fields?: PhoneNumberFieldsParam): Promise<PhoneNumberResponse>;
     getPhoneNumbers(): Promise<PhoneNumbersResponse>;
     requestVerificationCode(params: RequestVerificationCodeRequest): Promise<ResponseSuccess>;
     verifyCode(params: VerifyCodeRequest): Promise<ResponseSuccess>;

@@ -106,6 +106,8 @@ export interface WabaAccount {
     message_template_namespace?: string;
     name?: string;
     ownership_type?: string;
+    timezone_id?: string;
+    primary_business_location?: Record<string, unknown> | string;
     currency?: string;
 }
 
@@ -115,6 +117,7 @@ export interface WabaAccount {
 export type WabaAccountFields =
     | 'id'
     | 'name'
+    | 'timezone_id'
     | 'account_review_status'
     | 'auth_international_rate_eligibility'
     | 'business_verification_status'
@@ -123,7 +126,8 @@ export type WabaAccountFields =
     | 'health_status'
     | 'status'
     | 'ownership_type'
-    | 'message_template_namespace';
+    | 'message_template_namespace'
+    | 'primary_business_location';
 
 /**
  * Parameter type for specifying which WABA account fields to retrieve
