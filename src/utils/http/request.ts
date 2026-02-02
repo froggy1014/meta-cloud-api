@@ -1,6 +1,6 @@
 import type { HttpMethodsEnum } from '../../types/enums';
 import type { RequesterClass } from '../../types/request';
-import { isMetaError, MetaError } from '../isMetaError';
+import { isMetaError, normalizeMetaError, WhatsAppApiError, WhatsAppError, WhatsAppNetworkError } from '../isMetaError';
 import Logger from '../logger';
 import HttpsClient from './httpsClient';
 
@@ -85,39 +85,28 @@ export default class Requester implements RequesterClass {
             );
 
             if (!response.rawResponse().ok) {
-                const errorData = await response.json();
-                if (isMetaError(errorData)) {
-                    throw errorData;
+                let errorData: unknown = null;
+                try {
+                    errorData = await response.json();
+                } catch {
+                    errorData = null;
                 }
-                // If the error doesn't match Meta's format, create a generic MetaError
-                throw {
-                    name: 'MetaError',
-                    message: 'Unknown error occurred',
-                    error: {
-                        message: errorData.message || 'Unknown error occurred',
-                        type: 'UnknownError',
-                        code: response.statusCode(),
-                        fbtrace_id: '',
-                    },
-                } as MetaError;
+
+                const metaError = normalizeMetaError(errorData, response.statusCode());
+                throw new WhatsAppApiError(metaError.error.message, metaError.error, response.statusCode());
             }
 
             return response;
         } catch (error) {
-            if (isMetaError(error)) {
+            if (error instanceof WhatsAppError) {
                 throw error;
             }
-            // Handle network errors or other unexpected errors
-            throw {
-                name: 'MetaError',
-                message: error instanceof Error ? error.message : 'Network error occurred',
-                error: {
-                    message: error instanceof Error ? error.message : 'Network error occurred',
-                    type: 'NetworkError',
-                    code: 500,
-                    fbtrace_id: '',
-                },
-            } as MetaError;
+            if (isMetaError(error)) {
+                throw new WhatsAppApiError(error.error.message, error.error);
+            }
+
+            const message = error instanceof Error ? error.message : 'Network error occurred';
+            throw new WhatsAppNetworkError(message, error);
         }
     }
 
