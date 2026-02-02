@@ -1,5 +1,5 @@
 // Express webhook handler
-export { expressWebhookHandler } from './express';
+export { expressWebhookHandler, expressWebhookHandler as webhookHandler } from './express';
 
 // Types
 export type { WebhookContact, WebhookEvent, WebhookMessage } from '../../types';
