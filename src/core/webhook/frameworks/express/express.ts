@@ -49,7 +49,11 @@ class ExpressWebhookHandler extends BaseWebhookHandler<ExpressRequest, ExpressRe
             return result;
         } catch (error) {
             next(error);
-            throw error;
+            return {
+                status: 500,
+                body: JSON.stringify({ error: 'Internal Server Error' }),
+                headers: { 'Content-Type': 'application/json' },
+            };
         }
     }
 
@@ -72,7 +76,11 @@ class ExpressWebhookHandler extends BaseWebhookHandler<ExpressRequest, ExpressRe
             return result;
         } catch (error) {
             next(error);
-            throw error;
+            return {
+                status: 500,
+                body: JSON.stringify({ error: 'Internal Server Error' }),
+                headers: { 'Content-Type': 'application/json' },
+            };
         }
     }
 
@@ -99,7 +107,11 @@ class ExpressWebhookHandler extends BaseWebhookHandler<ExpressRequest, ExpressRe
             return result;
         } catch (error) {
             next(error);
-            throw error;
+            return {
+                status: 500,
+                body: JSON.stringify({ error: 'Internal Server Error' }),
+                headers: { 'Content-Type': 'application/json' },
+            };
         }
     }
 

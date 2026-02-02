@@ -81,7 +81,11 @@ class NextJsWebhookHandler<
         } catch (error) {
             console.error('Webhook verification error:', error);
             res.status(500).json({ error: 'Internal Server Error' });
-            throw error;
+            return {
+                status: 500,
+                body: JSON.stringify({ error: 'Internal Server Error' }),
+                headers: { 'Content-Type': 'application/json' },
+            };
         }
     }
 
@@ -95,11 +99,19 @@ class NextJsWebhookHandler<
             // Handle JSON parsing errors specifically
             if (error instanceof Error && error.message === 'Invalid JSON in request body') {
                 res.status(400).json({ error: 'Invalid JSON' });
-                throw error;
+                return {
+                    status: 400,
+                    body: JSON.stringify({ error: 'Invalid JSON' }),
+                    headers: { 'Content-Type': 'application/json' },
+                };
             }
 
             res.status(500).json({ error: 'Internal Server Error' });
-            throw error;
+            return {
+                status: 500,
+                body: JSON.stringify({ error: 'Internal Server Error' }),
+                headers: { 'Content-Type': 'application/json' },
+            };
         }
 
         try {
@@ -118,7 +130,11 @@ class NextJsWebhookHandler<
         } catch (error) {
             console.error('Webhook processing error:', error);
             res.status(500).json({ error: 'Internal Server Error' });
-            throw error;
+            return {
+                status: 500,
+                body: JSON.stringify({ error: 'Internal Server Error' }),
+                headers: { 'Content-Type': 'application/json' },
+            };
         }
     }
 
@@ -132,11 +148,19 @@ class NextJsWebhookHandler<
             // Handle JSON parsing errors specifically
             if (error instanceof Error && error.message === 'Invalid JSON in request body') {
                 res.status(400).json({ error: 'Invalid JSON' });
-                throw error;
+                return {
+                    status: 400,
+                    body: JSON.stringify({ error: 'Invalid JSON' }),
+                    headers: { 'Content-Type': 'application/json' },
+                };
             }
 
             res.status(500).json({ error: 'Internal Server Error' });
-            throw error;
+            return {
+                status: 500,
+                body: JSON.stringify({ error: 'Internal Server Error' }),
+                headers: { 'Content-Type': 'application/json' },
+            };
         }
 
         try {
@@ -160,7 +184,11 @@ class NextJsWebhookHandler<
         } catch (error) {
             console.error('Flow error:', error);
             res.status(500).json({ error: 'Internal Server Error' });
-            throw error;
+            return {
+                status: 500,
+                body: JSON.stringify({ error: 'Internal Server Error' }),
+                headers: { 'Content-Type': 'application/json' },
+            };
         }
     }
 
