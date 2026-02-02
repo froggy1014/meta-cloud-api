@@ -67,6 +67,7 @@ export enum InteractiveTypesEnum {
     Product = 'product',
     ProductList = 'product_list',
     CtaUrl = 'cta_url',
+    Carousel = 'carousel',
     LocationRequest = 'location_request_message',
     AddressMessage = 'address_message',
     Flow = 'flow',

@@ -311,6 +311,126 @@ describe('Messages API - Unit Tests', () => {
             });
         });
 
+        it('should send interactive carousel message with correct schema', async () => {
+            const interactiveParams: MessageRequestParams<InteractiveObject> = {
+                to: '1234567890',
+                body: {
+                    type: InteractiveTypesEnum.Carousel,
+                    body: {
+                        text: 'Check these out',
+                    },
+                    action: {
+                        cards: [
+                            {
+                                card_index: 0,
+                                type: 'cta_url',
+                                header: {
+                                    type: 'image',
+                                    image: {
+                                        link: 'https://example.com/image-1.png',
+                                    },
+                                },
+                                body: {
+                                    text: 'Card 1',
+                                },
+                                action: {
+                                    name: 'cta_url',
+                                    parameters: {
+                                        display_text: 'Open',
+                                        url: 'https://example.com',
+                                    },
+                                },
+                            },
+                            {
+                                card_index: 1,
+                                type: 'cta_url',
+                                header: {
+                                    type: 'image',
+                                    image: {
+                                        link: 'https://example.com/image-2.png',
+                                    },
+                                },
+                                action: {
+                                    buttons: [
+                                        {
+                                            type: 'quick_reply',
+                                            quick_reply: {
+                                                id: 'card_2_reply',
+                                                title: 'Select',
+                                            },
+                                        },
+                                    ],
+                                },
+                            },
+                        ],
+                    },
+                },
+            };
+
+            await whatsApp.messages.interactiveCarousel(interactiveParams);
+
+            expect(mockRequestSend).toHaveBeenCalled();
+            const [_, __, ___, body] = mockRequestSend.mock.calls[0];
+
+            const requestBody = JSON.parse(body);
+
+            expect(requestBody).toMatchObject({
+                type: 'interactive',
+                to: '1234567890',
+                interactive: {
+                    type: 'carousel',
+                    body: {
+                        text: 'Check these out',
+                    },
+                    action: {
+                        cards: [
+                            {
+                                card_index: 0,
+                                type: 'cta_url',
+                                header: {
+                                    type: 'image',
+                                    image: {
+                                        link: 'https://example.com/image-1.png',
+                                    },
+                                },
+                                body: {
+                                    text: 'Card 1',
+                                },
+                                action: {
+                                    name: 'cta_url',
+                                    parameters: {
+                                        display_text: 'Open',
+                                        url: 'https://example.com',
+                                    },
+                                },
+                            },
+                            {
+                                card_index: 1,
+                                type: 'cta_url',
+                                header: {
+                                    type: 'image',
+                                    image: {
+                                        link: 'https://example.com/image-2.png',
+                                    },
+                                },
+                                action: {
+                                    buttons: [
+                                        {
+                                            type: 'quick_reply',
+                                            quick_reply: {
+                                                id: 'card_2_reply',
+                                                title: 'Select',
+                                            },
+                                        },
+                                    ],
+                                },
+                            },
+                        ],
+                    },
+                },
+            });
+        });
+
         it('should send template message with correct schema', async () => {
             const templateParams: MessageRequestParams<MessageTemplateObject<ComponentTypesEnum>> = {
                 to: '1234567890',

@@ -207,12 +207,67 @@ type FlowInteractiveObject = {
     action: FlowActionObject;
 };
 
+type CarouselHeaderObject = {
+    type: 'image' | 'video';
+    image?: ImageMediaObject;
+    video?: VideoMediaObject;
+};
+
+type CarouselQuickReply = {
+    id: string;
+    title: string;
+};
+
+type CarouselQuickReplyButton = {
+    type: 'quick_reply';
+    quick_reply: CarouselQuickReply;
+};
+
+type CarouselCtaUrlAction = {
+    name: 'cta_url';
+    parameters: CtaUrlParameters;
+};
+
+type CarouselQuickReplyAction = {
+    buttons: CarouselQuickReplyButton[];
+};
+
+type MediaCarouselCard = {
+    card_index: number;
+    type: 'cta_url';
+    header: CarouselHeaderObject;
+    body?: SimpleTextObject;
+    action: CarouselCtaUrlAction | CarouselQuickReplyAction;
+};
+
+type ProductCarouselAction = {
+    product_retailer_id: string;
+    catalog_id: string;
+};
+
+type ProductCarouselCard = {
+    card_index: number;
+    type: 'product';
+    action: ProductCarouselAction;
+};
+
+type CarouselActionObject = {
+    cards: Array<MediaCarouselCard | ProductCarouselCard>;
+};
+
+type CarouselInteractiveObject = {
+    type: InteractiveTypesEnum.Carousel;
+    body: SimpleTextObject;
+    action: CarouselActionObject;
+};
+
 export type InteractiveObject =
     | ButtonInteractiveObject
     | ListInteractiveObject
     | ProductInteractiveObject
     | ProductListInteractiveObject
     | CtaUrlInteractiveObject
+    | CarouselInteractiveObject
     | LocationRequestInteractiveObject
     | AddressMessageInteractiveObject
     | FlowInteractiveObject;

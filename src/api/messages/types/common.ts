@@ -126,6 +126,13 @@ export declare class MessagesClass extends BaseClass {
             }
         >,
     ): Promise<MessagesResponse>;
+    interactiveCarousel(
+        params: MessageRequestParams<
+            import('./interactive').InteractiveObject & {
+                type: InteractiveTypesEnum.Carousel;
+            }
+        >,
+    ): Promise<MessagesResponse>;
 
     // Reaction and status messages
     reaction(params: import('./reaction').ReactionParams): Promise<MessagesResponse>;

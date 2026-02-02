@@ -304,6 +304,17 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
     }
 
     /**
+     * Sends a carousel interactive message
+     * @param params The carousel interactive message parameters
+     * @returns Promise with the message response
+     */
+    async interactiveCarousel(
+        params: m.MessageRequestParams<m.InteractiveObject & { type: InteractiveTypesEnum.Carousel }>,
+    ): Promise<m.MessagesResponse> {
+        return this.interactive(params);
+    }
+
+    /**
      * Sends a reaction to a message
      * @param params The reaction parameters
      * @returns Promise with the message response
