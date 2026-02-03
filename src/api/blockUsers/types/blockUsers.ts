@@ -1,3 +1,5 @@
+// Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/block-users/
+
 import type { MetaErrorDetail } from '../../../types/request';
 
 /**

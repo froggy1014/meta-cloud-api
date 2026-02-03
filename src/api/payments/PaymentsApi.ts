@@ -1,3 +1,5 @@
+// Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/payments/payments-in/onboarding-apis/
+
 import { BaseAPI } from '../../types/base';
 import type { WabaConfigType } from '../../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';

@@ -1,3 +1,5 @@
+// Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/qr-codes/
+
 import QrCodeApi from './QrCodeApi';
 
 export default QrCodeApi;

@@ -1,3 +1,5 @@
+// Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/business-profiles/
+
 /**
  * Upload session information for creating upload sessions.
  */

@@ -1,3 +1,5 @@
+// Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/business-profiles/
+
 import type { BaseClass } from 'src/types/base';
 import { BusinessVerticalEnum } from '../../../types/enums';
 import { ResponseSuccess } from '../../../types/request';

@@ -1,3 +1,5 @@
+// Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/business-phone-numbers/media/
+
 import type { ResponseSuccess } from '../../../types/request';
 
 export type MediaResponse = {

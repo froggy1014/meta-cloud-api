@@ -1,3 +1,5 @@
+// Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/qr-codes/
+
 import type { ResponseData, ResponseSuccess } from '../../../types/request';
 
 export type QrCodeResponse = {

@@ -1,3 +1,5 @@
+// Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/business-profiles/
+
 export * from './common';
 export * from './upload';
 

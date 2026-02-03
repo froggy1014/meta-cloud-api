@@ -1,3 +1,5 @@
+// Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/business-phone-numbers/registration/
+
 import { BaseAPI } from '../../types/base';
 import type { WabaConfigType } from '../../types/config';
 import { DataLocalizationRegionEnum, HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';

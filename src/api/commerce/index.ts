@@ -1,3 +1,5 @@
+// Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/catalogs/sell-products-and-services/set-commerce-settings/
+
 import CommerceApi from './CommerceApi';
 
 export default CommerceApi;

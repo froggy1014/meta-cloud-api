@@ -1,3 +1,5 @@
+// Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/business-phone-numbers/phone-numbers/
+
 import type { Paging, ResponseSuccess } from '../../../types/request';
 
 export type QualityRating = 'GREEN' | 'YELLOW' | 'RED' | 'NA';

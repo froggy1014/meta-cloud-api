@@ -1,3 +1,5 @@
+// Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/block-users/
+
 import { BaseAPI } from '../../types/base';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
 import type { RequesterClass } from '../../types/request';

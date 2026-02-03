@@ -1,3 +1,5 @@
+// Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/marketing-messages/send-marketing-messages/
+
 import type { ComponentTypesEnum } from '../../../types/enums';
 import type { MessagesResponse, MessageTemplateObject } from '../../messages/types';
 

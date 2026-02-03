@@ -1,3 +1,5 @@
+// Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/templates/
+
 export * from './common';
 export type {
     CatalogButton,

@@ -1,3 +1,5 @@
+// Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/business-profiles/
+
 import BusinessProfileApi from './BusinessProfileApi';
 
 export default BusinessProfileApi;

@@ -1,3 +1,5 @@
+// Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/business-phone-numbers/registration/
+
 import { DataLocalizationRegionEnum } from '../../../types/enums';
 import type { ResponseSuccess } from '../../../types/request';
 

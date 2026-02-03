@@ -1,3 +1,5 @@
+// Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/templates/
+
 import { CategoryEnum } from '../../../types/enums';
 import type {
     ComponentTypes,

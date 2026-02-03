@@ -1,3 +1,5 @@
+// Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/messages/
+
 import { MessageTypesEnum } from '../../../types/enums';
 import { MessageRequestBody } from './common';
 

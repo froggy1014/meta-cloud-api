@@ -1,3 +1,5 @@
+// Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/groups/reference/
+
 import type { ResponseSuccess } from '../../../types/request';
 
 /**
