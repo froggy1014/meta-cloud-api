@@ -15,6 +15,26 @@
 
 - [Documentation](https://www.meta-cloud-api.xyz/)
 
+## Local API Docs
+
+- [Messages](./docs/messages.md)
+- [Media](./docs/media.md)
+- [Templates](./docs/templates.md)
+- [Flows](./docs/flows.md)
+- [Phone Numbers](./docs/phone-numbers.md)
+- [Business Profile](./docs/business-profile.md)
+- [Registration](./docs/registration.md)
+- [Two-Step Verification](./docs/two-step-verification.md)
+- [Encryption](./docs/encryption.md)
+- [QR Codes](./docs/qr-codes.md)
+- [WABA](./docs/waba.md)
+- [Block Users](./docs/block-users.md)
+- [Calling](./docs/calling.md)
+- [Groups](./docs/groups.md)
+- [Marketing Messages](./docs/marketing-messages.md)
+- [Commerce Settings](./docs/commerce-settings.md)
+- [Payments](./docs/payments.md)
+
 ## Features
 
 - **Type-Safe Development** - Built with TypeScript to provide code completion and catch errors during development
