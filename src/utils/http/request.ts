@@ -81,13 +81,15 @@ export default class Requester implements RequesterClass {
         LOGGER.log(`${method} : ${path} (${effectiveContentType})`);
 
         try {
+            const shouldSendBody = method === 'POST' || method === 'PUT' || method === 'DELETE';
+
             const response = await this.client.sendRequest(
                 this.host,
                 this.buildCAPIPath(endpoint),
                 method,
                 this.buildHeader(effectiveContentType, additionalHeaders),
                 timeout,
-                method === 'POST' || method === 'PUT' ? body : undefined,
+                shouldSendBody ? body : undefined,
             );
 
             if (!response.rawResponse().ok) {
