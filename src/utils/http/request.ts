@@ -1,6 +1,12 @@
 import type { HttpMethodsEnum } from '../../types/enums';
 import type { RequesterClass } from '../../types/request';
-import { isMetaError, normalizeMetaError, WhatsAppApiError, WhatsAppError, WhatsAppNetworkError } from '../isMetaError';
+import {
+    createWhatsAppApiError,
+    isMetaError,
+    normalizeMetaError,
+    WhatsAppError,
+    WhatsAppNetworkError,
+} from '../isMetaError';
 import Logger from '../logger';
 import HttpsClient from './httpsClient';
 
@@ -93,7 +99,7 @@ export default class Requester implements RequesterClass {
                 }
 
                 const metaError = normalizeMetaError(errorData, response.statusCode());
-                throw new WhatsAppApiError(metaError.error.message, metaError.error, response.statusCode());
+                throw createWhatsAppApiError(metaError.error, response.statusCode());
             }
 
             return response;
@@ -102,7 +108,7 @@ export default class Requester implements RequesterClass {
                 throw error;
             }
             if (isMetaError(error)) {
-                throw new WhatsAppApiError(error.error.message, error.error);
+                throw createWhatsAppApiError(error.error);
             }
 
             const message = error instanceof Error ? error.message : 'Network error occurred';

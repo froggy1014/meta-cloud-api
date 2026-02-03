@@ -225,7 +225,7 @@ export type { TwoStepVerificationClass, TwoStepVerificationRequest } from './api
 export type { EncryptionPublicKeyResponse } from './api/encryption/types';
 
 // Utility types
-export type { MetaError, MetaErrorData, WhatsAppErrorCode } from './utils/isMetaError';
+export type { ApiPermissionErrorCode, MetaError, MetaErrorData, WhatsAppErrorCode } from './utils/isMetaError';
 
 // Common enums that users need frequently
 export {

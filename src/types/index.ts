@@ -263,7 +263,7 @@ export type {
 } from '../api/blockUsers/types';
 
 // Utility types
-export type { MetaError, MetaErrorData, WhatsAppErrorCode } from '../utils/isMetaError';
+export type { ApiPermissionErrorCode, MetaError, MetaErrorData, WhatsAppErrorCode } from '../utils/isMetaError';
 
 // All enums (commonly used on client-side)
 export * from './enums';
