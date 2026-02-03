@@ -224,6 +224,89 @@ export type { TwoStepVerificationClass, TwoStepVerificationRequest } from './api
 // Encryption types
 export type { EncryptionPublicKeyResponse } from './api/encryption/types';
 
+// Groups types
+export type {
+    GroupCreateRequest,
+    GroupCreateResponse,
+    GroupInfoField,
+    GroupInfoFieldsParam,
+    GroupInfoResponse,
+    GroupInviteLinkResponse,
+    GroupJoinApprovalMode,
+    GroupJoinRequest,
+    GroupJoinRequestError,
+    GroupJoinRequestFailure,
+    GroupJoinRequestsActionResponse,
+    GroupJoinRequestsResponse,
+    GroupListParams,
+    GroupListResponse,
+    GroupParticipant,
+    GroupSettingsResponse,
+    GroupsClass,
+    UpdateGroupSettingsRequest,
+} from './api/groups/types';
+
+// Calling types
+export type {
+    AcceptCallRequest,
+    CallAction,
+    CallActionResponse,
+    CallHours,
+    CallHoursDay,
+    CallHoursStatus,
+    CallIconVisibility,
+    CallPermission,
+    CallPermissionAction,
+    CallPermissionLimit,
+    CallPermissionsResponse,
+    CallSession,
+    CallSdpType,
+    CallingClass,
+    CallingSettings,
+    CallingSettingsResponse,
+    CallingStatus,
+    CallbackPermissionStatus,
+    HolidaySchedule,
+    InitiateCallRequest,
+    InitiateCallResponse,
+    PreAcceptCallRequest,
+    RejectCallRequest,
+    SipServer,
+    SipSettings,
+    SipStatus,
+    TerminateCallRequest,
+    UpdateCallingSettingsRequest,
+    WeeklyOperatingHours,
+} from './api/calling/types';
+
+// Marketing Messages types
+export type { MarketingMessageRequest, MarketingMessagesClass } from './api/marketingMessages/types';
+
+// Commerce types
+export type {
+    CommerceClass,
+    CommerceSetting,
+    CommerceSettingsResponse,
+    UpdateCommerceSettingsRequest,
+} from './api/commerce/types';
+
+// Payments types
+export type {
+    PaymentConfiguration,
+    PaymentConfigurationCode,
+    PaymentConfigurationCreateRequest,
+    PaymentConfigurationCreateResponse,
+    PaymentConfigurationDeleteRequest,
+    PaymentConfigurationOauthLinkRequest,
+    PaymentConfigurationOauthLinkResponse,
+    PaymentConfigurationProvider,
+    PaymentConfigurationStatus,
+    PaymentConfigurationUpdateRequest,
+    PaymentConfigurationUpdateResponse,
+    PaymentConfigurationsResponse,
+    PaymentsClass,
+} from './api/payments/types';
+
 // Utility types
 export type { ApiPermissionErrorCode, MetaError, MetaErrorData, WhatsAppErrorCode } from './utils/isMetaError';
 

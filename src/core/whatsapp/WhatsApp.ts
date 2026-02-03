@@ -9,11 +9,16 @@ import { getUserAgent, getVersion } from '../../utils/version';
 
 import {
     BlockUsersApi,
+    CallingApi,
+    CommerceApi,
     BusinessProfileApi,
     EncryptionApi,
     FlowApi,
+    GroupsApi,
+    MarketingMessagesApi,
     MediaApi,
     MessageApi,
+    PaymentsApi,
     PhoneNumberApi,
     QrCodeApi,
     RegistrationApi,
@@ -34,8 +39,13 @@ export default class WhatsApp {
     config: WabaConfigType;
     requester: Readonly<Requester>;
     blockUsers: BlockUsersApi;
+    calling: CallingApi;
+    commerce: CommerceApi;
+    groups: GroupsApi;
+    marketingMessages: MarketingMessagesApi;
     messages: MessageApi;
     media: MediaApi;
+    payments: PaymentsApi;
     phoneNumbers: PhoneNumberApi;
     twoStepVerification: TwoStepVerificationApi;
     flows: FlowApi;
@@ -59,8 +69,13 @@ export default class WhatsApp {
         );
 
         this.blockUsers = new BlockUsersApi(this.config, this.requester);
+        this.calling = new CallingApi(this.config, this.requester);
+        this.commerce = new CommerceApi(this.config, this.requester);
+        this.groups = new GroupsApi(this.config, this.requester);
+        this.marketingMessages = new MarketingMessagesApi(this.config, this.requester);
         this.messages = new MessageApi(this.config, this.requester);
         this.media = new MediaApi(this.config, this.requester);
+        this.payments = new PaymentsApi(this.config, this.requester);
         this.phoneNumbers = new PhoneNumberApi(this.config, this.requester);
         this.twoStepVerification = new TwoStepVerificationApi(this.config, this.requester);
         this.flows = new FlowApi(this.config, this.requester);
