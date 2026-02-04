@@ -1,5 +1,17 @@
 // Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/flows/
 
+// Endpoints:
+// - GET /{WABA_ID}/flows
+// - POST /{WABA_ID}/flows
+// - GET /{FLOW_ID}?fields&date_format
+// - POST /{FLOW_ID}
+// - DELETE /{FLOW_ID}
+// - GET /{FLOW_ID}/assets
+// - POST /{FLOW_ID}/assets
+// - POST /{FLOW_ID}/publish
+// - POST /{FLOW_ID}/deprecate
+// - POST /{DESTINATION_WABA_ID}/migrate_flows
+
 import { BaseAPI } from '../../types/base';
 import type { WabaConfigType } from '../../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
@@ -185,9 +197,8 @@ export default class FlowApi extends BaseAPI implements flow.FlowClass {
 
         // Handle different input types for the file
         if (data.file instanceof Buffer) {
-            // Buffer
-            // Create a Blob from the Buffer and cast it to the global Blob type
-            fileContent = new globalThis.Blob([data.file]);
+            // Buffer - convert to Uint8Array for BlobPart compatibility
+            fileContent = new globalThis.Blob([new Uint8Array(data.file)]);
             formData.append('file', fileContent as unknown as Blob);
         } else if (typeof data.file === 'object' && !(data.file instanceof Blob)) {
             // JSON object - stringify and create Blob

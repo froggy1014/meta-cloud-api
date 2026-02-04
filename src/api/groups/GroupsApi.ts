@@ -1,5 +1,18 @@
 // Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/groups/reference/
 
+// Endpoints:
+// - POST /{PHONE_NUMBER_ID}/groups
+// - DELETE /{GROUP_ID}
+// - GET /{GROUP_ID}?fields
+// - GET /{PHONE_NUMBER_ID}/groups?limit&after&before
+// - GET /{GROUP_ID}/invite_link
+// - POST /{GROUP_ID}/invite_link
+// - GET /{GROUP_ID}/join_requests
+// - POST /{GROUP_ID}/join_requests
+// - DELETE /{GROUP_ID}/join_requests
+// - DELETE /{GROUP_ID}/participants
+// - POST /{GROUP_ID}
+
 import { BaseAPI } from '../../types/base';
 import type { WabaConfigType } from '../../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
@@ -152,7 +165,9 @@ export default class GroupsApi extends BaseAPI implements groups.GroupsClass {
             if (params.description) formData.append('description', params.description);
 
             if (params.profilePictureFile instanceof Buffer) {
-                const fileBlob = new globalThis.Blob([params.profilePictureFile], { type: 'image/jpeg' });
+                const fileBlob = new globalThis.Blob([new Uint8Array(params.profilePictureFile)], {
+                    type: 'image/jpeg',
+                });
                 formData.append('file', fileBlob as unknown as Blob);
             } else if (params.profilePictureFile instanceof Blob) {
                 formData.append('file', params.profilePictureFile);

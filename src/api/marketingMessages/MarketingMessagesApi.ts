@@ -1,10 +1,14 @@
 // Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/marketing-messages/send-marketing-messages/
 
+// Endpoints:
+// - POST /{PHONE_NUMBER_ID}/marketing_messages
+
 import { BaseAPI } from '../../types/base';
 import type { WabaConfigType } from '../../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
 import type { RequesterClass } from '../../types/request';
 
+import type { MessagesResponse } from '../messages/types';
 import type * as marketing from './types';
 
 /**
@@ -17,7 +21,7 @@ export default class MarketingMessagesApi extends BaseAPI implements marketing.M
         super(config, client);
     }
 
-    async sendTemplateMessage(params: marketing.MarketingMessageRequest) {
+    async sendTemplateMessage(params: marketing.MarketingMessageRequest): Promise<MessagesResponse> {
         const body = {
             messaging_product: 'whatsapp',
             recipient_type: 'individual',
