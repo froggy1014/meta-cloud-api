@@ -1,5 +1,10 @@
 // Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/block-users/
 
+// Endpoints:
+// - POST /{PHONE_NUMBER_ID}/block_users
+// - DELETE /{PHONE_NUMBER_ID}/block_users
+// - GET /{PHONE_NUMBER_ID}/block_users?limit&after&before
+
 import { BaseAPI } from '../../types/base';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
 import type { RequesterClass } from '../../types/request';
@@ -129,7 +134,7 @@ export default class BlockUsersApi extends BaseAPI implements blockUsers.BlockUs
         if (params) {
             const queryString = objectToQueryString(params);
             if (queryString) {
-                endpoint += `?${queryString}`;
+                endpoint += queryString;
             }
         }
 

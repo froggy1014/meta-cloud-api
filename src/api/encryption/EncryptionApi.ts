@@ -1,5 +1,9 @@
 // Docs: https://developers.facebook.com/docs/whatsapp/cloud-api/reference/whatsapp-business-encryption/
 
+// Endpoints:
+// - GET /{PHONE_NUMBER_ID}/whatsapp_business_encryption
+// - POST /{PHONE_NUMBER_ID}/whatsapp_business_encryption
+
 import { BaseAPI } from '../../types/base';
 import type { WabaConfigType } from '../../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
@@ -26,7 +30,7 @@ export default class EncryptionApi extends BaseAPI implements EncryptionClass {
         const formData = new FormData();
         formData.append('business_public_key', businessPublicKey);
 
-        return this.sendJson(
+        return this.sendFormData(
             HttpMethodsEnum.Post,
             `${this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}`,
             this.config[WabaConfigEnum.RequestTimeout],
