@@ -1,5 +1,11 @@
 // Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/calling/reference/
 
+// Endpoints:
+// - POST /{PHONE_NUMBER_ID}/settings
+// - GET /{PHONE_NUMBER_ID}/settings?fields&include_sip_credentials
+// - GET /{PHONE_NUMBER_ID}/call_permissions?user_wa_id
+// - POST /{PHONE_NUMBER_ID}/calls
+
 import { BaseAPI } from '../../types/base';
 import type { WabaConfigType } from '../../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';

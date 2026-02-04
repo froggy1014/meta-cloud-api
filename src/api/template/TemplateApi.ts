@@ -1,5 +1,12 @@
 // Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/templates/
 
+// Endpoints:
+// - GET /{TEMPLATE_ID}
+// - POST /{TEMPLATE_ID}
+// - GET /{WABA_ID}/message_templates?...
+// - POST /{WABA_ID}/message_templates
+// - DELETE /{WABA_ID}/message_templates?...
+
 import { BaseAPI } from '../../types/base';
 import type { WabaConfigType } from '../../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';

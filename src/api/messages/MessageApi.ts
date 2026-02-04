@@ -1,5 +1,8 @@
 // Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/messages/
 
+// Endpoints:
+// - POST /{PHONE_NUMBER_ID}/messages
+
 import { BaseAPI } from '../../types/base';
 import type { WabaConfigType } from '../../types/config';
 import {

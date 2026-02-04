@@ -1,5 +1,9 @@
 // Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/catalogs/sell-products-and-services/set-commerce-settings/
 
+// Endpoints:
+// - GET /{PHONE_NUMBER_ID}/whatsapp_commerce_settings
+// - POST /{PHONE_NUMBER_ID}/whatsapp_commerce_settings?is_cart_enabled&is_catalog_visible
+
 import { BaseAPI } from '../../types/base';
 import type { WabaConfigType } from '../../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';

@@ -1,5 +1,13 @@
 // Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/payments/payments-in/onboarding-apis/
 
+// Endpoints:
+// - GET /{WABA_ID}/payment_configurations
+// - GET /{WABA_ID}/payment_configuration/{CONFIGURATION_NAME}
+// - POST /{WABA_ID}/payment_configuration
+// - POST /{WABA_ID}/payment_configuration/{CONFIGURATION_NAME}
+// - POST /{WABA_ID}/generate_payment_configuration_oauth_link
+// - DELETE /{WABA_ID}/payment_configuration
+
 import { BaseAPI } from '../../types/base';
 import type { WabaConfigType } from '../../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';

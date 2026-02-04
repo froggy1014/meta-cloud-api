@@ -1,5 +1,11 @@
 // Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/whatsapp-business-accounts/
 
+// Endpoints:
+// - GET /{WABA_ID}?fields
+// - GET /{WABA_ID}/subscribed_apps
+// - POST /{WABA_ID}/subscribed_apps
+// - DELETE /{WABA_ID}/subscribed_apps
+
 import { BaseAPI } from '../../types/base';
 import type { WabaConfigType } from '../../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';

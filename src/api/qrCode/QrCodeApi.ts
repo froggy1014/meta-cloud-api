@@ -1,5 +1,12 @@
 // Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/qr-codes/
 
+// Endpoints:
+// - POST /{PHONE_NUMBER_ID}/message_qrdls
+// - GET /{PHONE_NUMBER_ID}/message_qrdls
+// - GET /{PHONE_NUMBER_ID}/message_qrdls/{QR_CODE_ID}
+// - POST /{PHONE_NUMBER_ID}/message_qrdls
+// - DELETE /{PHONE_NUMBER_ID}/message_qrdls/{QR_CODE_ID}
+
 import { BaseAPI } from '../../types/base';
 import type { WabaConfigType } from '../../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';

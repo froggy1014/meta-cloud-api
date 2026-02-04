@@ -1,5 +1,14 @@
 // Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/business-phone-numbers/phone-numbers/
 
+// Endpoints:
+// - GET /{PHONE_NUMBER_ID}?fields
+// - GET /{WABA_ID}/phone_numbers
+// - POST /{PHONE_NUMBER_ID}/request_code
+// - POST /{PHONE_NUMBER_ID}/verify_code
+// - POST /{PHONE_NUMBER_ID}/conversational_automation
+// - GET /{PHONE_NUMBER_ID}?fields=conversational_automation
+// - GET /{PHONE_NUMBER_ID}?fields=throughput
+
 import { BaseAPI } from '../../types/base';
 import type { WabaConfigType } from '../../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';

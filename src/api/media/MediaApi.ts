@@ -1,5 +1,11 @@
 // Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/business-phone-numbers/media/
 
+// Endpoints:
+// - GET /{MEDIA_ID}
+// - POST /{PHONE_NUMBER_ID}/media
+// - DELETE /{MEDIA_ID}
+// - GET {MEDIA_URL}
+
 import { BaseAPI } from '../../types/base';
 import type { WabaConfigType } from '../../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';

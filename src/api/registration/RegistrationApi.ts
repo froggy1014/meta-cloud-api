@@ -1,5 +1,9 @@
 // Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/business-phone-numbers/registration/
 
+// Endpoints:
+// - POST /{PHONE_NUMBER_ID}/register
+// - POST /{PHONE_NUMBER_ID}/deregister
+
 import { BaseAPI } from '../../types/base';
 import type { WabaConfigType } from '../../types/config';
 import { DataLocalizationRegionEnum, HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';

@@ -1,5 +1,12 @@
 // Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/business-profiles/
 
+// Endpoints:
+// - GET /{PHONE_NUMBER_ID}/whatsapp_business_profile?fields
+// - POST /{PHONE_NUMBER_ID}/whatsapp_business_profile
+// - POST /app/uploads?file_length&file_type&file_name
+// - POST /{UPLOAD_ID}
+// - GET /{UPLOAD_ID}
+
 import { BaseAPI } from '../../types/base';
 import type { WabaConfigType } from '../../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
