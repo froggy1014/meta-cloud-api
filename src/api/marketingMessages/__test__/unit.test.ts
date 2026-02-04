@@ -1,4 +1,5 @@
 import { WhatsApp } from '@core/whatsapp';
+import { LanguagesEnum } from '../../../types/enums';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('Marketing Messages API - Unit Tests', () => {
@@ -24,7 +25,7 @@ describe('Marketing Messages API - Unit Tests', () => {
             to: '15551234567',
             template: {
                 name: 'marketing_template',
-                language: { code: 'en_US' },
+                language: { policy: 'deterministic', code: LanguagesEnum.English_US },
             },
             message_activity_sharing: true,
         });
@@ -39,7 +40,7 @@ describe('Marketing Messages API - Unit Tests', () => {
             type: 'template',
             template: {
                 name: 'marketing_template',
-                language: { code: 'en_US' },
+                language: { policy: 'deterministic', code: 'en_US' },
             },
             message_activity_sharing: true,
         });

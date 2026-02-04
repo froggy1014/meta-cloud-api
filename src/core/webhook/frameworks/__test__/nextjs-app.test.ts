@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { webhookHandler } from '../nextjs-app';
+import { nextjsAppWebhookHandler } from '../nextjs-app';
 import type { NextJsAppWebhookConfig } from '../nextjs-app';
 import {
     mockWebhookConfig,
@@ -21,11 +21,11 @@ vi.mock('../../WebhookProcessor', () => ({
 describe('Next.js App Router Webhook Handler', () => {
     const mockConfig: NextJsAppWebhookConfig = mockWebhookConfig;
 
-    let handler: ReturnType<typeof webhookHandler>;
+    let handler: ReturnType<typeof nextjsAppWebhookHandler>;
 
     beforeEach(() => {
         vi.clearAllMocks();
-        handler = webhookHandler(mockConfig);
+        handler = nextjsAppWebhookHandler(mockConfig);
     });
 
     describe('handler structure', () => {

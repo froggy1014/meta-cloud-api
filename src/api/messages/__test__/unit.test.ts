@@ -312,7 +312,7 @@ describe('Messages API - Unit Tests', () => {
         });
 
         it('should send interactive carousel message with correct schema', async () => {
-            const interactiveParams: MessageRequestParams<InteractiveObject> = {
+            await whatsApp.messages.interactiveCarousel({
                 to: '1234567890',
                 body: {
                     type: InteractiveTypesEnum.Carousel,
@@ -323,9 +323,9 @@ describe('Messages API - Unit Tests', () => {
                         cards: [
                             {
                                 card_index: 0,
-                                type: 'cta_url',
+                                type: 'cta_url' as const,
                                 header: {
-                                    type: 'image',
+                                    type: 'image' as const,
                                     image: {
                                         link: 'https://example.com/image-1.png',
                                     },
@@ -334,7 +334,7 @@ describe('Messages API - Unit Tests', () => {
                                     text: 'Card 1',
                                 },
                                 action: {
-                                    name: 'cta_url',
+                                    name: 'cta_url' as const,
                                     parameters: {
                                         display_text: 'Open',
                                         url: 'https://example.com',
@@ -343,9 +343,9 @@ describe('Messages API - Unit Tests', () => {
                             },
                             {
                                 card_index: 1,
-                                type: 'cta_url',
+                                type: 'cta_url' as const,
                                 header: {
-                                    type: 'image',
+                                    type: 'image' as const,
                                     image: {
                                         link: 'https://example.com/image-2.png',
                                     },
@@ -365,9 +365,7 @@ describe('Messages API - Unit Tests', () => {
                         ],
                     },
                 },
-            };
-
-            await whatsApp.messages.interactiveCarousel(interactiveParams);
+            });
 
             expect(mockRequestSend).toHaveBeenCalled();
             const [_, __, ___, body] = mockRequestSend.mock.calls[0];

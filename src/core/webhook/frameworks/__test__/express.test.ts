@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { webhookHandler } from '../express';
+import { expressWebhookHandler } from '../express';
 import type { ExpressWebhookConfig, ExpressRequest, ExpressResponse, NextFunction } from '../express';
 import {
     mockWebhookConfig,
@@ -26,14 +26,14 @@ describe('Express Webhook Handler', () => {
         path: '/webhook',
     };
 
-    let handler: ReturnType<typeof webhookHandler>;
+    let handler: ReturnType<typeof expressWebhookHandler>;
     let mockReq: ExpressRequest;
     let mockRes: ExpressResponse;
     let mockNext: NextFunction;
 
     beforeEach(() => {
         vi.clearAllMocks();
-        handler = webhookHandler(mockConfig);
+        handler = expressWebhookHandler(mockConfig);
         mockReq = createMockExpressRequest();
         mockRes = createMockExpressResponse() as any;
         mockNext = vi.fn();

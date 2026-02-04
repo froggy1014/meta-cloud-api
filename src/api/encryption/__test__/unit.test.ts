@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 describe('Encryption API - Unit Tests', () => {
     let whatsApp: WhatsApp;
     let mockRequestSend: any;
+    let mockFormDataSend: any;
 
     beforeEach(() => {
         whatsApp = new WhatsApp({
@@ -14,6 +15,7 @@ describe('Encryption API - Unit Tests', () => {
         });
 
         mockRequestSend = vi.spyOn(whatsApp.requester, 'getJson');
+        mockFormDataSend = vi.spyOn(whatsApp.requester, 'sendFormData');
     });
 
     describe('getEncryptionPublicKey', () => {
@@ -64,14 +66,14 @@ describe('Encryption API - Unit Tests', () => {
 
     describe('setEncryptionPublicKey', () => {
         it('should construct correct POST request with FormData', async () => {
-            mockRequestSend.mockResolvedValue({ success: true });
+            mockFormDataSend.mockResolvedValue({ success: true });
 
             const businessPublicKey = 'new_business_public_key_789';
 
             await whatsApp.encryption.setEncryptionPublicKey(businessPublicKey);
 
-            expect(mockRequestSend).toHaveBeenCalledTimes(1);
-            const [method, endpoint, timeout, formData] = mockRequestSend.mock.calls[0];
+            expect(mockFormDataSend).toHaveBeenCalledTimes(1);
+            const [method, endpoint, timeout, formData] = mockFormDataSend.mock.calls[0];
 
             expect(method).toBe('POST');
             expect(endpoint).toBe(`${whatsApp.requester.phoneNumberId}/whatsapp_business_encryption`);
@@ -83,21 +85,21 @@ describe('Encryption API - Unit Tests', () => {
         });
 
         it('should handle empty business public key', async () => {
-            mockRequestSend.mockResolvedValue({ success: true });
+            mockFormDataSend.mockResolvedValue({ success: true });
 
             const businessPublicKey = '';
 
             await whatsApp.encryption.setEncryptionPublicKey(businessPublicKey);
 
-            expect(mockRequestSend).toHaveBeenCalled();
-            const [, , , formData] = mockRequestSend.mock.calls[0];
+            expect(mockFormDataSend).toHaveBeenCalled();
+            const [, , , formData] = mockFormDataSend.mock.calls[0];
 
             expect(formData.get('business_public_key')).toBe('');
         });
 
         it('should handle API errors when setting public key', async () => {
             const mockError = new Error('API Error: Unable to set public key');
-            mockRequestSend.mockRejectedValue(mockError);
+            mockFormDataSend.mockRejectedValue(mockError);
 
             const businessPublicKey = 'test_key';
 
@@ -118,16 +120,15 @@ describe('Encryption API - Unit Tests', () => {
             mockRequestSend.mockResolvedValue({
                 data: { business_public_key: 'test', business_public_key_signature_status: 'VALID' },
             });
+            mockFormDataSend.mockResolvedValue({ success: true });
 
             // Test GET operation
             await whatsApp.encryption.getEncryptionPublicKey();
             const getEndpoint = mockRequestSend.mock.calls[0][1];
 
-            // Reset and test POST operation
-            mockRequestSend.mockClear();
-            mockRequestSend.mockResolvedValue({ success: true });
+            // Test POST operation
             await whatsApp.encryption.setEncryptionPublicKey('test_key');
-            const postEndpoint = mockRequestSend.mock.calls[0][1];
+            const postEndpoint = mockFormDataSend.mock.calls[0][1];
 
             // Both should use the same endpoint
             expect(getEndpoint).toBe(postEndpoint);
