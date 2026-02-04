@@ -1,5 +1,21 @@
 # Templates API
 
+## Overview
+Create, update, list, and delete message templates on your WABA. Templates must be approved before use.
+
+## Endpoints
+- GET /{WABA_ID}/message_templates?...
+- POST /{WABA_ID}/message_templates
+- GET /{TEMPLATE_ID}
+- POST /{TEMPLATE_ID}
+- DELETE /{WABA_ID}/message_templates?...
+
+## Notes
+- Template requests use the WABA business account ID.
+- Components define the template body, header, footer, and buttons.
+- Updates are partial; pass only fields to change.
+
+## Example
 ```ts
 import WhatsApp from 'meta-cloud-api';
 
@@ -29,3 +45,8 @@ await client.templates.updateTemplate(created.id, {
   ],
 });
 ```
+
+## Example Details
+- `getTemplates` can filter by `name` and `limit` to page results.
+- `createTemplate` requires `name`, `category`, `language`, and `components` to match the template format.
+- `updateTemplate` uses the template ID and only the fields you want to change.

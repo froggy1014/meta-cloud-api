@@ -1,5 +1,18 @@
 # Messages API
 
+## Overview
+Send text, media, template, interactive, and reaction messages through the Cloud API. Use the message type to select the correct payload.
+
+## Endpoints
+- POST /{PHONE_NUMBER_ID}/messages
+
+## Notes
+- Always include `messaging_product: "whatsapp"` in message bodies.
+- `to` must be an E.164 formatted number string.
+- `type` must match the body key (e.g., `type: "text"` with a `text` object).
+- Use `context.message_id` to reply to a specific message.
+
+## Example
 ```ts
 import WhatsApp from 'meta-cloud-api';
 import { ComponentTypesEnum, LanguagesEnum, ParametersTypesEnum } from 'meta-cloud-api';
@@ -32,3 +45,8 @@ await client.messages.template({
   },
 });
 ```
+
+## Example Details
+- Initialize the client with `accessToken`, `phoneNumberId`, and `businessAcctId` before sending messages.
+- `messages.text` requires `to` (E.164) and `body` for the text content.
+- `messages.template` uses `template.name`, `template.language.code`, and `components` in template order.

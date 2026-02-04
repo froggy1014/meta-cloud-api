@@ -1,5 +1,19 @@
 # WABA API
 
+## Overview
+Manage WABA metadata and webhook subscriptions.
+
+## Endpoints
+- GET /{WABA_ID}?fields
+- GET /{WABA_ID}/subscribed_apps
+- POST /{WABA_ID}/subscribed_apps
+- DELETE /{WABA_ID}/subscribed_apps
+
+## Notes
+- Use `fields` to select specific WABA properties.
+- Webhook subscriptions require `override_callback_uri` and `verify_token`.
+
+## Example
 ```ts
 import WhatsApp from 'meta-cloud-api';
 
@@ -26,3 +40,8 @@ await client.waba.updateWabaSubscription({
 
 await client.waba.unsubscribeFromWaba();
 ```
+
+## Example Details
+- `getWabaAccount` accepts a fields array to select account metadata.
+- `updateWabaSubscription` requires `override_callback_uri` and `verify_token` for webhook setup.
+- `unsubscribeFromWaba` removes the current app subscription.
