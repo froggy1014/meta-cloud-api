@@ -17,7 +17,23 @@
 
 ## Local API Docs
 
-- [API examples index](./docs/README.md)
+- [Messages](./docs/messages.md)
+- [Media](./docs/media.md)
+- [Templates](./docs/templates.md)
+- [Flows](./docs/flows.md)
+- [Phone Numbers](./docs/phone-numbers.md)
+- [Business Profile](./docs/business-profile.md)
+- [Registration](./docs/registration.md)
+- [Two-Step Verification](./docs/two-step-verification.md)
+- [Encryption](./docs/encryption.md)
+- [QR Codes](./docs/qr-codes.md)
+- [WABA](./docs/waba.md)
+- [Block Users](./docs/block-users.md)
+- [Calling](./docs/calling.md)
+- [Groups](./docs/groups.md)
+- [Marketing Messages](./docs/marketing-messages.md)
+- [Commerce Settings](./docs/commerce-settings.md)
+- [Payments](./docs/payments.md)
 
 ## Features
 
@@ -37,34 +53,6 @@ yarn add meta-cloud-api
 # or
 pnpm add meta-cloud-api
 ```
-
-## Quick Start
-
-```typescript
-import WhatsApp, { MessageTypesEnum } from 'meta-cloud-api';
-
-// Initialize the client
-const client = new WhatsApp({
-  accessToken: process.env.CLOUD_API_ACCESS_TOKEN,
-  phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
-  businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID
-});
-
-// Send a WhatsApp text message
-const response = await client.messages.text({
-  to: '+1234567890',
-  body: 'Hello from Meta Cloud API!'
-});
-
-console.log(`Message ID: ${response.messages[0].id}`);
-```
-
-## More Examples
-
-- [API examples index](./docs/README.md)
-- [Express.js Echo Bot](./examples/express-example)
-- [Next.js App Router Echo Bot](./examples/nextjs-app-router-example)
-- [Next.js Page Router Echo Bot](./examples/nextjs-page-router-example)
 
 ## Requirements
 
