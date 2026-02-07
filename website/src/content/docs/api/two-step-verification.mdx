@@ -1,0 +1,464 @@
+---
+title: Two-Step Verification API
+description: Configure two-step verification PIN for WhatsApp Business phone numbers
+---
+
+# Two-Step Verification API
+
+Set up and manage two-step verification (2SV) for WhatsApp Business phone numbers to add an extra layer of security.
+
+**Official Documentation**: [WhatsApp Two-Step Verification API](https://developers.facebook.com/documentation/business-messaging/whatsapp/business-phone-numbers/two-step-verification/)
+
+## Overview
+
+Two-step verification adds security to your WhatsApp Business phone number by requiring a 6-digit PIN for registration and re-registration.
+
+- **Set PIN**: Configure a 6-digit security PIN
+- **Update PIN**: Change existing PIN
+- **Security**: Prevent unauthorized phone number registration
+
+## Endpoints
+
+```
+POST /{PHONE_NUMBER_ID}
+```
+
+## Important Notes
+
+:::caution[PIN Security]
+The 6-digit PIN must be stored securely. If lost, you may lose access to your phone number and will need to contact WhatsApp support.
+:::
+
+:::tip[Same PIN for Registration]
+It's recommended to use the same PIN for both registration and two-step verification to simplify management.
+:::
+
+:::caution[PIN Recovery]
+There is no automatic PIN recovery. Store your PIN in a secure location like a password manager or secrets management system.
+:::
+
+## Quick Start
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID!,
+});
+
+// Set two-step verification PIN
+await client.twoStepVerification.setTwoStepVerificationCode('123456');
+```
+
+## Set Two-Step Verification
+
+Configure or update the two-step verification PIN.
+
+### Basic Setup
+
+```typescript
+const pin = '123456'; // 6-digit numeric string
+await client.twoStepVerification.setTwoStepVerificationCode(pin);
+
+console.log('Two-step verification enabled');
+```
+
+### Setup After Registration
+
+```typescript
+// Complete phone setup with 2SV
+async function setupPhoneNumberSecurity(pin: string) {
+    // Register phone number
+    await client.registration.register(pin);
+
+    // Enable two-step verification with same PIN
+    await client.twoStepVerification.setTwoStepVerificationCode(pin);
+
+    console.log('Phone number secured with two-step verification');
+}
+
+await setupPhoneNumberSecurity('123456');
+```
+
+## Update PIN
+
+Change an existing two-step verification PIN.
+
+```typescript
+// Update to new PIN
+const newPin = '654321';
+await client.twoStepVerification.setTwoStepVerificationCode(newPin);
+
+console.log('Two-step verification PIN updated');
+```
+
+:::tip[Update Existing PIN]
+To update, simply call `setTwoStepVerificationCode()` with the new PIN. The old PIN is automatically replaced.
+:::
+
+## Complete Security Setup
+
+Example of comprehensive phone number security configuration:
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+async function setupPhoneNumberWithSecurity() {
+    const client = new WhatsApp({
+        accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+        phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+        businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID!,
+    });
+
+    // Generate secure PIN
+    const pin = generateSecurePIN();
+
+    try {
+        // Step 1: Register phone number
+        console.log('Registering phone number...');
+        await client.registration.register(pin);
+
+        // Step 2: Request verification
+        console.log('Requesting verification code...');
+        await client.phoneNumbers.requestVerificationCode({
+            code_method: 'SMS',
+            language: 'en_US',
+        });
+
+        // Step 3: Verify (user provides code)
+        const verificationCode = await promptUserForCode();
+        await client.phoneNumbers.verifyCode(verificationCode);
+
+        // Step 4: Enable two-step verification
+        console.log('Enabling two-step verification...');
+        await client.twoStepVerification.setTwoStepVerificationCode(pin);
+
+        // Step 5: Store PIN securely
+        await storeSecurely('WA_2SV_PIN', pin);
+
+        console.log('Phone number setup complete with two-step verification');
+    } catch (error) {
+        console.error('Setup failed:', error.message);
+        throw error;
+    }
+}
+
+function generateSecurePIN(): string {
+    // Generate cryptographically secure 6-digit PIN
+    const crypto = require('crypto');
+    const randomNum = crypto.randomInt(100000, 1000000);
+    return randomNum.toString();
+}
+```
+
+## Response Format
+
+### Success Response
+
+```typescript
+{
+    success: true
+}
+```
+
+## Error Handling
+
+```typescript
+try {
+    await client.twoStepVerification.setTwoStepVerificationCode('123456');
+} catch (error) {
+    if (error.response) {
+        const { code, message } = error.response.data.error;
+
+        switch (code) {
+            case 133016:
+                console.error('Invalid PIN format - must be 6 digits');
+                break;
+            case 133000:
+                console.error('Two-step verification cannot be set');
+                break;
+            default:
+                console.error(`Error ${code}: ${message}`);
+        }
+    }
+}
+```
+
+## Best Practices
+
+1. **Store PIN Securely**: Use proper secrets management
+   ```typescript
+   import { SecretsManager } from 'aws-sdk';
+
+   async function storePINSecurely(pin: string) {
+       const secretsManager = new SecretsManager();
+
+       await secretsManager.putSecretValue({
+           SecretId: 'whatsapp/2sv-pin',
+           SecretString: pin,
+       }).promise();
+   }
+
+   // Set 2SV after storing PIN
+   await storePINSecurely('123456');
+   await client.twoStepVerification.setTwoStepVerificationCode('123456');
+   ```
+
+2. **Validate PIN Format**: Ensure correct format before setting
+   ```typescript
+   function validatePIN(pin: string): boolean {
+       // Must be exactly 6 digits
+       return /^\d{6}$/.test(pin);
+   }
+
+   const pin = '123456';
+   if (!validatePIN(pin)) {
+       throw new Error('PIN must be 6 digits');
+   }
+
+   await client.twoStepVerification.setTwoStepVerificationCode(pin);
+   ```
+
+3. **Use Same PIN for Registration**: Simplify management
+   ```typescript
+   const pin = '123456';
+
+   // Use same PIN for both operations
+   await client.registration.register(pin);
+   await client.twoStepVerification.setTwoStepVerificationCode(pin);
+   ```
+
+4. **Implement PIN Rotation**: Change PIN periodically
+   ```typescript
+   async function rotatePIN() {
+       // Generate new PIN
+       const newPIN = generateSecurePIN();
+
+       // Update two-step verification
+       await client.twoStepVerification.setTwoStepVerificationCode(newPIN);
+
+       // Store new PIN securely
+       await storeSecurely('WA_2SV_PIN', newPIN);
+
+       // Log rotation
+       console.log('PIN rotated successfully');
+   }
+
+   // Rotate every 90 days
+   setInterval(rotatePIN, 90 * 24 * 60 * 60 * 1000);
+   ```
+
+5. **Document PIN Requirements**: Create clear documentation
+   ```typescript
+   /**
+    * Sets two-step verification PIN for WhatsApp Business number.
+    *
+    * Requirements:
+    * - Must be exactly 6 digits
+    * - Must be numeric only (0-9)
+    * - Must be stored securely
+    * - Cannot be recovered if lost
+    *
+    * @param pin - 6-digit numeric PIN
+    * @throws Error if PIN format is invalid
+    */
+   async function setTwoStepVerification(pin: string) {
+       if (!validatePIN(pin)) {
+           throw new Error('Invalid PIN format');
+       }
+
+       await client.twoStepVerification.setTwoStepVerificationCode(pin);
+   }
+   ```
+
+6. **Backup PIN Information**: Maintain secure records
+   ```typescript
+   interface PINRecord {
+       phoneNumberId: string;
+       pin: string;
+       createdAt: Date;
+       lastRotated: Date;
+   }
+
+   async function recordPIN(pin: string): Promise<PINRecord> {
+       const record: PINRecord = {
+           phoneNumberId: process.env.WA_PHONE_NUMBER_ID!,
+           pin: pin,
+           createdAt: new Date(),
+           lastRotated: new Date(),
+       };
+
+       // Store in secure database or secrets manager
+       await secureStorage.save('wa-pin-record', record);
+
+       return record;
+   }
+   ```
+
+7. **Monitor PIN Status**: Track verification status
+   ```typescript
+   async function checkSecurityStatus() {
+       const phoneInfo = await client.phoneNumbers.getPhoneNumberById([
+           'code_verification_status',
+       ]);
+
+       if (phoneInfo.code_verification_status !== 'VERIFIED') {
+           console.warn('Phone number not verified - 2SV may not be active');
+       }
+   }
+   ```
+
+## PIN Requirements
+
+### Format Requirements
+
+- **Length**: Exactly 6 digits
+- **Characters**: Numeric only (0-9)
+- **No special characters**: No letters, spaces, or symbols
+
+### Security Recommendations
+
+- Don't use obvious patterns (123456, 111111, etc.)
+- Don't use birthday or personal information
+- Generate randomly when possible
+- Rotate periodically (every 90 days recommended)
+- Never share or commit to version control
+- Store in secure secrets management system
+
+```typescript
+// Good PINs (random)
+'847592' ✅
+'103948' ✅
+'652847' ✅
+
+// Weak PINs (avoid)
+'123456' ⚠️ (sequential)
+'111111' ⚠️ (repetitive)
+'121212' ⚠️ (pattern)
+'102030' ⚠️ (pattern)
+```
+
+## PIN Generation Best Practices
+
+```typescript
+import crypto from 'crypto';
+
+// Generate secure random PIN
+function generateSecurePIN(): string {
+    const randomNum = crypto.randomInt(100000, 1000000);
+    return randomNum.toString();
+}
+
+// Validate PIN strength
+function isPINSecure(pin: string): boolean {
+    // Check format
+    if (!/^\d{6}$/.test(pin)) return false;
+
+    // Avoid sequential patterns
+    if (/012345|123456|234567|345678|456789|567890/.test(pin)) return false;
+
+    // Avoid repetitive patterns
+    if (/(\d)\1{5}/.test(pin)) return false; // All same digit
+    if (/(\d{2})\1{2}/.test(pin)) return false; // Repeating pairs
+
+    return true;
+}
+
+// Usage
+let pin: string;
+do {
+    pin = generateSecurePIN();
+} while (!isPINSecure(pin));
+
+await client.twoStepVerification.setTwoStepVerificationCode(pin);
+```
+
+## Troubleshooting
+
+### Lost PIN
+
+If you lose your two-step verification PIN:
+
+1. Contact WhatsApp Business API support
+2. Provide business verification documents
+3. Follow the account recovery process
+
+**Prevention**: Always store PINs in a secure secrets manager.
+
+### PIN Not Working
+
+```typescript
+async function troubleshootPIN(pin: string) {
+    // Check format
+    if (!validatePIN(pin)) {
+        console.error('PIN format invalid');
+        return;
+    }
+
+    // Try setting PIN
+    try {
+        await client.twoStepVerification.setTwoStepVerificationCode(pin);
+        console.log('PIN set successfully');
+    } catch (error) {
+        console.error('Failed to set PIN:', error.message);
+
+        // Check phone number status
+        const phoneInfo = await client.phoneNumbers.getPhoneNumberById([
+            'code_verification_status',
+        ]);
+
+        if (phoneInfo.code_verification_status !== 'VERIFIED') {
+            console.error('Phone number must be verified first');
+        }
+    }
+}
+```
+
+## Security Considerations
+
+1. **Never Hardcode PINs**
+   ```typescript
+   // ❌ Bad
+   await client.twoStepVerification.setTwoStepVerificationCode('123456');
+
+   // ✅ Good
+   const pin = process.env.WA_2SV_PIN;
+   await client.twoStepVerification.setTwoStepVerificationCode(pin);
+   ```
+
+2. **Use Environment Variables or Secrets Manager**
+   ```typescript
+   // .env file (never commit to git)
+   WA_2SV_PIN=123456
+
+   // In code
+   const pin = process.env.WA_2SV_PIN!;
+   ```
+
+3. **Implement Access Controls**
+   ```typescript
+   // Only allow authorized users to set PIN
+   async function setTwoStepVerificationSecure(
+       pin: string,
+       userId: string
+   ) {
+       if (!isAuthorized(userId, 'set:2sv-pin')) {
+           throw new Error('Unauthorized');
+       }
+
+       await client.twoStepVerification.setTwoStepVerificationCode(pin);
+   }
+   ```
+
+## Related Documentation
+
+- [Registration API](/api/registration) - Register phone numbers
+- [Phone Numbers API](/api/phone-numbers) - Verify phone numbers
+- [Security Best Practices](/guides/security) - Comprehensive security guide
+- [WABA API](/api/waba) - Manage business accounts
+
+## Source Code
+
+View the source code on GitHub: [TwoStepVerificationApi.ts](https://github.com/froggy1014/meta-cloud-api/blob/main/src/api/twoStepVerification/TwoStepVerificationApi.ts)

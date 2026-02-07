@@ -1,0 +1,499 @@
+---
+title: WABA API
+description: Manage WhatsApp Business Account metadata and webhook subscriptions
+---
+
+# WABA API
+
+Manage WhatsApp Business Account (WABA) settings, retrieve account information, and configure webhook subscriptions for real-time notifications.
+
+**Official Documentation**: [WhatsApp Business Accounts API](https://developers.facebook.com/documentation/business-messaging/whatsapp/whatsapp-business-accounts/)
+
+## Overview
+
+The WABA API provides account-level management capabilities:
+
+- **Get Account Info**: Retrieve WABA metadata and settings
+- **Manage Subscriptions**: Configure webhook subscriptions
+- **Update Webhooks**: Modify webhook URLs and verify tokens
+- **Unsubscribe**: Remove webhook subscriptions
+
+## Endpoints
+
+```
+GET /{WABA_ID}?fields
+GET /{WABA_ID}/subscribed_apps
+POST /{WABA_ID}/subscribed_apps
+DELETE /{WABA_ID}/subscribed_apps
+```
+
+## Important Notes
+
+:::tip[Fields Parameter]
+Use the `fields` parameter to select specific WABA properties. This reduces response size and improves performance.
+:::
+
+:::caution[Webhook Configuration]
+Webhook subscriptions require both `override_callback_uri` and `verify_token`. The verify token must match when Meta validates your webhook endpoint.
+:::
+
+:::tip[WABA ID]
+The WABA ID is different from the phone number ID. Configure it when initializing the WhatsApp client.
+:::
+
+## Quick Start
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID!,
+});
+
+// Get WABA account info
+const account = await client.waba.getWabaAccount([
+    'id',
+    'name',
+    'timezone_id',
+    'message_template_namespace',
+]);
+
+// Get webhook subscriptions
+const subscriptions = await client.waba.getAllWabaSubscriptions();
+
+// Update webhook subscription
+await client.waba.updateWabaSubscription({
+    override_callback_uri: 'https://example.com/webhook',
+    verify_token: 'your-verify-token',
+});
+
+// Unsubscribe from webhooks
+await client.waba.unsubscribeFromWaba();
+```
+
+## Get WABA Account Information
+
+Retrieve WhatsApp Business Account details and settings.
+
+### Get All Available Fields
+
+```typescript
+const account = await client.waba.getWabaAccount([
+    'id',
+    'name',
+    'timezone_id',
+    'message_template_namespace',
+    'account_review_status',
+    'business_verification_status',
+    'country',
+    'currency',
+    'ownership_type',
+    'primary_business_location',
+]);
+
+console.log(account);
+// {
+//     id: '123456789',
+//     name: 'My Business',
+//     timezone_id: 'America/Los_Angeles',
+//     account_review_status: 'APPROVED',
+//     currency: 'USD'
+// }
+```
+
+### Get Specific Fields
+
+```typescript
+// Just the essentials
+const basicInfo = await client.waba.getWabaAccount([
+    'id',
+    'name',
+    'timezone_id',
+]);
+
+// Account status fields
+const status = await client.waba.getWabaAccount([
+    'account_review_status',
+    'business_verification_status',
+]);
+```
+
+### Check Account Status
+
+```typescript
+const account = await client.waba.getWabaAccount([
+    'account_review_status',
+    'business_verification_status',
+]);
+
+if (account.account_review_status !== 'APPROVED') {
+    console.warn('Account review pending');
+}
+
+if (account.business_verification_status !== 'verified') {
+    console.warn('Business verification incomplete');
+}
+```
+
+## Manage Webhook Subscriptions
+
+Configure and manage webhook subscriptions for real-time notifications.
+
+### Get Current Subscriptions
+
+```typescript
+const subscriptions = await client.waba.getAllWabaSubscriptions();
+
+console.log(subscriptions);
+// {
+//     data: [
+//         {
+//             whatsapp_business_api_data: {
+//                 subscribed_fields: ['messages', 'message_status']
+//             }
+//         }
+//     ]
+// }
+```
+
+### Subscribe to Webhooks
+
+```typescript
+await client.waba.updateWabaSubscription({
+    override_callback_uri: 'https://api.example.com/webhook',
+    verify_token: 'my-secure-verify-token-123',
+});
+
+console.log('Webhook subscription configured');
+```
+
+### Update Webhook URL
+
+```typescript
+// Change webhook endpoint
+await client.waba.updateWabaSubscription({
+    override_callback_uri: 'https://new-domain.com/webhook',
+    verify_token: process.env.WEBHOOK_VERIFY_TOKEN!,
+});
+```
+
+### Unsubscribe from Webhooks
+
+```typescript
+await client.waba.unsubscribeFromWaba();
+
+console.log('Webhook subscription removed');
+```
+
+## Complete Webhook Setup
+
+Example of comprehensive webhook configuration:
+
+```typescript
+import express from 'express';
+import WhatsApp from 'meta-cloud-api';
+
+const app = express();
+const VERIFY_TOKEN = process.env.WEBHOOK_VERIFY_TOKEN!;
+
+// Webhook verification endpoint (GET)
+app.get('/webhook', (req, res) => {
+    const mode = req.query['hub.mode'];
+    const token = req.query['hub.verify_token'];
+    const challenge = req.query['hub.challenge'];
+
+    if (mode === 'subscribe' && token === VERIFY_TOKEN) {
+        console.log('Webhook verified');
+        res.status(200).send(challenge);
+    } else {
+        res.sendStatus(403);
+    }
+});
+
+// Webhook notification endpoint (POST)
+app.post('/webhook', express.json(), (req, res) => {
+    console.log('Webhook received:', JSON.stringify(req.body, null, 2));
+    res.sendStatus(200);
+});
+
+app.listen(3000, async () => {
+    console.log('Webhook server running on port 3000');
+
+    // Configure WABA subscription
+    const client = new WhatsApp({
+        accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+        phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+        businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID!,
+    });
+
+    await client.waba.updateWabaSubscription({
+        override_callback_uri: 'https://yourdomain.com/webhook',
+        verify_token: VERIFY_TOKEN,
+    });
+
+    console.log('WABA webhook configured');
+});
+```
+
+## Response Formats
+
+### Get WABA Account Response
+
+```typescript
+{
+    id: '123456789',
+    name: 'My Business Name',
+    timezone_id: 'America/Los_Angeles',
+    message_template_namespace: 'abc123_def456',
+    account_review_status: 'APPROVED',
+    business_verification_status: 'verified',
+    country: 'US',
+    currency: 'USD',
+    ownership_type: 'SELF',
+    primary_business_location: 'US'
+}
+```
+
+### Get Subscriptions Response
+
+```typescript
+{
+    data: [
+        {
+            application: {
+                id: 'APP_ID',
+                name: 'My App'
+            },
+            whatsapp_business_api_data: {
+                subscribed_fields: [
+                    'messages',
+                    'message_status',
+                    'message_echoes'
+                ]
+            }
+        }
+    ]
+}
+```
+
+### Update Subscription Response
+
+```typescript
+{
+    success: true
+}
+```
+
+## Error Handling
+
+```typescript
+try {
+    await client.waba.updateWabaSubscription({
+        override_callback_uri: 'https://example.com/webhook',
+        verify_token: 'token',
+    });
+} catch (error) {
+    if (error.response) {
+        const { code, message } = error.response.data.error;
+
+        switch (code) {
+            case 100:
+                console.error('Invalid webhook URL or verify token');
+                break;
+            case 190:
+                console.error('Invalid access token');
+                break;
+            case 200:
+                console.error('Insufficient permissions');
+                break;
+            default:
+                console.error(`Error ${code}: ${message}`);
+        }
+    }
+}
+```
+
+## Best Practices
+
+1. **Request Only Needed Fields**: Optimize API calls
+   ```typescript
+   // ✅ Good - specific fields
+   await client.waba.getWabaAccount(['id', 'name', 'timezone_id']);
+
+   // ❌ Wasteful - retrieves everything
+   await client.waba.getWabaAccount([]);
+   ```
+
+2. **Store WABA ID Securely**: Use environment variables
+   ```typescript
+   // ✅ Good
+   const wabaId = process.env.WA_BUSINESS_ACCOUNT_ID;
+
+   // ❌ Bad - hardcoded
+   const wabaId = '123456789';
+   ```
+
+3. **Use Strong Verify Tokens**: Generate random, secure tokens
+   ```typescript
+   import crypto from 'crypto';
+
+   function generateVerifyToken(): string {
+       return crypto.randomBytes(32).toString('hex');
+   }
+
+   const verifyToken = generateVerifyToken();
+   // Store securely: process.env.WEBHOOK_VERIFY_TOKEN
+   ```
+
+4. **Validate Webhook Signatures**: Verify authenticity
+   ```typescript
+   import crypto from 'crypto';
+
+   function verifyWebhookSignature(
+       payload: string,
+       signature: string,
+       appSecret: string
+   ): boolean {
+       const expectedSignature = crypto
+           .createHmac('sha256', appSecret)
+           .update(payload)
+           .digest('hex');
+
+       return signature === `sha256=${expectedSignature}`;
+   }
+   ```
+
+5. **Monitor Account Status**: Check periodically
+   ```typescript
+   async function checkAccountHealth() {
+       const account = await client.waba.getWabaAccount([
+           'account_review_status',
+           'business_verification_status',
+       ]);
+
+       if (account.account_review_status !== 'APPROVED') {
+           await alertTeam('WABA account review status changed');
+       }
+   }
+
+   // Check daily
+   setInterval(checkAccountHealth, 24 * 60 * 60 * 1000);
+   ```
+
+6. **Handle Timezone Correctly**: Use WABA timezone for scheduling
+   ```typescript
+   import { DateTime } from 'luxon';
+
+   const account = await client.waba.getWabaAccount(['timezone_id']);
+
+   // Schedule message in account's timezone
+   const accountTime = DateTime.now().setZone(account.timezone_id);
+   console.log('Account local time:', accountTime.toISO());
+   ```
+
+## Available WABA Fields
+
+When calling `getWabaAccount()`, you can request these fields:
+
+- `id`: WABA identifier
+- `name`: Business account name
+- `timezone_id`: Account timezone (e.g., 'America/Los_Angeles')
+- `message_template_namespace`: Template namespace identifier
+- `account_review_status`: Review status (APPROVED, PENDING, REJECTED)
+- `business_verification_status`: Verification status (verified, unverified, pending)
+- `country`: Country code (ISO 3166-1 alpha-2)
+- `currency`: Currency code (ISO 4217)
+- `ownership_type`: SELF or AGENCY
+- `primary_business_location`: Primary business country code
+
+## Account Review Statuses
+
+- **APPROVED**: Account fully operational
+- **PENDING**: Under review
+- **REJECTED**: Review failed, action required
+- **DISABLED**: Account disabled
+
+```typescript
+const account = await client.waba.getWabaAccount(['account_review_status']);
+
+switch (account.account_review_status) {
+    case 'APPROVED':
+        console.log('Account ready to use');
+        break;
+    case 'PENDING':
+        console.log('Account under review');
+        break;
+    case 'REJECTED':
+        console.error('Account rejected - review required');
+        break;
+    case 'DISABLED':
+        console.error('Account disabled - contact support');
+        break;
+}
+```
+
+## Webhook Event Types
+
+When configuring webhooks, you can receive these event types:
+
+- `messages`: Incoming messages from users
+- `message_status`: Message delivery and read status
+- `message_echoes`: Messages sent by your business
+- `message_template_status_update`: Template approval status changes
+- `phone_number_quality_update`: Phone number quality changes
+- `account_update`: Account-level changes
+- `account_alerts`: Important account notifications
+
+## Webhook Security
+
+### Verify Token
+
+```typescript
+// Generate secure verify token
+const VERIFY_TOKEN = crypto.randomBytes(32).toString('hex');
+
+// Store in environment variables
+// WEBHOOK_VERIFY_TOKEN=abc123...
+
+// Use in verification endpoint
+app.get('/webhook', (req, res) => {
+    if (req.query['hub.verify_token'] === process.env.WEBHOOK_VERIFY_TOKEN) {
+        res.send(req.query['hub.challenge']);
+    } else {
+        res.sendStatus(403);
+    }
+});
+```
+
+### Signature Validation
+
+```typescript
+app.post('/webhook', express.json(), (req, res) => {
+    const signature = req.headers['x-hub-signature-256'];
+    const payload = JSON.stringify(req.body);
+
+    if (!verifyWebhookSignature(
+        payload,
+        signature,
+        process.env.APP_SECRET!
+    )) {
+        return res.sendStatus(403);
+    }
+
+    // Process webhook
+    res.sendStatus(200);
+});
+```
+
+## Related Documentation
+
+- [Webhooks Overview](/webhooks/overview) - Complete webhook guide
+- [Phone Numbers API](/api/phone-numbers) - Manage phone numbers
+- [Templates API](/api/templates) - Create message templates
+- [Messages API](/api/messages) - Send messages
+
+## Source Code
+
+View the source code on GitHub: [WabaApi.ts](https://github.com/froggy1014/meta-cloud-api/blob/main/src/api/waba/WabaApi.ts)

@@ -1,0 +1,575 @@
+---
+title: Marketing Messages API
+description: Send marketing template messages through the dedicated marketing endpoint
+---
+
+# Marketing Messages API
+
+Send marketing template messages via the dedicated `/marketing_messages` endpoint with analytics sharing capabilities.
+
+**Official Documentation**: [WhatsApp Marketing Messages API](https://developers.facebook.com/documentation/business-messaging/whatsapp/marketing-messages/send-marketing-messages/)
+
+## Overview
+
+The Marketing Messages API provides a specialized endpoint for promotional messaging:
+
+- **Marketing Templates**: Send pre-approved marketing message templates
+- **Analytics Sharing**: Control message analytics and insights sharing
+- **Compliance**: Ensure compliance with marketing message regulations
+- **Engagement Tracking**: Monitor campaign performance
+
+## Endpoints
+
+```
+POST /{PHONE_NUMBER_ID}/marketing_messages
+```
+
+## Important Notes
+
+:::caution[Marketing Templates Only]
+This endpoint only accepts marketing category templates. Utility and authentication templates should use the standard messages endpoint.
+:::
+
+:::tip[Message Activity Sharing]
+The `message_activity_sharing` parameter controls whether message activity and insights are shared for analytics purposes.
+:::
+
+:::tip[Opt-in Required]
+Marketing messages require explicit user opt-in. Ensure recipients have consented to receive promotional content.
+:::
+
+## Quick Start
+
+```typescript
+import WhatsApp, { LanguagesEnum } from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID!,
+});
+
+// Send marketing template
+await client.marketingMessages.sendTemplateMessage({
+    to: '15551234567',
+    template: {
+        name: 'summer_sale_2024',
+        language: { code: LanguagesEnum.English_US },
+    },
+    message_activity_sharing: true,
+});
+```
+
+## Send Marketing Template
+
+Send pre-approved marketing message templates.
+
+### Basic Marketing Message
+
+```typescript
+import { LanguagesEnum } from 'meta-cloud-api/enums';
+
+await client.marketingMessages.sendTemplateMessage({
+    to: '15551234567',
+    template: {
+        name: 'promotional_offer',
+        language: { code: LanguagesEnum.English_US },
+    },
+});
+```
+
+### Marketing Message with Parameters
+
+```typescript
+import { ComponentTypesEnum, ParametersTypesEnum } from 'meta-cloud-api/enums';
+
+await client.marketingMessages.sendTemplateMessage({
+    to: '15551234567',
+    template: {
+        name: 'discount_code',
+        language: { code: LanguagesEnum.English_US },
+        components: [
+            {
+                type: ComponentTypesEnum.Body,
+                parameters: [
+                    { type: ParametersTypesEnum.Text, text: 'John' },
+                    { type: ParametersTypesEnum.Text, text: 'SAVE20' },
+                    { type: ParametersTypesEnum.Text, text: '20%' },
+                ],
+            },
+        ],
+    },
+    message_activity_sharing: true,
+});
+```
+
+### Marketing Message with Media Header
+
+```typescript
+await client.marketingMessages.sendTemplateMessage({
+    to: '15551234567',
+    template: {
+        name: 'new_product_launch',
+        language: { code: LanguagesEnum.English_US },
+        components: [
+            {
+                type: ComponentTypesEnum.Header,
+                parameters: [
+                    {
+                        type: ParametersTypesEnum.Image,
+                        image: {
+                            link: 'https://example.com/product-image.jpg',
+                        },
+                    },
+                ],
+            },
+            {
+                type: ComponentTypesEnum.Body,
+                parameters: [
+                    { type: ParametersTypesEnum.Text, text: 'Smartphone X' },
+                    { type: ParametersTypesEnum.Text, text: '$699' },
+                ],
+            },
+        ],
+    },
+    message_activity_sharing: true,
+});
+```
+
+## Analytics and Tracking
+
+Control message analytics sharing and track campaign performance.
+
+### Enable Analytics Sharing
+
+```typescript
+await client.marketingMessages.sendTemplateMessage({
+    to: '15551234567',
+    template: {
+        name: 'campaign_template',
+        language: { code: LanguagesEnum.English_US },
+    },
+    message_activity_sharing: true, // Enable insights
+});
+```
+
+### Disable Analytics Sharing
+
+```typescript
+await client.marketingMessages.sendTemplateMessage({
+    to: '15551234567',
+    template: {
+        name: 'private_offer',
+        language: { code: LanguagesEnum.English_US },
+    },
+    message_activity_sharing: false, // Disable insights
+});
+```
+
+## Campaign Management
+
+Example of managing marketing campaigns.
+
+### Send Campaign to List
+
+```typescript
+interface Campaign {
+    name: string;
+    templateName: string;
+    recipients: string[];
+    personalization?: Record<string, string[]>;
+}
+
+async function sendCampaign(campaign: Campaign) {
+    const results = [];
+
+    for (const recipient of campaign.recipients) {
+        try {
+            const params = campaign.personalization?.[recipient] || [];
+
+            await client.marketingMessages.sendTemplateMessage({
+                to: recipient,
+                template: {
+                    name: campaign.templateName,
+                    language: { code: LanguagesEnum.English_US },
+                    components: params.length > 0 ? [
+                        {
+                            type: ComponentTypesEnum.Body,
+                            parameters: params.map(text => ({
+                                type: ParametersTypesEnum.Text,
+                                text,
+                            })),
+                        },
+                    ] : undefined,
+                },
+                message_activity_sharing: true,
+            });
+
+            results.push({ recipient, status: 'sent' });
+        } catch (error) {
+            results.push({ recipient, status: 'failed', error: error.message });
+        }
+
+        // Rate limiting
+        await delay(1000);
+    }
+
+    return results;
+}
+
+// Usage
+const campaign = {
+    name: 'Summer Sale 2024',
+    templateName: 'summer_sale',
+    recipients: ['15551234567', '15559876543'],
+    personalization: {
+        '15551234567': ['John', '20%'],
+        '15559876543': ['Jane', '25%'],
+    },
+};
+
+await sendCampaign(campaign);
+```
+
+### Segmented Campaign
+
+```typescript
+interface CustomerSegment {
+    name: string;
+    customers: Array<{
+        phoneNumber: string;
+        name: string;
+        tier: string;
+    }>;
+}
+
+async function sendSegmentedCampaign(segments: CustomerSegment[]) {
+    for (const segment of segments) {
+        console.log(`Sending to segment: ${segment.name}`);
+
+        for (const customer of segment.customers) {
+            const templateName = getTemplateForTier(customer.tier);
+
+            await client.marketingMessages.sendTemplateMessage({
+                to: customer.phoneNumber,
+                template: {
+                    name: templateName,
+                    language: { code: LanguagesEnum.English_US },
+                    components: [
+                        {
+                            type: ComponentTypesEnum.Body,
+                            parameters: [
+                                { type: ParametersTypesEnum.Text, text: customer.name },
+                            ],
+                        },
+                    ],
+                },
+                message_activity_sharing: true,
+            });
+
+            await delay(500);
+        }
+    }
+}
+
+function getTemplateForTier(tier: string): string {
+    const templates = {
+        'VIP': 'vip_exclusive_offer',
+        'PREMIUM': 'premium_member_sale',
+        'STANDARD': 'general_promotion',
+    };
+
+    return templates[tier] || templates['STANDARD'];
+}
+```
+
+## Compliance and Best Practices
+
+### Check Opt-in Status
+
+```typescript
+interface OptInRecord {
+    phoneNumber: string;
+    optedIn: boolean;
+    optedInAt?: Date;
+    channel: string;
+}
+
+async function sendToOptedInUsers(
+    templateName: string,
+    recipients: string[]
+) {
+    const optedInUsers = await database.optIns.find({
+        phoneNumber: { $in: recipients },
+        optedIn: true,
+    });
+
+    const optedInNumbers = optedInUsers.map(u => u.phoneNumber);
+
+    for (const phoneNumber of optedInNumbers) {
+        await client.marketingMessages.sendTemplateMessage({
+            to: phoneNumber,
+            template: {
+                name: templateName,
+                language: { code: LanguagesEnum.English_US },
+            },
+            message_activity_sharing: true,
+        });
+    }
+
+    console.log(`Sent to ${optedInNumbers.length} opted-in users`);
+}
+```
+
+### Frequency Capping
+
+```typescript
+interface FrequencyCap {
+    maxPerDay: number;
+    maxPerWeek: number;
+}
+
+async function sendWithFrequencyCap(
+    phoneNumber: string,
+    templateName: string,
+    cap: FrequencyCap
+) {
+    // Check daily count
+    const sentToday = await database.messages.count({
+        to: phoneNumber,
+        sentAt: { $gte: startOfDay(new Date()) },
+    });
+
+    if (sentToday >= cap.maxPerDay) {
+        console.log('Daily frequency cap reached');
+        return;
+    }
+
+    // Check weekly count
+    const sentThisWeek = await database.messages.count({
+        to: phoneNumber,
+        sentAt: { $gte: startOfWeek(new Date()) },
+    });
+
+    if (sentThisWeek >= cap.maxPerWeek) {
+        console.log('Weekly frequency cap reached');
+        return;
+    }
+
+    // Send message
+    await client.marketingMessages.sendTemplateMessage({
+        to: phoneNumber,
+        template: {
+            name: templateName,
+            language: { code: LanguagesEnum.English_US },
+        },
+        message_activity_sharing: true,
+    });
+
+    // Log send
+    await database.messages.insert({
+        to: phoneNumber,
+        template: templateName,
+        sentAt: new Date(),
+    });
+}
+```
+
+### Unsubscribe Handling
+
+```typescript
+import { WebhookProcessor } from 'meta-cloud-api/webhook';
+
+const webhook = new WebhookProcessor({
+    verifyToken: process.env.WEBHOOK_VERIFY_TOKEN!,
+});
+
+webhook.on('message', async (message, metadata) => {
+    const text = message.text?.body?.toLowerCase();
+
+    // Check for opt-out keywords
+    if (text && ['stop', 'unsubscribe', 'optout'].includes(text)) {
+        // Mark user as opted out
+        await database.optIns.updateOne(
+            { phoneNumber: message.from },
+            { optedIn: false, optedOutAt: new Date() }
+        );
+
+        // Send confirmation
+        await client.messages.text({
+            to: message.from,
+            body: 'You have been unsubscribed from marketing messages.',
+        });
+
+        console.log(`User ${message.from} opted out`);
+    }
+});
+```
+
+## Response Format
+
+### Success Response
+
+```typescript
+{
+    messaging_product: 'whatsapp',
+    contacts: [
+        {
+            input: '15551234567',
+            wa_id: '15551234567'
+        }
+    ],
+    messages: [
+        {
+            id: 'wamid.ABC123...',
+            message_status: 'accepted'
+        }
+    ]
+}
+```
+
+## Error Handling
+
+```typescript
+try {
+    await client.marketingMessages.sendTemplateMessage({
+        to: '15551234567',
+        template: {
+            name: 'promo_template',
+            language: { code: LanguagesEnum.English_US },
+        },
+        message_activity_sharing: true,
+    });
+} catch (error) {
+    if (error.response) {
+        const { code, message } = error.response.data.error;
+
+        switch (code) {
+            case 131047:
+                console.error('Template does not exist or is not approved');
+                break;
+            case 131026:
+                console.error('Message not sent: Customer has not opted in');
+                break;
+            case 131051:
+                console.error('Marketing message limit reached');
+                break;
+            default:
+                console.error(`Error ${code}: ${message}`);
+        }
+    }
+}
+```
+
+## Best Practices
+
+1. **Verify Opt-in Status**: Always check before sending
+   ```typescript
+   const hasOptedIn = await checkOptInStatus(phoneNumber);
+   if (hasOptedIn) {
+       await client.marketingMessages.sendTemplateMessage({ ... });
+   }
+   ```
+
+2. **Implement Frequency Caps**: Avoid message fatigue
+   ```typescript
+   const cap = { maxPerDay: 2, maxPerWeek: 5 };
+   await sendWithFrequencyCap(phoneNumber, template, cap);
+   ```
+
+3. **Personalize Messages**: Use customer data
+   ```typescript
+   const customer = await getCustomerData(phoneNumber);
+   await client.marketingMessages.sendTemplateMessage({
+       to: phoneNumber,
+       template: {
+           name: 'personalized_offer',
+           components: [{
+               type: ComponentTypesEnum.Body,
+               parameters: [
+                   { type: ParametersTypesEnum.Text, text: customer.name },
+                   { type: ParametersTypesEnum.Text, text: customer.discountCode },
+               ],
+           }],
+       },
+   });
+   ```
+
+4. **Track Campaign Performance**: Monitor metrics
+   ```typescript
+   interface CampaignMetrics {
+       sent: number;
+       delivered: number;
+       read: number;
+       replied: number;
+   }
+
+   async function trackCampaign(campaignId: string): Promise<CampaignMetrics> {
+       return await database.campaigns.getMetrics(campaignId);
+   }
+   ```
+
+5. **Respect Local Time Zones**: Send at appropriate times
+   ```typescript
+   import { DateTime } from 'luxon';
+
+   async function sendAtOptimalTime(
+       phoneNumber: string,
+       timezone: string
+   ) {
+       const localTime = DateTime.now().setZone(timezone);
+       const hour = localTime.hour;
+
+       // Only send between 9 AM and 8 PM local time
+       if (hour >= 9 && hour < 20) {
+           await client.marketingMessages.sendTemplateMessage({ ... });
+       } else {
+           await scheduleLater(phoneNumber, timezone);
+       }
+   }
+   ```
+
+6. **A/B Testing**: Test template variations
+   ```typescript
+   async function sendABTest(recipients: string[]) {
+       const halfPoint = Math.floor(recipients.length / 2);
+       const groupA = recipients.slice(0, halfPoint);
+       const groupB = recipients.slice(halfPoint);
+
+       // Send variant A
+       for (const recipient of groupA) {
+           await client.marketingMessages.sendTemplateMessage({
+               to: recipient,
+               template: { name: 'variant_a', ... },
+           });
+       }
+
+       // Send variant B
+       for (const recipient of groupB) {
+           await client.marketingMessages.sendTemplateMessage({
+               to: recipient,
+               template: { name: 'variant_b', ... },
+           });
+       }
+   }
+   ```
+
+## Marketing Message Requirements
+
+- Template must be in MARKETING category
+- Template must be approved by Meta
+- Recipient must have opted in to receive marketing messages
+- Messages must comply with local regulations
+- Must respect opt-out requests immediately
+- Should include clear value proposition
+
+## Related Documentation
+
+- [Templates API](/api/templates) - Create marketing templates
+- [Messages API](/api/messages) - Standard message sending
+- [Webhooks](/webhooks/overview) - Track message delivery
+- [Opt-in Guidelines](https://developers.facebook.com/docs/whatsapp/overview/getting-opt-in/) - Compliance requirements
+
+## Source Code
+
+View the source code on GitHub: [MarketingMessagesApi.ts](https://github.com/froggy1014/meta-cloud-api/blob/main/src/api/marketingMessages/MarketingMessagesApi.ts)

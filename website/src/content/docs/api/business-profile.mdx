@@ -1,0 +1,447 @@
+---
+title: Business Profile API
+description: Manage WhatsApp Business profile information and settings
+---
+
+# Business Profile API
+
+Get and update WhatsApp Business profile information including business details, contact information, description, and profile photo.
+
+**Official Documentation**: [WhatsApp Business Profiles API](https://developers.facebook.com/documentation/business-messaging/whatsapp/business-profiles/)
+
+## Overview
+
+The Business Profile API allows you to manage your WhatsApp Business presence:
+
+- **Get Profile**: Retrieve current business profile information
+- **Update Profile**: Modify business details and contact info
+- **Profile Photo**: Upload and manage business profile pictures
+- **Business Vertical**: Categorize your business type
+
+## Endpoints
+
+```
+GET /{PHONE_NUMBER_ID}/whatsapp_business_profile?fields
+POST /{PHONE_NUMBER_ID}/whatsapp_business_profile
+POST /app/uploads?file_length&file_type&file_name
+POST /{UPLOAD_ID}
+GET /{UPLOAD_ID}
+```
+
+## Important Notes
+
+:::caution[Messaging Product Required]
+Profile updates must include `messaging_product: "whatsapp"` in the request body.
+:::
+
+:::tip[Profile Photo Upload]
+Profile photo upload is a 3-step process:
+1. Create upload session
+2. Upload file bytes
+3. Get file handle for profile update
+:::
+
+:::tip[Website Limit]
+You can specify up to 2 website URLs in your business profile.
+:::
+
+## Quick Start
+
+```typescript
+import WhatsApp, { BusinessVerticalEnum } from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID!,
+});
+
+// Get current profile
+const profile = await client.businessProfile.getBusinessProfile([
+    'about',
+    'address',
+    'description',
+    'email',
+    'vertical',
+    'websites',
+]);
+
+// Update profile
+await client.businessProfile.updateBusinessProfile({
+    messaging_product: 'whatsapp',
+    about: 'Your trusted partner for quality service',
+    address: '123 Main Street, San Francisco, CA 94102',
+    description: 'We provide excellent customer service 24/7',
+    email: 'support@example.com',
+    vertical: BusinessVerticalEnum.RETAIL,
+    websites: ['https://example.com', 'https://shop.example.com'],
+});
+```
+
+## Get Business Profile
+
+Retrieve current business profile information.
+
+### Get All Fields
+
+```typescript
+const profile = await client.businessProfile.getBusinessProfile([
+    'about',
+    'address',
+    'description',
+    'email',
+    'profile_picture_url',
+    'vertical',
+    'websites',
+]);
+
+console.log(profile);
+// {
+//     about: 'We are a leading retailer',
+//     address: '123 Main St, SF, CA',
+//     description: 'Quality products since 2020',
+//     email: 'info@example.com',
+//     vertical: 'RETAIL',
+//     websites: ['https://example.com']
+// }
+```
+
+### Get Specific Fields
+
+```typescript
+// Just contact info
+const contact = await client.businessProfile.getBusinessProfile([
+    'email',
+    'websites',
+]);
+
+// Just description fields
+const info = await client.businessProfile.getBusinessProfile([
+    'about',
+    'description',
+    'vertical',
+]);
+```
+
+## Update Business Profile
+
+Modify business profile information.
+
+### Update Basic Information
+
+```typescript
+await client.businessProfile.updateBusinessProfile({
+    messaging_product: 'whatsapp',
+    about: 'Premium quality products and services',
+    description: 'Your one-stop shop for all your needs',
+});
+```
+
+### Update Contact Information
+
+```typescript
+await client.businessProfile.updateBusinessProfile({
+    messaging_product: 'whatsapp',
+    email: 'contact@example.com',
+    websites: ['https://www.example.com'],
+    address: '456 Commerce Ave, New York, NY 10001',
+});
+```
+
+### Update Business Vertical
+
+```typescript
+import { BusinessVerticalEnum } from 'meta-cloud-api/enums';
+
+await client.businessProfile.updateBusinessProfile({
+    messaging_product: 'whatsapp',
+    vertical: BusinessVerticalEnum.ECOMMERCE,
+});
+```
+
+### Complete Profile Update
+
+```typescript
+import { BusinessVerticalEnum } from 'meta-cloud-api/enums';
+
+await client.businessProfile.updateBusinessProfile({
+    messaging_product: 'whatsapp',
+    about: 'Fast and reliable service since 2020',
+    address: '789 Business Blvd, Suite 100, Austin, TX 78701',
+    description: 'We specialize in providing top-tier customer service and quality products. Available 24/7 for your convenience.',
+    email: 'hello@mybusiness.com',
+    vertical: BusinessVerticalEnum.PROFESSIONAL_SERVICES,
+    websites: [
+        'https://mybusiness.com',
+        'https://shop.mybusiness.com',
+    ],
+});
+```
+
+## Profile Photo Management
+
+Upload and set a business profile picture.
+
+### Upload Profile Photo (3-Step Process)
+
+```typescript
+import fs from 'fs';
+
+// Read image file
+const imageBuffer = fs.readFileSync('/path/to/profile.jpg');
+const fileSize = imageBuffer.length;
+
+// Step 1: Create upload session
+const session = await client.businessProfile.createProfilePhotoUploadSession({
+    file_length: fileSize,
+    file_type: 'image/jpeg',
+    file_name: 'profile.jpg',
+});
+
+// Step 2: Upload file bytes
+await client.businessProfile.uploadProfilePhotoBytes(
+    session.id,
+    imageBuffer
+);
+
+// Step 3: Get file handle
+const upload = await client.businessProfile.getProfilePhotoUpload(session.id);
+
+// Step 4: Update profile with new photo
+await client.businessProfile.updateBusinessProfile({
+    messaging_product: 'whatsapp',
+    profile_picture_handle: upload.h,
+});
+```
+
+### Complete Profile Photo Upload Helper
+
+```typescript
+async function updateProfilePhoto(imagePath: string) {
+    const imageBuffer = fs.readFileSync(imagePath);
+    const mimeType = 'image/jpeg'; // or 'image/png'
+
+    // Create session
+    const session = await client.businessProfile.createProfilePhotoUploadSession({
+        file_length: imageBuffer.length,
+        file_type: mimeType,
+        file_name: path.basename(imagePath),
+    });
+
+    // Upload bytes
+    await client.businessProfile.uploadProfilePhotoBytes(
+        session.id,
+        imageBuffer
+    );
+
+    // Get handle
+    const upload = await client.businessProfile.getProfilePhotoUpload(session.id);
+
+    // Set as profile photo
+    await client.businessProfile.updateBusinessProfile({
+        messaging_product: 'whatsapp',
+        profile_picture_handle: upload.h,
+    });
+
+    console.log('Profile photo updated successfully');
+}
+```
+
+## Response Formats
+
+### Get Profile Response
+
+```typescript
+{
+    about: 'We provide quality service',
+    address: '123 Main St, San Francisco, CA',
+    description: 'Leading provider since 2020',
+    email: 'contact@example.com',
+    profile_picture_url: 'https://...',
+    vertical: 'RETAIL',
+    websites: ['https://example.com']
+}
+```
+
+### Update Profile Response
+
+```typescript
+{
+    success: true
+}
+```
+
+### Upload Session Response
+
+```typescript
+{
+    id: 'UPLOAD_SESSION_ID'
+}
+```
+
+### Profile Photo Upload Response
+
+```typescript
+{
+    h: 'FILE_HANDLE_STRING'
+}
+```
+
+## Business Verticals
+
+Available business category options:
+
+```typescript
+import { BusinessVerticalEnum } from 'meta-cloud-api/enums';
+
+// Common verticals
+BusinessVerticalEnum.ECOMMERCE           // Online retail
+BusinessVerticalEnum.RETAIL              // Physical retail
+BusinessVerticalEnum.FOOD                // Food & beverage
+BusinessVerticalEnum.HEALTH              // Healthcare
+BusinessVerticalEnum.EDUCATION           // Education services
+BusinessVerticalEnum.ENTERTAINMENT       // Entertainment & media
+BusinessVerticalEnum.TRAVEL              // Travel & hospitality
+BusinessVerticalEnum.AUTOMOTIVE          // Automotive
+BusinessVerticalEnum.REAL_ESTATE         // Real estate
+BusinessVerticalEnum.PROFESSIONAL_SERVICES // Professional services
+BusinessVerticalEnum.BEAUTY              // Beauty & personal care
+BusinessVerticalEnum.NONPROFIT           // Non-profit organizations
+BusinessVerticalEnum.GOVERNMENT          // Government services
+BusinessVerticalEnum.OTHER               // Other categories
+```
+
+## Error Handling
+
+```typescript
+try {
+    await client.businessProfile.updateBusinessProfile({
+        messaging_product: 'whatsapp',
+        email: 'invalid-email',
+    });
+} catch (error) {
+    if (error.response) {
+        const { code, message } = error.response.data.error;
+
+        switch (code) {
+            case 100:
+                console.error('Invalid parameter value');
+                break;
+            case 131031:
+                console.error('Profile photo too large');
+                break;
+            default:
+                console.error(`Error ${code}: ${message}`);
+        }
+    }
+}
+```
+
+## Best Practices
+
+1. **Provide Complete Information**: Fill out all relevant fields
+   ```typescript
+   await client.businessProfile.updateBusinessProfile({
+       messaging_product: 'whatsapp',
+       about: 'Clear, concise description (256 chars max)',
+       description: 'More detailed business information (512 chars max)',
+       email: 'support@example.com',
+       address: 'Full address with city, state, ZIP',
+       vertical: BusinessVerticalEnum.RETAIL,
+       websites: ['https://primary.com', 'https://shop.com'],
+   });
+   ```
+
+2. **Use High-Quality Profile Photos**: Follow image guidelines
+   ```typescript
+   // ✅ Good
+   // - Square image (minimum 192x192px)
+   // - High resolution
+   // - Professional appearance
+   // - File size under 5MB
+
+   // ❌ Avoid
+   // - Low resolution images
+   // - Stretched or distorted photos
+   // - Generic stock images
+   ```
+
+3. **Choose Accurate Vertical**: Select the best matching category
+   ```typescript
+   // ✅ Good - specific match
+   vertical: BusinessVerticalEnum.ECOMMERCE  // For online stores
+
+   // ❌ Less ideal - too generic
+   vertical: BusinessVerticalEnum.OTHER
+   ```
+
+4. **Keep Information Current**: Update regularly
+   ```typescript
+   // Update profile when details change
+   await client.businessProfile.updateBusinessProfile({
+       messaging_product: 'whatsapp',
+       address: 'New store location',
+       websites: ['https://new-domain.com'],
+   });
+   ```
+
+5. **Validate Email Format**: Ensure proper email addresses
+   ```typescript
+   function isValidEmail(email: string): boolean {
+       return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+   }
+
+   const email = 'contact@example.com';
+   if (isValidEmail(email)) {
+       await client.businessProfile.updateBusinessProfile({
+           messaging_product: 'whatsapp',
+           email,
+       });
+   }
+   ```
+
+6. **Use HTTPS for Websites**: Only secure URLs
+   ```typescript
+   // ✅ Good
+   websites: ['https://example.com']
+
+   // ❌ Bad - insecure
+   websites: ['http://example.com']
+   ```
+
+## Available Profile Fields
+
+When calling `getBusinessProfile()`, you can request these fields:
+
+- `about`: Short business description (256 characters)
+- `address`: Physical business address
+- `description`: Detailed business information (512 characters)
+- `email`: Business email address
+- `profile_picture_url`: Current profile photo URL
+- `vertical`: Business category/industry
+- `websites`: Array of website URLs (max 2)
+
+## Character Limits
+
+- **about**: 256 characters
+- **description**: 512 characters
+- **address**: 256 characters
+- **email**: 128 characters
+
+## Profile Photo Requirements
+
+- **Format**: JPEG or PNG
+- **Size**: 5 MB maximum
+- **Dimensions**: Minimum 192x192 pixels (square recommended)
+- **Aspect Ratio**: 1:1 (square) recommended
+
+## Related Documentation
+
+- [Phone Numbers API](/api/phone-numbers) - Manage phone numbers
+- [Messages API](/api/messages) - Send messages
+- [WABA API](/api/waba) - Manage business accounts
+- [Business Profile Guidelines](https://developers.facebook.com/docs/whatsapp/business-management-api/manage-profile) - Official guidelines
+
+## Source Code
+
+View the source code on GitHub: [BusinessProfileApi.ts](https://github.com/froggy1014/meta-cloud-api/blob/main/src/api/profile/BusinessProfileApi.ts)

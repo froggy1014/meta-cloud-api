@@ -1,0 +1,686 @@
+---
+title: Groups API
+description: Create and manage WhatsApp groups, participants, and settings
+---
+
+# Groups API
+
+Create, configure, and manage WhatsApp groups for community engagement and customer communication.
+
+**Official Documentation**: [WhatsApp Groups API](https://developers.facebook.com/documentation/business-messaging/whatsapp/groups/reference/)
+
+## Overview
+
+The Groups API enables comprehensive group management:
+
+- **Create Groups**: Set up new WhatsApp groups
+- **List Groups**: Retrieve all groups for your phone number
+- **Manage Participants**: Add and remove group members
+- **Join Requests**: Handle group join approval workflows
+- **Invite Links**: Generate and manage shareable invite links
+- **Group Settings**: Update group name, description, and picture
+
+## Endpoints
+
+```
+POST /{PHONE_NUMBER_ID}/groups
+GET /{PHONE_NUMBER_ID}/groups?limit&after&before
+GET /{GROUP_ID}?fields
+POST /{GROUP_ID}
+DELETE /{GROUP_ID}
+GET /{GROUP_ID}/invite_link
+POST /{GROUP_ID}/invite_link
+GET /{GROUP_ID}/join_requests
+POST /{GROUP_ID}/join_requests
+DELETE /{GROUP_ID}/join_requests
+DELETE /{GROUP_ID}/participants
+```
+
+## Important Notes
+
+:::tip[Join Approval Modes]
+- **auto_approve**: Users automatically join via invite link
+- **approval_required**: Admin must approve join requests
+:::
+
+:::caution[Participant Limits]
+Remove up to 8 participants per request. For larger batches, make multiple requests.
+:::
+
+:::tip[Group Settings Updates]
+When updating group settings, you can optionally include a profile picture file.
+:::
+
+## Quick Start
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+});
+
+// Create a group
+const group = await client.groups.createGroup({
+    subject: 'Product Updates',
+    description: 'Get notified about new product releases',
+    join_approval_mode: 'auto_approve',
+});
+
+// Get group info
+const info = await client.groups.getGroupInfo(group.id, [
+    'subject',
+    'description',
+    'participants',
+]);
+
+// Generate invite link
+const invite = await client.groups.getGroupInviteLink(group.id);
+
+// Remove participants
+await client.groups.removeParticipants(group.id, ['15551234567']);
+
+// Delete group
+await client.groups.deleteGroup(group.id);
+```
+
+## Create Group
+
+Set up a new WhatsApp group.
+
+### Basic Group Creation
+
+```typescript
+const group = await client.groups.createGroup({
+    subject: 'Customer Support',
+    description: 'Get help from our support team',
+    join_approval_mode: 'auto_approve',
+});
+
+console.log('Group ID:', group.id);
+console.log('Invite link:', group.invite_link);
+```
+
+### Group with Approval Required
+
+```typescript
+const group = await client.groups.createGroup({
+    subject: 'VIP Customers',
+    description: 'Exclusive updates for VIP members',
+    join_approval_mode: 'approval_required',
+});
+```
+
+### Group with Profile Picture
+
+```typescript
+import fs from 'fs';
+
+const imageBuffer = fs.readFileSync('/path/to/group-icon.jpg');
+const imageFile = new File([imageBuffer], 'icon.jpg', {
+    type: 'image/jpeg'
+});
+
+const group = await client.groups.createGroup({
+    subject: 'Team Chat',
+    description: 'Internal team communication',
+    join_approval_mode: 'auto_approve',
+    profile_picture: imageFile,
+});
+```
+
+## List Groups
+
+Retrieve all groups managed by your phone number.
+
+### Get All Groups
+
+```typescript
+const groups = await client.groups.listGroups();
+
+groups.data.forEach(group => {
+    console.log(`${group.subject} (${group.id})`);
+});
+```
+
+### Paginated List
+
+```typescript
+// Get first page
+const page1 = await client.groups.listGroups({ limit: 20 });
+
+// Get next page
+if (page1.paging?.cursors?.after) {
+    const page2 = await client.groups.listGroups({
+        limit: 20,
+        after: page1.paging.cursors.after,
+    });
+}
+```
+
+### Get All Groups (All Pages)
+
+```typescript
+async function getAllGroups() {
+    const allGroups = [];
+    let after: string | undefined;
+
+    do {
+        const response = await client.groups.listGroups({
+            limit: 100,
+            after,
+        });
+
+        allGroups.push(...response.data);
+        after = response.paging?.cursors?.after;
+    } while (after);
+
+    return allGroups;
+}
+```
+
+## Get Group Information
+
+Retrieve detailed information about a specific group.
+
+### Get All Fields
+
+```typescript
+const group = await client.groups.getGroupInfo(groupId, [
+    'id',
+    'subject',
+    'description',
+    'participants',
+    'created_at',
+    'updated_at',
+]);
+
+console.log(group);
+```
+
+### Get Specific Fields
+
+```typescript
+// Just basic info
+const basicInfo = await client.groups.getGroupInfo(groupId, [
+    'subject',
+    'description',
+]);
+
+// Just participants
+const members = await client.groups.getGroupInfo(groupId, [
+    'participants',
+]);
+```
+
+## Update Group Settings
+
+Modify group name, description, or profile picture.
+
+### Update Basic Information
+
+```typescript
+await client.groups.updateGroupSettings(groupId, {
+    subject: 'Updated Group Name',
+    description: 'Updated group description',
+});
+```
+
+### Update Profile Picture
+
+```typescript
+import fs from 'fs';
+
+const imageBuffer = fs.readFileSync('/path/to/new-icon.jpg');
+const imageFile = new File([imageBuffer], 'icon.jpg', {
+    type: 'image/jpeg'
+});
+
+await client.groups.updateGroupSettings(groupId, {
+    profile_picture: imageFile,
+});
+```
+
+### Complete Update
+
+```typescript
+await client.groups.updateGroupSettings(groupId, {
+    subject: 'Product Announcements',
+    description: 'Official product updates and news',
+    profile_picture: imageFile,
+});
+```
+
+## Manage Invite Links
+
+Generate and revoke group invite links.
+
+### Get Current Invite Link
+
+```typescript
+const invite = await client.groups.getGroupInviteLink(groupId);
+
+console.log('Invite link:', invite.invite_link);
+console.log('Invite code:', invite.invite_code);
+```
+
+### Revoke and Generate New Link
+
+```typescript
+const newInvite = await client.groups.revokeGroupInviteLink(groupId);
+
+console.log('New invite link:', newInvite.invite_link);
+```
+
+### Share Invite Link
+
+```typescript
+const invite = await client.groups.getGroupInviteLink(groupId);
+
+// Send invite link via message
+await client.messages.text({
+    to: '15551234567',
+    body: `Join our group: ${invite.invite_link}`,
+});
+```
+
+## Handle Join Requests
+
+Manage group join approval workflow.
+
+### List Pending Join Requests
+
+```typescript
+const requests = await client.groups.getJoinRequests(groupId);
+
+requests.data.forEach(request => {
+    console.log(`User ${request.wa_id} wants to join`);
+});
+```
+
+### Approve Join Request
+
+```typescript
+await client.groups.approveJoinRequest(groupId, '15551234567');
+
+console.log('Join request approved');
+```
+
+### Reject Join Request
+
+```typescript
+await client.groups.rejectJoinRequest(groupId, '15551234567');
+
+console.log('Join request rejected');
+```
+
+### Bulk Approve Requests
+
+```typescript
+async function approveAllPendingRequests(groupId: string) {
+    const requests = await client.groups.getJoinRequests(groupId);
+
+    for (const request of requests.data) {
+        await client.groups.approveJoinRequest(groupId, request.wa_id);
+    }
+
+    console.log(`Approved ${requests.data.length} join requests`);
+}
+```
+
+## Manage Participants
+
+Add and remove group members.
+
+### Remove Single Participant
+
+```typescript
+await client.groups.removeParticipants(groupId, ['15551234567']);
+
+console.log('Participant removed');
+```
+
+### Remove Multiple Participants
+
+```typescript
+const usersToRemove = [
+    '15551234567',
+    '15559876543',
+    '15555555555',
+];
+
+await client.groups.removeParticipants(groupId, usersToRemove);
+
+console.log(`Removed ${usersToRemove.length} participants`);
+```
+
+### Remove Participants in Batches
+
+```typescript
+async function removeManyParticipants(
+    groupId: string,
+    phoneNumbers: string[]
+) {
+    // Process in batches of 8 (API limit)
+    const batchSize = 8;
+
+    for (let i = 0; i < phoneNumbers.length; i += batchSize) {
+        const batch = phoneNumbers.slice(i, i + batchSize);
+        await client.groups.removeParticipants(groupId, batch);
+        console.log(`Removed batch ${i / batchSize + 1}`);
+    }
+}
+```
+
+## Delete Group
+
+Permanently delete a group.
+
+```typescript
+await client.groups.deleteGroup(groupId);
+
+console.log('Group deleted');
+```
+
+:::caution[Permanent Deletion]
+Deleting a group is permanent and cannot be undone. All messages and media in the group will be lost.
+:::
+
+## Advanced Use Cases
+
+### Community Group Manager
+
+```typescript
+class CommunityGroupManager {
+    private client: WhatsApp;
+
+    constructor(client: WhatsApp) {
+        this.client = client;
+    }
+
+    async createCommunityGroup(
+        name: string,
+        description: string,
+        requireApproval: boolean = true
+    ) {
+        const group = await this.client.groups.createGroup({
+            subject: name,
+            description,
+            join_approval_mode: requireApproval
+                ? 'approval_required'
+                : 'auto_approve',
+        });
+
+        // Store group info
+        await database.groups.insert({
+            id: group.id,
+            name,
+            description,
+            createdAt: new Date(),
+        });
+
+        return group;
+    }
+
+    async broadcastToGroup(groupId: string, message: string) {
+        const group = await this.client.groups.getGroupInfo(groupId, [
+            'participants',
+        ]);
+
+        // Send message to all participants
+        for (const participant of group.participants) {
+            await this.client.messages.text({
+                to: participant.wa_id,
+                body: message,
+            });
+        }
+    }
+
+    async autoModerateJoinRequests(groupId: string) {
+        const requests = await this.client.groups.getJoinRequests(groupId);
+
+        for (const request of requests.data) {
+            // Check if user meets criteria
+            const isApproved = await this.checkUserEligibility(request.wa_id);
+
+            if (isApproved) {
+                await this.client.groups.approveJoinRequest(
+                    groupId,
+                    request.wa_id
+                );
+            } else {
+                await this.client.groups.rejectJoinRequest(
+                    groupId,
+                    request.wa_id
+                );
+            }
+        }
+    }
+
+    private async checkUserEligibility(waId: string): Promise<boolean> {
+        // Your eligibility logic
+        return true;
+    }
+}
+```
+
+### VIP Customer Group
+
+```typescript
+async function setupVIPGroup() {
+    // Create VIP group
+    const group = await client.groups.createGroup({
+        subject: 'VIP Customers',
+        description: 'Exclusive offers and early access',
+        join_approval_mode: 'approval_required',
+    });
+
+    // Get invite link
+    const invite = await client.groups.getGroupInviteLink(group.id);
+
+    // Send invite to VIP customers
+    const vipCustomers = await database.customers.find({ tier: 'VIP' });
+
+    for (const customer of vipCustomers) {
+        await client.messages.text({
+            to: customer.phoneNumber,
+            body: `Welcome to our VIP group! Join here: ${invite.invite_link}`,
+        });
+    }
+
+    return group;
+}
+```
+
+### Product Launch Group
+
+```typescript
+async function createProductLaunchGroup(productName: string) {
+    const group = await client.groups.createGroup({
+        subject: `${productName} Launch`,
+        description: `Get updates about ${productName}`,
+        join_approval_mode: 'auto_approve',
+    });
+
+    // Send announcement
+    const subscribers = await database.subscribers.find({
+        interested_in: productName,
+    });
+
+    const invite = await client.groups.getGroupInviteLink(group.id);
+
+    for (const subscriber of subscribers) {
+        await client.messages.template({
+            to: subscriber.phoneNumber,
+            template: {
+                name: 'product_launch_invite',
+                language: { code: 'en_US' },
+                components: [
+                    {
+                        type: 'BODY',
+                        parameters: [
+                            { type: 'TEXT', text: productName },
+                            { type: 'TEXT', text: invite.invite_link },
+                        ],
+                    },
+                ],
+            },
+        });
+    }
+
+    return group;
+}
+```
+
+## Response Formats
+
+### Create Group Response
+
+```typescript
+{
+    id: 'GROUP_ID',
+    subject: 'Product Updates',
+    invite_link: 'https://chat.whatsapp.com/...'
+}
+```
+
+### Group Info Response
+
+```typescript
+{
+    id: 'GROUP_ID',
+    subject: 'Customer Support',
+    description: 'Get help from our support team',
+    participants: [
+        {
+            wa_id: '15551234567',
+            is_admin: true
+        },
+        {
+            wa_id: '15559876543',
+            is_admin: false
+        }
+    ],
+    created_at: '2024-01-15T10:30:00Z',
+    updated_at: '2024-01-20T15:45:00Z'
+}
+```
+
+### Join Requests Response
+
+```typescript
+{
+    data: [
+        {
+            wa_id: '15551234567',
+            requested_at: '2024-01-15T10:30:00Z'
+        }
+    ]
+}
+```
+
+## Error Handling
+
+```typescript
+try {
+    await client.groups.createGroup({
+        subject: 'New Group',
+        description: 'Description',
+        join_approval_mode: 'auto_approve',
+    });
+} catch (error) {
+    if (error.response) {
+        const { code, message } = error.response.data.error;
+
+        switch (code) {
+            case 131031:
+                console.error('Invalid group settings');
+                break;
+            case 131000:
+                console.error('Group creation failed');
+                break;
+            default:
+                console.error(`Error ${code}: ${message}`);
+        }
+    }
+}
+```
+
+## Best Practices
+
+1. **Use Descriptive Names**: Make group purpose clear
+   ```typescript
+   // ✅ Good
+   subject: 'Product Launch 2024 - Beta Testers'
+
+   // ❌ Bad
+   subject: 'Group 1'
+   ```
+
+2. **Set Appropriate Approval Mode**: Choose based on use case
+   ```typescript
+   // Public community - auto approve
+   join_approval_mode: 'auto_approve'
+
+   // Private/VIP - require approval
+   join_approval_mode: 'approval_required'
+   ```
+
+3. **Batch Participant Removals**: Respect API limits
+   ```typescript
+   // Process in batches of 8
+   const batchSize = 8;
+   for (let i = 0; i < users.length; i += batchSize) {
+       await client.groups.removeParticipants(
+           groupId,
+           users.slice(i, i + batchSize)
+       );
+   }
+   ```
+
+4. **Track Group Metrics**: Monitor group health
+   ```typescript
+   interface GroupMetrics {
+       groupId: string;
+       memberCount: number;
+       joinRequestsToday: number;
+       messagesThisWeek: number;
+   }
+
+   async function getGroupMetrics(groupId: string): Promise<GroupMetrics> {
+       const info = await client.groups.getGroupInfo(groupId, [
+           'participants',
+       ]);
+
+       return {
+           groupId,
+           memberCount: info.participants.length,
+           joinRequestsToday: await countTodayJoinRequests(groupId),
+           messagesThisWeek: await countWeeklyMessages(groupId),
+       };
+   }
+   ```
+
+5. **Automate Join Request Handling**: Reduce manual work
+   ```typescript
+   setInterval(async () => {
+       const groups = await client.groups.listGroups();
+
+       for (const group of groups.data) {
+           await autoModerateJoinRequests(group.id);
+       }
+   }, 60 * 60 * 1000); // Every hour
+   ```
+
+## Related Documentation
+
+- [Messages API](/api/messages) - Send group messages
+- [Webhooks](/webhooks/overview) - Receive group events
+- [Templates API](/api/templates) - Create group invite templates
+- [Community Management](/guides/community-management) - Best practices
+
+## Source Code
+
+View the source code on GitHub: [GroupsApi.ts](https://github.com/froggy1014/meta-cloud-api/blob/main/src/api/groups/GroupsApi.ts)

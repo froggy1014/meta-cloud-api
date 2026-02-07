@@ -1,0 +1,415 @@
+---
+title: Registration API
+description: Register and deregister WhatsApp Business phone numbers
+---
+
+# Registration API
+
+Register or deregister WhatsApp Business phone numbers with a secure 6-digit PIN and optional data localization settings.
+
+**Official Documentation**: [WhatsApp Registration API](https://developers.facebook.com/documentation/business-messaging/whatsapp/business-phone-numbers/registration/)
+
+## Overview
+
+The Registration API manages phone number registration status:
+
+- **Register**: Activate phone numbers for WhatsApp Business messaging
+- **Deregister**: Remove phone numbers from WhatsApp Business platform
+- **Data Localization**: Specify regional data storage requirements
+
+## Endpoints
+
+```
+POST /{PHONE_NUMBER_ID}/register
+POST /{PHONE_NUMBER_ID}/deregister
+```
+
+## Important Notes
+
+:::caution[PIN Security]
+The 6-digit PIN is required for registration and should be stored securely. You'll need it to re-register if the number is moved or deregistered.
+:::
+
+:::tip[Data Localization]
+Some regions require data to be stored locally. Use `DataLocalizationRegionEnum` to specify the appropriate region when required by local regulations.
+:::
+
+:::caution[Registration State]
+Registering a phone number will deregister it from any other WhatsApp Business Account or application it's currently associated with.
+:::
+
+## Quick Start
+
+```typescript
+import WhatsApp, { DataLocalizationRegionEnum } from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID!,
+});
+
+// Register phone number
+await client.registration.register('123456');
+
+// Register with data localization
+await client.registration.register(
+    '123456',
+    DataLocalizationRegionEnum.Asia
+);
+
+// Deregister phone number
+await client.registration.deregister();
+```
+
+## Register Phone Number
+
+Activate a phone number for WhatsApp Business messaging.
+
+### Basic Registration
+
+```typescript
+// Register with PIN only
+const pin = '123456'; // 6-digit numeric string
+await client.registration.register(pin);
+
+console.log('Phone number registered successfully');
+```
+
+### Registration with Data Localization
+
+```typescript
+import { DataLocalizationRegionEnum } from 'meta-cloud-api/enums';
+
+// Register for Asia-Pacific region
+await client.registration.register(
+    '123456',
+    DataLocalizationRegionEnum.Asia
+);
+```
+
+### Registration with PIN Generation
+
+```typescript
+function generateRegistrationPIN(): string {
+    // Generate random 6-digit PIN
+    return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+const pin = generateRegistrationPIN();
+
+// Store PIN securely (e.g., in environment variables or secrets manager)
+await storeSecurely('WA_REGISTRATION_PIN', pin);
+
+// Register phone number
+await client.registration.register(pin);
+```
+
+## Deregister Phone Number
+
+Remove a phone number from WhatsApp Business platform.
+
+```typescript
+await client.registration.deregister();
+
+console.log('Phone number deregistered successfully');
+```
+
+:::caution[Deregistration Effect]
+Deregistering a phone number will:
+- Stop all message sending/receiving
+- Remove the number from your WhatsApp Business Account
+- Require re-registration to use again
+:::
+
+## Data Localization Regions
+
+Available data storage regions:
+
+```typescript
+import { DataLocalizationRegionEnum } from 'meta-cloud-api/enums';
+
+// Available regions
+DataLocalizationRegionEnum.Asia          // Asia-Pacific
+DataLocalizationRegionEnum.Europe        // Europe
+DataLocalizationRegionEnum.LatinAmerica  // Latin America
+```
+
+### When to Use Data Localization
+
+```typescript
+// India - requires Asia region
+await client.registration.register(
+    '123456',
+    DataLocalizationRegionEnum.Asia
+);
+
+// EU - requires Europe region
+await client.registration.register(
+    '123456',
+    DataLocalizationRegionEnum.Europe
+);
+
+// Brazil - requires Latin America region
+await client.registration.register(
+    '123456',
+    DataLocalizationRegionEnum.LatinAmerica
+);
+```
+
+## Complete Registration Flow
+
+Example of complete phone number setup process:
+
+```typescript
+import WhatsApp, { DataLocalizationRegionEnum } from 'meta-cloud-api';
+
+async function setupPhoneNumber(pin: string, region?: string) {
+    const client = new WhatsApp({
+        accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+        phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+        businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID!,
+    });
+
+    try {
+        // Step 1: Register phone number
+        console.log('Registering phone number...');
+        await client.registration.register(
+            pin,
+            region as DataLocalizationRegionEnum
+        );
+
+        // Step 2: Verify registration
+        console.log('Requesting verification code...');
+        await client.phoneNumbers.requestVerificationCode({
+            code_method: 'SMS',
+            language: 'en_US',
+        });
+
+        // Step 3: User enters verification code (in real app)
+        const verificationCode = '123456'; // From user input
+
+        console.log('Verifying code...');
+        await client.phoneNumbers.verifyCode(verificationCode);
+
+        // Step 4: Set up two-step verification
+        console.log('Setting up two-step verification...');
+        await client.twoStepVerification.setTwoStepVerificationCode(pin);
+
+        console.log('Phone number setup complete!');
+    } catch (error) {
+        console.error('Setup failed:', error.message);
+        throw error;
+    }
+}
+
+// Usage
+await setupPhoneNumber('123456', 'ASIA');
+```
+
+## Response Format
+
+### Registration Success
+
+```typescript
+{
+    success: true
+}
+```
+
+### Deregistration Success
+
+```typescript
+{
+    success: true
+}
+```
+
+## Error Handling
+
+```typescript
+try {
+    await client.registration.register('123456');
+} catch (error) {
+    if (error.response) {
+        const { code, message } = error.response.data.error;
+
+        switch (code) {
+            case 133010:
+                console.error('Phone number already registered elsewhere');
+                break;
+            case 133016:
+                console.error('Invalid PIN format - must be 6 digits');
+                break;
+            case 133000:
+                console.error('Phone number cannot be registered');
+                break;
+            default:
+                console.error(`Error ${code}: ${message}`);
+        }
+    }
+}
+```
+
+## Best Practices
+
+1. **Store PIN Securely**: Never hardcode or expose PINs
+   ```typescript
+   // ✅ Good - use environment variables or secrets manager
+   const pin = process.env.WA_REGISTRATION_PIN;
+   await client.registration.register(pin);
+
+   // ❌ Bad - hardcoded PIN
+   await client.registration.register('123456');
+   ```
+
+2. **Validate PIN Format**: Ensure 6-digit numeric string
+   ```typescript
+   function validatePIN(pin: string): boolean {
+       return /^\d{6}$/.test(pin);
+   }
+
+   const pin = '123456';
+   if (validatePIN(pin)) {
+       await client.registration.register(pin);
+   } else {
+       throw new Error('Invalid PIN format');
+   }
+   ```
+
+3. **Use Data Localization When Required**: Comply with local regulations
+   ```typescript
+   // Check if data localization is required for your region
+   const requiresLocalization = isDataLocalizationRequired(countryCode);
+
+   if (requiresLocalization) {
+       await client.registration.register(
+           pin,
+           getDataLocalizationRegion(countryCode)
+       );
+   } else {
+       await client.registration.register(pin);
+   }
+   ```
+
+4. **Implement Re-registration Logic**: Handle migration scenarios
+   ```typescript
+   async function migratePhoneNumber(
+       oldClient: WhatsApp,
+       newClient: WhatsApp,
+       pin: string
+   ) {
+       // Deregister from old account
+       await oldClient.registration.deregister();
+
+       // Wait briefly
+       await new Promise(resolve => setTimeout(resolve, 5000));
+
+       // Register on new account
+       await newClient.registration.register(pin);
+   }
+   ```
+
+5. **Document PIN Requirements**: Inform users about PIN importance
+   ```typescript
+   /**
+    * Registers a phone number for WhatsApp Business.
+    *
+    * @param pin - 6-digit numeric PIN (must be stored securely)
+    * @param region - Data localization region (required for some countries)
+    *
+    * IMPORTANT: Save the PIN securely. You'll need it to:
+    * - Re-register the phone number
+    * - Set up two-step verification
+    * - Migrate to a different account
+    */
+   async function registerPhoneNumber(
+       pin: string,
+       region?: DataLocalizationRegionEnum
+   ) {
+       await client.registration.register(pin, region);
+   }
+   ```
+
+6. **Handle Deregistration Carefully**: Confirm before deregistering
+   ```typescript
+   async function safeDeregister(confirmation: boolean) {
+       if (!confirmation) {
+           throw new Error('Deregistration requires explicit confirmation');
+       }
+
+       // Backup important data before deregistering
+       await backupPhoneNumberData();
+
+       // Deregister
+       await client.registration.deregister();
+
+       console.log('Phone number deregistered');
+   }
+   ```
+
+## PIN Requirements
+
+- Must be exactly 6 digits
+- Only numeric characters (0-9)
+- Should be unique and not easily guessable
+- Must be stored securely
+- Used for registration and two-step verification
+
+```typescript
+// Valid PINs
+'123456' ✅
+'000000' ✅
+'999999' ✅
+
+// Invalid PINs
+'12345'   ❌ (too short)
+'1234567' ❌ (too long)
+'12345a'  ❌ (contains letter)
+'12-34-56' ❌ (contains hyphens)
+```
+
+## Data Localization Requirements
+
+### When is Data Localization Required?
+
+- **India**: Must use Asia region
+- **European Union**: Should use Europe region for GDPR compliance
+- **Brazil**: Should use Latin America region
+
+### Checking Requirements
+
+```typescript
+function getRequiredRegion(countryCode: string): DataLocalizationRegionEnum | undefined {
+    const regionMap: Record<string, DataLocalizationRegionEnum> = {
+        'IN': DataLocalizationRegionEnum.Asia,        // India
+        'BR': DataLocalizationRegionEnum.LatinAmerica, // Brazil
+        // Add EU countries
+        'DE': DataLocalizationRegionEnum.Europe,
+        'FR': DataLocalizationRegionEnum.Europe,
+        'IT': DataLocalizationRegionEnum.Europe,
+        // ... other EU countries
+    };
+
+    return regionMap[countryCode];
+}
+
+// Usage
+const region = getRequiredRegion('IN');
+if (region) {
+    await client.registration.register(pin, region);
+} else {
+    await client.registration.register(pin);
+}
+```
+
+## Related Documentation
+
+- [Phone Numbers API](/api/phone-numbers) - Verify phone numbers
+- [Two-Step Verification](/api/two-step-verification) - Secure your number
+- [WABA API](/api/waba) - Manage business accounts
+- [Setup Guide](/guides/getting-started) - Complete setup process
+
+## Source Code
+
+View the source code on GitHub: [RegistrationApi.ts](https://github.com/froggy1014/meta-cloud-api/blob/main/src/api/registration/RegistrationApi.ts)

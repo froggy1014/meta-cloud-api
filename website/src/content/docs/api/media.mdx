@@ -1,0 +1,344 @@
+---
+title: Media API
+description: Upload, download, and manage media files for WhatsApp messages
+---
+
+# Media API
+
+Upload media files once and reuse them across multiple messages using media IDs. Manage media lifecycles with upload, download, metadata retrieval, and deletion capabilities.
+
+**Official Documentation**: [WhatsApp Media API](https://developers.facebook.com/documentation/business-messaging/whatsapp/business-phone-numbers/media/)
+
+## Overview
+
+The Media API enables efficient media management for WhatsApp Business messaging:
+
+- **Upload Media**: Upload images, videos, audio, and documents
+- **Retrieve Metadata**: Get media information including URLs, MIME types, and file sizes
+- **Download Media**: Download media files from temporary URLs
+- **Delete Media**: Remove uploaded media to free up storage
+
+## Endpoints
+
+```
+POST /{PHONE_NUMBER_ID}/media
+GET /{MEDIA_ID}
+DELETE /{MEDIA_ID}
+GET {MEDIA_URL}
+```
+
+## Important Notes
+
+:::caution[Media Upload Format]
+Media uploads use `multipart/form-data` with three required fields:
+- `file`: The file to upload
+- `type`: The MIME type of the file
+- `messaging_product`: Always set to `"whatsapp"`
+:::
+
+:::tip[Media ID vs URL]
+- Use the **media ID** from upload responses in message requests
+- Use the **temporary URL** from `getMediaById()` for downloads
+- URLs expire after a short period - download immediately if needed
+:::
+
+:::caution[File Size Limits]
+- Images: 5 MB
+- Videos: 16 MB
+- Audio: 16 MB
+- Documents: 100 MB
+:::
+
+## Quick Start
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+});
+
+// Upload a file
+const file = new File([Buffer.from('hello')], 'note.txt', {
+    type: 'text/plain'
+});
+const upload = await client.media.uploadMedia(file);
+
+// Get media info
+const mediaInfo = await client.media.getMediaById(upload.id);
+
+// Download media
+const blob = await client.media.downloadMedia(mediaInfo.url);
+
+// Delete media
+await client.media.deleteMedia(upload.id);
+```
+
+## Upload Media
+
+Upload media files to WhatsApp for use in messages.
+
+### Upload from File Object
+
+```typescript
+// Upload an image
+const imageFile = new File(
+    [await fetch('https://example.com/image.jpg').then(r => r.blob())],
+    'photo.jpg',
+    { type: 'image/jpeg' }
+);
+
+const result = await client.media.uploadMedia(imageFile);
+console.log('Media ID:', result.id); // Use this ID in messages
+```
+
+### Upload from Buffer
+
+```typescript
+import fs from 'fs';
+
+// Read file from disk
+const buffer = fs.readFileSync('/path/to/video.mp4');
+
+// Create File object
+const videoFile = new File([buffer], 'video.mp4', {
+    type: 'video/mp4'
+});
+
+const result = await client.media.uploadMedia(videoFile);
+```
+
+### Upload Different Media Types
+
+```typescript
+// Audio file
+const audioFile = new File([audioBuffer], 'voice.ogg', {
+    type: 'audio/ogg; codecs=opus'
+});
+await client.media.uploadMedia(audioFile);
+
+// Document
+const docFile = new File([pdfBuffer], 'invoice.pdf', {
+    type: 'application/pdf'
+});
+await client.media.uploadMedia(docFile);
+
+// Sticker (WebP format)
+const stickerFile = new File([webpBuffer], 'sticker.webp', {
+    type: 'image/webp'
+});
+await client.media.uploadMedia(stickerFile);
+```
+
+## Get Media Information
+
+Retrieve metadata about uploaded media files.
+
+```typescript
+const mediaInfo = await client.media.getMediaById('MEDIA_ID');
+
+console.log(mediaInfo);
+// {
+//     id: 'MEDIA_ID',
+//     url: 'https://lookaside.fbsbx.com/...',
+//     mime_type: 'image/jpeg',
+//     sha256: 'abc123...',
+//     file_size: 123456,
+//     messaging_product: 'whatsapp'
+// }
+```
+
+## Download Media
+
+Download media files using temporary URLs.
+
+```typescript
+// Get media info first to retrieve URL
+const mediaInfo = await client.media.getMediaById('MEDIA_ID');
+
+// Download the media file
+const blob = await client.media.downloadMedia(mediaInfo.url);
+
+// Save to disk (Node.js)
+import fs from 'fs';
+const buffer = Buffer.from(await blob.arrayBuffer());
+fs.writeFileSync('downloaded_media.jpg', buffer);
+
+// Use in browser
+const url = URL.createObjectURL(blob);
+const link = document.createElement('a');
+link.href = url;
+link.download = 'media.jpg';
+link.click();
+```
+
+### Download from Webhook Messages
+
+```typescript
+// When receiving a media message via webhook
+const incomingMessage = webhookEvent.entry[0].changes[0].value.messages[0];
+
+if (incomingMessage.type === 'image') {
+    const mediaId = incomingMessage.image.id;
+
+    // Get media URL
+    const mediaInfo = await client.media.getMediaById(mediaId);
+
+    // Download the image
+    const blob = await client.media.downloadMedia(mediaInfo.url);
+
+    // Process the image...
+}
+```
+
+## Delete Media
+
+Remove uploaded media files to free up storage space.
+
+```typescript
+// Delete by media ID
+await client.media.deleteMedia('MEDIA_ID');
+
+// Delete after sending message
+const upload = await client.media.uploadMedia(file);
+
+await client.messages.image({
+    to: '15551234567',
+    image: { id: upload.id },
+});
+
+// Clean up after sending
+await client.media.deleteMedia(upload.id);
+```
+
+## Response Formats
+
+### Upload Response
+
+```typescript
+{
+    id: 'MEDIA_ID'
+}
+```
+
+### Media Info Response
+
+```typescript
+{
+    id: 'MEDIA_ID',
+    url: 'https://lookaside.fbsbx.com/whatsapp_business/attachments/?mid=...',
+    mime_type: 'image/jpeg',
+    sha256: 'abc123...',
+    file_size: 123456,
+    messaging_product: 'whatsapp'
+}
+```
+
+### Delete Response
+
+```typescript
+{
+    success: true
+}
+```
+
+## Error Handling
+
+```typescript
+try {
+    const result = await client.media.uploadMedia(file);
+} catch (error) {
+    if (error.response) {
+        const { code, message } = error.response.data.error;
+
+        switch (code) {
+            case 131031:
+                console.error('Media upload failed: File too large');
+                break;
+            case 131042:
+                console.error('Media upload failed: Invalid file type');
+                break;
+            case 131051:
+                console.error('Media upload failed: Corrupted file');
+                break;
+            default:
+                console.error(`Error ${code}: ${message}`);
+        }
+    } else {
+        console.error('Network error:', error.message);
+    }
+}
+```
+
+## Best Practices
+
+1. **Reuse Media IDs**: Upload media once and reuse the ID across multiple messages
+   ```typescript
+   const upload = await client.media.uploadMedia(file);
+
+   // Send to multiple recipients
+   await client.messages.image({ to: '1111', image: { id: upload.id } });
+   await client.messages.image({ to: '2222', image: { id: upload.id } });
+   await client.messages.image({ to: '3333', image: { id: upload.id } });
+   ```
+
+2. **Validate Before Upload**: Check file size and type before uploading
+   ```typescript
+   const MAX_SIZES = {
+       'image': 5 * 1024 * 1024,    // 5 MB
+       'video': 16 * 1024 * 1024,   // 16 MB
+       'audio': 16 * 1024 * 1024,   // 16 MB
+       'document': 100 * 1024 * 1024 // 100 MB
+   };
+
+   if (file.size > MAX_SIZES['image']) {
+       throw new Error('File too large');
+   }
+   ```
+
+3. **Handle Temporary URLs**: Download media immediately as URLs expire
+   ```typescript
+   const mediaInfo = await client.media.getMediaById(mediaId);
+   // Download immediately - URL expires soon
+   const blob = await client.media.downloadMedia(mediaInfo.url);
+   ```
+
+4. **Clean Up Unused Media**: Delete media files you no longer need
+   ```typescript
+   // Delete media after it's no longer needed
+   await client.media.deleteMedia(mediaId);
+   ```
+
+## Supported Media Types
+
+### Images
+- JPEG (`.jpg`, `.jpeg`)
+- PNG (`.png`)
+- WebP (`.webp`) - for stickers
+
+### Videos
+- MP4 (`.mp4`)
+- 3GPP (`.3gp`)
+
+### Audio
+- AAC (`.aac`)
+- MP3 (`.mp3`)
+- AMR (`.amr`)
+- OGG (`.ogg`, must use Opus codec)
+
+### Documents
+- PDF (`.pdf`)
+- Microsoft Office files (`.doc`, `.docx`, `.xls`, `.xlsx`, `.ppt`, `.pptx`)
+- Text files (`.txt`)
+
+## Related Documentation
+
+- [Messages API](/api/messages) - Send media messages using uploaded media IDs
+- [Webhooks](/webhooks/overview) - Receive and download incoming media
+- [Interactive Messages](/guides/interactive-messages) - Add media to interactive messages
+
+## Source Code
+
+View the source code on GitHub: [MediaApi.ts](https://github.com/froggy1014/meta-cloud-api/blob/main/src/api/media/MediaApi.ts)

@@ -1,0 +1,586 @@
+---
+title: Flows API
+description: Create and manage WhatsApp Flows for interactive data collection
+---
+
+# Flows API
+
+Create, manage, and deploy WhatsApp Flows - interactive forms that enable rich data collection experiences within WhatsApp conversations.
+
+**Official Documentation**: [WhatsApp Flows API](https://developers.facebook.com/documentation/business-messaging/whatsapp/flows/)
+
+## Overview
+
+WhatsApp Flows allow you to build multi-screen interactive experiences for data collection:
+
+- **Create Flows**: Define interactive form structures
+- **Upload JSON**: Define flow screens and components
+- **Publish Flows**: Make flows available for use
+- **Manage Lifecycle**: Update, deprecate, and delete flows
+- **Migrate Flows**: Transfer flows between WABAs
+
+## Endpoints
+
+```
+GET /{WABA_ID}/flows
+POST /{WABA_ID}/flows
+GET /{FLOW_ID}?fields&date_format
+POST /{FLOW_ID}
+GET /{FLOW_ID}/assets
+POST /{FLOW_ID}/assets
+POST /{FLOW_ID}/publish
+POST /{FLOW_ID}/deprecate
+DELETE /{FLOW_ID}
+POST /{DESTINATION_WABA_ID}/migrate_flows
+```
+
+## Important Notes
+
+:::caution[WABA ID Required]
+Flow operations use the **WABA Business Account ID**, not the phone number ID. Ensure you configure this when initializing the client.
+:::
+
+:::tip[Flow Development Process]
+1. Create a draft flow
+2. Upload flow JSON defining screens and logic
+3. Configure webhook endpoint for data handling
+4. Test the flow in draft mode
+5. Publish when ready for production use
+:::
+
+:::caution[Webhook Required]
+Flows require a webhook endpoint to receive and process form submissions. Configure your endpoint URL when creating the flow.
+:::
+
+## Quick Start
+
+```typescript
+import WhatsApp, { FlowCategoryEnum } from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID!,
+});
+
+// Create a flow
+const flow = await client.flows.createFlow('WABA_ID', {
+    name: 'customer_survey',
+    categories: [FlowCategoryEnum.Survey],
+    endpoint_uri: 'https://example.com/flow-webhook',
+    publish: false,
+});
+
+// Upload flow JSON
+const flowJson = {
+    version: '5.0',
+    screens: [
+        {
+            id: 'QUESTION',
+            title: 'Customer Survey',
+            data: {},
+            layout: {
+                type: 'SingleColumnLayout',
+                children: [
+                    {
+                        type: 'TextInput',
+                        name: 'feedback',
+                        label: 'How was your experience?',
+                        required: true,
+                    },
+                ],
+            },
+        },
+    ],
+};
+
+const jsonFile = new File(
+    [JSON.stringify(flowJson)],
+    'flow.json',
+    { type: 'application/json' }
+);
+
+await client.flows.uploadFlowJson(flow.id, jsonFile);
+
+// Publish the flow
+await client.flows.publishFlow(flow.id);
+```
+
+## Create Flow
+
+Create a new flow in draft mode.
+
+### Basic Flow Creation
+
+```typescript
+import { FlowCategoryEnum } from 'meta-cloud-api/enums';
+
+const flow = await client.flows.createFlow('WABA_ID', {
+    name: 'appointment_booking',
+    categories: [FlowCategoryEnum.Appointment],
+    endpoint_uri: 'https://api.example.com/flows/appointment',
+    publish: false, // Keep as draft
+});
+```
+
+### Flow with Multiple Categories
+
+```typescript
+const flow = await client.flows.createFlow('WABA_ID', {
+    name: 'multi_purpose_form',
+    categories: [
+        FlowCategoryEnum.LeadGeneration,
+        FlowCategoryEnum.Survey,
+    ],
+    endpoint_uri: 'https://api.example.com/flows/handler',
+    publish: false,
+});
+```
+
+## List Flows
+
+Retrieve all flows for your WABA.
+
+```typescript
+const flows = await client.flows.listFlows('WABA_ID');
+
+console.log(flows.data);
+// [
+//     { id: '...', name: 'customer_survey', status: 'PUBLISHED' },
+//     { id: '...', name: 'order_form', status: 'DRAFT' }
+// ]
+```
+
+## Get Flow Details
+
+Retrieve detailed information about a specific flow.
+
+### Get Basic Info
+
+```typescript
+const flow = await client.flows.getFlow('FLOW_ID');
+
+console.log(flow);
+// {
+//     id: 'FLOW_ID',
+//     name: 'customer_survey',
+//     status: 'PUBLISHED',
+//     categories: ['SURVEY'],
+//     validation_errors: []
+// }
+```
+
+### Get Specific Fields
+
+```typescript
+const flow = await client.flows.getFlow('FLOW_ID', {
+    fields: ['name', 'status', 'validation_errors', 'json_version'],
+});
+```
+
+## Update Flow Metadata
+
+Update flow name, categories, or endpoint.
+
+```typescript
+await client.flows.updateFlowMetadata('FLOW_ID', {
+    name: 'updated_survey_form',
+    categories: [FlowCategoryEnum.Survey, FlowCategoryEnum.Other],
+    endpoint_uri: 'https://api.example.com/new-endpoint',
+});
+```
+
+## Upload Flow JSON
+
+Define flow screens and components using JSON.
+
+### Create Flow JSON File
+
+```typescript
+const flowDefinition = {
+    version: '5.0',
+    data_api_version: '3.0',
+    routing_model: {},
+    screens: [
+        {
+            id: 'CONTACT_FORM',
+            title: 'Contact Information',
+            data: {},
+            terminal: true,
+            layout: {
+                type: 'SingleColumnLayout',
+                children: [
+                    {
+                        type: 'TextInput',
+                        name: 'name',
+                        label: 'Full Name',
+                        'input-type': 'text',
+                        required: true,
+                    },
+                    {
+                        type: 'TextInput',
+                        name: 'email',
+                        label: 'Email Address',
+                        'input-type': 'email',
+                        required: true,
+                    },
+                    {
+                        type: 'TextArea',
+                        name: 'message',
+                        label: 'Your Message',
+                        required: true,
+                    },
+                    {
+                        type: 'Footer',
+                        label: 'Submit',
+                        'on-click-action': {
+                            name: 'complete',
+                            payload: {
+                                name: '${form.name}',
+                                email: '${form.email}',
+                                message: '${form.message}',
+                            },
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+};
+
+// Convert to File
+const jsonFile = new File(
+    [JSON.stringify(flowDefinition)],
+    'flow.json',
+    { type: 'application/json' }
+);
+
+// Upload
+await client.flows.uploadFlowJson('FLOW_ID', jsonFile);
+```
+
+### Multi-Screen Flow
+
+```typescript
+const multiScreenFlow = {
+    version: '5.0',
+    screens: [
+        {
+            id: 'WELCOME',
+            title: 'Welcome',
+            data: {},
+            layout: {
+                type: 'SingleColumnLayout',
+                children: [
+                    {
+                        type: 'TextHeading',
+                        text: 'Welcome to our survey!',
+                    },
+                    {
+                        type: 'Footer',
+                        label: 'Start',
+                        'on-click-action': {
+                            name: 'navigate',
+                            next: { type: 'screen', name: 'QUESTIONS' },
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            id: 'QUESTIONS',
+            title: 'Questions',
+            data: {},
+            terminal: true,
+            layout: {
+                type: 'SingleColumnLayout',
+                children: [
+                    {
+                        type: 'RadioButtonsGroup',
+                        name: 'rating',
+                        label: 'How would you rate us?',
+                        'data-source': [
+                            { id: '5', title: 'Excellent' },
+                            { id: '4', title: 'Good' },
+                            { id: '3', title: 'Average' },
+                            { id: '2', title: 'Poor' },
+                        ],
+                        required: true,
+                    },
+                    {
+                        type: 'Footer',
+                        label: 'Submit',
+                        'on-click-action': {
+                            name: 'complete',
+                            payload: { rating: '${form.rating}' },
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+};
+
+const file = new File(
+    [JSON.stringify(multiScreenFlow)],
+    'flow.json',
+    { type: 'application/json' }
+);
+
+await client.flows.uploadFlowJson('FLOW_ID', file);
+```
+
+## Get Flow Assets
+
+Retrieve uploaded flow JSON.
+
+```typescript
+const assets = await client.flows.getFlowAssets('FLOW_ID');
+
+console.log(assets);
+// {
+//     data: [
+//         {
+//             name: 'flow.json',
+//             asset_type: 'FLOW_JSON',
+//             download_url: 'https://...'
+//         }
+//     ]
+// }
+```
+
+## Publish Flow
+
+Make a draft flow available for use in messages.
+
+```typescript
+await client.flows.publishFlow('FLOW_ID');
+
+// Verify publication
+const flow = await client.flows.getFlow('FLOW_ID');
+console.log(flow.status); // 'PUBLISHED'
+```
+
+:::caution[Publishing Requirements]
+Before publishing, ensure:
+- Valid flow JSON is uploaded
+- Webhook endpoint is configured and accessible
+- All validation errors are resolved
+:::
+
+## Deprecate Flow
+
+Mark a published flow as deprecated (still usable but not recommended).
+
+```typescript
+await client.flows.deprecateFlow('FLOW_ID');
+```
+
+## Delete Flow
+
+Permanently delete a flow.
+
+```typescript
+await client.flows.deleteFlow('FLOW_ID');
+```
+
+:::caution[Deletion Restrictions]
+You can only delete flows in DRAFT or DEPRECATED status. Published flows must be deprecated first.
+:::
+
+## Migrate Flows
+
+Copy flows from one WABA to another.
+
+```typescript
+await client.flows.migrateFlows('DESTINATION_WABA_ID', {
+    flow_ids: ['FLOW_ID_1', 'FLOW_ID_2'],
+});
+```
+
+## Send Flow Messages
+
+Use flows in interactive messages.
+
+```typescript
+await client.messages.interactive({
+    to: '15551234567',
+    type: 'flow',
+    body: {
+        text: 'Please fill out our survey',
+    },
+    action: {
+        name: 'flow',
+        parameters: {
+            flow_message_version: '3',
+            flow_token: 'UNIQUE_FLOW_TOKEN',
+            flow_id: 'FLOW_ID',
+            flow_cta: 'Start Survey',
+            flow_action: 'navigate',
+            flow_action_payload: {
+                screen: 'WELCOME',
+            },
+        },
+    },
+});
+```
+
+## Handle Flow Webhooks
+
+Process flow data submissions on your webhook endpoint.
+
+```typescript
+// Express.js example
+app.post('/flow-webhook', async (req, res) => {
+    const { flow_token, action, data } = req.body;
+
+    if (action === 'ping') {
+        // Health check
+        return res.json({ version: '3.0' });
+    }
+
+    if (action === 'INIT') {
+        // Initialize flow with data
+        return res.json({
+            version: '3.0',
+            data: {
+                // Initial data for the flow
+            },
+        });
+    }
+
+    if (action === 'data_exchange') {
+        // Process form submission
+        const formData = data;
+
+        // Save to database
+        await saveFormData(formData);
+
+        return res.json({
+            version: '3.0',
+            data: {
+                // Updated data
+            },
+        });
+    }
+
+    res.status(400).json({ error: 'Unknown action' });
+});
+```
+
+## Response Formats
+
+### Create Flow Response
+
+```typescript
+{
+    id: 'FLOW_ID',
+    name: 'customer_survey',
+    status: 'DRAFT',
+    categories: ['SURVEY'],
+    validation_errors: []
+}
+```
+
+### List Flows Response
+
+```typescript
+{
+    data: [
+        {
+            id: 'FLOW_ID_1',
+            name: 'survey',
+            status: 'PUBLISHED'
+        },
+        {
+            id: 'FLOW_ID_2',
+            name: 'booking',
+            status: 'DRAFT'
+        }
+    ]
+}
+```
+
+## Error Handling
+
+```typescript
+try {
+    await client.flows.publishFlow('FLOW_ID');
+} catch (error) {
+    if (error.response) {
+        const { code, message } = error.response.data.error;
+
+        switch (code) {
+            case 100:
+                console.error('Flow has validation errors');
+                break;
+            case 2388153:
+                console.error('Webhook endpoint unreachable');
+                break;
+            default:
+                console.error(`Error ${code}: ${message}`);
+        }
+    }
+}
+```
+
+## Best Practices
+
+1. **Test in Draft Mode**: Thoroughly test flows before publishing
+   ```typescript
+   // Keep publish: false during development
+   const flow = await client.flows.createFlow('WABA_ID', {
+       name: 'test_flow',
+       publish: false,
+   });
+   ```
+
+2. **Use Unique Flow Tokens**: Generate unique tokens for tracking
+   ```typescript
+   import { v4 as uuidv4 } from 'uuid';
+
+   const flowToken = uuidv4(); // Unique per conversation
+   ```
+
+3. **Validate JSON Before Upload**: Check flow JSON structure
+   ```typescript
+   const flowJson = JSON.parse(flowString);
+   if (!flowJson.version || !flowJson.screens) {
+       throw new Error('Invalid flow JSON structure');
+   }
+   ```
+
+4. **Handle Webhook Errors**: Implement proper error handling
+   ```typescript
+   app.post('/flow-webhook', async (req, res) => {
+       try {
+           const result = await processFlowData(req.body);
+           res.json(result);
+       } catch (error) {
+           console.error('Flow webhook error:', error);
+           res.status(500).json({ error: 'Processing failed' });
+       }
+   });
+   ```
+
+## Flow Categories
+
+- `SIGN_UP`: User registration
+- `SIGN_IN`: User authentication
+- `APPOINTMENT`: Booking appointments
+- `LEAD_GENERATION`: Collecting leads
+- `CONTACT_US`: Contact forms
+- `CUSTOMER_SUPPORT`: Support requests
+- `SURVEY`: Feedback collection
+- `OTHER`: General purpose
+
+## Related Documentation
+
+- [Messages API](/api/messages) - Send flow messages
+- [Interactive Messages](/guides/interactive-messages) - Build interactive experiences
+- [Webhooks](/webhooks/overview) - Handle flow submissions
+- [Flow Builder](https://developers.facebook.com/docs/whatsapp/flows) - Official Flow documentation
+
+## Source Code
+
+View the source code on GitHub: [FlowApi.ts](https://github.com/froggy1014/meta-cloud-api/blob/main/src/api/flow/FlowApi.ts)
