@@ -7,6 +7,7 @@ export default defineConfig({
         globals: true,
         environment: 'node',
         clearMocks: true,
+        exclude: ['**/node_modules/**', '**/dist/**', '**/examples/**', '**/website/**'],
         env: {
             ...config({ path: '.env.test' }).parsed,
         },
