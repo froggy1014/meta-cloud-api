@@ -1,0 +1,919 @@
+---
+title: Message Types Reference
+description: Complete TypeScript type definitions for sending and receiving WhatsApp messages
+---
+
+# Message Types Reference
+
+Complete reference for all message-related TypeScript types in the SDK. These types provide type-safe message construction and handling.
+
+## Import Instructions
+
+```typescript
+// Import from main package for sending
+import type {
+    TextMessageParams,
+    ImageMediaObject,
+    InteractiveObject
+} from 'meta-cloud-api/types';
+
+// Import specific types from messages module
+import type {
+    MessageRequestParams,
+    MessagesResponse,
+    TextObject,
+    DocumentMediaObject
+} from 'meta-cloud-api/types';
+```
+
+## Common Message Types
+
+### MessageRequestParams
+
+Generic request parameters for all message types.
+
+```typescript
+interface MessageRequestParams<T> {
+    body: T;
+    to: string;
+    replyMessageId?: string;
+}
+```
+
+**Usage:**
+
+```typescript
+const params: MessageRequestParams<TextObject> = {
+    to: '15551234567',
+    body: {
+        body: 'Hello, World!',
+        preview_url: true
+    },
+    replyMessageId: 'wamid.ABC123...' // Optional reply
+};
+```
+
+### MessagesResponse
+
+Standard response from all message API calls.
+
+```typescript
+interface MessagesResponse {
+    messaging_product: 'whatsapp';
+    contacts: [{
+        input: string;
+        wa_id: string;
+    }];
+    messages: [{
+        id: string;
+    }];
+}
+```
+
+**Usage:**
+
+```typescript
+const response: MessagesResponse = await client.messages.text({
+    to: '15551234567',
+    body: 'Hello!'
+});
+
+const messageId = response.messages[0].id;
+const recipientWaId = response.contacts[0].wa_id;
+```
+
+### MessageRequestBody
+
+Base request body structure (internal type).
+
+```typescript
+type MessageRequestBody<T extends MessageTypesEnum> = {
+    messaging_product: 'whatsapp';
+    recipient_type?: string;
+    to: string;
+    context?: {
+        message_id: string;
+    };
+    type?: T;
+};
+```
+
+## Text Messages
+
+### TextMessageParams
+
+Parameters for sending text messages.
+
+```typescript
+interface TextMessageParams {
+    body: TextObject | string;
+    to: string;
+    previewUrl?: boolean;
+    replyMessageId?: string;
+}
+```
+
+### TextObject
+
+Text message content structure.
+
+```typescript
+type TextObject = {
+    body: string;
+    preview_url?: boolean;
+};
+```
+
+**Usage Example:**
+
+```typescript
+// Simple string
+await client.messages.text({
+    to: '15551234567',
+    body: 'Hello, World!'
+});
+
+// With preview URL
+await client.messages.text({
+    to: '15551234567',
+    body: {
+        body: 'Check this out: https://example.com',
+        preview_url: true
+    }
+});
+
+// As a reply
+await client.messages.text({
+    to: '15551234567',
+    body: 'Thanks for your message!',
+    replyMessageId: 'wamid.ABC123...'
+});
+```
+
+## Media Messages
+
+All media messages support either Meta-hosted media (by ID) or externally hosted media (by URL).
+
+### ImageMediaObject
+
+Image message structure.
+
+```typescript
+type ImageMediaObject =
+    | {
+        id: string;
+        link?: never;
+        caption?: string;
+    }
+    | {
+        id?: never;
+        link: string;
+        caption?: string;
+    };
+```
+
+**Usage:**
+
+```typescript
+// Using Meta media ID
+await client.messages.image({
+    to: '15551234567',
+    body: {
+        id: 'MEDIA_ID_FROM_UPLOAD',
+        caption: 'Product image'
+    }
+});
+
+// Using external URL
+await client.messages.image({
+    to: '15551234567',
+    body: {
+        link: 'https://example.com/image.jpg',
+        caption: 'Check this out!'
+    }
+});
+```
+
+### VideoMediaObject
+
+Video message structure.
+
+```typescript
+type VideoMediaObject =
+    | {
+        id: string;
+        link?: never;
+        caption?: string;
+    }
+    | {
+        id?: never;
+        link: string;
+        caption?: string;
+    };
+```
+
+### AudioMediaObject
+
+Audio message structure (no caption support).
+
+```typescript
+type AudioMediaObject =
+    | { id: string; link?: never; }
+    | { id?: never; link: string; };
+```
+
+### DocumentMediaObject
+
+Document message structure with filename.
+
+```typescript
+type DocumentMediaObject =
+    | {
+        id: string;
+        link?: never;
+        caption?: string;
+        filename?: string;
+    }
+    | {
+        id?: never;
+        link: string;
+        caption?: string;
+        filename?: string;
+    };
+```
+
+**Usage:**
+
+```typescript
+await client.messages.document({
+    to: '15551234567',
+    body: {
+        link: 'https://example.com/invoice.pdf',
+        filename: 'Invoice_2024.pdf',
+        caption: 'Your invoice for January'
+    }
+});
+```
+
+### StickerMediaObject
+
+Sticker message structure.
+
+```typescript
+type StickerMediaObject =
+    | { id: string; link?: never; }
+    | { id?: never; link: string; };
+```
+
+## Interactive Messages
+
+### InteractiveObject
+
+Discriminated union of all interactive message types.
+
+```typescript
+type InteractiveObject =
+    | ButtonInteractiveObject
+    | ListInteractiveObject
+    | ProductInteractiveObject
+    | ProductListInteractiveObject
+    | CtaUrlInteractiveObject
+    | CarouselInteractiveObject
+    | LocationRequestInteractiveObject
+    | AddressMessageInteractiveObject
+    | FlowInteractiveObject;
+```
+
+### ButtonInteractiveObject
+
+Reply buttons (up to 3).
+
+```typescript
+type ButtonInteractiveObject = {
+    type: InteractiveTypesEnum.Button;
+    body: { text: string; };
+    footer?: { text: string; };
+    header?: HeaderObject;
+    action: {
+        buttons: Array<{
+            type: 'reply';
+            reply: {
+                id: string;
+                title: string;
+            };
+        }>;
+    };
+};
+```
+
+**Usage:**
+
+```typescript
+import { InteractiveTypesEnum } from 'meta-cloud-api/enums';
+
+await client.messages.interactive({
+    to: '15551234567',
+    body: {
+        type: InteractiveTypesEnum.Button,
+        body: { text: 'Choose an option:' },
+        action: {
+            buttons: [
+                { type: 'reply', reply: { id: 'yes', title: 'Yes' } },
+                { type: 'reply', reply: { id: 'no', title: 'No' } },
+                { type: 'reply', reply: { id: 'maybe', title: 'Maybe' } }
+            ]
+        }
+    }
+});
+```
+
+### ListInteractiveObject
+
+List message (up to 10 items per section).
+
+```typescript
+type ListInteractiveObject = {
+    type: InteractiveTypesEnum.List;
+    body: { text: string; };
+    footer?: { text: string; };
+    header?: HeaderObject;
+    action: {
+        button: string; // Button text
+        sections: Array<{
+            title?: string;
+            rows: Array<{
+                id: string;
+                title: string;
+                description?: string;
+            }>;
+        }>;
+    };
+};
+```
+
+**Usage:**
+
+```typescript
+import { InteractiveTypesEnum } from 'meta-cloud-api/enums';
+
+await client.messages.interactive({
+    to: '15551234567',
+    body: {
+        type: InteractiveTypesEnum.List,
+        body: { text: 'Select a product:' },
+        action: {
+            button: 'View Products',
+            sections: [
+                {
+                    title: 'Electronics',
+                    rows: [
+                        {
+                            id: 'phone_1',
+                            title: 'iPhone 15 Pro',
+                            description: '$999 - Latest model'
+                        },
+                        {
+                            id: 'laptop_1',
+                            title: 'MacBook Pro',
+                            description: '$1,999 - M3 chip'
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+});
+```
+
+### CtaUrlInteractiveObject
+
+Call-to-action URL button.
+
+```typescript
+type CtaUrlInteractiveObject = {
+    type: InteractiveTypesEnum.CtaUrl;
+    body?: { text: string; };
+    footer?: { text: string; };
+    header?: HeaderObject;
+    action: {
+        name: 'cta_url';
+        parameters: {
+            display_text: string;
+            url: string;
+        };
+    };
+};
+```
+
+**Usage:**
+
+```typescript
+import { InteractiveTypesEnum } from 'meta-cloud-api/enums';
+
+await client.messages.interactive({
+    to: '15551234567',
+    body: {
+        type: InteractiveTypesEnum.CtaUrl,
+        body: { text: 'Visit our website for more info' },
+        action: {
+            name: 'cta_url',
+            parameters: {
+                display_text: 'Visit Website',
+                url: 'https://example.com'
+            }
+        }
+    }
+});
+```
+
+### FlowInteractiveObject
+
+WhatsApp Flow integration.
+
+```typescript
+type FlowInteractiveObject = {
+    type: InteractiveTypesEnum.Flow;
+    body: { text: string; };
+    footer?: { text: string; };
+    header?: HeaderObject;
+    action: {
+        name: 'flow';
+        parameters: {
+            flow_message_version: string;
+            flow_id?: string;
+            flow_name?: string;
+            flow_cta: string;
+            mode?: 'draft' | 'published';
+            flow_token: string;
+            flow_action: 'navigate' | 'data_exchange';
+            flow_action_payload?: {
+                screen?: string;
+                data?: Record<string, string>;
+            };
+        };
+    };
+};
+```
+
+**Usage:**
+
+```typescript
+import { InteractiveTypesEnum } from 'meta-cloud-api/enums';
+
+await client.messages.interactive({
+    to: '15551234567',
+    body: {
+        type: InteractiveTypesEnum.Flow,
+        body: { text: 'Complete your registration' },
+        action: {
+            name: 'flow',
+            parameters: {
+                flow_message_version: '3',
+                flow_id: 'FLOW_ID',
+                flow_cta: 'Start Registration',
+                flow_token: 'FLOW_TOKEN',
+                flow_action: 'navigate',
+                mode: 'published'
+            }
+        }
+    }
+});
+```
+
+### LocationRequestInteractiveObject
+
+Request user's location.
+
+```typescript
+type LocationRequestInteractiveObject = {
+    type: InteractiveTypesEnum.LocationRequest;
+    body: { text: string; };
+    footer?: { text: string; };
+    action: {
+        name: 'send_location';
+    };
+};
+```
+
+### CarouselInteractiveObject
+
+Carousel with multiple cards.
+
+```typescript
+type CarouselInteractiveObject = {
+    type: InteractiveTypesEnum.Carousel;
+    body: { text: string; };
+    action: {
+        cards: Array<MediaCarouselCard | ProductCarouselCard>;
+    };
+};
+
+type MediaCarouselCard = {
+    card_index: number;
+    type: 'cta_url';
+    header: {
+        type: 'image' | 'video';
+        image?: { id?: string; link?: string; };
+        video?: { id?: string; link?: string; };
+    };
+    body?: { text: string; };
+    action: {
+        name: 'cta_url';
+        parameters: {
+            display_text: string;
+            url: string;
+        };
+    };
+};
+```
+
+### HeaderObject
+
+Header for interactive messages.
+
+```typescript
+type HeaderObject = {
+    type: 'document' | 'image' | 'text' | 'video';
+    document?: DocumentMediaObject;
+    image?: ImageMediaObject;
+    text?: string;
+    video?: VideoMediaObject;
+};
+```
+
+**Usage:**
+
+```typescript
+// Text header
+{
+    type: 'text',
+    text: 'Welcome Message'
+}
+
+// Image header
+{
+    type: 'image',
+    image: {
+        link: 'https://example.com/header.jpg'
+    }
+}
+
+// Document header
+{
+    type: 'document',
+    document: {
+        link: 'https://example.com/menu.pdf',
+        filename: 'menu.pdf'
+    }
+}
+```
+
+## Template Messages
+
+### MessageTemplateObject
+
+Template message structure with components.
+
+```typescript
+type MessageTemplateObject<T extends ComponentTypesEnum> = {
+    name: string;
+    language: {
+        policy: 'deterministic';
+        code: LanguagesEnum;
+    };
+    components?: Array<ComponentObject<T> | ButtonComponentObject>;
+};
+```
+
+### ComponentObject
+
+Template component with parameters.
+
+```typescript
+type ComponentObject<T extends ComponentTypesEnum> = {
+    type: T;
+    parameters: Array<
+        | TextParametersObject
+        | CurrencyParametersObject
+        | DateTimeParametersObject
+        | ImageParametersObject
+        | VideoParametersObject
+        | DocumentParametersObject
+        | CouponCodeParametersObject
+    >;
+};
+```
+
+### Parameter Types
+
+```typescript
+// Text parameter
+type TextParametersObject = {
+    type: ParametersTypesEnum.Text;
+    text: string;
+};
+
+// Currency parameter
+type CurrencyParametersObject = {
+    type: ParametersTypesEnum.Currency;
+    currency: {
+        fallback_value: string;
+        code: CurrencyCodesEnum;
+        amount_1000: number;
+    };
+};
+
+// DateTime parameter
+type DateTimeParametersObject = {
+    type: ParametersTypesEnum.DateTime;
+    date_time: {
+        fallback_value: string;
+    };
+};
+
+// Coupon code parameter
+type CouponCodeParametersObject = {
+    type: ParametersTypesEnum.CouponCode;
+    coupon_code: string;
+};
+
+// Image parameter
+type ImageParametersObject = {
+    type: ParametersTypesEnum.Image;
+    id?: string;
+    link?: string;
+};
+```
+
+**Complete Template Example:**
+
+```typescript
+import {
+    ComponentTypesEnum,
+    ParametersTypesEnum,
+    LanguagesEnum,
+    CurrencyCodesEnum
+} from 'meta-cloud-api/enums';
+
+await client.messages.template({
+    to: '15551234567',
+    body: {
+        name: 'order_confirmation',
+        language: {
+            code: LanguagesEnum.English_US,
+            policy: 'deterministic'
+        },
+        components: [
+            {
+                type: ComponentTypesEnum.Header,
+                parameters: [
+                    {
+                        type: ParametersTypesEnum.Image,
+                        link: 'https://example.com/product.jpg'
+                    }
+                ]
+            },
+            {
+                type: ComponentTypesEnum.Body,
+                parameters: [
+                    { type: ParametersTypesEnum.Text, text: 'John' },
+                    { type: ParametersTypesEnum.Text, text: 'Order #12345' },
+                    {
+                        type: ParametersTypesEnum.Currency,
+                        currency: {
+                            fallback_value: '$99.99',
+                            code: CurrencyCodesEnum.USD,
+                            amount_1000: 99990
+                        }
+                    },
+                    {
+                        type: ParametersTypesEnum.DateTime,
+                        date_time: {
+                            fallback_value: 'Dec 25, 2024'
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+});
+```
+
+## Location & Contact Messages
+
+### LocationObject
+
+Location message structure.
+
+```typescript
+type LocationObject = {
+    latitude: number;
+    longitude: number;
+    name?: string;
+    address?: string;
+};
+```
+
+**Usage:**
+
+```typescript
+await client.messages.location({
+    to: '15551234567',
+    body: {
+        latitude: 37.7749,
+        longitude: -122.4194,
+        name: 'San Francisco',
+        address: 'San Francisco, CA'
+    }
+});
+```
+
+### ContactObject
+
+vCard contact structure.
+
+```typescript
+type ContactObject = {
+    addresses?: Array<{
+        city?: string;
+        country?: string;
+        country_code?: string;
+        state?: string;
+        street?: string;
+        type?: string;
+        zip?: string;
+    }>;
+    birthday?: string;
+    emails?: Array<{
+        email: string;
+        type?: string;
+    }>;
+    name: {
+        formatted_name: string;
+        first_name?: string;
+        last_name?: string;
+        middle_name?: string;
+        suffix?: string;
+        prefix?: string;
+    };
+    org?: {
+        company?: string;
+        department?: string;
+        title?: string;
+    };
+    phones?: Array<{
+        phone: string;
+        wa_id?: string;
+        type?: string;
+    }>;
+    urls?: Array<{
+        url: string;
+        type?: string;
+    }>;
+};
+```
+
+**Usage:**
+
+```typescript
+await client.messages.contacts({
+    to: '15551234567',
+    body: [
+        {
+            name: {
+                formatted_name: 'Jane Smith',
+                first_name: 'Jane',
+                last_name: 'Smith'
+            },
+            phones: [
+                { phone: '+15551234567', type: 'MOBILE' }
+            ],
+            emails: [
+                { email: 'jane@example.com', type: 'WORK' }
+            ],
+            org: {
+                company: 'Acme Corp',
+                title: 'Sales Manager'
+            }
+        }
+    ]
+});
+```
+
+## Reaction Messages
+
+### ReactionParams
+
+Reaction message parameters.
+
+```typescript
+interface ReactionParams {
+    to: string;
+    message_id: string;
+    emoji: string; // Empty string to remove reaction
+}
+```
+
+**Usage:**
+
+```typescript
+// Add reaction
+await client.messages.reaction({
+    to: '15551234567',
+    message_id: 'wamid.ABC123...',
+    emoji: '👍'
+});
+
+// Remove reaction
+await client.messages.reaction({
+    to: '15551234567',
+    message_id: 'wamid.ABC123...',
+    emoji: ''
+});
+```
+
+## Status Messages
+
+### StatusParams
+
+Message read status and typing indicator.
+
+```typescript
+interface StatusParams {
+    status: string;
+    messageId: string;
+    typingIndicator?: {
+        type: string;
+    };
+}
+```
+
+**Usage:**
+
+```typescript
+// Mark as read
+await client.messages.markAsRead({
+    messageId: 'wamid.ABC123...'
+});
+
+// Show typing indicator
+await client.messages.showTypingIndicator({
+    messageId: 'wamid.ABC123...'
+});
+```
+
+## Type Guards & Narrowing
+
+TypeScript's discriminated unions work excellently with these types:
+
+```typescript
+import { InteractiveTypesEnum } from 'meta-cloud-api/enums';
+
+function buildInteractive(type: string): InteractiveObject {
+    if (type === 'button') {
+        // Type is narrowed to ButtonInteractiveObject
+        return {
+            type: InteractiveTypesEnum.Button,
+            body: { text: 'Choose:' },
+            action: {
+                buttons: [
+                    { type: 'reply', reply: { id: '1', title: 'Option 1' } }
+                ]
+            }
+        };
+    } else if (type === 'list') {
+        // Type is narrowed to ListInteractiveObject
+        return {
+            type: InteractiveTypesEnum.List,
+            body: { text: 'Select:' },
+            action: {
+                button: 'View List',
+                sections: [
+                    {
+                        rows: [
+                            { id: '1', title: 'Item 1' }
+                        ]
+                    }
+                ]
+            }
+        };
+    }
+    // ... other types
+}
+```
+
+## Related Documentation
+
+- [Enums Reference](/types/enums) - All SDK enums
+- [Webhook Types Reference](/types/webhook-types) - Received message types
+- [Messages API](/api/messages) - Using these types in practice
+- [Interactive Messages Guide](/guides/interactive-messages) - Building interactive experiences
+
+## Source Code
+
+View the source code on GitHub:
+- [messages/types/](https://github.com/froggy1014/meta-cloud-api/tree/main/src/api/messages/types)
+- [common.ts](https://github.com/froggy1014/meta-cloud-api/blob/main/src/api/messages/types/common.ts)
+- [text.ts](https://github.com/froggy1014/meta-cloud-api/blob/main/src/api/messages/types/text.ts)
+- [interactive.ts](https://github.com/froggy1014/meta-cloud-api/blob/main/src/api/messages/types/interactive.ts)
+- [template.ts](https://github.com/froggy1014/meta-cloud-api/blob/main/src/api/messages/types/template.ts)
