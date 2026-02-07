@@ -46,10 +46,27 @@ const mockWebhookProcessor = {
 
 vi.mock('meta-cloud-api', () => ({
     WhatsApp: vi.fn().mockImplementation(() => mockWhatsAppClient),
-    expressWebhookHandler: vi.fn().mockImplementation(() => ({
+    expressWebhookHandler: vi.fn().mockImplementation((config) => ({
         client: mockWhatsAppClient,
         processor: mockWebhookProcessor,
-        GET: vi.fn((req, res) => res.status(200).send('OK')),
+        GET: vi.fn((req, res) => {
+            const mode = req.query['hub.mode'];
+            const token = req.query['hub.verify_token'];
+            const challenge = req.query['hub.challenge'];
+
+            // Validate required parameters
+            if (!mode || !token || !challenge) {
+                return res.status(400).send('Missing required parameters');
+            }
+
+            // Verify token
+            if (mode === 'subscribe' && token === config.webhookVerificationToken) {
+                return res.status(200).send(challenge);
+            }
+
+            // Invalid token
+            return res.status(403).send('Forbidden');
+        }),
         POST: vi.fn((req, res) => res.status(200).json({ success: true })),
     })),
 }));
