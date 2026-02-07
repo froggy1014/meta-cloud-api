@@ -1,0 +1,638 @@
+---
+title: Express.js Integration
+description: Using webhooks with Express.js
+sidebar:
+    order: 3
+---
+
+import { Aside, Code, Tabs, TabItem } from '@astrojs/starlight/components';
+
+The SDK provides a built-in Express.js webhook adapter that handles both webhook verification and message processing. This guide shows you how to build a complete WhatsApp bot with Express.
+
+## Quick Start
+
+### Installation
+
+```bash
+npm install meta-cloud-api express
+# or
+pnpm add meta-cloud-api express
+```
+
+### Basic Setup
+
+```typescript
+// server.ts
+import express from 'express';
+import { webhookHandler } from 'meta-cloud-api/webhook/express';
+
+const app = express();
+
+// Create webhook handler
+const whatsapp = webhookHandler({
+    accessToken: process.env.WHATSAPP_ACCESS_TOKEN!,
+    phoneNumberId: parseInt(process.env.WHATSAPP_PHONE_NUMBER_ID!),
+    businessAcctId: process.env.WHATSAPP_BUSINESS_ACCOUNT_ID,
+    webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN!,
+});
+
+// Register a text message handler
+whatsapp.processor.onText(async (client, message) => {
+    console.log('Received:', message.text.body);
+
+    await client.messages.text({
+        to: message.from,
+        body: `Echo: ${message.text.body}`,
+    });
+});
+
+// Set up routes
+app.get('/webhook', whatsapp.GET);
+app.post('/webhook', express.json(), whatsapp.POST);
+
+// Start server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
+```
+
+<Aside type="tip">
+The `webhookHandler` returns an object with `GET`, `POST`, `webhook`, and `processor` properties for flexible routing.
+</Aside>
+
+## Handler Registration Patterns
+
+The Express adapter provides multiple routing patterns:
+
+### Pattern 1: Separate GET/POST (Recommended)
+
+```typescript
+const { GET, POST, processor } = whatsapp;
+
+// Clean destructuring
+app.get('/webhook', GET);
+app.post('/webhook', express.json(), POST);
+
+// Register handlers on processor
+processor.onText(async (client, message) => {
+    // Handle text messages
+});
+```
+
+### Pattern 2: Auto-routing
+
+```typescript
+const { webhook, processor } = whatsapp;
+
+// Single handler for both GET and POST
+app.use('/webhook', express.json());
+app.all('/webhook', webhook);
+
+processor.onText(async (client, message) => {
+    // Handle text messages
+});
+```
+
+### Pattern 3: Direct Method Access
+
+```typescript
+// Access handlers directly
+app.get('/webhook', whatsapp.GET);
+app.post('/webhook', express.json(), whatsapp.POST);
+
+whatsapp.processor.onText(async (client, message) => {
+    // Handle text messages
+});
+```
+
+## Message Handlers
+
+The SDK provides type-safe handlers for all message types:
+
+### Text Messages
+
+```typescript
+processor.onText(async (whatsapp, message) => {
+    console.log(`From: ${message.from}`);
+    console.log(`Text: ${message.text.body}`);
+
+    await whatsapp.messages.text({
+        to: message.from,
+        body: `You said: ${message.text.body}`,
+    });
+});
+```
+
+### Media Messages
+
+<Tabs>
+<TabItem label="Images">
+
+```typescript
+processor.onImage(async (whatsapp, message) => {
+    const { id, mime_type, caption } = message.image;
+
+    console.log(`Received image: ${id} (${mime_type})`);
+    if (caption) {
+        console.log(`Caption: ${caption}`);
+    }
+
+    // Download the image
+    const mediaUrl = await whatsapp.media.retrieveMediaUrl({ mediaId: id });
+
+    await whatsapp.messages.text({
+        to: message.from,
+        body: `Thanks for the image! URL: ${mediaUrl.url}`,
+    });
+});
+```
+
+</TabItem>
+<TabItem label="Videos">
+
+```typescript
+processor.onVideo(async (whatsapp, message) => {
+    const { id, mime_type } = message.video;
+
+    await whatsapp.messages.text({
+        to: message.from,
+        body: `Received your video (${mime_type})`,
+    });
+});
+```
+
+</TabItem>
+<TabItem label="Audio">
+
+```typescript
+processor.onAudio(async (whatsapp, message) => {
+    const { id, voice } = message.audio;
+
+    const messageType = voice ? 'voice message' : 'audio file';
+
+    await whatsapp.messages.text({
+        to: message.from,
+        body: `Received your ${messageType}`,
+    });
+});
+```
+
+</TabItem>
+<TabItem label="Documents">
+
+```typescript
+processor.onDocument(async (whatsapp, message) => {
+    const { id, filename, mime_type } = message.document;
+
+    console.log(`Received document: ${filename}`);
+
+    await whatsapp.messages.text({
+        to: message.from,
+        body: `Thanks for ${filename}`,
+    });
+});
+```
+
+</TabItem>
+</Tabs>
+
+### Interactive Messages
+
+```typescript
+// Handle button responses
+processor.onInteractive(async (whatsapp, message) => {
+    const { interactive } = message;
+
+    if (interactive.type === 'button_reply') {
+        const buttonId = interactive.button_reply.id;
+        console.log(`Button clicked: ${buttonId}`);
+
+        await whatsapp.messages.text({
+            to: message.from,
+            body: `You clicked: ${interactive.button_reply.title}`,
+        });
+    }
+
+    if (interactive.type === 'list_reply') {
+        const listId = interactive.list_reply.id;
+        console.log(`List item selected: ${listId}`);
+
+        await whatsapp.messages.text({
+            to: message.from,
+            body: `You selected: ${interactive.list_reply.title}`,
+        });
+    }
+
+    if (interactive.type === 'nfm_reply') {
+        // Flow response
+        const flowData = JSON.parse(interactive.nfm_reply.response_json);
+        console.log('Flow response:', flowData);
+    }
+});
+```
+
+### Location Messages
+
+```typescript
+processor.onLocation(async (whatsapp, message) => {
+    const { latitude, longitude, name, address } = message.location;
+
+    console.log(`Location: ${latitude}, ${longitude}`);
+    if (name) console.log(`Name: ${name}`);
+
+    await whatsapp.messages.text({
+        to: message.from,
+        body: `Received location: ${name || 'Unknown'}`,
+    });
+});
+```
+
+### Contact Messages
+
+```typescript
+processor.onContacts(async (whatsapp, message) => {
+    const contacts = message.contacts;
+
+    for (const contact of contacts) {
+        console.log(`Contact: ${contact.name.formatted_name}`);
+
+        if (contact.phones) {
+            contact.phones.forEach(phone => {
+                console.log(`Phone: ${phone.phone}`);
+            });
+        }
+    }
+
+    await whatsapp.messages.text({
+        to: message.from,
+        body: `Received ${contacts.length} contact(s)`,
+    });
+});
+```
+
+### Reaction Messages
+
+```typescript
+processor.onReaction(async (whatsapp, message) => {
+    const { message_id, emoji } = message.reaction;
+
+    if (emoji) {
+        console.log(`Reacted with ${emoji} to message ${message_id}`);
+    } else {
+        console.log(`Removed reaction from message ${message_id}`);
+    }
+});
+```
+
+## Status Updates
+
+Track message delivery status:
+
+```typescript
+processor.onStatus(async (whatsapp, status) => {
+    console.log(`Message ${status.id}: ${status.status}`);
+
+    switch (status.status) {
+        case 'sent':
+            console.log('Message sent to WhatsApp');
+            break;
+        case 'delivered':
+            console.log('Message delivered to recipient');
+            break;
+        case 'read':
+            console.log('Message read by recipient');
+            break;
+        case 'failed':
+            console.log('Message failed:', status.errors);
+            break;
+    }
+});
+```
+
+## Webhook Field Handlers
+
+Handle non-message webhook events:
+
+### Account Updates
+
+```typescript
+processor.onAccountUpdate(async (whatsapp, update) => {
+    console.log('Account updated:', update);
+
+    // Handle account changes
+    if (update.account) {
+        console.log('Account ID:', update.account.id);
+    }
+});
+```
+
+### Template Updates
+
+```typescript
+processor.onMessageTemplateStatusUpdate(async (whatsapp, update) => {
+    console.log('Template status:', update);
+
+    const { event, message_template_id, message_template_name, reason } = update;
+
+    if (event === 'APPROVED') {
+        console.log(`Template ${message_template_name} was approved!`);
+    } else if (event === 'REJECTED') {
+        console.log(`Template ${message_template_name} was rejected: ${reason}`);
+    }
+});
+```
+
+### Phone Number Quality
+
+```typescript
+processor.onPhoneNumberQualityUpdate(async (whatsapp, update) => {
+    console.log('Quality rating:', update);
+
+    const { current_limit, event } = update;
+
+    if (event === 'FLAGGED') {
+        console.warn('Phone number flagged! Current limit:', current_limit);
+    }
+});
+```
+
+## Complete Example
+
+Here's a full-featured Express webhook server:
+
+```typescript
+// server.ts
+import 'dotenv/config';
+import express from 'express';
+import { webhookHandler } from 'meta-cloud-api/webhook/express';
+import { MessageTypesEnum } from 'meta-cloud-api/enums';
+
+const app = express();
+
+// Configuration
+const whatsapp = webhookHandler({
+    accessToken: process.env.WHATSAPP_ACCESS_TOKEN!,
+    phoneNumberId: parseInt(process.env.WHATSAPP_PHONE_NUMBER_ID!),
+    businessAcctId: process.env.WHATSAPP_BUSINESS_ACCOUNT_ID,
+    webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN!,
+});
+
+// Text message handler
+whatsapp.processor.onText(async (client, message) => {
+    const text = message.text.body.toLowerCase();
+
+    // Mark as read
+    await client.messages.markAsRead({ messageId: message.id });
+
+    // Show typing indicator
+    await client.messages.showTypingIndicator({ messageId: message.id });
+
+    // Command handling
+    if (text === 'menu') {
+        await client.messages.interactive({
+            to: message.from,
+            type: 'button',
+            body: { text: 'Choose an option:' },
+            action: {
+                buttons: [
+                    { type: 'reply', reply: { id: 'help', title: 'Help' } },
+                    { type: 'reply', reply: { id: 'about', title: 'About' } },
+                ],
+            },
+        });
+        return;
+    }
+
+    // Echo
+    await client.messages.text({
+        to: message.from,
+        body: `You said: ${message.text.body}`,
+    });
+});
+
+// Interactive message handler
+whatsapp.processor.onInteractive(async (client, message) => {
+    if (message.interactive.type === 'button_reply') {
+        const buttonId = message.interactive.button_reply.id;
+
+        let response = '';
+        if (buttonId === 'help') {
+            response = 'Send "menu" to see options.';
+        } else if (buttonId === 'about') {
+            response = 'WhatsApp Bot built with meta-cloud-api';
+        }
+
+        await client.messages.text({
+            to: message.from,
+            body: response,
+        });
+    }
+});
+
+// Image handler
+whatsapp.processor.onImage(async (client, message) => {
+    await client.messages.text({
+        to: message.from,
+        body: 'Thanks for the image!',
+    });
+});
+
+// Status handler
+whatsapp.processor.onStatus(async (client, status) => {
+    console.log(`[${status.timestamp}] ${status.id}: ${status.status}`);
+});
+
+// Routes
+app.get('/webhook', whatsapp.GET);
+app.post('/webhook', express.json(), whatsapp.POST);
+
+// Health check
+app.get('/', (req, res) => {
+    res.json({ status: 'ok', message: 'WhatsApp webhook server' });
+});
+
+// Start server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Webhook: http://localhost:${PORT}/webhook`);
+});
+```
+
+## Error Handling
+
+Handle errors gracefully:
+
+```typescript
+// Global error handler
+processor.onText(async (whatsapp, message) => {
+    try {
+        await processMessage(message);
+    } catch (error) {
+        console.error('Error processing message:', error);
+
+        // Notify user
+        await whatsapp.messages.text({
+            to: message.from,
+            body: 'Sorry, something went wrong. Please try again.',
+        });
+    }
+});
+
+// Express error handler
+app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error('Express error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+});
+```
+
+## Testing Locally
+
+Use ngrok to test webhooks locally:
+
+```bash
+# Terminal 1: Start server
+npm run dev
+
+# Terminal 2: Start ngrok
+ngrok http 3000
+
+# Use ngrok URL in Meta Developer Portal
+# https://abc123.ngrok.io/webhook
+```
+
+Test your webhook:
+
+```bash
+# Test verification
+curl "http://localhost:3000/webhook?hub.mode=subscribe&hub.verify_token=YOUR_TOKEN&hub.challenge=test"
+
+# Test webhook (mock payload)
+curl -X POST http://localhost:3000/webhook \
+  -H "Content-Type: application/json" \
+  -d '{
+    "object": "whatsapp_business_account",
+    "entry": [{
+      "id": "123",
+      "changes": [{
+        "value": {
+          "messaging_product": "whatsapp",
+          "metadata": {
+            "display_phone_number": "1234567890",
+            "phone_number_id": "123456789"
+          },
+          "contacts": [{"profile": {"name": "Test"}, "wa_id": "1234567890"}],
+          "messages": [{
+            "from": "1234567890",
+            "id": "wamid.test",
+            "timestamp": "1234567890",
+            "type": "text",
+            "text": {"body": "Hello"}
+          }]
+        },
+        "field": "messages"
+      }]
+    }]
+  }'
+```
+
+## Best Practices
+
+### Use Environment Variables
+
+```bash
+# .env
+WHATSAPP_ACCESS_TOKEN=your_token
+WHATSAPP_PHONE_NUMBER_ID=123456789
+WHATSAPP_BUSINESS_ACCOUNT_ID=987654321
+WEBHOOK_VERIFICATION_TOKEN=your_secret
+PORT=3000
+```
+
+### Async Processing
+
+For long-running operations, process in the background:
+
+```typescript
+processor.onText(async (whatsapp, message) => {
+    // Acknowledge immediately
+    setImmediate(async () => {
+        await performLongOperation(message);
+    });
+});
+```
+
+### Rate Limiting
+
+Implement rate limiting to avoid overwhelming the API:
+
+```typescript
+import rateLimit from 'express-rate-limit';
+
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per window
+});
+
+app.use('/webhook', limiter);
+```
+
+### Monitoring
+
+Add logging and monitoring:
+
+```typescript
+import morgan from 'morgan';
+
+app.use(morgan('combined'));
+
+processor.onText(async (whatsapp, message) => {
+    console.log('[TEXT]', {
+        from: message.from,
+        text: message.text.body,
+        timestamp: message.timestamp,
+    });
+});
+```
+
+## Deployment
+
+### Environment Setup
+
+```bash
+# Production .env
+NODE_ENV=production
+WHATSAPP_ACCESS_TOKEN=your_production_token
+WHATSAPP_PHONE_NUMBER_ID=123456789
+WHATSAPP_BUSINESS_ACCOUNT_ID=987654321
+WEBHOOK_VERIFICATION_TOKEN=your_production_secret
+PORT=3000
+```
+
+### Using Process Managers
+
+```bash
+# Install PM2
+npm install -g pm2
+
+# Start with PM2
+pm2 start dist/server.js --name whatsapp-bot
+
+# Monitor
+pm2 logs whatsapp-bot
+pm2 monit
+```
+
+## Next Steps
+
+- [Webhook Verification](/webhooks/verification) - Set up webhook verification
+- [Next.js Integration](/webhooks/nextjs) - Use with Next.js
+- [Custom Implementation](/webhooks/custom) - Build custom handlers
+- [Message API Reference](/api/messages) - Send messages
+
+## Related Resources
+
+- [Express.js Documentation](https://expressjs.com/)
+- [ngrok Documentation](https://ngrok.com/docs)
+- [Meta Webhooks](https://developers.facebook.com/docs/graph-api/webhooks)

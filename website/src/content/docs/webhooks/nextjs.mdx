@@ -1,0 +1,678 @@
+---
+title: Next.js Integration
+description: Using webhooks with Next.js App Router and Pages Router
+sidebar:
+    order: 4
+---
+
+import { Aside, Code, Tabs, TabItem } from '@astrojs/starlight/components';
+
+The SDK provides built-in Next.js webhook adapters for both App Router and Pages Router. This guide shows you how to implement WhatsApp webhooks in your Next.js application.
+
+## Choosing Your Router
+
+Next.js offers two routing systems:
+
+- **App Router** (Next.js 13+) - Modern, uses `app/` directory
+- **Pages Router** (Legacy) - Traditional, uses `pages/` directory
+
+Choose the adapter that matches your Next.js project.
+
+## App Router Integration
+
+### Installation
+
+```bash
+npm install meta-cloud-api
+# or
+pnpm add meta-cloud-api
+```
+
+### Setup
+
+Create a webhook route handler in `app/api/webhook/route.ts`:
+
+```typescript
+// app/api/webhook/route.ts
+import { webhookHandler } from 'meta-cloud-api/webhook/nextjs-app';
+
+// Create webhook handler
+const whatsapp = webhookHandler({
+    accessToken: process.env.WHATSAPP_ACCESS_TOKEN!,
+    phoneNumberId: parseInt(process.env.WHATSAPP_PHONE_NUMBER_ID!),
+    businessAcctId: process.env.WHATSAPP_BUSINESS_ACCOUNT_ID,
+    webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN!,
+});
+
+// Register message handlers
+whatsapp.processor.onText(async (client, message) => {
+    console.log('Received:', message.text.body);
+
+    await client.messages.text({
+        to: message.from,
+        body: `Echo: ${message.text.body}`,
+    });
+});
+
+// Export route handlers
+export const { GET, POST } = whatsapp.webhook;
+```
+
+That's it! Your webhook is ready at `/api/webhook`.
+
+<Aside type="tip">
+The App Router adapter handles verification (GET) and webhook processing (POST) automatically.
+</Aside>
+
+### Message Handlers
+
+Create organized handler files for better code structure:
+
+```typescript
+// lib/messageHandlers/index.ts
+export * from './text';
+export * from './image';
+export * from './interactive';
+```
+
+```typescript
+// lib/messageHandlers/text.ts
+import type { WhatsApp, WebhookMessage } from 'meta-cloud-api';
+
+export async function handleTextMessage(
+    whatsapp: WhatsApp,
+    message: WebhookMessage
+) {
+    const text = message.text?.body.toLowerCase();
+
+    // Mark as read
+    await whatsapp.messages.markAsRead({ messageId: message.id });
+
+    // Command handling
+    if (text === 'menu') {
+        await whatsapp.messages.interactive({
+            to: message.from,
+            type: 'button',
+            body: { text: 'Choose an option:' },
+            action: {
+                buttons: [
+                    { type: 'reply', reply: { id: 'help', title: 'Help' } },
+                    { type: 'reply', reply: { id: 'about', title: 'About' } },
+                ],
+            },
+        });
+        return;
+    }
+
+    // Echo
+    await whatsapp.messages.text({
+        to: message.from,
+        body: `You said: ${text}`,
+    });
+}
+```
+
+```typescript
+// lib/messageHandlers/image.ts
+import type { WhatsApp, WebhookMessage } from 'meta-cloud-api';
+
+export async function handleImageMessage(
+    whatsapp: WhatsApp,
+    message: WebhookMessage
+) {
+    const { id, mime_type, caption } = message.image!;
+
+    console.log(`Received image: ${id} (${mime_type})`);
+
+    await whatsapp.messages.text({
+        to: message.from,
+        body: caption ? `Nice image! "${caption}"` : 'Thanks for the image!',
+    });
+}
+```
+
+Import and register handlers in your route:
+
+```typescript
+// app/api/webhook/route.ts
+import { webhookHandler } from 'meta-cloud-api/webhook/nextjs-app';
+import { handleTextMessage, handleImageMessage } from '@/lib/messageHandlers';
+
+const whatsapp = webhookHandler({
+    accessToken: process.env.WHATSAPP_ACCESS_TOKEN!,
+    phoneNumberId: parseInt(process.env.WHATSAPP_PHONE_NUMBER_ID!),
+    businessAcctId: process.env.WHATSAPP_BUSINESS_ACCOUNT_ID,
+    webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN!,
+});
+
+// Register handlers
+whatsapp.processor.onText(handleTextMessage);
+whatsapp.processor.onImage(handleImageMessage);
+
+export const { GET, POST } = whatsapp.webhook;
+```
+
+### Complete App Router Example
+
+```typescript
+// app/api/webhook/route.ts
+import { webhookHandler } from 'meta-cloud-api/webhook/nextjs-app';
+import {
+    handleTextMessage,
+    handleImageMessage,
+    handleDocumentMessage,
+    handleContactMessage,
+    handleLocationMessage,
+    handleInteractiveMessage,
+} from '@/lib/messageHandlers';
+
+const whatsapp = webhookHandler({
+    accessToken: process.env.WHATSAPP_ACCESS_TOKEN!,
+    phoneNumberId: parseInt(process.env.WHATSAPP_PHONE_NUMBER_ID!),
+    businessAcctId: process.env.WHATSAPP_BUSINESS_ACCOUNT_ID,
+    webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN!,
+});
+
+// Register message handlers
+whatsapp.processor.onText(handleTextMessage);
+whatsapp.processor.onImage(handleImageMessage);
+whatsapp.processor.onDocument(handleDocumentMessage);
+whatsapp.processor.onContacts(handleContactMessage);
+whatsapp.processor.onLocation(handleLocationMessage);
+whatsapp.processor.onInteractive(handleInteractiveMessage);
+
+// Register status handler
+whatsapp.processor.onStatus(async (client, status) => {
+    console.log(`Message ${status.id}: ${status.status}`);
+});
+
+// Register webhook field handlers
+whatsapp.processor.onAccountUpdate(async (client, update) => {
+    console.log('Account updated:', update);
+});
+
+export const { GET, POST } = whatsapp.webhook;
+```
+
+## Pages Router Integration
+
+### Setup
+
+Create a webhook API route in `pages/api/webhook.ts`:
+
+```typescript
+// pages/api/webhook.ts
+import { nextjsWebhookHandler } from 'meta-cloud-api';
+
+// Disable body parser for webhook processing
+export const config = {
+    api: {
+        bodyParser: false,
+    },
+};
+
+// Create webhook handler
+const whatsapp = nextjsWebhookHandler({
+    accessToken: process.env.WHATSAPP_ACCESS_TOKEN!,
+    phoneNumberId: parseInt(process.env.WHATSAPP_PHONE_NUMBER_ID!),
+    businessAcctId: process.env.WHATSAPP_BUSINESS_ACCOUNT_ID,
+    webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN!,
+});
+
+// Register message handlers
+whatsapp.processor.onText(async (client, message) => {
+    console.log('Received:', message.text.body);
+
+    await client.messages.text({
+        to: message.from,
+        body: `Echo: ${message.text.body}`,
+    });
+});
+
+// Export the webhook handler
+export default whatsapp.webhook;
+```
+
+<Aside type="caution">
+Important: Set `bodyParser: false` in the config to allow the SDK to handle raw request bodies.
+</Aside>
+
+### Complete Pages Router Example
+
+```typescript
+// pages/api/webhook.ts
+import { nextjsWebhookHandler } from 'meta-cloud-api';
+import {
+    handleTextMessage,
+    handleImageMessage,
+    handleInteractiveMessage,
+} from '@/lib/messageHandlers';
+
+export const config = {
+    api: {
+        bodyParser: false,
+    },
+};
+
+const whatsapp = nextjsWebhookHandler({
+    accessToken: process.env.WHATSAPP_ACCESS_TOKEN!,
+    phoneNumberId: parseInt(process.env.WHATSAPP_PHONE_NUMBER_ID!),
+    businessAcctId: process.env.WHATSAPP_BUSINESS_ACCOUNT_ID,
+    webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN!,
+});
+
+// Register handlers
+whatsapp.processor.onText(handleTextMessage);
+whatsapp.processor.onImage(handleImageMessage);
+whatsapp.processor.onInteractive(handleInteractiveMessage);
+
+whatsapp.processor.onStatus(async (client, status) => {
+    console.log(`Status: ${status.id} - ${status.status}`);
+});
+
+export default whatsapp.webhook;
+```
+
+## Handler Examples
+
+### Interactive Messages
+
+Handle button and list responses:
+
+```typescript
+// lib/messageHandlers/interactive.ts
+import type { WhatsApp, WebhookMessage } from 'meta-cloud-api';
+
+export async function handleInteractiveMessage(
+    whatsapp: WhatsApp,
+    message: WebhookMessage
+) {
+    const { interactive } = message;
+
+    if (!interactive) return;
+
+    if (interactive.type === 'button_reply') {
+        const { id, title } = interactive.button_reply;
+
+        switch (id) {
+            case 'help':
+                await whatsapp.messages.text({
+                    to: message.from,
+                    body: 'Send "menu" to see available commands.',
+                });
+                break;
+
+            case 'about':
+                await whatsapp.messages.text({
+                    to: message.from,
+                    body: 'WhatsApp Bot powered by meta-cloud-api',
+                });
+                break;
+
+            default:
+                await whatsapp.messages.text({
+                    to: message.from,
+                    body: `You clicked: ${title}`,
+                });
+        }
+    }
+
+    if (interactive.type === 'list_reply') {
+        const { id, title } = interactive.list_reply;
+
+        await whatsapp.messages.text({
+            to: message.from,
+            body: `You selected: ${title}`,
+        });
+    }
+
+    if (interactive.type === 'nfm_reply') {
+        // Handle Flow response
+        const flowData = JSON.parse(interactive.nfm_reply.response_json);
+        console.log('Flow response:', flowData);
+
+        await whatsapp.messages.text({
+            to: message.from,
+            body: 'Thanks for completing the flow!',
+        });
+    }
+}
+```
+
+### Location Messages
+
+```typescript
+// lib/messageHandlers/location.ts
+import type { WhatsApp, WebhookMessage } from 'meta-cloud-api';
+
+export async function handleLocationMessage(
+    whatsapp: WhatsApp,
+    message: WebhookMessage
+) {
+    const { latitude, longitude, name, address } = message.location!;
+
+    console.log(`Location received: ${latitude}, ${longitude}`);
+
+    await whatsapp.messages.text({
+        to: message.from,
+        body: `Thanks for sharing your location${name ? `: ${name}` : ''}!`,
+    });
+}
+```
+
+### Document Messages
+
+```typescript
+// lib/messageHandlers/document.ts
+import type { WhatsApp, WebhookMessage } from 'meta-cloud-api';
+
+export async function handleDocumentMessage(
+    whatsapp: WhatsApp,
+    message: WebhookMessage
+) {
+    const { id, filename, mime_type } = message.document!;
+
+    console.log(`Document: ${filename} (${mime_type})`);
+
+    // Download document
+    const mediaUrl = await whatsapp.media.retrieveMediaUrl({ mediaId: id });
+
+    await whatsapp.messages.text({
+        to: message.from,
+        body: `Received: ${filename}`,
+    });
+}
+```
+
+### Contact Messages
+
+```typescript
+// lib/messageHandlers/contact.ts
+import type { WhatsApp, WebhookMessage } from 'meta-cloud-api';
+
+export async function handleContactMessage(
+    whatsapp: WhatsApp,
+    message: WebhookMessage
+) {
+    const contacts = message.contacts!;
+
+    for (const contact of contacts) {
+        console.log(`Contact: ${contact.name.formatted_name}`);
+    }
+
+    await whatsapp.messages.text({
+        to: message.from,
+        body: `Received ${contacts.length} contact${contacts.length > 1 ? 's' : ''}!`,
+    });
+}
+```
+
+## TypeScript Types
+
+All handlers are fully typed:
+
+```typescript
+import type {
+    WhatsApp,
+    WebhookMessage,
+    TextMessage,
+    ImageMessage,
+    InteractiveMessage,
+} from 'meta-cloud-api';
+
+// Generic message handler
+type MessageHandler = (
+    whatsapp: WhatsApp,
+    message: WebhookMessage
+) => Promise<void>;
+
+// Type-safe text handler
+type TextMessageHandler = (
+    whatsapp: WhatsApp,
+    message: TextMessage
+) => Promise<void>;
+
+// Type-safe image handler
+type ImageMessageHandler = (
+    whatsapp: WhatsApp,
+    message: ImageMessage
+) => Promise<void>;
+```
+
+## Environment Variables
+
+Create a `.env.local` file:
+
+```bash
+# .env.local
+WHATSAPP_ACCESS_TOKEN=your_access_token
+WHATSAPP_PHONE_NUMBER_ID=123456789
+WHATSAPP_BUSINESS_ACCOUNT_ID=987654321
+WEBHOOK_VERIFICATION_TOKEN=your_secure_token
+```
+
+<Aside type="caution">
+Never commit `.env.local` to version control. Add it to `.gitignore`.
+</Aside>
+
+## Testing Locally
+
+### Using ngrok
+
+```bash
+# Terminal 1: Start Next.js dev server
+npm run dev
+# Running on http://localhost:3000
+
+# Terminal 2: Start ngrok
+ngrok http 3000
+# Forwarding https://abc123.ngrok.io -> http://localhost:3000
+```
+
+Use the ngrok URL in Meta Developer Portal:
+```
+https://abc123.ngrok.io/api/webhook
+```
+
+### Testing Verification
+
+```bash
+# Test GET request (verification)
+curl "http://localhost:3000/api/webhook?hub.mode=subscribe&hub.verify_token=YOUR_TOKEN&hub.challenge=test123"
+# Should return: test123
+```
+
+## Best Practices
+
+### Error Handling
+
+Wrap handlers in try-catch blocks:
+
+```typescript
+whatsapp.processor.onText(async (client, message) => {
+    try {
+        await processMessage(message);
+    } catch (error) {
+        console.error('Error processing message:', error);
+
+        // Notify user of error
+        await client.messages.text({
+            to: message.from,
+            body: 'Sorry, something went wrong. Please try again.',
+        });
+    }
+});
+```
+
+### Background Processing
+
+For long operations, process asynchronously:
+
+```typescript
+whatsapp.processor.onText(async (client, message) => {
+    // Acknowledge immediately
+    setImmediate(async () => {
+        await performLongOperation(message);
+    });
+});
+```
+
+### Logging
+
+Use Next.js logging best practices:
+
+```typescript
+whatsapp.processor.onText(async (client, message) => {
+    console.log({
+        timestamp: new Date().toISOString(),
+        type: 'text_message',
+        from: message.from,
+        text: message.text.body,
+    });
+});
+```
+
+### Rate Limiting
+
+Implement rate limiting for webhook endpoints:
+
+```typescript
+// lib/rateLimit.ts
+import { LRUCache } from 'lru-cache';
+
+const tokenCache = new LRUCache<string, number>({
+    max: 500,
+    ttl: 60000, // 1 minute
+});
+
+export function rateLimit(identifier: string, limit: number = 10): boolean {
+    const count = tokenCache.get(identifier) || 0;
+
+    if (count >= limit) {
+        return false;
+    }
+
+    tokenCache.set(identifier, count + 1);
+    return true;
+}
+```
+
+## Deployment
+
+### Vercel
+
+Next.js webhooks work seamlessly on Vercel:
+
+1. Push code to GitHub
+2. Import project in Vercel
+3. Add environment variables in Vercel dashboard
+4. Deploy
+5. Use Vercel URL in Meta Developer Portal:
+   ```
+   https://your-app.vercel.app/api/webhook
+   ```
+
+### Other Platforms
+
+Works on any Node.js hosting:
+
+- **Netlify** - Use Netlify Functions
+- **Railway** - Direct Next.js deployment
+- **DigitalOcean** - App Platform
+- **AWS** - Amplify or EC2
+- **Self-hosted** - Docker or PM2
+
+### Environment Variables in Production
+
+Set in your hosting platform's dashboard:
+
+```
+WHATSAPP_ACCESS_TOKEN=your_production_token
+WHATSAPP_PHONE_NUMBER_ID=123456789
+WHATSAPP_BUSINESS_ACCOUNT_ID=987654321
+WEBHOOK_VERIFICATION_TOKEN=your_production_secret
+```
+
+## Comparison: App Router vs Pages Router
+
+<Tabs>
+<TabItem label="App Router">
+
+**Pros:**
+- Modern Next.js architecture
+- Clean export syntax (`export const { GET, POST }`)
+- Better TypeScript support
+- Improved performance
+
+**Cons:**
+- Requires Next.js 13+
+- Newer, less documentation
+
+**Best for:** New projects, modern apps
+
+</TabItem>
+<TabItem label="Pages Router">
+
+**Pros:**
+- Stable, mature API
+- More documentation available
+- Works with older Next.js versions
+
+**Cons:**
+- Older architecture
+- Requires `bodyParser: false` config
+
+**Best for:** Existing projects, legacy apps
+
+</TabItem>
+</Tabs>
+
+## Troubleshooting
+
+### Webhook Not Receiving Messages
+
+1. Check ngrok is running (development)
+2. Verify webhook URL in Meta Developer Portal
+3. Ensure HTTPS is used (not HTTP)
+4. Check Next.js logs for errors
+5. Verify webhook subscriptions are active
+
+### TypeScript Errors
+
+```bash
+# Ensure types are installed
+npm install --save-dev @types/node
+
+# Check tsconfig.json
+{
+  "compilerOptions": {
+    "moduleResolution": "bundler",
+    "target": "ES2017"
+  }
+}
+```
+
+### Body Parser Issues (Pages Router)
+
+Make sure you've disabled body parser:
+
+```typescript
+export const config = {
+    api: {
+        bodyParser: false, // Required!
+    },
+};
+```
+
+## Next Steps
+
+- [Webhook Verification](/webhooks/verification) - Verify webhooks
+- [Custom Implementation](/webhooks/custom) - Build custom handlers
+- [Message API Reference](/api/messages) - Send messages
+- [Flow API Reference](/api/flow) - Work with WhatsApp Flows
+
+## Related Resources
+
+- [Next.js API Routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes)
+- [Next.js App Router](https://nextjs.org/docs/app/building-your-application/routing/route-handlers)
+- [Vercel Deployment](https://vercel.com/docs)
