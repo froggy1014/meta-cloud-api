@@ -1,0 +1,118 @@
+// Prisma schema for WhatsApp customer support bot
+// Documentation: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+// Conversation represents an ongoing chat session with a user
+model Conversation {
+    id        String   @id @default(cuid())
+    // WhatsApp phone number in international format without +
+    userId    String
+    // Current state in the conversation flow
+    state     ConversationState @default(IDLE)
+    // User's name collected during the conversation
+    userName  String?
+    // Description of the issue being reported
+    issue     String?
+    // Selected category for the ticket
+    category  TicketCategory?
+    // Additional context data stored as JSON
+    context   Json     @default("{}")
+    // Message count in this conversation
+    messageCount Int   @default(0)
+    // Timestamps
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    // Soft delete flag
+    isActive  Boolean  @default(true)
+
+    // Relation to tickets
+    tickets   Ticket[]
+
+    @@index([userId])
+    @@index([state])
+    @@index([createdAt])
+}
+
+// Ticket represents a support request created from a conversation
+model Ticket {
+    id            String         @id @default(cuid())
+    // Ticket number in format T-XXXXX
+    ticketNumber  String         @unique
+    // Reference to the conversation
+    conversationId String
+    conversation  Conversation   @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+    // User information
+    userId        String
+    userName      String
+    // Ticket details
+    category      TicketCategory
+    issue         String
+    // Ticket status
+    status        TicketStatus   @default(OPEN)
+    priority      TicketPriority @default(MEDIUM)
+    // Assignment
+    assignedTo    String?
+    // Resolution
+    resolution    String?
+    resolvedAt    DateTime?
+    // Metadata
+    tags          String[]       @default([])
+    metadata      Json           @default("{}")
+    // Timestamps
+    createdAt     DateTime       @default(now())
+    updatedAt     DateTime       @updatedAt
+
+    @@index([userId])
+    @@index([status])
+    @@index([category])
+    @@index([createdAt])
+    @@index([ticketNumber])
+}
+
+// Enums
+
+enum ConversationState {
+    IDLE                    // No active conversation
+    COLLECTING_NAME         // Asking for user's name
+    COLLECTING_ISSUE        // Asking for issue description
+    SELECTING_CATEGORY      // User selecting category
+    CONFIRMING_TICKET       // Showing summary and confirmation
+    COMPLETED               // Ticket created successfully
+    CANCELLED               // User cancelled the flow
+}
+
+enum TicketCategory {
+    TECHNICAL_SUPPORT       // Technical issues
+    BILLING_PAYMENT         // Payment and billing issues
+    ACCOUNT_ACCESS          // Login and account issues
+    PRODUCT_INQUIRY         // Product questions
+    FEATURE_REQUEST         // New feature requests
+    BUG_REPORT             // Bug reports
+    GENERAL_INQUIRY        // General questions
+    OTHER                  // Other issues
+}
+
+enum TicketStatus {
+    OPEN                   // Newly created
+    IN_PROGRESS           // Being worked on
+    PENDING_USER          // Waiting for user response
+    PENDING_INTERNAL      // Waiting for internal team
+    RESOLVED              // Issue resolved
+    CLOSED                // Ticket closed
+    CANCELLED             // Cancelled by user
+}
+
+enum TicketPriority {
+    LOW                   // Low priority
+    MEDIUM                // Medium priority
+    HIGH                  // High priority
+    URGENT                // Urgent priority
+}
