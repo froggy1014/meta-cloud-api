@@ -1,0 +1,472 @@
+---
+title: Encryption API
+description: Manage business public keys for WhatsApp Flows end-to-end encryption
+---
+
+# Encryption API
+
+Manage business public keys used for end-to-end encryption in WhatsApp Flows, ensuring secure data collection and transmission.
+
+**Official Documentation**: [WhatsApp Business Encryption API](https://developers.facebook.com/docs/whatsapp/cloud-api/reference/whatsapp-business-encryption/)
+
+## Overview
+
+The Encryption API manages public keys for secure Flow data handling:
+
+- **Generate Keys**: Create encryption key pairs using built-in helper
+- **Set Public Key**: Upload business public key for Flows encryption
+- **Get Public Key**: Retrieve current active encryption key
+- **Secure Flows**: Enable end-to-end encryption for Flow submissions
+
+## Endpoints
+
+```
+GET /{PHONE_NUMBER_ID}/whatsapp_business_encryption
+POST /{PHONE_NUMBER_ID}/whatsapp_business_encryption
+```
+
+## Important Notes
+
+:::caution[Private Key Security]
+The private key must be stored securely and never shared or exposed. It's required to decrypt Flow data submissions.
+:::
+
+:::tip[Key Generation]
+Use the built-in `generateEncryption()` method to create properly formatted key pairs. This ensures compatibility with WhatsApp's encryption requirements.
+:::
+
+:::caution[Multipart Upload]
+Setting the public key uses `multipart/form-data` format, not JSON. The SDK handles this automatically.
+:::
+
+## Quick Start
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID!,
+});
+
+// Generate encryption key pair
+const keyPair = client.generateEncryption();
+
+// Store private key securely
+await storeSecurely('WA_PRIVATE_KEY', keyPair.privateKey);
+
+// Upload public key
+await client.encryption.setEncryptionPublicKey(keyPair.publicKey);
+
+// Verify upload
+const currentKey = await client.encryption.getEncryptionPublicKey();
+console.log('Active public key:', currentKey);
+```
+
+## Generate Encryption Keys
+
+Create a new encryption key pair for Flows.
+
+```typescript
+// Generate key pair
+const { publicKey, privateKey } = client.generateEncryption();
+
+console.log('Public key:', publicKey);
+console.log('Private key:', privateKey); // Keep this secret!
+
+// Store private key securely
+await secureStorage.set('whatsapp-private-key', privateKey);
+```
+
+:::caution[One-Time Generation]
+Generate keys once per phone number. Store the private key securely as it cannot be recovered if lost.
+:::
+
+## Set Public Key
+
+Upload the business public key to enable Flow encryption.
+
+### Basic Upload
+
+```typescript
+const keyPair = client.generateEncryption();
+
+await client.encryption.setEncryptionPublicKey(keyPair.publicKey);
+
+console.log('Public key uploaded successfully');
+```
+
+### Complete Setup Flow
+
+```typescript
+async function setupFlowEncryption() {
+    // Generate keys
+    const keyPair = client.generateEncryption();
+
+    // Store private key in secure storage
+    await storePrivateKey(keyPair.privateKey);
+
+    // Upload public key to WhatsApp
+    await client.encryption.setEncryptionPublicKey(keyPair.publicKey);
+
+    console.log('Flow encryption configured');
+
+    return {
+        publicKey: keyPair.publicKey,
+        privateKeyStored: true,
+    };
+}
+
+async function storePrivateKey(privateKey: string) {
+    // Use AWS Secrets Manager, Azure Key Vault, etc.
+    await secretsManager.createSecret({
+        name: 'whatsapp/flow-private-key',
+        secretString: privateKey,
+    });
+}
+```
+
+## Get Public Key
+
+Retrieve the currently active public key.
+
+```typescript
+const publicKey = await client.encryption.getEncryptionPublicKey();
+
+console.log('Current public key:', publicKey);
+```
+
+### Verify Key Configuration
+
+```typescript
+async function verifyEncryptionSetup() {
+    try {
+        const publicKey = await client.encryption.getEncryptionPublicKey();
+
+        if (publicKey) {
+            console.log('Encryption is configured');
+            return true;
+        } else {
+            console.log('No encryption key set');
+            return false;
+        }
+    } catch (error) {
+        console.error('Failed to retrieve public key:', error);
+        return false;
+    }
+}
+```
+
+## Decrypt Flow Data
+
+Decrypt encrypted data received from Flow submissions.
+
+```typescript
+import crypto from 'crypto';
+
+async function decryptFlowData(
+    encryptedData: string,
+    aesKey: string,
+    iv: string
+): Promise<any> {
+    // Retrieve private key
+    const privateKey = await retrievePrivateKey();
+
+    // Decrypt AES key with RSA private key
+    const decryptedAesKey = crypto.privateDecrypt(
+        {
+            key: privateKey,
+            padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+            oaepHash: 'sha256',
+        },
+        Buffer.from(aesKey, 'base64')
+    );
+
+    // Decrypt data with AES key
+    const decipher = crypto.createDecipheriv(
+        'aes-256-gcm',
+        decryptedAesKey,
+        Buffer.from(iv, 'base64')
+    );
+
+    let decrypted = decipher.update(encryptedData, 'base64', 'utf8');
+    decrypted += decipher.final('utf8');
+
+    return JSON.parse(decrypted);
+}
+
+async function retrievePrivateKey(): Promise<string> {
+    // Retrieve from secure storage
+    const secret = await secretsManager.getSecretValue({
+        SecretId: 'whatsapp/flow-private-key',
+    });
+
+    return secret.SecretString!;
+}
+```
+
+## Complete Flow Webhook Handler
+
+Handle encrypted Flow submissions in your webhook.
+
+```typescript
+import express from 'express';
+import crypto from 'crypto';
+
+const app = express();
+app.use(express.json());
+
+app.post('/flow-webhook', async (req, res) => {
+    const { encrypted_flow_data, encrypted_aes_key, initial_vector } = req.body;
+
+    if (!encrypted_flow_data) {
+        return res.json({ version: '3.0' });
+    }
+
+    try {
+        // Decrypt the flow data
+        const decryptedData = await decryptFlowData(
+            encrypted_flow_data,
+            encrypted_aes_key,
+            initial_vector
+        );
+
+        // Process the decrypted data
+        console.log('Decrypted flow data:', decryptedData);
+
+        // Your business logic here
+        const result = await processFlowSubmission(decryptedData);
+
+        // Return response
+        res.json({
+            version: '3.0',
+            data: result,
+        });
+    } catch (error) {
+        console.error('Decryption failed:', error);
+        res.status(500).json({ error: 'Decryption failed' });
+    }
+});
+
+async function processFlowSubmission(data: any) {
+    // Process the decrypted form data
+    // Save to database, trigger actions, etc.
+    return { success: true };
+}
+```
+
+## Key Rotation
+
+Periodically rotate encryption keys for enhanced security.
+
+```typescript
+async function rotateEncryptionKeys() {
+    // Generate new key pair
+    const newKeyPair = client.generateEncryption();
+
+    // Store new private key
+    await secretsManager.updateSecret({
+        SecretId: 'whatsapp/flow-private-key',
+        SecretString: newKeyPair.privateKey,
+    });
+
+    // Upload new public key
+    await client.encryption.setEncryptionPublicKey(newKeyPair.publicKey);
+
+    // Archive old private key for historical data
+    await archiveOldKey();
+
+    console.log('Encryption keys rotated');
+}
+
+// Rotate keys every 90 days
+setInterval(rotateEncryptionKeys, 90 * 24 * 60 * 60 * 1000);
+```
+
+## Response Formats
+
+### Get Public Key Response
+
+```typescript
+{
+    public_key: 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...'
+}
+```
+
+### Set Public Key Response
+
+```typescript
+{
+    success: true
+}
+```
+
+## Error Handling
+
+```typescript
+try {
+    await client.encryption.setEncryptionPublicKey(publicKey);
+} catch (error) {
+    if (error.response) {
+        const { code, message } = error.response.data.error;
+
+        switch (code) {
+            case 131031:
+                console.error('Invalid public key format');
+                break;
+            case 100:
+                console.error('Invalid parameter');
+                break;
+            default:
+                console.error(`Error ${code}: ${message}`);
+        }
+    }
+}
+```
+
+## Best Practices
+
+1. **Store Private Keys Securely**: Use proper secrets management
+   ```typescript
+   import { SecretsManager } from 'aws-sdk';
+
+   async function storePrivateKey(privateKey: string) {
+       const secretsManager = new SecretsManager();
+
+       await secretsManager.createSecret({
+           Name: 'whatsapp/flow-encryption-key',
+           SecretString: privateKey,
+       });
+   }
+   ```
+
+2. **Never Expose Private Keys**: Keep them out of logs and code
+   ```typescript
+   // ❌ Bad
+   console.log('Private key:', privateKey);
+
+   // ✅ Good
+   console.log('Private key stored securely');
+   ```
+
+3. **Use Environment-Specific Keys**: Different keys per environment
+   ```typescript
+   const keyPair = client.generateEncryption();
+
+   if (process.env.NODE_ENV === 'production') {
+       await storeInProduction(keyPair.privateKey);
+   } else {
+       await storeInDevelopment(keyPair.privateKey);
+   }
+   ```
+
+4. **Implement Key Backup**: Maintain secure key backups
+   ```typescript
+   async function backupEncryptionKey() {
+       const privateKey = await retrievePrivateKey();
+
+       // Backup to multiple secure locations
+       await primaryStorage.store(privateKey);
+       await backupStorage.store(privateKey);
+       await offlineVault.store(privateKey);
+   }
+   ```
+
+5. **Test Decryption**: Verify keys work correctly
+   ```typescript
+   async function testEncryption() {
+       const keyPair = client.generateEncryption();
+
+       // Upload public key
+       await client.encryption.setEncryptionPublicKey(keyPair.publicKey);
+
+       // Test data
+       const testData = { message: 'test' };
+
+       // Encrypt with public key
+       const encrypted = encryptWithPublicKey(
+           JSON.stringify(testData),
+           keyPair.publicKey
+       );
+
+       // Decrypt with private key
+       const decrypted = decryptWithPrivateKey(
+           encrypted,
+           keyPair.privateKey
+       );
+
+       console.log('Encryption test:', JSON.parse(decrypted));
+   }
+   ```
+
+6. **Handle Decryption Errors Gracefully**
+   ```typescript
+   async function safeDecrypt(encryptedData: string) {
+       try {
+           return await decryptFlowData(encryptedData);
+       } catch (error) {
+           console.error('Decryption failed:', error.message);
+
+           // Check if key rotation occurred
+           const isKeyRotated = await checkKeyRotation();
+
+           if (isKeyRotated) {
+               // Try with previous key
+               return await decryptWithPreviousKey(encryptedData);
+           }
+
+           throw error;
+       }
+   }
+   ```
+
+## Security Considerations
+
+### Key Management
+
+- Generate keys once per phone number
+- Store private keys in secure vaults (AWS Secrets Manager, Azure Key Vault, HashiCorp Vault)
+- Never commit keys to version control
+- Use separate keys for different environments
+- Rotate keys periodically (every 90 days recommended)
+
+### Access Controls
+
+```typescript
+// Implement strict access controls
+async function setEncryptionKey(publicKey: string, userId: string) {
+    // Verify authorization
+    if (!hasPermission(userId, 'manage:encryption')) {
+        throw new Error('Unauthorized: Cannot manage encryption keys');
+    }
+
+    // Audit log
+    await auditLog.record({
+        action: 'set_encryption_key',
+        user: userId,
+        timestamp: new Date(),
+    });
+
+    // Set key
+    await client.encryption.setEncryptionPublicKey(publicKey);
+}
+```
+
+### Compliance
+
+- Maintain audit logs of key operations
+- Document key rotation procedures
+- Implement key recovery processes
+- Follow data protection regulations (GDPR, CCPA, etc.)
+
+## Related Documentation
+
+- [Flows API](/api/flows) - Create and manage Flows
+- [Webhooks](/webhooks/overview) - Handle Flow submissions
+- [Security Guide](/guides/security) - Comprehensive security practices
+- [Flow Builder](https://developers.facebook.com/docs/whatsapp/flows) - Official Flow documentation
+
+## Source Code
+
+View the source code on GitHub: [EncryptionApi.ts](https://github.com/froggy1014/meta-cloud-api/blob/main/src/api/encryption/EncryptionApi.ts)

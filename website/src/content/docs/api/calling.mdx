@@ -1,0 +1,611 @@
+---
+title: Calling API
+description: Configure voice calling settings and manage WhatsApp call sessions
+---
+
+# Calling API
+
+Configure voice calling capabilities, manage call permissions, and control call sessions for WhatsApp Business.
+
+**Official Documentation**: [WhatsApp Calling API](https://developers.facebook.com/documentation/business-messaging/whatsapp/calling/reference/)
+
+## Overview
+
+The Calling API enables voice call management:
+
+- **Configure Settings**: Enable/disable calling and set icon visibility
+- **Check Permissions**: Verify if users can receive calls
+- **Initiate Calls**: Start voice call sessions
+- **Manage Sessions**: Accept, reject, and terminate calls
+- **SIP Integration**: Connect with SIP infrastructure
+
+## Endpoints
+
+```
+POST /{PHONE_NUMBER_ID}/settings
+GET /{PHONE_NUMBER_ID}/settings?fields&include_sip_credentials
+GET /{PHONE_NUMBER_ID}/call_permissions?user_wa_id
+POST /{PHONE_NUMBER_ID}/calls
+```
+
+## Important Notes
+
+:::caution[SIP Required]
+WhatsApp voice calling requires integration with a SIP (Session Initiation Protocol) service provider. You'll need SDP (Session Description Protocol) data from your SIP stack.
+:::
+
+:::tip[Call Actions]
+Available call actions: `connect`, `pre_accept`, `accept`, `reject`, `terminate`
+:::
+
+:::tip[Business Callback Data]
+Use `biz_opaque_callback_data` to attach metadata to calls for tracking purposes.
+:::
+
+## Quick Start
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+});
+
+// Enable calling
+await client.calling.updateCallingSettings({
+    calling: {
+        status: 'ENABLED',
+        call_icon_visibility: 'DEFAULT',
+    },
+});
+
+// Check if user can be called
+const permissions = await client.calling.getCallPermissions({
+    userWaId: '15551234567',
+});
+
+// Initiate a call
+const call = await client.calling.initiateCall({
+    to: '15551234567',
+    session: {
+        sdp_type: 'offer',
+        sdp: 'v=0\r\no=- 123 0 IN IP4 192.168.1.1\r\n...',
+    },
+});
+
+// Terminate call
+await client.calling.terminateCall({
+    call_id: call.calls[0].id,
+});
+```
+
+## Configure Calling Settings
+
+Enable or disable calling functionality and set icon visibility.
+
+### Enable Calling
+
+```typescript
+await client.calling.updateCallingSettings({
+    calling: {
+        status: 'ENABLED',
+        call_icon_visibility: 'DEFAULT',
+    },
+});
+
+console.log('Calling enabled');
+```
+
+### Disable Calling
+
+```typescript
+await client.calling.updateCallingSettings({
+    calling: {
+        status: 'DISABLED',
+    },
+});
+
+console.log('Calling disabled');
+```
+
+### Hide Call Icon
+
+```typescript
+await client.calling.updateCallingSettings({
+    calling: {
+        status: 'ENABLED',
+        call_icon_visibility: 'HIDDEN',
+    },
+});
+```
+
+### Get Current Settings
+
+```typescript
+const settings = await client.calling.getCallingSettings({
+    fields: ['calling'],
+});
+
+console.log('Status:', settings.calling.status);
+console.log('Icon visibility:', settings.calling.call_icon_visibility);
+```
+
+### Get SIP Credentials
+
+```typescript
+const settings = await client.calling.getCallingSettings({
+    fields: ['calling'],
+    include_sip_credentials: true,
+});
+
+console.log('SIP credentials:', settings.sip_credentials);
+```
+
+## Check Call Permissions
+
+Verify if a user can receive calls from your business.
+
+```typescript
+const permissions = await client.calling.getCallPermissions({
+    userWaId: '15551234567',
+});
+
+if (permissions.can_call) {
+    console.log('User can receive calls');
+} else {
+    console.log('User cannot receive calls:', permissions.reason);
+}
+```
+
+### Check Multiple Users
+
+```typescript
+async function checkBulkPermissions(phoneNumbers: string[]) {
+    const results = await Promise.all(
+        phoneNumbers.map(async number => {
+            const permissions = await client.calling.getCallPermissions({
+                userWaId: number,
+            });
+            return { number, canCall: permissions.can_call };
+        })
+    );
+
+    return results;
+}
+
+const permissions = await checkBulkPermissions([
+    '15551234567',
+    '15559876543',
+]);
+```
+
+## Initiate Calls
+
+Start a voice call session with a user.
+
+### Basic Call
+
+```typescript
+const call = await client.calling.initiateCall({
+    to: '15551234567',
+    session: {
+        sdp_type: 'offer',
+        sdp: generateSDP(), // From your SIP provider
+    },
+});
+
+console.log('Call ID:', call.calls[0].id);
+```
+
+### Call with Tracking Data
+
+```typescript
+const call = await client.calling.initiateCall({
+    to: '15551234567',
+    session: {
+        sdp_type: 'offer',
+        sdp: generateSDP(),
+    },
+    biz_opaque_callback_data: JSON.stringify({
+        customerId: 'CUST123',
+        callReason: 'support',
+        timestamp: new Date().toISOString(),
+    }),
+});
+```
+
+### Call with Error Handling
+
+```typescript
+async function makeCall(phoneNumber: string) {
+    try {
+        // Check permissions first
+        const permissions = await client.calling.getCallPermissions({
+            userWaId: phoneNumber,
+        });
+
+        if (!permissions.can_call) {
+            throw new Error(`Cannot call user: ${permissions.reason}`);
+        }
+
+        // Initiate call
+        const call = await client.calling.initiateCall({
+            to: phoneNumber,
+            session: {
+                sdp_type: 'offer',
+                sdp: await getSipSDP(),
+            },
+        });
+
+        console.log('Call initiated:', call.calls[0].id);
+        return call;
+    } catch (error) {
+        console.error('Call failed:', error.message);
+        throw error;
+    }
+}
+```
+
+## Manage Call Sessions
+
+Handle different call actions during the session lifecycle.
+
+### Accept Call
+
+```typescript
+await client.calling.acceptCall({
+    call_id: 'CALL_ID',
+    session: {
+        sdp_type: 'answer',
+        sdp: answerSDP,
+    },
+});
+```
+
+### Pre-Accept Call (Early Media)
+
+```typescript
+await client.calling.preAcceptCall({
+    call_id: 'CALL_ID',
+    session: {
+        sdp_type: 'answer',
+        sdp: earlyMediaSDP,
+    },
+});
+```
+
+### Reject Call
+
+```typescript
+await client.calling.rejectCall({
+    call_id: 'CALL_ID',
+});
+```
+
+### Terminate Call
+
+```typescript
+await client.calling.terminateCall({
+    call_id: 'CALL_ID',
+});
+```
+
+## Complete Call Flow Example
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+class CallManager {
+    private client: WhatsApp;
+    private activeCalls = new Map<string, any>();
+
+    constructor(client: WhatsApp) {
+        this.client = client;
+    }
+
+    async initiateCall(phoneNumber: string) {
+        // Verify permissions
+        const permissions = await this.client.calling.getCallPermissions({
+            userWaId: phoneNumber,
+        });
+
+        if (!permissions.can_call) {
+            throw new Error('User cannot receive calls');
+        }
+
+        // Get SDP from SIP provider
+        const sdp = await this.getSipOffer();
+
+        // Start call
+        const call = await this.client.calling.initiateCall({
+            to: phoneNumber,
+            session: {
+                sdp_type: 'offer',
+                sdp,
+            },
+            biz_opaque_callback_data: JSON.stringify({
+                initiatedAt: new Date().toISOString(),
+            }),
+        });
+
+        const callId = call.calls[0].id;
+        this.activeCalls.set(callId, {
+            phoneNumber,
+            startedAt: new Date(),
+            status: 'initiated',
+        });
+
+        return callId;
+    }
+
+    async acceptCall(callId: string) {
+        const sdp = await this.getSipAnswer();
+
+        await this.client.calling.acceptCall({
+            call_id: callId,
+            session: {
+                sdp_type: 'answer',
+                sdp,
+            },
+        });
+
+        const call = this.activeCalls.get(callId);
+        if (call) {
+            call.status = 'connected';
+            call.connectedAt = new Date();
+        }
+    }
+
+    async terminateCall(callId: string) {
+        await this.client.calling.terminateCall({ call_id: callId });
+
+        const call = this.activeCalls.get(callId);
+        if (call) {
+            call.status = 'terminated';
+            call.endedAt = new Date();
+            call.duration = call.endedAt - call.connectedAt;
+        }
+
+        this.activeCalls.delete(callId);
+    }
+
+    private async getSipOffer(): Promise<string> {
+        // Get SDP offer from your SIP provider
+        return 'v=0\r\no=- 123 0 IN IP4 192.168.1.1\r\n...';
+    }
+
+    private async getSipAnswer(): Promise<string> {
+        // Get SDP answer from your SIP provider
+        return 'v=0\r\no=- 456 0 IN IP4 192.168.1.2\r\n...';
+    }
+}
+```
+
+## Handle Call Webhooks
+
+Process call-related webhook events.
+
+```typescript
+import { WebhookProcessor } from 'meta-cloud-api/webhook';
+
+const webhook = new WebhookProcessor({
+    verifyToken: process.env.WEBHOOK_VERIFY_TOKEN!,
+});
+
+webhook.on('call', async (call, metadata) => {
+    console.log('Call event:', call);
+
+    switch (call.status) {
+        case 'ringing':
+            console.log('Call is ringing');
+            // Auto-accept or route to agent
+            break;
+
+        case 'connected':
+            console.log('Call connected');
+            // Start call timer
+            break;
+
+        case 'ended':
+            console.log('Call ended');
+            // Log call duration, update records
+            break;
+
+        case 'failed':
+            console.log('Call failed:', call.reason);
+            // Handle failure, retry if needed
+            break;
+    }
+});
+```
+
+## Response Formats
+
+### Initiate Call Response
+
+```typescript
+{
+    calls: [
+        {
+            id: 'CALL_ID',
+            from_phone_number_id: '1234567890',
+            to: '15551234567',
+            status: 'initiated'
+        }
+    ]
+}
+```
+
+### Call Permissions Response
+
+```typescript
+{
+    can_call: true,
+    reason: null // or reason if cannot call
+}
+```
+
+### Settings Response
+
+```typescript
+{
+    calling: {
+        status: 'ENABLED',
+        call_icon_visibility: 'DEFAULT'
+    },
+    sip_credentials: {
+        username: 'sip_user',
+        password: 'sip_pass'
+    }
+}
+```
+
+## Error Handling
+
+```typescript
+try {
+    await client.calling.initiateCall({
+        to: '15551234567',
+        session: { sdp_type: 'offer', sdp: 'v=0...' },
+    });
+} catch (error) {
+    if (error.response) {
+        const { code, message } = error.response.data.error;
+
+        switch (code) {
+            case 131053:
+                console.error('User cannot receive calls');
+                break;
+            case 131054:
+                console.error('Invalid SDP data');
+                break;
+            case 131000:
+                console.error('Calling not enabled');
+                break;
+            default:
+                console.error(`Error ${code}: ${message}`);
+        }
+    }
+}
+```
+
+## Best Practices
+
+1. **Check Permissions First**: Verify before calling
+   ```typescript
+   const permissions = await client.calling.getCallPermissions({
+       userWaId: phoneNumber,
+   });
+
+   if (permissions.can_call) {
+       await client.calling.initiateCall({ to: phoneNumber, ... });
+   }
+   ```
+
+2. **Use Tracking Data**: Attach metadata to calls
+   ```typescript
+   const trackingData = {
+       customerId: 'CUST123',
+       agentId: 'AGT456',
+       department: 'support',
+   };
+
+   await client.calling.initiateCall({
+       to: phoneNumber,
+       biz_opaque_callback_data: JSON.stringify(trackingData),
+       session: { ... },
+   });
+   ```
+
+3. **Handle SIP Integration Properly**: Use reliable SIP providers
+   ```typescript
+   class SipProvider {
+       async createOffer(): Promise<string> {
+           // Generate SDP offer with proper codec support
+           return 'v=0\r\no=- ...\r\n';
+       }
+
+       async createAnswer(offer: string): Promise<string> {
+           // Generate SDP answer
+           return 'v=0\r\no=- ...\r\n';
+       }
+   }
+   ```
+
+4. **Implement Call Logging**: Track all call activities
+   ```typescript
+   interface CallLog {
+       callId: string;
+       to: string;
+       initiatedAt: Date;
+       connectedAt?: Date;
+       endedAt?: Date;
+       duration?: number;
+       status: string;
+   }
+
+   async function logCall(log: CallLog) {
+       await database.callLogs.insert(log);
+   }
+   ```
+
+5. **Handle Failures Gracefully**: Implement retry logic
+   ```typescript
+   async function makeCallWithRetry(
+       phoneNumber: string,
+       maxRetries: number = 3
+   ) {
+       for (let i = 0; i < maxRetries; i++) {
+           try {
+               return await client.calling.initiateCall({
+                   to: phoneNumber,
+                   session: await getSipSession(),
+               });
+           } catch (error) {
+               if (i === maxRetries - 1) throw error;
+               await delay(1000 * (i + 1)); // Exponential backoff
+           }
+       }
+   }
+   ```
+
+## SIP Integration
+
+WhatsApp calling requires SIP infrastructure. Here's a basic overview:
+
+```typescript
+interface SipSession {
+    sdp_type: 'offer' | 'answer';
+    sdp: string;
+}
+
+// SDP (Session Description Protocol) example
+const sdpOffer = `v=0
+o=- 123456789 123456789 IN IP4 192.168.1.1
+s=WhatsApp Call
+c=IN IP4 192.168.1.1
+t=0 0
+m=audio 49170 RTP/AVP 0 8
+a=rtpmap:0 PCMU/8000
+a=rtpmap:8 PCMA/8000`;
+```
+
+### Recommended SIP Providers
+
+- Twilio
+- Vonage (Nexmo)
+- Bandwidth
+- Plivo
+
+## Related Documentation
+
+- [Phone Numbers API](/api/phone-numbers) - Manage phone numbers
+- [Webhooks](/webhooks/overview) - Handle call events
+- [Messages API](/api/messages) - Send messages
+- [SIP Integration Guide](/guides/sip-integration) - Detailed SIP setup
+
+## Source Code
+
+View the source code on GitHub: [CallingApi.ts](https://github.com/froggy1014/meta-cloud-api/blob/main/src/api/calling/CallingApi.ts)

@@ -1,0 +1,1171 @@
+---
+title: Testing Guide
+description: Comprehensive guide to testing WhatsApp Cloud API integrations with meta-cloud-api using Vitest, Jest, and E2E strategies
+---
+
+# Testing Guide
+
+Learn how to write effective tests for your WhatsApp applications using meta-cloud-api. This guide covers unit testing, integration testing, E2E testing, and CI/CD integration.
+
+## Overview
+
+Testing is crucial for building reliable WhatsApp applications. This guide demonstrates how to test message sending, webhook handlers, error scenarios, and more.
+
+## Test Setup
+
+### Install Dependencies
+
+```bash
+# Using Vitest (recommended for Vite/modern projects)
+pnpm add -D vitest @vitest/ui
+pnpm add -D @types/node
+
+# Or using Jest (for traditional setups)
+pnpm add -D jest @types/jest ts-jest
+pnpm add -D @testing-library/react @testing-library/jest-dom
+
+# Test utilities
+pnpm add -D supertest @types/supertest
+pnpm add -D node-mocks-http
+```
+
+### Vitest Configuration
+
+Create `vitest.config.ts`:
+
+```typescript
+import { defineConfig } from 'vitest/config';
+import path from 'path';
+
+export default defineConfig({
+    test: {
+        globals: true,
+        environment: 'node',
+        setupFiles: ['./src/__tests__/setup.ts'],
+        coverage: {
+            provider: 'v8',
+            reporter: ['text', 'json', 'html'],
+            exclude: [
+                'node_modules/',
+                'src/__tests__/',
+                '**/*.test.ts',
+                '**/*.spec.ts',
+            ],
+        },
+    },
+    resolve: {
+        alias: {
+            '@': path.resolve(__dirname, './src'),
+            '@core': path.resolve(__dirname, './src/core'),
+            '@api': path.resolve(__dirname, './src/api'),
+        },
+    },
+});
+```
+
+### Test Setup File
+
+Create `src/__tests__/setup.ts`:
+
+```typescript
+import { beforeAll, afterAll, vi } from 'vitest';
+
+// Mock environment variables
+process.env.CLOUD_API_ACCESS_TOKEN = 'test_token';
+process.env.WA_PHONE_NUMBER_ID = '123456789';
+process.env.WA_BUSINESS_ACCOUNT_ID = 'business_123';
+
+// Global test setup
+beforeAll(() => {
+    console.log('🧪 Test suite starting...');
+});
+
+afterAll(() => {
+    console.log('✅ Test suite completed');
+});
+
+// Mock console methods to reduce noise
+global.console = {
+    ...console,
+    log: vi.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+};
+```
+
+## Unit Testing
+
+### Testing Message Sending
+
+```typescript
+// src/__tests__/unit/messages.test.ts
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import WhatsApp from 'meta-cloud-api';
+
+// Mock axios
+vi.mock('axios', () => ({
+    default: {
+        create: vi.fn(() => ({
+            post: vi.fn(),
+            get: vi.fn(),
+            interceptors: {
+                request: { use: vi.fn() },
+                response: { use: vi.fn() },
+            },
+        })),
+    },
+}));
+
+describe('Messages API', () => {
+    let client: WhatsApp;
+    let mockPost: any;
+
+    beforeEach(() => {
+        client = new WhatsApp({
+            accessToken: 'test_token',
+            phoneNumberId: 123456789,
+        });
+
+        // @ts-ignore - Access private axios instance for mocking
+        mockPost = vi.spyOn(client.messages['axiosInstance'], 'post');
+    });
+
+    describe('Text Messages', () => {
+        it('should send text message successfully', async () => {
+            const mockResponse = {
+                data: {
+                    messaging_product: 'whatsapp',
+                    contacts: [{ input: '15551234567', wa_id: '15551234567' }],
+                    messages: [{ id: 'wamid.test123' }],
+                },
+            };
+
+            mockPost.mockResolvedValue(mockResponse);
+
+            const result = await client.messages.text({
+                to: '15551234567',
+                body: 'Test message',
+            });
+
+            expect(mockPost).toHaveBeenCalledWith(
+                '/123456789/messages',
+                expect.objectContaining({
+                    messaging_product: 'whatsapp',
+                    to: '15551234567',
+                    type: 'text',
+                    text: { body: 'Test message' },
+                })
+            );
+
+            expect(result.messages[0].id).toBe('wamid.test123');
+        });
+
+        it('should send text with preview URL', async () => {
+            mockPost.mockResolvedValue({
+                data: {
+                    messages: [{ id: 'wamid.test456' }],
+                },
+            });
+
+            await client.messages.text({
+                to: '15551234567',
+                body: 'Check this: https://example.com',
+                preview_url: true,
+            });
+
+            expect(mockPost).toHaveBeenCalledWith(
+                expect.any(String),
+                expect.objectContaining({
+                    text: {
+                        body: 'Check this: https://example.com',
+                        preview_url: true,
+                    },
+                })
+            );
+        });
+
+        it('should send reply message', async () => {
+            mockPost.mockResolvedValue({
+                data: { messages: [{ id: 'wamid.reply123' }] },
+            });
+
+            await client.messages.text({
+                to: '15551234567',
+                body: 'Reply text',
+                context: { message_id: 'wamid.original123' },
+            });
+
+            expect(mockPost).toHaveBeenCalledWith(
+                expect.any(String),
+                expect.objectContaining({
+                    context: { message_id: 'wamid.original123' },
+                })
+            );
+        });
+    });
+
+    describe('Interactive Messages', () => {
+        it('should send button message', async () => {
+            mockPost.mockResolvedValue({
+                data: { messages: [{ id: 'wamid.button123' }] },
+            });
+
+            await client.messages.interactive({
+                to: '15551234567',
+                type: 'button',
+                body: { text: 'Choose option' },
+                action: {
+                    buttons: [
+                        {
+                            type: 'reply',
+                            reply: { id: 'btn1', title: 'Option 1' },
+                        },
+                    ],
+                },
+            });
+
+            expect(mockPost).toHaveBeenCalledWith(
+                expect.any(String),
+                expect.objectContaining({
+                    type: 'interactive',
+                    interactive: {
+                        type: 'button',
+                        body: { text: 'Choose option' },
+                        action: expect.any(Object),
+                    },
+                })
+            );
+        });
+
+        it('should send list message', async () => {
+            mockPost.mockResolvedValue({
+                data: { messages: [{ id: 'wamid.list123' }] },
+            });
+
+            await client.messages.interactive({
+                to: '15551234567',
+                type: 'list',
+                body: { text: 'Select item' },
+                action: {
+                    button: 'View List',
+                    sections: [
+                        {
+                            title: 'Section 1',
+                            rows: [
+                                { id: 'item1', title: 'Item 1' },
+                            ],
+                        },
+                    ],
+                },
+            });
+
+            expect(mockPost).toHaveBeenCalledWith(
+                expect.any(String),
+                expect.objectContaining({
+                    interactive: expect.objectContaining({
+                        type: 'list',
+                    }),
+                })
+            );
+        });
+    });
+
+    describe('Media Messages', () => {
+        it('should send image with link', async () => {
+            mockPost.mockResolvedValue({
+                data: { messages: [{ id: 'wamid.image123' }] },
+            });
+
+            await client.messages.image({
+                to: '15551234567',
+                image: {
+                    link: 'https://example.com/image.jpg',
+                    caption: 'Test image',
+                },
+            });
+
+            expect(mockPost).toHaveBeenCalledWith(
+                expect.any(String),
+                expect.objectContaining({
+                    type: 'image',
+                    image: {
+                        link: 'https://example.com/image.jpg',
+                        caption: 'Test image',
+                    },
+                })
+            );
+        });
+
+        it('should send document with ID', async () => {
+            mockPost.mockResolvedValue({
+                data: { messages: [{ id: 'wamid.doc123' }] },
+            });
+
+            await client.messages.document({
+                to: '15551234567',
+                document: {
+                    id: 'media_id_123',
+                    filename: 'document.pdf',
+                },
+            });
+
+            expect(mockPost).toHaveBeenCalledWith(
+                expect.any(String),
+                expect.objectContaining({
+                    type: 'document',
+                    document: {
+                        id: 'media_id_123',
+                        filename: 'document.pdf',
+                    },
+                })
+            );
+        });
+    });
+});
+```
+
+### Testing Webhook Handlers
+
+```typescript
+// src/__tests__/unit/webhook-handlers.test.ts
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { WebhookMessage, WhatsApp } from 'meta-cloud-api';
+import { handleTextMessage } from '@/lib/whatsapp/handlers/text';
+
+describe('Webhook Handlers', () => {
+    let mockWhatsApp: WhatsApp;
+    let mockMessage: WebhookMessage;
+
+    beforeEach(() => {
+        // Mock WhatsApp client
+        mockWhatsApp = {
+            messages: {
+                text: vi.fn().mockResolvedValue({
+                    messages: [{ id: 'response_123' }],
+                }),
+                markAsRead: vi.fn().mockResolvedValue({}),
+                showTypingIndicator: vi.fn().mockResolvedValue({}),
+            },
+        } as any;
+
+        // Mock webhook message
+        mockMessage = {
+            id: 'wamid.test123',
+            from: '15551234567',
+            type: 'text',
+            timestamp: '1234567890',
+            text: {
+                body: 'Hello',
+            },
+        } as WebhookMessage;
+    });
+
+    describe('Text Message Handler', () => {
+        it('should process text message and reply', async () => {
+            await handleTextMessage(mockWhatsApp, mockMessage);
+
+            expect(mockWhatsApp.messages.markAsRead).toHaveBeenCalledWith({
+                messageId: 'wamid.test123',
+            });
+
+            expect(mockWhatsApp.messages.text).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    to: '15551234567',
+                    body: expect.any(String),
+                })
+            );
+        });
+
+        it('should handle /menu command', async () => {
+            mockMessage.text!.body = '/menu';
+
+            await handleTextMessage(mockWhatsApp, mockMessage);
+
+            expect(mockWhatsApp.messages.interactive).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    type: 'button',
+                })
+            );
+        });
+
+        it('should handle errors gracefully', async () => {
+            mockWhatsApp.messages.markAsRead = vi.fn().mockRejectedValue(
+                new Error('API Error')
+            );
+
+            await expect(
+                handleTextMessage(mockWhatsApp, mockMessage)
+            ).resolves.not.toThrow();
+
+            // Should still attempt to send error message
+            expect(mockWhatsApp.messages.text).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    body: expect.stringContaining('error'),
+                })
+            );
+        });
+    });
+});
+```
+
+### Testing Error Handling
+
+```typescript
+// src/__tests__/unit/error-handling.test.ts
+import { describe, it, expect, vi } from 'vitest';
+import { withRetry } from '@/lib/errors/retry';
+import { parseWhatsAppError } from '@/lib/errors/parser';
+import { ErrorCategory } from '@/lib/errors/types';
+
+describe('Error Handling', () => {
+    describe('Error Parser', () => {
+        it('should parse rate limit error', () => {
+            const error = {
+                response: {
+                    status: 429,
+                    data: {
+                        error: {
+                            code: 130429,
+                            message: 'Rate limit exceeded',
+                            type: 'OAuthException',
+                        },
+                    },
+                },
+            };
+
+            const parsed = parseWhatsAppError(error);
+
+            expect(parsed.category).toBe(ErrorCategory.RateLimit);
+            expect(parsed.retryable).toBe(true);
+            expect(parsed.code).toBe(130429);
+        });
+
+        it('should parse authentication error', () => {
+            const error = {
+                response: {
+                    status: 401,
+                    data: {
+                        error: {
+                            code: 190,
+                            message: 'Invalid token',
+                        },
+                    },
+                },
+            };
+
+            const parsed = parseWhatsAppError(error);
+
+            expect(parsed.category).toBe(ErrorCategory.Authentication);
+            expect(parsed.retryable).toBe(false);
+        });
+
+        it('should handle network errors', () => {
+            const error = {
+                request: {},
+                message: 'Network Error',
+            };
+
+            const parsed = parseWhatsAppError(error);
+
+            expect(parsed.category).toBe(ErrorCategory.NetworkError);
+            expect(parsed.retryable).toBe(true);
+        });
+    });
+
+    describe('Retry Logic', () => {
+        it('should retry on retryable errors', async () => {
+            const mockFn = vi.fn()
+                .mockRejectedValueOnce({ response: { status: 500 } })
+                .mockRejectedValueOnce({ response: { status: 500 } })
+                .mockResolvedValueOnce('success');
+
+            const result = await withRetry(mockFn, {
+                maxRetries: 3,
+                initialDelay: 10,
+            });
+
+            expect(mockFn).toHaveBeenCalledTimes(3);
+            expect(result).toBe('success');
+        });
+
+        it('should not retry non-retryable errors', async () => {
+            const mockFn = vi.fn().mockRejectedValue({
+                response: {
+                    status: 400,
+                    data: { error: { code: 100 } },
+                },
+            });
+
+            await expect(withRetry(mockFn)).rejects.toThrow();
+            expect(mockFn).toHaveBeenCalledTimes(1);
+        });
+
+        it('should respect max retries', async () => {
+            const mockFn = vi.fn().mockRejectedValue({
+                response: { status: 500 },
+            });
+
+            await expect(
+                withRetry(mockFn, { maxRetries: 2, initialDelay: 10 })
+            ).rejects.toThrow();
+
+            expect(mockFn).toHaveBeenCalledTimes(3); // initial + 2 retries
+        });
+    });
+});
+```
+
+## Integration Testing
+
+### Testing Express API Routes
+
+```typescript
+// src/__tests__/integration/api-routes.test.ts
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import request from 'supertest';
+import express from 'express';
+import apiRoutes from '@/routes/api';
+
+describe('API Routes Integration', () => {
+    let app: express.Application;
+
+    beforeAll(() => {
+        app = express();
+        app.use(express.json());
+        app.use('/api', apiRoutes);
+    });
+
+    describe('POST /api/messages/send', () => {
+        it('should send text message', async () => {
+            const response = await request(app)
+                .post('/api/messages/send')
+                .set('x-api-key', process.env.API_SECRET!)
+                .send({
+                    to: '15551234567',
+                    type: 'text',
+                    content: { message: 'Test message' },
+                });
+
+            expect(response.status).toBe(200);
+            expect(response.body).toMatchObject({
+                success: true,
+                messageId: expect.any(String),
+            });
+        });
+
+        it('should return 401 without API key', async () => {
+            const response = await request(app)
+                .post('/api/messages/send')
+                .send({
+                    to: '15551234567',
+                    type: 'text',
+                    content: { message: 'Test' },
+                });
+
+            expect(response.status).toBe(401);
+        });
+
+        it('should return 400 for invalid input', async () => {
+            const response = await request(app)
+                .post('/api/messages/send')
+                .set('x-api-key', process.env.API_SECRET!)
+                .send({
+                    // Missing 'to' field
+                    type: 'text',
+                    content: { message: 'Test' },
+                });
+
+            expect(response.status).toBe(400);
+            expect(response.body.error).toBeDefined();
+        });
+    });
+
+    describe('GET /api/messages/history', () => {
+        it('should fetch message history', async () => {
+            const response = await request(app)
+                .get('/api/messages/history')
+                .query({ phone: '15551234567', limit: 10 });
+
+            expect(response.status).toBe(200);
+            expect(response.body.messages).toBeInstanceOf(Array);
+        });
+    });
+});
+```
+
+### Testing Next.js API Routes
+
+```typescript
+// src/__tests__/integration/nextjs-api.test.ts
+import { describe, it, expect } from 'vitest';
+import { createMocks } from 'node-mocks-http';
+import handler from '@/pages/api/messages/send';
+
+describe('Next.js API Routes', () => {
+    it('should handle POST request', async () => {
+        const { req, res } = createMocks({
+            method: 'POST',
+            headers: {
+                'x-api-key': process.env.API_SECRET,
+            },
+            body: {
+                to: '15551234567',
+                type: 'text',
+                content: { message: 'Test' },
+            },
+        });
+
+        await handler(req, res);
+
+        expect(res._getStatusCode()).toBe(200);
+
+        const data = JSON.parse(res._getData());
+        expect(data).toMatchObject({
+            success: true,
+            messageId: expect.any(String),
+        });
+    });
+
+    it('should reject GET requests', async () => {
+        const { req, res } = createMocks({
+            method: 'GET',
+        });
+
+        await handler(req, res);
+
+        expect(res._getStatusCode()).toBe(405);
+    });
+});
+```
+
+## Test Fixtures and Factories
+
+### Message Factories
+
+```typescript
+// src/__tests__/factories/messages.ts
+import type { WebhookMessage } from 'meta-cloud-api';
+
+export class MessageFactory {
+    static createTextMessage(overrides?: Partial<WebhookMessage>): WebhookMessage {
+        return {
+            id: 'wamid.test123',
+            from: '15551234567',
+            type: 'text',
+            timestamp: '1234567890',
+            text: {
+                body: 'Test message',
+            },
+            ...overrides,
+        } as WebhookMessage;
+    }
+
+    static createImageMessage(overrides?: Partial<WebhookMessage>): WebhookMessage {
+        return {
+            id: 'wamid.image123',
+            from: '15551234567',
+            type: 'image',
+            timestamp: '1234567890',
+            image: {
+                id: 'media_123',
+                mime_type: 'image/jpeg',
+                sha256: 'abc123',
+                caption: 'Test image',
+            },
+            ...overrides,
+        } as WebhookMessage;
+    }
+
+    static createInteractiveMessage(
+        buttonId: string,
+        overrides?: Partial<WebhookMessage>
+    ): WebhookMessage {
+        return {
+            id: 'wamid.interactive123',
+            from: '15551234567',
+            type: 'interactive',
+            timestamp: '1234567890',
+            interactive: {
+                type: 'button_reply',
+                button_reply: {
+                    id: buttonId,
+                    title: 'Button Title',
+                },
+            },
+            ...overrides,
+        } as WebhookMessage;
+    }
+}
+```
+
+### Error Factories
+
+```typescript
+// src/__tests__/factories/errors.ts
+export class ErrorFactory {
+    static createApiError(code: number, message: string) {
+        return {
+            response: {
+                status: code >= 100 && code < 600 ? code : 500,
+                data: {
+                    error: {
+                        code,
+                        message,
+                        type: 'OAuthException',
+                    },
+                },
+            },
+        };
+    }
+
+    static createRateLimitError() {
+        return this.createApiError(130429, 'Rate limit exceeded');
+    }
+
+    static createAuthError() {
+        return this.createApiError(190, 'Invalid access token');
+    }
+
+    static createNetworkError() {
+        return {
+            request: {},
+            message: 'Network Error',
+        };
+    }
+}
+```
+
+## Mock Data
+
+### Webhook Payloads
+
+```typescript
+// src/__tests__/mocks/webhook-payloads.ts
+export const mockWebhookPayloads = {
+    textMessage: {
+        object: 'whatsapp_business_account',
+        entry: [
+            {
+                id: 'business_id',
+                changes: [
+                    {
+                        value: {
+                            messaging_product: 'whatsapp',
+                            metadata: {
+                                display_phone_number: '15551234567',
+                                phone_number_id: '123456789',
+                            },
+                            contacts: [
+                                {
+                                    profile: { name: 'Test User' },
+                                    wa_id: '15559876543',
+                                },
+                            ],
+                            messages: [
+                                {
+                                    from: '15559876543',
+                                    id: 'wamid.test123',
+                                    timestamp: '1234567890',
+                                    type: 'text',
+                                    text: { body: 'Hello' },
+                                },
+                            ],
+                        },
+                        field: 'messages',
+                    },
+                ],
+            },
+        ],
+    },
+
+    statusUpdate: {
+        object: 'whatsapp_business_account',
+        entry: [
+            {
+                id: 'business_id',
+                changes: [
+                    {
+                        value: {
+                            messaging_product: 'whatsapp',
+                            metadata: {
+                                phone_number_id: '123456789',
+                            },
+                            statuses: [
+                                {
+                                    id: 'wamid.status123',
+                                    status: 'delivered',
+                                    timestamp: '1234567890',
+                                    recipient_id: '15559876543',
+                                },
+                            ],
+                        },
+                        field: 'messages',
+                    },
+                ],
+            },
+        ],
+    },
+};
+```
+
+## E2E Testing
+
+### Setup Playwright
+
+```bash
+pnpm add -D @playwright/test
+npx playwright install
+```
+
+### Playwright Configuration
+
+```typescript
+// playwright.config.ts
+import { defineConfig, devices } from '@playwright/test';
+
+export default defineConfig({
+    testDir: './src/__tests__/e2e',
+    fullyParallel: true,
+    forbidOnly: !!process.env.CI,
+    retries: process.env.CI ? 2 : 0,
+    workers: process.env.CI ? 1 : undefined,
+    reporter: 'html',
+    use: {
+        baseURL: 'http://localhost:3000',
+        trace: 'on-first-retry',
+    },
+    projects: [
+        {
+            name: 'chromium',
+            use: { ...devices['Desktop Chrome'] },
+        },
+    ],
+    webServer: {
+        command: 'pnpm dev',
+        url: 'http://localhost:3000',
+        reuseExistingServer: !process.env.CI,
+    },
+});
+```
+
+### E2E Tests
+
+```typescript
+// src/__tests__/e2e/send-message.spec.ts
+import { test, expect } from '@playwright/test';
+
+test.describe('Send Message Flow', () => {
+    test('should send text message through UI', async ({ page }) => {
+        await page.goto('/dashboard');
+
+        // Fill form
+        await page.fill('[name="phoneNumber"]', '15551234567');
+        await page.fill('[name="message"]', 'Test message from E2E');
+
+        // Submit
+        await page.click('button:has-text("Send")');
+
+        // Wait for success message
+        await expect(page.locator('.success-message')).toBeVisible();
+        await expect(page.locator('.success-message')).toContainText(
+            'Message sent'
+        );
+    });
+
+    test('should display validation error for empty phone', async ({ page }) => {
+        await page.goto('/dashboard');
+
+        await page.fill('[name="message"]', 'Test message');
+        await page.click('button:has-text("Send")');
+
+        await expect(page.locator('.error-message')).toBeVisible();
+    });
+
+    test('should display message history', async ({ page }) => {
+        await page.goto('/dashboard');
+
+        await expect(page.locator('.message-list')).toBeVisible();
+        await expect(page.locator('.message-item')).toHaveCount(
+            expect.any(Number)
+        );
+    });
+});
+```
+
+## CI/CD Integration
+
+### GitHub Actions Workflow
+
+```yaml
+# .github/workflows/test.yml
+name: Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run linter
+        run: pnpm lint
+
+      - name: Run type check
+        run: pnpm typecheck
+
+      - name: Run unit tests
+        run: pnpm test:unit
+        env:
+          CLOUD_API_ACCESS_TOKEN: ${{ secrets.TEST_ACCESS_TOKEN }}
+          WA_PHONE_NUMBER_ID: ${{ secrets.TEST_PHONE_NUMBER_ID }}
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+
+      - name: Run integration tests
+        run: pnpm test:integration
+        env:
+          CLOUD_API_ACCESS_TOKEN: ${{ secrets.TEST_ACCESS_TOKEN }}
+          WA_PHONE_NUMBER_ID: ${{ secrets.TEST_PHONE_NUMBER_ID }}
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+
+      - name: Generate coverage report
+        run: pnpm test:coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/coverage-final.json
+
+      - name: Install Playwright
+        run: npx playwright install --with-deps
+
+      - name: Run E2E tests
+        run: pnpm test:e2e
+        env:
+          CLOUD_API_ACCESS_TOKEN: ${{ secrets.TEST_ACCESS_TOKEN }}
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: test-results/
+```
+
+### Package.json Scripts
+
+```json
+{
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:unit": "vitest run src/__tests__/unit",
+    "test:integration": "vitest run src/__tests__/integration",
+    "test:e2e": "playwright test",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui"
+  }
+}
+```
+
+## Testing Best Practices
+
+### 1. Test Organization
+
+```
+src/__tests__/
+├── unit/                    # Unit tests
+│   ├── messages.test.ts
+│   ├── webhook-handlers.test.ts
+│   └── error-handling.test.ts
+├── integration/             # Integration tests
+│   ├── api-routes.test.ts
+│   └── webhook-endpoints.test.ts
+├── e2e/                     # End-to-end tests
+│   ├── send-message.spec.ts
+│   └── webhook-flow.spec.ts
+├── factories/               # Test factories
+│   ├── messages.ts
+│   └── errors.ts
+├── mocks/                   # Mock data
+│   └── webhook-payloads.ts
+└── setup.ts                 # Test setup
+```
+
+### 2. Test Naming Convention
+
+```typescript
+describe('Feature/Component Name', () => {
+    describe('Method/Function Name', () => {
+        it('should do something when condition is met', () => {
+            // Arrange
+            const input = 'test';
+
+            // Act
+            const result = doSomething(input);
+
+            // Assert
+            expect(result).toBe('expected');
+        });
+    });
+});
+```
+
+### 3. Use AAA Pattern
+
+```typescript
+it('should send message with retry', async () => {
+    // Arrange
+    const mockFn = vi.fn()
+        .mockRejectedValueOnce(new Error('Temporary failure'))
+        .mockResolvedValueOnce({ success: true });
+
+    // Act
+    const result = await withRetry(mockFn, { maxRetries: 2 });
+
+    // Assert
+    expect(mockFn).toHaveBeenCalledTimes(2);
+    expect(result).toEqual({ success: true });
+});
+```
+
+### 4. Test Edge Cases
+
+```typescript
+describe('Phone Number Validation', () => {
+    it.each([
+        ['15551234567', true],
+        ['+15551234567', false],
+        ['1-555-123-4567', false],
+        ['', false],
+        ['abc', false],
+    ])('should validate "%s" as %s', (phone, expected) => {
+        expect(isValidPhoneNumber(phone)).toBe(expected);
+    });
+});
+```
+
+### 5. Mock External Dependencies
+
+```typescript
+// Mock database
+vi.mock('@/lib/db/prisma', () => ({
+    prisma: {
+        message: {
+            create: vi.fn(),
+            findMany: vi.fn(),
+        },
+    },
+}));
+
+// Mock API client
+vi.mock('@/lib/whatsapp/client', () => ({
+    whatsappClient: {
+        messages: {
+            text: vi.fn(),
+        },
+    },
+}));
+```
+
+## Coverage Goals
+
+Aim for these coverage targets:
+
+- **Unit Tests**: 80%+ coverage
+- **Integration Tests**: Critical paths covered
+- **E2E Tests**: Main user flows covered
+
+Generate coverage report:
+
+```bash
+pnpm test:coverage
+```
+
+View HTML report:
+
+```bash
+open coverage/index.html
+```
+
+## Troubleshooting Tests
+
+### Common Issues
+
+#### Tests Hanging
+
+```typescript
+// Set timeout for async tests
+it('should complete within timeout', async () => {
+    // Test code
+}, 10000); // 10 second timeout
+```
+
+#### Mock Not Working
+
+```typescript
+// Ensure mock is before import
+vi.mock('@/lib/whatsapp/client');
+import { whatsappClient } from '@/lib/whatsapp/client';
+```
+
+#### Environment Variables
+
+```typescript
+// Use dotenv in test setup
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.test' });
+```
+
+## Next Steps
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<CardGrid>
+  <Card title="Error Handling" link="/guides/error-handling">
+    Test error scenarios
+  </Card>
+  <Card title="Deployment Guide" link="/guides/deployment">
+    Set up CI/CD pipeline
+  </Card>
+  <Card title="Express Guide" link="/guides/express">
+    Test Express integration
+  </Card>
+  <Card title="Next.js Guide" link="/guides/nextjs-app">
+    Test Next.js integration
+  </Card>
+</CardGrid>

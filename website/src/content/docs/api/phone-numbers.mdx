@@ -1,0 +1,501 @@
+---
+title: Phone Numbers API
+description: Manage WhatsApp Business phone numbers, verification, and automation settings
+---
+
+# Phone Numbers API
+
+Manage WhatsApp Business phone numbers, configure verification, set up conversational automation, and monitor messaging throughput.
+
+**Official Documentation**: [WhatsApp Phone Numbers API](https://developers.facebook.com/documentation/business-messaging/whatsapp/business-phone-numbers/phone-numbers/)
+
+## Overview
+
+The Phone Numbers API provides comprehensive phone number management:
+
+- **Get Phone Info**: Retrieve phone number details and metadata
+- **List Phone Numbers**: Get all numbers for your WABA
+- **Verification**: Request and verify phone numbers with SMS or voice codes
+- **Conversational Automation**: Configure welcome messages and prompts
+- **Throughput Monitoring**: Check messaging rate limits
+
+## Endpoints
+
+```
+GET /{PHONE_NUMBER_ID}?fields
+GET /{WABA_ID}/phone_numbers
+POST /{PHONE_NUMBER_ID}/request_code
+POST /{PHONE_NUMBER_ID}/verify_code
+POST /{PHONE_NUMBER_ID}/conversational_automation
+GET /{PHONE_NUMBER_ID}?fields=conversational_automation
+GET /{PHONE_NUMBER_ID}?fields=throughput
+```
+
+## Important Notes
+
+:::tip[Fields Parameter]
+Use the `fields` parameter to request specific phone number properties. Can be a comma-separated string or string array.
+:::
+
+:::caution[Verification Methods]
+Code delivery methods:
+- **SMS**: Text message (default, most reliable)
+- **VOICE**: Automated voice call
+:::
+
+:::tip[Conversational Automation]
+Enable welcome messages and suggested prompts to improve user engagement and guide conversations.
+:::
+
+## Quick Start
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID!,
+});
+
+// Get all phone numbers for WABA
+const numbers = await client.phoneNumbers.getPhoneNumbers();
+
+// Get specific phone number details
+const phoneInfo = await client.phoneNumbers.getPhoneNumberById([
+    'display_phone_number',
+    'verified_name',
+    'quality_rating',
+]);
+
+// Request verification code
+await client.phoneNumbers.requestVerificationCode({
+    code_method: 'SMS',
+    language: 'en_US',
+});
+
+// Verify code
+await client.phoneNumbers.verifyCode('123456');
+
+// Set up conversational automation
+await client.phoneNumbers.setConversationalAutomation({
+    enable_welcome_message: true,
+    prompts: ['Book a flight', 'Check flight status', 'Talk to support'],
+    commands: [
+        {
+            command_name: 'book_flight',
+            command_description: 'Start booking a flight',
+        },
+    ],
+});
+
+// Check throughput limits
+const throughput = await client.phoneNumbers.getThroughput();
+```
+
+## Get Phone Number Details
+
+Retrieve information about a specific phone number.
+
+### Get All Available Fields
+
+```typescript
+const phoneInfo = await client.phoneNumbers.getPhoneNumberById([
+    'id',
+    'display_phone_number',
+    'verified_name',
+    'quality_rating',
+    'platform_type',
+    'throughput',
+    'last_onboarded_time',
+    'code_verification_status',
+]);
+
+console.log(phoneInfo);
+// {
+//     id: '1234567890',
+//     display_phone_number: '+1 555 123 4567',
+//     verified_name: 'My Business',
+//     quality_rating: 'GREEN',
+//     platform_type: 'CLOUD_API',
+//     throughput: { level: 'STANDARD' }
+// }
+```
+
+### Get Specific Fields
+
+```typescript
+// Just the essentials
+const info = await client.phoneNumbers.getPhoneNumberById([
+    'display_phone_number',
+    'verified_name',
+]);
+```
+
+### Check Quality Rating
+
+```typescript
+const info = await client.phoneNumbers.getPhoneNumberById(['quality_rating']);
+
+if (info.quality_rating === 'RED') {
+    console.warn('Phone number quality is low - messaging may be restricted');
+}
+```
+
+## List Phone Numbers
+
+Get all phone numbers associated with your WABA.
+
+```typescript
+const allNumbers = await client.phoneNumbers.getPhoneNumbers();
+
+console.log(allNumbers.data);
+// [
+//     {
+//         id: '1234567890',
+//         display_phone_number: '+1 555 123 4567',
+//         verified_name: 'My Business'
+//     },
+//     {
+//         id: '9876543210',
+//         display_phone_number: '+1 555 987 6543',
+//         verified_name: 'Another Business'
+//     }
+// ]
+```
+
+## Phone Number Verification
+
+Verify ownership of phone numbers using SMS or voice codes.
+
+### Request Verification Code (SMS)
+
+```typescript
+await client.phoneNumbers.requestVerificationCode({
+    code_method: 'SMS',
+    language: 'en_US',
+});
+```
+
+### Request Verification Code (Voice)
+
+```typescript
+await client.phoneNumbers.requestVerificationCode({
+    code_method: 'VOICE',
+    language: 'en_US',
+});
+```
+
+### Verify Code
+
+```typescript
+try {
+    await client.phoneNumbers.verifyCode('123456');
+    console.log('Phone number verified successfully');
+} catch (error) {
+    console.error('Verification failed:', error.message);
+}
+```
+
+### Verification with Different Languages
+
+```typescript
+// Spanish
+await client.phoneNumbers.requestVerificationCode({
+    code_method: 'SMS',
+    language: 'es_ES',
+});
+
+// French
+await client.phoneNumbers.requestVerificationCode({
+    code_method: 'SMS',
+    language: 'fr_FR',
+});
+
+// Portuguese (Brazil)
+await client.phoneNumbers.requestVerificationCode({
+    code_method: 'SMS',
+    language: 'pt_BR',
+});
+```
+
+## Conversational Automation
+
+Configure automated messages and prompts to enhance user interactions.
+
+### Enable Welcome Message with Prompts
+
+```typescript
+await client.phoneNumbers.setConversationalAutomation({
+    enable_welcome_message: true,
+    prompts: [
+        'View menu',
+        'Place an order',
+        'Track my order',
+        'Talk to support',
+    ],
+});
+```
+
+### Configure Welcome Message with Commands
+
+```typescript
+await client.phoneNumbers.setConversationalAutomation({
+    enable_welcome_message: true,
+    prompts: ['Order food', 'Check delivery', 'Contact us'],
+    commands: [
+        {
+            command_name: 'order_food',
+            command_description: 'Browse menu and place an order',
+        },
+        {
+            command_name: 'track_order',
+            command_description: 'Check your order status',
+        },
+        {
+            command_name: 'help',
+            command_description: 'Get help from our support team',
+        },
+    ],
+});
+```
+
+### Disable Welcome Message
+
+```typescript
+await client.phoneNumbers.setConversationalAutomation({
+    enable_welcome_message: false,
+});
+```
+
+### Get Current Automation Settings
+
+```typescript
+const settings = await client.phoneNumbers.getConversationalAutomationSettings();
+
+console.log(settings);
+// {
+//     enable_welcome_message: true,
+//     prompts: ['View menu', 'Place order'],
+//     commands: [...]
+// }
+```
+
+## Check Throughput
+
+Monitor messaging rate limits and tier status.
+
+```typescript
+const throughput = await client.phoneNumbers.getThroughput();
+
+console.log(throughput);
+// {
+//     level: 'STANDARD',
+//     max_messages_per_day: 1000
+// }
+```
+
+### Throughput Tiers
+
+```typescript
+const throughput = await client.phoneNumbers.getThroughput();
+
+switch (throughput.level) {
+    case 'TIER_50':
+        console.log('50 unique customers per day');
+        break;
+    case 'TIER_250':
+        console.log('250 unique customers per day');
+        break;
+    case 'TIER_1K':
+        console.log('1,000 unique customers per day');
+        break;
+    case 'TIER_10K':
+        console.log('10,000 unique customers per day');
+        break;
+    case 'TIER_100K':
+        console.log('100,000 unique customers per day');
+        break;
+    case 'UNLIMITED':
+        console.log('Unlimited messaging');
+        break;
+}
+```
+
+## Response Formats
+
+### Phone Number Details Response
+
+```typescript
+{
+    id: '1234567890',
+    display_phone_number: '+1 555 123 4567',
+    verified_name: 'My Business',
+    quality_rating: 'GREEN', // GREEN, YELLOW, RED
+    code_verification_status: 'VERIFIED',
+    platform_type: 'CLOUD_API',
+    throughput: {
+        level: 'STANDARD'
+    },
+    last_onboarded_time: '2024-01-15T10:30:00+0000'
+}
+```
+
+### List Phone Numbers Response
+
+```typescript
+{
+    data: [
+        {
+            id: '1234567890',
+            display_phone_number: '+1 555 123 4567',
+            verified_name: 'My Business',
+            quality_rating: 'GREEN'
+        }
+    ],
+    paging: {
+        cursors: {
+            before: 'CURSOR',
+            after: 'CURSOR'
+        }
+    }
+}
+```
+
+### Throughput Response
+
+```typescript
+{
+    level: 'TIER_1K',
+    max_messages_per_day: 1000
+}
+```
+
+## Error Handling
+
+```typescript
+try {
+    await client.phoneNumbers.verifyCode('123456');
+} catch (error) {
+    if (error.response) {
+        const { code, message } = error.response.data.error;
+
+        switch (code) {
+            case 368:
+                console.error('Verification code expired');
+                break;
+            case 133016:
+                console.error('Invalid verification code');
+                break;
+            case 133015:
+                console.error('Too many verification attempts');
+                break;
+            default:
+                console.error(`Error ${code}: ${message}`);
+        }
+    }
+}
+```
+
+## Best Practices
+
+1. **Request Only Needed Fields**: Reduce payload size by specifying fields
+   ```typescript
+   // ✅ Good - only request what you need
+   await client.phoneNumbers.getPhoneNumberById(['display_phone_number', 'quality_rating']);
+
+   // ❌ Wasteful - retrieves all data
+   await client.phoneNumbers.getPhoneNumberById();
+   ```
+
+2. **Monitor Quality Rating**: Keep track of phone number health
+   ```typescript
+   const info = await client.phoneNumbers.getPhoneNumberById(['quality_rating']);
+
+   if (info.quality_rating === 'YELLOW') {
+       console.warn('Quality declining - review messaging practices');
+   } else if (info.quality_rating === 'RED') {
+       console.error('Quality critical - immediate action required');
+   }
+   ```
+
+3. **Use SMS Verification**: More reliable than voice
+   ```typescript
+   // ✅ Preferred method
+   await client.phoneNumbers.requestVerificationCode({
+       code_method: 'SMS',
+   });
+   ```
+
+4. **Localize Verification Messages**: Use appropriate language
+   ```typescript
+   // Match user's language preference
+   await client.phoneNumbers.requestVerificationCode({
+       code_method: 'SMS',
+       language: userLocale, // e.g., 'es_ES', 'pt_BR'
+   });
+   ```
+
+5. **Keep Prompts Short and Clear**: Maximum 4 prompts recommended
+   ```typescript
+   await client.phoneNumbers.setConversationalAutomation({
+       enable_welcome_message: true,
+       prompts: [
+           'Order now',      // Clear and actionable
+           'Track order',    // Specific purpose
+           'Get help',       // Simple support option
+       ],
+   });
+   ```
+
+6. **Monitor Throughput**: Plan for scaling
+   ```typescript
+   const throughput = await client.phoneNumbers.getThroughput();
+
+   if (throughput.level === 'TIER_50') {
+       console.log('Starter tier - request upgrade if needed');
+   }
+   ```
+
+## Quality Rating
+
+Phone numbers are rated based on message quality and user feedback:
+
+- **GREEN**: Good quality, no restrictions
+- **YELLOW**: Warning status, improve quality
+- **RED**: Critical status, messaging may be restricted
+
+### Maintaining Quality
+
+- Get explicit opt-in from users
+- Send relevant, valuable content
+- Respond promptly to user messages
+- Avoid spam-like behavior
+- Handle opt-outs properly
+
+## Available Fields
+
+When calling `getPhoneNumberById()`, you can request these fields:
+
+- `id`: Phone number ID
+- `display_phone_number`: Formatted display number
+- `verified_name`: Business verification name
+- `quality_rating`: Quality status (GREEN/YELLOW/RED)
+- `platform_type`: Platform type (CLOUD_API/ON_PREMISE)
+- `throughput`: Messaging tier information
+- `last_onboarded_time`: Onboarding timestamp
+- `code_verification_status`: Verification status
+- `account_mode`: Account type (SANDBOX/LIVE)
+- `certificate_status`: Certificate status for on-premise
+- `name_status`: Display name status
+
+## Related Documentation
+
+- [Registration API](/api/registration) - Register phone numbers
+- [Two-Step Verification](/api/two-step-verification) - Secure phone numbers
+- [Business Profile](/api/business-profile) - Configure business information
+- [Messages API](/api/messages) - Send messages from phone numbers
+
+## Source Code
+
+View the source code on GitHub: [PhoneNumberApi.ts](https://github.com/froggy1014/meta-cloud-api/blob/main/src/api/phone/PhoneNumberApi.ts)

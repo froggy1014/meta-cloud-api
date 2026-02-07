@@ -1,0 +1,163 @@
+---
+title: Installation
+description: How to install and set up meta-cloud-api in your project
+---
+
+# Installation
+
+This guide will help you install and set up meta-cloud-api in your project.
+
+## System Requirements
+
+Before installing, ensure your system meets these requirements:
+
+- **Node.js**: >= 18.0.0
+- **Package Manager**: npm, yarn, or pnpm
+- **TypeScript**: >= 5.0.0 (recommended)
+
+## Install the Package
+
+Choose your preferred package manager:
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+<Tabs>
+  <TabItem label="pnpm">
+    ```bash
+    pnpm add meta-cloud-api
+    ```
+  </TabItem>
+  <TabItem label="npm">
+    ```bash
+    npm install meta-cloud-api
+    ```
+  </TabItem>
+  <TabItem label="yarn">
+    ```bash
+    yarn add meta-cloud-api
+    ```
+  </TabItem>
+</Tabs>
+
+## TypeScript Configuration
+
+If you're using TypeScript, ensure your `tsconfig.json` includes:
+
+```json
+{
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "ES2020",
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "strict": true
+    }
+}
+```
+
+## Environment Variables
+
+Create a `.env` file in your project root:
+
+```bash
+# Required
+CLOUD_API_ACCESS_TOKEN=your_access_token
+WA_PHONE_NUMBER_ID=your_phone_number_id
+
+# Optional
+WA_BUSINESS_ACCOUNT_ID=your_business_account_id
+WEBHOOK_VERIFICATION_TOKEN=your_webhook_token
+```
+
+### Getting Your Credentials
+
+To obtain these credentials:
+
+1. **Access Token**:
+   - Go to [Meta Developer Portal](https://developers.facebook.com/)
+   - Create a new app or select an existing one
+   - Navigate to WhatsApp > API Setup
+   - Copy your temporary or permanent access token
+
+2. **Phone Number ID**:
+   - In the WhatsApp API Setup page
+   - Find your phone number under "Phone numbers"
+   - Copy the Phone Number ID
+
+3. **Business Account ID** (optional):
+   - In Meta Business Suite
+   - Go to Business Settings
+   - Copy your WhatsApp Business Account ID
+
+4. **Webhook Verification Token** (for webhooks):
+   - Create a random secure string
+   - Use this when setting up webhooks in Meta Developer Portal
+
+## Verify Installation
+
+Create a test file to verify the installation:
+
+```typescript
+// test.ts
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+});
+
+console.log('✓ meta-cloud-api installed successfully!');
+```
+
+Run the test:
+
+```bash
+tsx test.ts
+# or
+node --loader ts-node/esm test.ts
+```
+
+If you see the success message, you're ready to start using meta-cloud-api!
+
+## Next Steps
+
+Now that you've installed the SDK, learn how to use it:
+
+- [Quick Start Guide](/getting-started/quick-start): Send your first message
+- [Configuration](/getting-started/configuration): Advanced configuration options
+- [API Reference](/api/messages): Explore all available methods
+
+## Troubleshooting
+
+### Module not found error
+
+If you get a "Cannot find module 'meta-cloud-api'" error:
+
+1. Ensure the package is installed: `pnpm list meta-cloud-api`
+2. Clear your node_modules and reinstall: `rm -rf node_modules && pnpm install`
+3. Check your import statement matches the package name exactly
+
+### TypeScript errors
+
+If you encounter TypeScript errors:
+
+1. Ensure you're using TypeScript >= 5.0.0
+2. Enable `esModuleInterop` in tsconfig.json
+3. Check that `moduleResolution` is set to "node"
+
+### Environment variable issues
+
+If environment variables aren't loading:
+
+1. Install dotenv: `pnpm add dotenv`
+2. Load at app entry: `import 'dotenv/config';`
+3. Verify .env file is in the correct location
+
+## Support
+
+Need help? Check out:
+
+- [GitHub Issues](https://github.com/froggy1014/meta-cloud-api/issues)
+- [Examples Repository](https://github.com/froggy1014/meta-cloud-api/tree/main/examples)
+- [Meta WhatsApp Documentation](https://developers.facebook.com/docs/whatsapp)

@@ -1,0 +1,422 @@
+---
+title: Messages API
+description: Send text, media, template, interactive, and reaction messages through WhatsApp Cloud API
+---
+
+# Messages API
+
+Send text, media, template, interactive, and reaction messages through the WhatsApp Cloud API.
+
+**Official Documentation**: [WhatsApp Messages API](https://developers.facebook.com/docs/whatsapp/cloud-api/reference/messages)
+
+## Overview
+
+The Messages API allows you to send various types of messages to WhatsApp users:
+
+- **Text Messages**: Simple text content
+- **Media Messages**: Images, videos, documents, audio files
+- **Interactive Messages**: Buttons, lists, and flows
+- **Template Messages**: Pre-approved message templates
+- **Reaction Messages**: Emoji reactions to messages
+- **Location Messages**: Geographic coordinates and addresses
+- **Contacts Messages**: vCard contact information
+
+## Endpoints
+
+```
+POST /{PHONE_NUMBER_ID}/messages
+```
+
+## Important Notes
+
+:::caution[Required Fields]
+- Always include `messaging_product: "whatsapp"` in message bodies
+- `to` must be an E.164 formatted number string (e.g., `15551234567`)
+- `type` must match the body key (e.g., `type: "text"` with a `text` object)
+:::
+
+:::tip[Reply to Messages]
+Use `context.message_id` to reply to a specific message and create conversation threads.
+:::
+
+## Quick Start
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+});
+
+// Send a text message
+await client.messages.text({
+    to: '15551234567',
+    body: 'Hello from meta-cloud-api!',
+});
+```
+
+## Message Types
+
+### Text Messages
+
+Send simple text messages with optional preview URL and reply context.
+
+```typescript
+// Basic text message
+await client.messages.text({
+    to: '15551234567',
+    body: 'Hello! This is a text message.',
+});
+
+// Text with URL preview
+await client.messages.text({
+    to: '15551234567',
+    body: 'Check out this link: https://example.com',
+    preview_url: true,
+});
+
+// Reply to a message
+await client.messages.text({
+    to: '15551234567',
+    body: 'This is a reply',
+    context: {
+        message_id: 'wamid.ABC123...',
+    },
+});
+```
+
+### Image Messages
+
+Send images with optional captions.
+
+```typescript
+// Image from URL
+await client.messages.image({
+    to: '15551234567',
+    image: {
+        link: 'https://example.com/image.jpg',
+        caption: 'Check out this image!',
+    },
+});
+
+// Image by media ID (after upload)
+await client.messages.image({
+    to: '15551234567',
+    image: {
+        id: 'MEDIA_ID',
+        caption: 'Image from uploaded media',
+    },
+});
+```
+
+### Video Messages
+
+Send video files with optional captions.
+
+```typescript
+await client.messages.video({
+    to: '15551234567',
+    video: {
+        link: 'https://example.com/video.mp4',
+        caption: 'Watch this video!',
+    },
+});
+```
+
+### Audio Messages
+
+Send audio files.
+
+```typescript
+await client.messages.audio({
+    to: '15551234567',
+    audio: {
+        link: 'https://example.com/audio.mp3',
+    },
+});
+```
+
+### Document Messages
+
+Send documents with filename and optional caption.
+
+```typescript
+await client.messages.document({
+    to: '15551234567',
+    document: {
+        link: 'https://example.com/document.pdf',
+        filename: 'invoice_2024.pdf',
+        caption: 'Your invoice for January',
+    },
+});
+```
+
+### Interactive Button Messages
+
+Send messages with up to 3 reply buttons.
+
+```typescript
+await client.messages.interactive({
+    to: '15551234567',
+    type: 'button',
+    body: {
+        text: 'Choose an action:',
+    },
+    action: {
+        buttons: [
+            {
+                type: 'reply',
+                reply: {
+                    id: 'confirm_action',
+                    title: 'Confirm',
+                },
+            },
+            {
+                type: 'reply',
+                reply: {
+                    id: 'cancel_action',
+                    title: 'Cancel',
+                },
+            },
+        ],
+    },
+});
+```
+
+### Interactive List Messages
+
+Send messages with a list of selectable options (up to 10 items per section).
+
+```typescript
+await client.messages.interactive({
+    to: '15551234567',
+    type: 'list',
+    body: {
+        text: 'Choose a product category:',
+    },
+    action: {
+        button: 'View Categories',
+        sections: [
+            {
+                title: 'Electronics',
+                rows: [
+                    {
+                        id: 'phones',
+                        title: 'Phones',
+                        description: 'Smartphones and accessories',
+                    },
+                    {
+                        id: 'laptops',
+                        title: 'Laptops',
+                        description: 'Laptops and computers',
+                    },
+                ],
+            },
+            {
+                title: 'Clothing',
+                rows: [
+                    {
+                        id: 'mens',
+                        title: "Men's Clothing",
+                    },
+                    {
+                        id: 'womens',
+                        title: "Women's Clothing",
+                    },
+                ],
+            },
+        ],
+    },
+});
+```
+
+### Template Messages
+
+Send pre-approved template messages with parameters.
+
+```typescript
+import { ComponentTypesEnum, LanguagesEnum, ParametersTypesEnum } from 'meta-cloud-api/enums';
+
+await client.messages.template({
+    to: '15551234567',
+    template: {
+        name: 'order_update',
+        language: {
+            code: LanguagesEnum.English_US,
+        },
+        components: [
+            {
+                type: ComponentTypesEnum.Body,
+                parameters: [
+                    { type: ParametersTypesEnum.Text, text: 'Jane' },
+                    { type: ParametersTypesEnum.Text, text: 'A123' },
+                ],
+            },
+        ],
+    },
+});
+```
+
+### Reaction Messages
+
+Send emoji reactions to messages.
+
+```typescript
+await client.messages.reaction({
+    to: '15551234567',
+    message_id: 'wamid.ABC123...',
+    emoji: '👍',
+});
+
+// Remove reaction
+await client.messages.reaction({
+    to: '15551234567',
+    message_id: 'wamid.ABC123...',
+    emoji: '',
+});
+```
+
+### Location Messages
+
+Send geographic locations.
+
+```typescript
+await client.messages.location({
+    to: '15551234567',
+    latitude: 37.7749,
+    longitude: -122.4194,
+    name: 'San Francisco',
+    address: 'San Francisco, CA',
+});
+```
+
+### Contact Messages
+
+Send vCard contact information.
+
+```typescript
+await client.messages.contacts({
+    to: '15551234567',
+    contacts: [
+        {
+            name: {
+                formatted_name: 'John Doe',
+                first_name: 'John',
+                last_name: 'Doe',
+            },
+            phones: [
+                {
+                    phone: '+1 555 123 4567',
+                    type: 'MOBILE',
+                },
+            ],
+            emails: [
+                {
+                    email: 'john@example.com',
+                    type: 'WORK',
+                },
+            ],
+        },
+    ],
+});
+```
+
+## Response Format
+
+All message sending methods return a response with the message ID:
+
+```typescript
+const response = await client.messages.text({
+    to: '15551234567',
+    body: 'Hello!',
+});
+
+console.log(response.messages[0].id); // wamid.ABC123...
+```
+
+Response structure:
+```typescript
+{
+    messaging_product: 'whatsapp',
+    contacts: [
+        {
+            input: '15551234567',
+            wa_id: '15551234567'
+        }
+    ],
+    messages: [
+        {
+            id: 'wamid.ABC123...'
+        }
+    ]
+}
+```
+
+## Error Handling
+
+```typescript
+try {
+    await client.messages.text({
+        to: '15551234567',
+        body: 'Hello!',
+    });
+} catch (error) {
+    if (error.response) {
+        // API error response
+        console.error('Error:', error.response.data.error.message);
+        console.error('Error code:', error.response.data.error.code);
+    } else {
+        // Network or other error
+        console.error('Error:', error.message);
+    }
+}
+```
+
+## Best Practices
+
+1. **Phone Number Format**: Always use E.164 format without + or spaces
+   ```typescript
+   // ✅ Good
+   to: '15551234567'
+
+   // ❌ Bad
+   to: '+1 555 123 4567'
+   to: '1-555-123-4567'
+   ```
+
+2. **Message Type Matching**: Ensure `type` matches the message body key
+   ```typescript
+   // ✅ Good
+   { type: 'text', text: { body: '...' } }
+
+   // ❌ Bad
+   { type: 'image', text: { body: '...' } }
+   ```
+
+3. **Context for Replies**: Use context to create conversation threads
+   ```typescript
+   await client.messages.text({
+       to: '15551234567',
+       body: 'Reply message',
+       context: { message_id: previousMessageId },
+   });
+   ```
+
+4. **Media Size Limits**: Be aware of media file size limits
+   - Images: 5 MB
+   - Videos: 16 MB
+   - Audio: 16 MB
+   - Documents: 100 MB
+
+## Related Documentation
+
+- [Media API](/api/media) - Upload and manage media files
+- [Templates API](/api/templates) - Create and manage message templates
+- [Webhooks](/webhooks/overview) - Receive message status updates
+- [Interactive Messages Guide](/guides/interactive-messages) - Build interactive experiences
+
+## Source Code
+
+View the source code on GitHub: [MessageApi.ts](https://github.com/froggy1014/meta-cloud-api/blob/main/src/api/messages/MessageApi.ts)

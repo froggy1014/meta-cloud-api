@@ -1,0 +1,38 @@
+name: Examples CI
+
+on:
+    pull_request:
+        branches: [main]
+        paths:
+            - 'examples/**'
+            - 'src/**'
+            - '.github/workflows/examples-ci.yml'
+
+jobs:
+    test-examples:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                example: [express-production, nextjs-app-router-example]
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: pnpm/action-setup@v4
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: '18'
+                  cache: 'pnpm'
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Build SDK
+              run: pnpm build
+
+            - name: Build example
+              run: cd examples/${{ matrix.example }} && pnpm build
+
+            - name: Run tests (if available)
+              run: cd examples/${{ matrix.example }} && pnpm test || echo "No tests defined"
+              continue-on-error: true

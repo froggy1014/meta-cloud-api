@@ -1,0 +1,721 @@
+---
+title: Custom Implementation
+description: Building custom webhook handlers and framework adapters
+sidebar:
+    order: 5
+---
+
+import { Aside, Code, Tabs, TabItem } from '@astrojs/starlight/components';
+
+While the SDK provides built-in adapters for Express and Next.js, you can build custom webhook handlers for any framework or use case. This guide shows you how to use the `WebhookProcessor` directly and create custom adapters.
+
+## Using WebhookProcessor Directly
+
+The `WebhookProcessor` is the core webhook processing engine. All framework adapters are built on top of it.
+
+### Basic Usage
+
+```typescript
+import { WebhookProcessor } from 'meta-cloud-api';
+
+// Create processor
+const processor = new WebhookProcessor({
+    accessToken: process.env.WHATSAPP_ACCESS_TOKEN!,
+    phoneNumberId: parseInt(process.env.WHATSAPP_PHONE_NUMBER_ID!),
+    businessAcctId: process.env.WHATSAPP_BUSINESS_ACCOUNT_ID,
+    webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN!,
+});
+
+// Register handlers
+processor.onText(async (whatsapp, message) => {
+    console.log('Text message:', message.text.body);
+
+    await whatsapp.messages.text({
+        to: message.from,
+        body: 'Response',
+    });
+});
+
+// Process verification (GET request)
+const verifyResult = await processor.processVerification(
+    mode,      // 'subscribe'
+    token,     // Your verification token
+    challenge  // Challenge string from WhatsApp
+);
+// Returns: { status: 200, body: challenge, headers: {...} }
+
+// Process webhook (POST request)
+const webhookResult = await processor.processWebhook(
+    new Request(url, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(payload),
+    })
+);
+// Returns: { status: 200, body: '{"success":true}', headers: {...} }
+```
+
+### WebhookProcessor API
+
+```typescript
+interface WebhookProcessor {
+    // Verification
+    processVerification(
+        mode: string | null,
+        token: string | null,
+        challenge: string | null
+    ): Promise<WebhookResponse>;
+
+    // Webhook processing
+    processWebhook(request: Request): Promise<WebhookResponse>;
+
+    // Flow processing
+    processFlow(request: Request): Promise<WebhookResponse>;
+
+    // Message handlers
+    onMessage(type: MessageTypesEnum, handler: MessageHandler): void;
+    onText(handler: TextMessageHandler): void;
+    onImage(handler: ImageMessageHandler): void;
+    onVideo(handler: VideoMessageHandler): void;
+    onAudio(handler: AudioMessageHandler): void;
+    onDocument(handler: DocumentMessageHandler): void;
+    onSticker(handler: StickerMessageHandler): void;
+    onInteractive(handler: InteractiveMessageHandler): void;
+    onButton(handler: ButtonMessageHandler): void;
+    onLocation(handler: LocationMessageHandler): void;
+    onContacts(handler: ContactsMessageHandler): void;
+    onReaction(handler: ReactionMessageHandler): void;
+    onOrder(handler: OrderMessageHandler): void;
+    onSystem(handler: SystemMessageHandler): void;
+
+    // Status handler
+    onStatus(handler: StatusHandler): void;
+
+    // Pre/post processing
+    onMessagePreProcess(handler: MessageHandler): void;
+    onMessagePostProcess(handler: MessageHandler): void;
+
+    // Flow handlers
+    onFlow(type: FlowTypeEnum, handler: FlowHandler): void;
+
+    // Webhook field handlers
+    onAccountUpdate(handler: AccountUpdateHandler): void;
+    onAccountReviewUpdate(handler: AccountReviewUpdateHandler): void;
+    onAccountAlerts(handler: AccountAlertsHandler): void;
+    onBusinessCapabilityUpdate(handler: BusinessCapabilityUpdateHandler): void;
+    onPhoneNumberNameUpdate(handler: PhoneNumberNameUpdateHandler): void;
+    onPhoneNumberQualityUpdate(handler: PhoneNumberQualityUpdateHandler): void;
+    onMessageTemplateStatusUpdate(handler: MessageTemplateStatusUpdateHandler): void;
+    onTemplateCategoryUpdate(handler: TemplateCategoryUpdateHandler): void;
+    onMessageTemplateQualityUpdate(handler: MessageTemplateQualityUpdateHandler): void;
+    onFlows(handler: FlowsHandler): void;
+    onSecurity(handler: SecurityHandler): void;
+    onHistory(handler: HistoryHandler): void;
+    onSmbMessageEchoes(handler: SmbMessageEchoesHandler): void;
+    onSmbAppStateSync(handler: SmbAppStateSyncHandler): void;
+
+    // Utilities
+    getClient(): WhatsApp;
+    getConfig(): WabaConfigType;
+}
+```
+
+## Creating Custom Framework Adapters
+
+Build adapters for any framework by extending `BaseWebhookHandler`:
+
+### Example: Fastify Adapter
+
+```typescript
+// fastify-adapter.ts
+import { BaseWebhookHandler, WebhookResponse } from 'meta-cloud-api';
+import type { FastifyRequest, FastifyReply } from 'fastify';
+
+interface FastifyWebhookConfig {
+    accessToken: string;
+    phoneNumberId: number;
+    businessAcctId?: string;
+    webhookVerificationToken: string;
+}
+
+class FastifyWebhookHandler extends BaseWebhookHandler<FastifyRequest, FastifyReply> {
+    constructor(config: FastifyWebhookConfig) {
+        super(config);
+    }
+
+    protected async handleGet(
+        req: FastifyRequest,
+        reply: FastifyReply
+    ): Promise<WebhookResponse> {
+        const { 'hub.mode': mode, 'hub.verify_token': token, 'hub.challenge': challenge } =
+            req.query as Record<string, string>;
+
+        const result = await this.processVerification(mode, token, challenge);
+
+        reply.code(result.status).headers(result.headers).send(result.body);
+        return result;
+    }
+
+    protected async handlePost(
+        req: FastifyRequest,
+        reply: FastifyReply
+    ): Promise<WebhookResponse> {
+        const fullUrl = this.constructFullUrl(req.headers as any, req.url);
+
+        const webRequest = new Request(fullUrl, {
+            method: 'POST',
+            headers: req.headers as HeadersInit,
+            body: JSON.stringify(req.body),
+        });
+
+        const result = await this.processWebhook(webRequest);
+
+        reply.code(result.status).headers(result.headers).send(result.body);
+        return result;
+    }
+
+    protected async handleFlow(
+        req: FastifyRequest,
+        reply: FastifyReply
+    ): Promise<WebhookResponse> {
+        const fullUrl = this.constructFullUrl(req.headers as any, req.url);
+
+        const webRequest = new Request(fullUrl, {
+            method: req.method,
+            headers: req.headers as HeadersInit,
+            body: JSON.stringify(req.body),
+        });
+
+        const result = await this.processFlow(webRequest);
+
+        reply.code(result.status).headers(result.headers).send(result.body);
+        return result;
+    }
+
+    getHandlers() {
+        return {
+            GET: (req: FastifyRequest, reply: FastifyReply) =>
+                this.handleGet(req, reply),
+            POST: (req: FastifyRequest, reply: FastifyReply) =>
+                this.handlePost(req, reply),
+            webhook: (req: FastifyRequest, reply: FastifyReply) =>
+                this.autoRoute(req, reply),
+            flow: (req: FastifyRequest, reply: FastifyReply) =>
+                this.handleFlow(req, reply),
+            processor: this.webhookProcessor,
+        };
+    }
+}
+
+export function fastifyWebhookHandler(config: FastifyWebhookConfig) {
+    const handler = new FastifyWebhookHandler(config);
+    return handler.getHandlers();
+}
+```
+
+### Using the Fastify Adapter
+
+```typescript
+import Fastify from 'fastify';
+import { fastifyWebhookHandler } from './fastify-adapter';
+
+const fastify = Fastify();
+
+const whatsapp = fastifyWebhookHandler({
+    accessToken: process.env.WHATSAPP_ACCESS_TOKEN!,
+    phoneNumberId: parseInt(process.env.WHATSAPP_PHONE_NUMBER_ID!),
+    businessAcctId: process.env.WHATSAPP_BUSINESS_ACCOUNT_ID,
+    webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN!,
+});
+
+// Register handlers
+whatsapp.processor.onText(async (client, message) => {
+    await client.messages.text({
+        to: message.from,
+        body: 'Hello from Fastify!',
+    });
+});
+
+// Routes
+fastify.get('/webhook', whatsapp.GET);
+fastify.post('/webhook', whatsapp.POST);
+
+fastify.listen({ port: 3000 });
+```
+
+## Custom Handler Patterns
+
+### Pre/Post Processing
+
+Add middleware-like processing:
+
+```typescript
+// Pre-process all messages
+processor.onMessagePreProcess(async (whatsapp, message) => {
+    console.log('Before processing:', message.id);
+
+    // Add custom metadata
+    (message as any).processedAt = new Date();
+
+    // Rate limiting check
+    if (await isRateLimited(message.from)) {
+        throw new Error('Rate limited');
+    }
+});
+
+// Post-process all messages
+processor.onMessagePostProcess(async (whatsapp, message) => {
+    console.log('After processing:', message.id);
+
+    // Logging to database
+    await logMessage(message);
+
+    // Analytics
+    await trackEvent('message_processed', { from: message.from });
+});
+```
+
+### Custom Message Router
+
+Build a command router:
+
+```typescript
+type CommandHandler = (
+    whatsapp: WhatsApp,
+    message: WebhookMessage,
+    args: string[]
+) => Promise<void>;
+
+class CommandRouter {
+    private commands = new Map<string, CommandHandler>();
+
+    register(command: string, handler: CommandHandler) {
+        this.commands.set(command.toLowerCase(), handler);
+    }
+
+    async route(whatsapp: WhatsApp, message: WebhookMessage) {
+        const text = message.text?.body.trim();
+        if (!text) return;
+
+        const [command, ...args] = text.split(/\s+/);
+        const handler = this.commands.get(command.toLowerCase());
+
+        if (handler) {
+            await handler(whatsapp, message, args);
+        }
+    }
+}
+
+// Usage
+const router = new CommandRouter();
+
+router.register('/start', async (whatsapp, message) => {
+    await whatsapp.messages.text({
+        to: message.from,
+        body: 'Welcome! Send /help for commands.',
+    });
+});
+
+router.register('/help', async (whatsapp, message) => {
+    await whatsapp.messages.text({
+        to: message.from,
+        body: 'Available commands:\n/start - Get started\n/help - Show this help',
+    });
+});
+
+processor.onText(async (whatsapp, message) => {
+    await router.route(whatsapp, message);
+});
+```
+
+### State Management
+
+Maintain conversation state:
+
+```typescript
+interface UserState {
+    step: string;
+    data: Record<string, any>;
+}
+
+class StateManager {
+    private states = new Map<string, UserState>();
+
+    getState(userId: string): UserState {
+        return this.states.get(userId) || { step: 'idle', data: {} };
+    }
+
+    setState(userId: string, state: UserState) {
+        this.states.set(userId, state);
+    }
+
+    clearState(userId: string) {
+        this.states.delete(userId);
+    }
+}
+
+// Usage
+const stateManager = new StateManager();
+
+processor.onText(async (whatsapp, message) => {
+    const state = stateManager.getState(message.from);
+    const text = message.text.body.toLowerCase();
+
+    switch (state.step) {
+        case 'idle':
+            if (text === 'register') {
+                stateManager.setState(message.from, {
+                    step: 'waiting_name',
+                    data: {},
+                });
+                await whatsapp.messages.text({
+                    to: message.from,
+                    body: 'What is your name?',
+                });
+            }
+            break;
+
+        case 'waiting_name':
+            state.data.name = text;
+            stateManager.setState(message.from, {
+                step: 'waiting_email',
+                data: state.data,
+            });
+            await whatsapp.messages.text({
+                to: message.from,
+                body: 'What is your email?',
+            });
+            break;
+
+        case 'waiting_email':
+            state.data.email = text;
+            await registerUser(state.data);
+            stateManager.clearState(message.from);
+            await whatsapp.messages.text({
+                to: message.from,
+                body: 'Registration complete!',
+            });
+            break;
+    }
+});
+```
+
+### Message Queue
+
+Process messages asynchronously:
+
+```typescript
+import { Queue } from 'bullmq';
+
+const messageQueue = new Queue('whatsapp-messages', {
+    connection: {
+        host: 'localhost',
+        port: 6379,
+    },
+});
+
+processor.onText(async (whatsapp, message) => {
+    // Add to queue
+    await messageQueue.add('process-text', {
+        message,
+        timestamp: Date.now(),
+    });
+
+    // Acknowledge immediately
+    await whatsapp.messages.markAsRead({ messageId: message.id });
+});
+
+// Worker
+const worker = new Worker('whatsapp-messages', async (job) => {
+    const { message } = job.data;
+
+    // Process message
+    await processMessage(message);
+}, {
+    connection: {
+        host: 'localhost',
+        port: 6379,
+    },
+});
+```
+
+## Advanced Patterns
+
+### Multi-tenant Support
+
+Handle multiple WhatsApp Business Accounts:
+
+```typescript
+class MultiTenantWebhook {
+    private processors = new Map<string, WebhookProcessor>();
+
+    registerTenant(accountId: string, config: WhatsAppConfig) {
+        const processor = new WebhookProcessor(config);
+        this.processors.set(accountId, processor);
+        return processor;
+    }
+
+    async processWebhook(accountId: string, request: Request) {
+        const processor = this.processors.get(accountId);
+        if (!processor) {
+            throw new Error('Account not found');
+        }
+        return await processor.processWebhook(request);
+    }
+}
+
+// Usage
+const multiTenant = new MultiTenantWebhook();
+
+// Register tenants
+const tenant1 = multiTenant.registerTenant('account1', {
+    accessToken: process.env.ACCOUNT1_TOKEN!,
+    phoneNumberId: parseInt(process.env.ACCOUNT1_PHONE!),
+    webhookVerificationToken: process.env.ACCOUNT1_VERIFY_TOKEN!,
+});
+
+tenant1.onText(async (whatsapp, message) => {
+    // Handle account1 messages
+});
+
+// Route based on path
+app.post('/webhook/:accountId', async (req, res) => {
+    const result = await multiTenant.processWebhook(
+        req.params.accountId,
+        createRequest(req)
+    );
+    res.status(result.status).send(result.body);
+});
+```
+
+### Plugin System
+
+Create extensible webhook processors:
+
+```typescript
+interface WebhookPlugin {
+    name: string;
+    init(processor: WebhookProcessor): void;
+}
+
+class LoggingPlugin implements WebhookPlugin {
+    name = 'logging';
+
+    init(processor: WebhookProcessor) {
+        processor.onMessagePreProcess(async (whatsapp, message) => {
+            console.log('[PLUGIN:LOGGING] Message received:', message.id);
+        });
+    }
+}
+
+class AnalyticsPlugin implements WebhookPlugin {
+    name = 'analytics';
+
+    init(processor: WebhookProcessor) {
+        processor.onMessagePostProcess(async (whatsapp, message) => {
+            await trackEvent('message', { type: message.type });
+        });
+    }
+}
+
+// Plugin manager
+class PluginManager {
+    private plugins: WebhookPlugin[] = [];
+
+    use(plugin: WebhookPlugin) {
+        this.plugins.push(plugin);
+    }
+
+    initialize(processor: WebhookProcessor) {
+        this.plugins.forEach(plugin => plugin.init(processor));
+    }
+}
+
+// Usage
+const processor = new WebhookProcessor(config);
+const plugins = new PluginManager();
+
+plugins.use(new LoggingPlugin());
+plugins.use(new AnalyticsPlugin());
+plugins.initialize(processor);
+```
+
+### Custom Flow Handlers
+
+Handle WhatsApp Flows with custom logic:
+
+```typescript
+import { FlowTypeEnum } from 'meta-cloud-api/enums';
+
+processor.onFlow(FlowTypeEnum.DataExchange, async (request, response, whatsapp) => {
+    const { screen, data, version, action, flow_token } = request;
+
+    // Process flow data
+    if (screen === 'FORM_SCREEN') {
+        // Validate form data
+        const errors = validateFormData(data);
+
+        if (errors.length > 0) {
+            return response.error({
+                error_message: 'Validation failed',
+            });
+        }
+
+        // Process successful submission
+        await saveFormData(data);
+
+        return response.success({
+            next_screen: 'SUCCESS_SCREEN',
+        });
+    }
+
+    return response.error({
+        error_message: 'Unknown screen',
+    });
+});
+```
+
+## Testing Custom Handlers
+
+### Unit Testing
+
+```typescript
+import { describe, it, expect, vi } from 'vitest';
+import { WebhookProcessor } from 'meta-cloud-api';
+
+describe('Custom Webhook Handler', () => {
+    it('should process text messages', async () => {
+        const processor = new WebhookProcessor({
+            accessToken: 'test_token',
+            phoneNumberId: 123456789,
+            webhookVerificationToken: 'test_verify',
+        });
+
+        const mockHandler = vi.fn();
+        processor.onText(mockHandler);
+
+        const mockRequest = new Request('http://localhost/webhook', {
+            method: 'POST',
+            body: JSON.stringify({
+                object: 'whatsapp_business_account',
+                entry: [{
+                    id: '123',
+                    changes: [{
+                        value: {
+                            messaging_product: 'whatsapp',
+                            metadata: {
+                                display_phone_number: '1234567890',
+                                phone_number_id: '123456789',
+                            },
+                            contacts: [{ profile: { name: 'Test' }, wa_id: '1234567890' }],
+                            messages: [{
+                                from: '1234567890',
+                                id: 'wamid.test',
+                                timestamp: '1234567890',
+                                type: 'text',
+                                text: { body: 'Hello' },
+                            }],
+                        },
+                        field: 'messages',
+                    }],
+                }],
+            }),
+        });
+
+        await processor.processWebhook(mockRequest);
+
+        expect(mockHandler).toHaveBeenCalled();
+    });
+});
+```
+
+### Integration Testing
+
+```typescript
+import { describe, it, expect } from 'vitest';
+import request from 'supertest';
+import { createTestServer } from './test-server';
+
+describe('Webhook Integration', () => {
+    const server = createTestServer();
+
+    it('should verify webhook', async () => {
+        const response = await request(server)
+            .get('/webhook')
+            .query({
+                'hub.mode': 'subscribe',
+                'hub.verify_token': 'test_token',
+                'hub.challenge': 'test_challenge',
+            });
+
+        expect(response.status).toBe(200);
+        expect(response.text).toBe('test_challenge');
+    });
+
+    it('should process webhook', async () => {
+        const response = await request(server)
+            .post('/webhook')
+            .send(mockWebhookPayload);
+
+        expect(response.status).toBe(200);
+    });
+});
+```
+
+## Best Practices
+
+<Aside type="tip">
+Always handle errors gracefully and return 200 OK to WhatsApp to avoid delivery retries.
+</Aside>
+
+### Error Handling
+
+```typescript
+processor.onText(async (whatsapp, message) => {
+    try {
+        await processMessage(message);
+    } catch (error) {
+        console.error('Processing error:', error);
+        // Don't throw - still return 200 OK
+    }
+});
+```
+
+### Idempotency
+
+```typescript
+const processed = new Set<string>();
+
+processor.onText(async (whatsapp, message) => {
+    if (processed.has(message.id)) {
+        return; // Already processed
+    }
+
+    processed.add(message.id);
+    await processMessage(message);
+});
+```
+
+### Resource Cleanup
+
+```typescript
+process.on('SIGTERM', async () => {
+    console.log('Cleaning up...');
+    // Close connections, save state, etc.
+    await cleanup();
+    process.exit(0);
+});
+```
+
+## Next Steps
+
+- [Webhook Overview](/webhooks/overview) - Understand webhooks
+- [Express Integration](/webhooks/express) - Use Express adapter
+- [Next.js Integration](/webhooks/nextjs) - Use Next.js adapter
+- [Message Types](/types/message-types) - Message type reference
+
+## Related Resources
+
+- [Meta Webhooks](https://developers.facebook.com/docs/graph-api/webhooks)
+- [WhatsApp Webhook Fields](https://developers.facebook.com/docs/graph-api/webhooks/reference/whatsapp-business-account)
+- [GitHub Examples](https://github.com/froggy1014/meta-cloud-api/tree/main/examples)

@@ -1,0 +1,762 @@
+---
+title: Enums Reference
+description: Complete reference for all SDK enums including message types, template statuses, languages, and more
+---
+
+# Enums Reference
+
+Complete reference for all TypeScript enums exported by the SDK. Enums provide type-safe constants for WhatsApp Business Platform operations.
+
+## Import Instructions
+
+```typescript
+// Import specific enums
+import { MessageTypesEnum, LanguagesEnum, ComponentTypesEnum } from 'meta-cloud-api/enums';
+
+// Or import all enums
+import * as Enums from 'meta-cloud-api/enums';
+```
+
+## Message & Component Enums
+
+### MessageTypesEnum
+
+Defines all message types supported by WhatsApp Cloud API.
+
+```typescript
+enum MessageTypesEnum {
+    Audio = 'audio',
+    Contacts = 'contacts',
+    Document = 'document',
+    Image = 'image',
+    Interactive = 'interactive',
+    Location = 'location',
+    Reaction = 'reaction',
+    Sticker = 'sticker',
+    Template = 'template',
+    Text = 'text',
+    Video = 'video',
+    Button = 'button',
+    Order = 'order',
+    System = 'system',
+    Unsupported = 'unsupported',
+    Unknown = 'unknown',
+    '*' = '*', // All message types (for webhooks)
+}
+```
+
+**Usage Example:**
+
+```typescript
+import { MessageTypesEnum } from 'meta-cloud-api/enums';
+
+// Type-safe message type checks
+if (message.type === MessageTypesEnum.Text) {
+    console.log(message.text.body);
+}
+
+// Listen to all message types in webhook
+processor.onMessage(MessageTypesEnum['*'], async (message) => {
+    // Handle any message type
+});
+```
+
+### ComponentTypesEnum
+
+Template message component types.
+
+```typescript
+enum ComponentTypesEnum {
+    Header = 'HEADER',
+    Body = 'BODY',
+    Button = 'BUTTON',
+    Footer = 'FOOTER',
+}
+```
+
+**Usage Example:**
+
+```typescript
+import { ComponentTypesEnum, ParametersTypesEnum } from 'meta-cloud-api/enums';
+
+await client.messages.template({
+    to: '15551234567',
+    template: {
+        name: 'order_confirmation',
+        language: { code: 'en_US' },
+        components: [
+            {
+                type: ComponentTypesEnum.Header,
+                parameters: [
+                    { type: ParametersTypesEnum.Image, link: 'https://example.com/image.jpg' }
+                ]
+            },
+            {
+                type: ComponentTypesEnum.Body,
+                parameters: [
+                    { type: ParametersTypesEnum.Text, text: 'John' },
+                    { type: ParametersTypesEnum.Text, text: 'Order #12345' }
+                ]
+            }
+        ]
+    }
+});
+```
+
+### ParametersTypesEnum
+
+Template parameter types for dynamic content.
+
+```typescript
+enum ParametersTypesEnum {
+    Action = 'ACTION',
+    CouponCode = 'COUPON_CODE',
+    Currency = 'CURRENCY',
+    DateTime = 'DATE_TIME',
+    Document = 'DOCUMENT',
+    ExpirationTimeMs = 'EXPIRATION_TIME_MS',
+    Image = 'IMAGE',
+    LimitedTimeOffer = 'LIMITED_TIME_OFFER',
+    Location = 'LOCATION',
+    OrderStatus = 'ORDER_STATUS',
+    Payload = 'PAYLOAD',
+    Product = 'PRODUCT',
+    Text = 'TEXT',
+    TtlMinutes = 'TTL_MINUTES',
+    Video = 'VIDEO',
+    WebviewInteraction = 'WEBVIEW_INTERACTION',
+    WebviewPresentation = 'WEBVIEW_PRESENTATION',
+}
+```
+
+**Usage Example:**
+
+```typescript
+import { ParametersTypesEnum, CurrencyCodesEnum } from 'meta-cloud-api/enums';
+
+// Currency parameter
+{
+    type: ParametersTypesEnum.Currency,
+    currency: {
+        fallback_value: '$100.00',
+        code: CurrencyCodesEnum.USD,
+        amount_1000: 100000 // $100.00 in smallest currency units
+    }
+}
+
+// DateTime parameter
+{
+    type: ParametersTypesEnum.DateTime,
+    date_time: {
+        fallback_value: 'December 25, 2024'
+    }
+}
+
+// Coupon code parameter
+{
+    type: ParametersTypesEnum.CouponCode,
+    coupon_code: 'SAVE20'
+}
+```
+
+### InteractiveTypesEnum
+
+Types of interactive messages.
+
+```typescript
+enum InteractiveTypesEnum {
+    Button = 'button',
+    List = 'list',
+    Product = 'product',
+    ProductList = 'product_list',
+    CtaUrl = 'cta_url',
+    Carousel = 'carousel',
+    LocationRequest = 'location_request_message',
+    AddressMessage = 'address_message',
+    Flow = 'flow',
+}
+```
+
+**Usage Example:**
+
+```typescript
+import { InteractiveTypesEnum } from 'meta-cloud-api/enums';
+
+// Button interactive
+await client.messages.interactive({
+    to: '15551234567',
+    type: InteractiveTypesEnum.Button,
+    body: { text: 'Choose an option:' },
+    action: {
+        buttons: [
+            { type: 'reply', reply: { id: 'yes', title: 'Yes' } },
+            { type: 'reply', reply: { id: 'no', title: 'No' } }
+        ]
+    }
+});
+
+// List interactive
+await client.messages.interactive({
+    to: '15551234567',
+    type: InteractiveTypesEnum.List,
+    body: { text: 'Select a category:' },
+    action: {
+        button: 'View Options',
+        sections: [
+            {
+                title: 'Products',
+                rows: [
+                    { id: 'phone', title: 'Phones' },
+                    { id: 'laptop', title: 'Laptops' }
+                ]
+            }
+        ]
+    }
+});
+```
+
+### SubTypeEnum
+
+Button sub-types for template messages.
+
+```typescript
+enum SubTypeEnum {
+    Catalog = 'CATALOG',
+    CopyCode = 'COPY_CODE',
+    Flow = 'FLOW',
+    Mpm = 'MPM',
+    OrderDetails = 'ORDER_DETAILS',
+    QuickReply = 'QUICK_REPLY',
+    Reminder = 'REMINDER',
+    Url = 'URL',
+    VoiceCall = 'VOICE_CALL',
+}
+```
+
+### ButtonPositionEnum
+
+Button positions in template messages (1-5).
+
+```typescript
+enum ButtonPositionEnum {
+    First = 1,
+    Second = 2,
+    Third = 3,
+    Fourth = 4,
+    Fifth = 5,
+}
+```
+
+## Template & Status Enums
+
+### CategoryEnum
+
+Message template categories.
+
+```typescript
+enum CategoryEnum {
+    Authentication = 'AUTHENTICATION',
+    Marketing = 'MARKETING',
+    Utility = 'UTILITY',
+}
+```
+
+**Usage Example:**
+
+```typescript
+import { CategoryEnum } from 'meta-cloud-api/enums';
+
+await client.template.create({
+    name: 'order_update',
+    category: CategoryEnum.Utility,
+    language: 'en_US',
+    components: [...]
+});
+```
+
+### TemplateStatusEnum
+
+Template approval status.
+
+```typescript
+enum TemplateStatusEnum {
+    Approved = 'APPROVED',
+    Pending = 'PENDING',
+    Rejected = 'REJECTED',
+}
+```
+
+**Usage Example:**
+
+```typescript
+import { TemplateStatusEnum } from 'meta-cloud-api/enums';
+
+const templates = await client.template.list();
+
+templates.forEach(template => {
+    if (template.status === TemplateStatusEnum.Approved) {
+        console.log(`${template.name} is ready to use`);
+    }
+});
+```
+
+### StatusEnum
+
+Message delivery status.
+
+```typescript
+enum StatusEnum {
+    Delivered = 'delivered',
+    Read = 'read',
+    Sent = 'sent',
+}
+```
+
+**Usage Example:**
+
+```typescript
+import { StatusEnum } from 'meta-cloud-api/enums';
+
+processor.onStatus(async (status) => {
+    if (status.status === StatusEnum.Read) {
+        console.log('Message was read by user');
+    }
+});
+```
+
+### ConversationTypesEnum
+
+Conversation categories for pricing.
+
+```typescript
+enum ConversationTypesEnum {
+    BusinessInitiated = 'business_initiated',
+    CustomerInitiated = 'customer_initiated',
+    ReferralConversion = 'referral_conversion',
+}
+```
+
+## Language Enums
+
+### LanguagesEnum
+
+Supported languages for templates and localization.
+
+```typescript
+enum LanguagesEnum {
+    // English variants
+    English = 'en',
+    English_UK = 'en_GB',
+    English_US = 'en_US',
+
+    // Spanish variants
+    Spanish = 'es',
+    Spanish_ARG = 'es_AR',
+    Spanish_SPA = 'es_ES',
+    Spanish_MEX = 'es_MX',
+
+    // Chinese variants
+    Chinese_CHN = 'zh_CN',
+    Chinese_HKG = 'zh_HK',
+    Chinese_TAI = 'zh_TW',
+
+    // Portuguese variants
+    Portuguese_BR = 'pt_BR',
+    Portuguese_POR = 'pt_PT',
+
+    // Other major languages
+    Arabic = 'ar',
+    French = 'fr',
+    German = 'de',
+    Hindi = 'hi',
+    Indonesian = 'id',
+    Italian = 'it',
+    Japanese = 'ja',
+    Korean = 'ko',
+    Russian = 'ru',
+    Turkish = 'tr',
+    Vietnamese = 'vi',
+
+    // Additional languages (60+ total)
+    Afrikaans = 'af',
+    Albanian = 'sq',
+    Azerbaijani = 'az',
+    Bengali = 'bn',
+    Bulgarian = 'bg',
+    Catalan = 'ca',
+    Croatian = 'hr',
+    Czech = 'cs',
+    Danish = 'da',
+    Dutch = 'nl',
+    Estonian = 'et',
+    Filipino = 'fil',
+    Finnish = 'fi',
+    Georgian = 'ka',
+    Greek = 'el',
+    Gujarati = 'gu',
+    Hausa = 'ha',
+    Hebrew = 'he',
+    Hungarian = 'hu',
+    Irish = 'ga',
+    Kannada = 'kn',
+    Kazakh = 'kk',
+    Kinyarwanda = 'rw_RW',
+    Kyrgyz_Kyrgyzstan = 'ky_KG',
+    Lao = 'lo',
+    Latvian = 'lv',
+    Lithuanian = 'lt',
+    Macedonian = 'mk',
+    Malay = 'ms',
+    Malayalam = 'ml',
+    Marathi = 'mr',
+    Norwegian = 'nb',
+    Persian = 'fa',
+    Polish = 'pl',
+    Punjabi = 'pa',
+    Romanian = 'ro',
+    Serbian = 'sr',
+    Slovak = 'sk',
+    Slovenian = 'sl',
+    Swahili = 'sw',
+    Swedish = 'sv',
+    Tamil = 'ta',
+    Telugu = 'te',
+    Thai = 'th',
+    Ukrainian = 'uk',
+    Urdu = 'ur',
+    Uzbek = 'uz',
+    Zulu = 'zu',
+}
+```
+
+**Usage Example:**
+
+```typescript
+import { LanguagesEnum } from 'meta-cloud-api/enums';
+
+await client.messages.template({
+    to: '15551234567',
+    template: {
+        name: 'greeting',
+        language: {
+            code: LanguagesEnum.Spanish_MEX,
+            policy: 'deterministic'
+        }
+    }
+});
+```
+
+### CurrencyCodesEnum
+
+ISO 4217 currency codes (180+ currencies).
+
+```typescript
+enum CurrencyCodesEnum {
+    // Major currencies
+    USD = 'USD', // US Dollar
+    EUR = 'EUR', // Euro
+    GBP = 'GBP', // British Pound
+    JPY = 'JPY', // Japanese Yen
+    CNY = 'CNY', // Chinese Yuan
+    INR = 'INR', // Indian Rupee
+    CAD = 'CAD', // Canadian Dollar
+    AUD = 'AUD', // Australian Dollar
+
+    // Additional currencies (180+ total)
+    AED = 'AED', // UAE Dirham
+    AFN = 'AFN', // Afghan Afghani
+    ALL = 'ALL', // Albanian Lek
+    AMD = 'AMD', // Armenian Dram
+    ANG = 'ANG', // Netherlands Antillean Guilder
+    AOA = 'AOA', // Angolan Kwanza
+    ARS = 'ARS', // Argentine Peso
+    // ... many more
+}
+```
+
+**Usage Example:**
+
+```typescript
+import { CurrencyCodesEnum, ParametersTypesEnum } from 'meta-cloud-api/enums';
+
+{
+    type: ParametersTypesEnum.Currency,
+    currency: {
+        fallback_value: '€50.00',
+        code: CurrencyCodesEnum.EUR,
+        amount_1000: 50000
+    }
+}
+```
+
+## Media Type Enums
+
+### ImageMediaTypesEnum
+
+Supported image MIME types.
+
+```typescript
+enum ImageMediaTypesEnum {
+    Jpeg = 'image/jpeg',
+    Png = 'image/png',
+}
+```
+
+### VideoMediaTypesEnum
+
+Supported video MIME types.
+
+```typescript
+enum VideoMediaTypesEnum {
+    Mp4 = 'video/mp4',
+    Threegp = 'video/3gp',
+}
+```
+
+### AudioMediaTypesEnum
+
+Supported audio MIME types.
+
+```typescript
+enum AudioMediaTypesEnum {
+    Aac = 'audio/aac',
+    Mp4 = 'audio/mp4',
+    Mpeg = 'audio/mpeg',
+    Amr = 'audio/amr',
+    Ogg = 'audio/ogg',
+}
+```
+
+### DocumentMediaTypesEnum
+
+Supported document MIME types.
+
+```typescript
+enum DocumentMediaTypesEnum {
+    Text = 'text/plain',
+    Pdf = 'application/pdf',
+    Ppt = 'application/vnd.ms-powerpoint',
+    Word = 'application/msword',
+    Excel = 'application/vnd.ms-excel',
+    OpenDoc = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    OpenPres = 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    OpenSheet = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+}
+```
+
+### StickerMediaTypesEnum
+
+Supported sticker MIME types.
+
+```typescript
+enum StickerMediaTypesEnum {
+    Webp = 'image/webp',
+}
+```
+
+## Webhook Enums
+
+### WebhookTypesEnum
+
+Webhook message types (subset of MessageTypesEnum).
+
+```typescript
+enum WebhookTypesEnum {
+    Audio = 'audio',
+    Button = 'button',
+    Document = 'document',
+    Text = 'text',
+    Image = 'image',
+    Interactive = 'interactive',
+    Order = 'order',
+    Sticker = 'sticker',
+    System = 'system',
+    Unknown = 'unknown',
+    Video = 'video',
+}
+```
+
+### SystemChangeTypesEnum
+
+System notification types.
+
+```typescript
+enum SystemChangeTypesEnum {
+    CustomerChangedNumber = 'customer_changed_number',
+    CustomerIdentityChanged = 'customer_identity_changed',
+}
+```
+
+### ReferralSourceTypesEnum
+
+Ad referral source types.
+
+```typescript
+enum ReferralSourceTypesEnum {
+    Ad = 'ad',
+    Post = 'post',
+}
+```
+
+## Configuration Enums
+
+### WabaConfigEnum
+
+Configuration environment variable keys.
+
+```typescript
+enum WabaConfigEnum {
+    AppId = 'M4D_APP_ID',
+    Port = 'WA_PORT',
+    AppSecret = 'M4D_APP_SECRET',
+    PhoneNumberId = 'WA_PHONE_NUMBER_ID',
+    BusinessAcctId = 'WA_BUSINESS_ACCOUNT_ID',
+    APIVersion = 'CLOUD_API_VERSION',
+    AccessToken = 'CLOUD_API_ACCESS_TOKEN',
+    WebhookEndpoint = 'WEBHOOK_ENDPOINT',
+    WebhookVerificationToken = 'WEBHOOK_VERIFICATION_TOKEN',
+    ListenerPort = 'LISTENER_PORT',
+    MaxRetriesAfterWait = 'MAX_RETRIES_AFTER_WAIT',
+    RequestTimeout = 'REQUEST_TIMEOUT',
+    Debug = 'DEBUG',
+    PrivatePem = 'FLOW_API_PRIVATE_PEM',
+    Passphrase = 'FLOW_API_PASSPHRASE',
+}
+```
+
+### HttpMethodsEnum
+
+HTTP methods for API requests.
+
+```typescript
+enum HttpMethodsEnum {
+    Get = 'GET',
+    Post = 'POST',
+    Put = 'PUT',
+    Delete = 'DELETE',
+}
+```
+
+### RequestCodeMethodsEnum
+
+Verification code delivery methods.
+
+```typescript
+enum RequestCodeMethodsEnum {
+    Sms = 'SMS',
+    Voice = 'VOICE',
+}
+```
+
+## Business & Region Enums
+
+### BusinessVerticalEnum
+
+Business categories for WhatsApp Business Profile.
+
+```typescript
+enum BusinessVerticalEnum {
+    ALCOHOL = 'ALCOHOL',              // Alcoholic Beverages
+    APPAREL = 'APPAREL',              // Clothing and Apparel
+    AUTO = 'AUTO',                    // Automotive
+    BEAUTY = 'BEAUTY',                // Beauty, Spa and Salon
+    EDU = 'EDU',                      // Education
+    ENTERTAIN = 'ENTERTAIN',          // Entertainment
+    EVENT_PLAN = 'EVENT_PLAN',        // Event Planning and Service
+    FINANCE = 'FINANCE',              // Finance and Banking
+    GOVT = 'GOVT',                    // Public Service
+    GROCERY = 'GROCERY',              // Food and Grocery
+    HEALTH = 'HEALTH',                // Medical and Health
+    HOTEL = 'HOTEL',                  // Hotel and Lodging
+    NONPROFIT = 'NONPROFIT',          // Non-profit
+    ONLINE_GAMBLING = 'ONLINE_GAMBLING', // Online Gambling & Gaming
+    OTC_DRUGS = 'OTC_DRUGS',          // Over-the-Counter Drugs
+    OTHER = 'OTHER',                  // Other
+    PHYSICAL_GAMBLING = 'PHYSICAL_GAMBLING', // Non-Online Gambling
+    PROF_SERVICES = 'PROF_SERVICES',  // Professional Services
+    RESTAURANT = 'RESTAURANT',        // Restaurant
+    RETAIL = 'RETAIL',                // Shopping and Retail
+    TRAVEL = 'TRAVEL',                // Travel and Transportation
+}
+```
+
+**Usage Example:**
+
+```typescript
+import { BusinessVerticalEnum } from 'meta-cloud-api/enums';
+
+await client.profile.update({
+    vertical: BusinessVerticalEnum.RESTAURANT,
+    about: 'Best pizza in town!',
+    email: 'contact@restaurant.com'
+});
+```
+
+### DataLocalizationRegionEnum
+
+Data residency regions.
+
+```typescript
+enum DataLocalizationRegionEnum {
+    // APAC
+    AU = 'AU', // Australia
+    ID = 'ID', // Indonesia
+    IN = 'IN', // India
+    JP = 'JP', // Japan
+    SG = 'SG', // Singapore
+    KR = 'KR', // South Korea
+
+    // Europe
+    DE = 'DE', // EU (Germany)
+    CH = 'CH', // Switzerland
+    GB = 'GB', // United Kingdom
+
+    // LATAM
+    BR = 'BR', // Brazil
+
+    // MEA
+    BH = 'BH', // Bahrain
+    ZA = 'ZA', // South Africa
+    AE = 'AE', // United Arab Emirates
+
+    // NORAM
+    CA = 'CA', // Canada
+}
+```
+
+## Type Guards & Utilities
+
+When working with enums, TypeScript provides excellent type narrowing:
+
+```typescript
+import { MessageTypesEnum } from 'meta-cloud-api/enums';
+
+function handleMessage(message: any) {
+    switch (message.type) {
+        case MessageTypesEnum.Text:
+            // TypeScript knows message.text exists
+            console.log(message.text.body);
+            break;
+        case MessageTypesEnum.Image:
+            // TypeScript knows message.image exists
+            console.log(message.image.caption);
+            break;
+        case MessageTypesEnum.Interactive:
+            // TypeScript knows message.interactive exists
+            console.log(message.interactive.type);
+            break;
+    }
+}
+```
+
+## Related Documentation
+
+- [Message Types Reference](/types/message-types) - Message type definitions
+- [Webhook Types Reference](/types/webhook-types) - Webhook event types
+- [Configuration Types](/types/config-types) - Configuration interfaces
+- [Messages API](/api/messages) - Using message types in practice
+- [Templates API](/api/templates) - Working with templates
+
+## Source Code
+
+View the source code on GitHub: [enums.ts](https://github.com/froggy1014/meta-cloud-api/blob/main/src/types/enums.ts)

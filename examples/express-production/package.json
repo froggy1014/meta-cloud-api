@@ -1,0 +1,50 @@
+{
+    "name": "meta-cloud-api-express-production",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "description": "Production-ready WhatsApp Bot with conversation flows, ticket management, and queue processing",
+    "main": "dist/server.js",
+    "scripts": {
+        "dev": "tsx watch src/server.ts",
+        "build": "tsc",
+        "start": "node dist/server.js",
+        "test": "vitest run",
+        "test:watch": "vitest --watch",
+        "test:e2e": "vitest run tests/e2e",
+        "typecheck": "tsc --noEmit",
+        "prisma:generate": "prisma generate",
+        "prisma:migrate": "prisma migrate dev",
+        "prisma:seed": "tsx prisma/seed.ts",
+        "prisma:studio": "prisma studio",
+        "worker": "tsx src/workers/index.ts",
+        "docker:build": "docker build -t express-production .",
+        "docker:up": "docker compose up",
+        "docker:down": "docker compose down"
+    },
+    "dependencies": {
+        "@prisma/client": "^6.1.0",
+        "bullmq": "^5.34.3",
+        "cors": "^2.8.5",
+        "dotenv": "^16.4.7",
+        "express": "^4.21.2",
+        "express-rate-limit": "^7.5.0",
+        "helmet": "^8.0.0",
+        "ioredis": "^5.4.2",
+        "meta-cloud-api": "workspace:*",
+        "winston": "^3.17.0",
+        "zod": "^3.24.1"
+    },
+    "devDependencies": {
+        "@types/cors": "^2.8.17",
+        "@types/express": "^5.0.0",
+        "@types/node": "^22.13.4",
+        "@types/supertest": "^6.0.2",
+        "@vitest/coverage-v8": "^2.1.8",
+        "prisma": "^6.1.0",
+        "supertest": "^7.0.0",
+        "tsx": "^4.19.2",
+        "typescript": "^5.8.3",
+        "vitest": "^2.1.8"
+    }
+}

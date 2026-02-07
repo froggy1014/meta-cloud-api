@@ -1,0 +1,608 @@
+---
+title: Block Users API
+description: Block and unblock WhatsApp users, manage blocked user lists
+---
+
+# Block Users API
+
+Block or unblock WhatsApp users to manage unwanted interactions, with support for list management and pagination.
+
+**Official Documentation**: [WhatsApp Block Users API](https://developers.facebook.com/documentation/business-messaging/whatsapp/block-users/)
+
+## Overview
+
+The Block Users API enables user blocking management:
+
+- **Block Users**: Prevent specific users from contacting your business
+- **Unblock Users**: Restore contact capabilities for previously blocked users
+- **List Blocked Users**: Retrieve all currently blocked users with pagination
+- **Batch Operations**: Block or unblock multiple users at once
+
+## Endpoints
+
+```
+POST /{PHONE_NUMBER_ID}/block_users
+DELETE /{PHONE_NUMBER_ID}/block_users
+GET /{PHONE_NUMBER_ID}/block_users?limit&after&before
+```
+
+## Important Notes
+
+:::caution[24-Hour Window]
+Users can only be blocked if they've sent a message to your business within the last 24 hours. This prevents preemptive blocking.
+:::
+
+:::tip[Batch Support]
+Both block and unblock operations accept arrays of phone numbers, allowing you to manage multiple users in a single request.
+:::
+
+:::tip[Pagination]
+The list endpoint supports cursor-based pagination with `after` and `before` cursors for navigating through large lists.
+:::
+
+## Quick Start
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+});
+
+// Block a user
+await client.blockUsers.block(['15551234567']);
+
+// Block multiple users
+await client.blockUsers.block([
+    '15551234567',
+    '15559876543',
+]);
+
+// List blocked users
+const blocked = await client.blockUsers.listBlockedUsers({ limit: 10 });
+
+// Unblock a user
+await client.blockUsers.unblock(['15551234567']);
+```
+
+## Block Users
+
+Prevent specific users from contacting your business.
+
+### Block Single User
+
+```typescript
+await client.blockUsers.block(['15551234567']);
+
+console.log('User blocked successfully');
+```
+
+### Block Multiple Users
+
+```typescript
+const usersToBlock = [
+    '15551234567',
+    '15559876543',
+    '15555555555',
+];
+
+await client.blockUsers.block(usersToBlock);
+
+console.log(`Blocked ${usersToBlock.length} users`);
+```
+
+### Block with Validation
+
+```typescript
+function isValidPhoneNumber(phone: string): boolean {
+    // E.164 format: 1-15 digits
+    return /^\d{1,15}$/.test(phone);
+}
+
+async function blockUser(phoneNumber: string) {
+    if (!isValidPhoneNumber(phoneNumber)) {
+        throw new Error('Invalid phone number format');
+    }
+
+    try {
+        await client.blockUsers.block([phoneNumber]);
+        console.log(`User ${phoneNumber} blocked`);
+    } catch (error) {
+        console.error('Failed to block user:', error.message);
+    }
+}
+```
+
+### Block with Reason Logging
+
+```typescript
+interface BlockRecord {
+    phoneNumber: string;
+    reason: string;
+    blockedAt: Date;
+    blockedBy: string;
+}
+
+async function blockWithReason(
+    phoneNumber: string,
+    reason: string,
+    adminId: string
+) {
+    // Block the user
+    await client.blockUsers.block([phoneNumber]);
+
+    // Log the block action
+    const record: BlockRecord = {
+        phoneNumber,
+        reason,
+        blockedAt: new Date(),
+        blockedBy: adminId,
+    };
+
+    await database.blockRecords.insert(record);
+
+    console.log(`User ${phoneNumber} blocked: ${reason}`);
+}
+
+// Usage
+await blockWithReason('15551234567', 'Spam messages', 'admin-123');
+```
+
+## Unblock Users
+
+Restore contact capabilities for previously blocked users.
+
+### Unblock Single User
+
+```typescript
+await client.blockUsers.unblock(['15551234567']);
+
+console.log('User unblocked successfully');
+```
+
+### Unblock Multiple Users
+
+```typescript
+const usersToUnblock = [
+    '15551234567',
+    '15559876543',
+];
+
+await client.blockUsers.unblock(usersToUnblock);
+
+console.log(`Unblocked ${usersToUnblock.length} users`);
+```
+
+### Unblock with Logging
+
+```typescript
+async function unblockWithLog(phoneNumber: string, adminId: string) {
+    // Unblock the user
+    await client.blockUsers.unblock([phoneNumber]);
+
+    // Log the unblock action
+    await database.blockRecords.update({
+        phoneNumber,
+        unblockedAt: new Date(),
+        unblockedBy: adminId,
+    });
+
+    console.log(`User ${phoneNumber} unblocked by ${adminId}`);
+}
+```
+
+## List Blocked Users
+
+Retrieve all currently blocked users with pagination support.
+
+### Get First Page
+
+```typescript
+const blockedUsers = await client.blockUsers.listBlockedUsers({
+    limit: 20,
+});
+
+console.log('Blocked users:', blockedUsers.data);
+console.log('Has more:', blockedUsers.paging?.next);
+```
+
+### Paginate Through All Blocked Users
+
+```typescript
+async function getAllBlockedUsers(): Promise<string[]> {
+    const allUsers: string[] = [];
+    let after: string | undefined;
+
+    do {
+        const response = await client.blockUsers.listBlockedUsers({
+            limit: 100,
+            after,
+        });
+
+        allUsers.push(...response.data.map(u => u.phone_number));
+
+        after = response.paging?.cursors?.after;
+    } while (after);
+
+    return allUsers;
+}
+
+// Usage
+const allBlocked = await getAllBlockedUsers();
+console.log(`Total blocked users: ${allBlocked.length}`);
+```
+
+### List with Filtering
+
+```typescript
+async function findBlockedUser(searchNumber: string) {
+    let after: string | undefined;
+
+    do {
+        const response = await client.blockUsers.listBlockedUsers({
+            limit: 100,
+            after,
+        });
+
+        const found = response.data.find(
+            u => u.phone_number === searchNumber
+        );
+
+        if (found) {
+            return found;
+        }
+
+        after = response.paging?.cursors?.after;
+    } while (after);
+
+    return null;
+}
+```
+
+## Advanced Use Cases
+
+### Automatic Spam Blocking
+
+```typescript
+import { WebhookProcessor } from 'meta-cloud-api/webhook';
+
+const webhook = new WebhookProcessor({
+    verifyToken: process.env.WEBHOOK_VERIFY_TOKEN!,
+});
+
+webhook.on('message', async (message, metadata) => {
+    // Check for spam indicators
+    const isSpam = detectSpam(message.text?.body);
+
+    if (isSpam) {
+        // Block the user
+        await client.blockUsers.block([message.from]);
+
+        console.log(`Blocked spam user: ${message.from}`);
+
+        // Log for review
+        await logSpamBlock(message.from, message.text?.body);
+    }
+});
+
+function detectSpam(text?: string): boolean {
+    if (!text) return false;
+
+    const spamKeywords = ['casino', 'lottery', 'prize', 'winner'];
+    const lowerText = text.toLowerCase();
+
+    return spamKeywords.some(keyword => lowerText.includes(keyword));
+}
+```
+
+### Rate Limit Blocking
+
+```typescript
+interface MessageCounter {
+    [phoneNumber: string]: {
+        count: number;
+        firstMessageAt: Date;
+    };
+}
+
+const messageCounters: MessageCounter = {};
+
+async function checkRateLimit(phoneNumber: string) {
+    const now = new Date();
+    const counter = messageCounters[phoneNumber];
+
+    if (!counter) {
+        messageCounters[phoneNumber] = {
+            count: 1,
+            firstMessageAt: now,
+        };
+        return false; // Not rate limited
+    }
+
+    // Reset if outside time window (e.g., 1 minute)
+    const timeDiff = now.getTime() - counter.firstMessageAt.getTime();
+    if (timeDiff > 60000) {
+        messageCounters[phoneNumber] = {
+            count: 1,
+            firstMessageAt: now,
+        };
+        return false;
+    }
+
+    // Increment counter
+    counter.count++;
+
+    // Block if exceeds threshold (e.g., 10 messages per minute)
+    if (counter.count > 10) {
+        await client.blockUsers.block([phoneNumber]);
+        console.log(`Rate limit exceeded: ${phoneNumber}`);
+        return true;
+    }
+
+    return false;
+}
+```
+
+### Temporary Block System
+
+```typescript
+interface TemporaryBlock {
+    phoneNumber: string;
+    blockedUntil: Date;
+}
+
+const tempBlocks = new Map<string, TemporaryBlock>();
+
+async function temporaryBlock(
+    phoneNumber: string,
+    durationMinutes: number
+) {
+    // Block the user
+    await client.blockUsers.block([phoneNumber]);
+
+    // Schedule unblock
+    const blockedUntil = new Date(Date.now() + durationMinutes * 60000);
+    tempBlocks.set(phoneNumber, { phoneNumber, blockedUntil });
+
+    // Set timeout for automatic unblock
+    setTimeout(async () => {
+        await client.blockUsers.unblock([phoneNumber]);
+        tempBlocks.delete(phoneNumber);
+        console.log(`Temporary block expired: ${phoneNumber}`);
+    }, durationMinutes * 60000);
+
+    console.log(`Temporarily blocked ${phoneNumber} for ${durationMinutes} minutes`);
+}
+
+// Usage: 30-minute timeout
+await temporaryBlock('15551234567', 30);
+```
+
+### Block Management Dashboard
+
+```typescript
+interface BlockSummary {
+    totalBlocked: number;
+    blockedToday: number;
+    recentBlocks: Array<{
+        phoneNumber: string;
+        blockedAt: Date;
+        reason: string;
+    }>;
+}
+
+async function getBlockSummary(): Promise<BlockSummary> {
+    // Get all blocked users
+    const allBlocked = await getAllBlockedUsers();
+
+    // Get block records from database
+    const records = await database.blockRecords.find({
+        blockedAt: { $exists: true },
+    });
+
+    // Calculate today's blocks
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const blockedToday = records.filter(
+        r => r.blockedAt >= today
+    ).length;
+
+    // Get recent blocks
+    const recentBlocks = records
+        .sort((a, b) => b.blockedAt.getTime() - a.blockedAt.getTime())
+        .slice(0, 10);
+
+    return {
+        totalBlocked: allBlocked.length,
+        blockedToday,
+        recentBlocks,
+    };
+}
+```
+
+## Response Formats
+
+### Block Response
+
+```typescript
+{
+    success: true
+}
+```
+
+### Unblock Response
+
+```typescript
+{
+    success: true
+}
+```
+
+### List Blocked Users Response
+
+```typescript
+{
+    data: [
+        {
+            phone_number: '15551234567',
+            blocked_at: '2024-01-15T10:30:00Z'
+        },
+        {
+            phone_number: '15559876543',
+            blocked_at: '2024-01-14T15:45:00Z'
+        }
+    ],
+    paging: {
+        cursors: {
+            before: 'CURSOR_STRING',
+            after: 'CURSOR_STRING'
+        },
+        next: 'https://graph.facebook.com/...'
+    }
+}
+```
+
+## Error Handling
+
+```typescript
+try {
+    await client.blockUsers.block(['15551234567']);
+} catch (error) {
+    if (error.response) {
+        const { code, message } = error.response.data.error;
+
+        switch (code) {
+            case 131026:
+                console.error('Cannot block: user has not messaged in 24 hours');
+                break;
+            case 100:
+                console.error('Invalid phone number format');
+                break;
+            default:
+                console.error(`Error ${code}: ${message}`);
+        }
+    }
+}
+```
+
+## Best Practices
+
+1. **Validate Before Blocking**: Ensure proper phone number format
+   ```typescript
+   function validateBeforeBlock(phoneNumbers: string[]): string[] {
+       return phoneNumbers.filter(num => /^\d{1,15}$/.test(num));
+   }
+
+   const validNumbers = validateBeforeBlock(['15551234567', 'invalid']);
+   await client.blockUsers.block(validNumbers);
+   ```
+
+2. **Log Block Actions**: Maintain audit trail
+   ```typescript
+   async function blockWithAudit(phoneNumber: string, reason: string) {
+       await client.blockUsers.block([phoneNumber]);
+
+       await auditLog.record({
+           action: 'block_user',
+           phoneNumber,
+           reason,
+           timestamp: new Date(),
+       });
+   }
+   ```
+
+3. **Provide Unblock Mechanism**: Allow reversing mistakes
+   ```typescript
+   // Admin interface for unblocking
+   app.post('/admin/unblock', async (req, res) => {
+       const { phoneNumber, adminId } = req.body;
+
+       await client.blockUsers.unblock([phoneNumber]);
+
+       await auditLog.record({
+           action: 'unblock_user',
+           phoneNumber,
+           adminId,
+           timestamp: new Date(),
+       });
+
+       res.json({ success: true });
+   });
+   ```
+
+4. **Handle 24-Hour Limitation**: Check timing before blocking
+   ```typescript
+   async function canBlockUser(phoneNumber: string): Promise<boolean> {
+       // Check if user messaged within 24 hours
+       const lastMessage = await database.messages.findOne({
+           from: phoneNumber,
+           timestamp: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+       });
+
+       return !!lastMessage;
+   }
+
+   if (await canBlockUser('15551234567')) {
+       await client.blockUsers.block(['15551234567']);
+   } else {
+       console.log('Cannot block: 24-hour window expired');
+   }
+   ```
+
+5. **Batch Operations**: Process multiple users efficiently
+   ```typescript
+   // Instead of blocking one by one
+   for (const number of numbers) {
+       await client.blockUsers.block([number]); // ❌ Inefficient
+   }
+
+   // Block all at once
+   await client.blockUsers.block(numbers); // ✅ Efficient
+   ```
+
+6. **Regular Cleanup**: Review blocked users periodically
+   ```typescript
+   async function reviewBlockedUsers() {
+       const allBlocked = await getAllBlockedUsers();
+
+       for (const phoneNumber of allBlocked) {
+           const record = await database.blockRecords.findOne({ phoneNumber });
+
+           // Unblock if blocked for more than 30 days
+           if (record && isOlderThan(record.blockedAt, 30)) {
+               await client.blockUsers.unblock([phoneNumber]);
+               console.log(`Auto-unblocked: ${phoneNumber}`);
+           }
+       }
+   }
+   ```
+
+## Phone Number Format
+
+Use E.164 format without the + symbol:
+
+```typescript
+// ✅ Correct format
+'15551234567'   // US number
+'442071234567'  // UK number
+'919876543210'  // India number
+
+// ❌ Incorrect format
+'+15551234567'  // Don't include +
+'1-555-123-4567' // Don't use hyphens
+'(555) 123-4567' // Don't use formatting
+```
+
+## Related Documentation
+
+- [Messages API](/api/messages) - Handle incoming messages
+- [Webhooks](/webhooks/overview) - Receive message notifications
+- [Phone Numbers API](/api/phone-numbers) - Manage phone numbers
+- [Moderation Guide](/guides/content-moderation) - Content moderation strategies
+
+## Source Code
+
+View the source code on GitHub: [BlockUsersApi.ts](https://github.com/froggy1014/meta-cloud-api/blob/main/src/api/blockUsers/BlockUsersApi.ts)

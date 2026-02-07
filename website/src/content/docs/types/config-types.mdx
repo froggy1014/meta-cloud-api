@@ -1,0 +1,649 @@
+---
+title: Configuration Types Reference
+description: Complete TypeScript type definitions for SDK configuration, logging, and HTTP client setup
+---
+
+# Configuration Types Reference
+
+Complete reference for SDK configuration types. These types define how to initialize and configure the WhatsApp client, including authentication, logging, and HTTP settings.
+
+## Import Instructions
+
+```typescript
+// Import configuration types
+import type {
+    WhatsAppConfig,
+    WabaConfigType
+} from 'meta-cloud-api/types';
+
+// Import enums for config keys
+import { WabaConfigEnum } from 'meta-cloud-api/enums';
+```
+
+## Primary Configuration Types
+
+### WhatsAppConfig
+
+User-friendly configuration interface for initializing the SDK.
+
+```typescript
+type WhatsAppConfig = {
+    accessToken: string;           // Required: Meta API access token
+    appId?: string;                // Meta for Developers app ID
+    appSecret?: string;            // Meta for Developers app secret
+    phoneNumberId?: number;        // WhatsApp phone number ID
+    businessAcctId?: string;       // WhatsApp Business Account ID
+    apiVersion?: string;           // Cloud API version (e.g., 'v21.0')
+    webhookEndpoint?: string;      // Webhook path (e.g., '/webhook')
+    webhookVerificationToken?: string; // Webhook verification token
+    listenerPort?: number;         // Webhook server port
+    debug?: boolean;               // Enable debug logging
+    maxRetriesAfterWait?: number;  // HTTP retry attempts
+    requestTimeout?: number;       // HTTP timeout in milliseconds
+    privatePem?: string;           // Flow API private key (PEM)
+    passphrase?: string;           // Flow API key passphrase
+};
+```
+
+**Basic Usage:**
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+});
+```
+
+**Full Configuration:**
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    // Required
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+
+    // Optional but recommended
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+    apiVersion: 'v21.0',
+
+    // App credentials (for certain operations)
+    appId: process.env.M4D_APP_ID,
+    appSecret: process.env.M4D_APP_SECRET,
+
+    // Webhook configuration
+    webhookEndpoint: '/webhook',
+    webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN,
+    listenerPort: 3000,
+
+    // HTTP client configuration
+    requestTimeout: 30000,      // 30 seconds
+    maxRetriesAfterWait: 3,     // Retry failed requests 3 times
+
+    // Debugging
+    debug: process.env.NODE_ENV !== 'production',
+
+    // Flow API (for WhatsApp Flows)
+    privatePem: process.env.FLOW_API_PRIVATE_PEM,
+    passphrase: process.env.FLOW_API_PASSPHRASE,
+});
+```
+
+### WabaConfigType
+
+Internal configuration type using enum keys (advanced usage).
+
+```typescript
+type WabaConfigType = {
+    [WabaConfigEnum.AppId]: string;
+    [WabaConfigEnum.AppSecret]: string;
+    [WabaConfigEnum.PhoneNumberId]: number;
+    [WabaConfigEnum.BusinessAcctId]: string;
+    [WabaConfigEnum.APIVersion]: string;
+    [WabaConfigEnum.AccessToken]: string;
+    [WabaConfigEnum.WebhookEndpoint]: string;
+    [WabaConfigEnum.WebhookVerificationToken]: string;
+    [WabaConfigEnum.ListenerPort]: number;
+    [WabaConfigEnum.Debug]: boolean;
+    [WabaConfigEnum.MaxRetriesAfterWait]: number;
+    [WabaConfigEnum.RequestTimeout]: number;
+    [WabaConfigEnum.PrivatePem]: string;
+    [WabaConfigEnum.Passphrase]: string;
+};
+```
+
+**Usage (Advanced):**
+
+```typescript
+import { WabaConfigEnum } from 'meta-cloud-api/enums';
+
+const config: WabaConfigType = {
+    [WabaConfigEnum.AppId]: 'YOUR_APP_ID',
+    [WabaConfigEnum.AppSecret]: 'YOUR_APP_SECRET',
+    [WabaConfigEnum.PhoneNumberId]: 123456789,
+    [WabaConfigEnum.BusinessAcctId]: 'YOUR_WABA_ID',
+    [WabaConfigEnum.APIVersion]: 'v21.0',
+    [WabaConfigEnum.AccessToken]: 'YOUR_ACCESS_TOKEN',
+    [WabaConfigEnum.WebhookEndpoint]: '/webhook',
+    [WabaConfigEnum.WebhookVerificationToken]: 'YOUR_VERIFY_TOKEN',
+    [WabaConfigEnum.ListenerPort]: 3000,
+    [WabaConfigEnum.Debug]: true,
+    [WabaConfigEnum.MaxRetriesAfterWait]: 3,
+    [WabaConfigEnum.RequestTimeout]: 30000,
+    [WabaConfigEnum.PrivatePem]: 'PEM_STRING',
+    [WabaConfigEnum.Passphrase]: 'PASSPHRASE',
+};
+```
+
+## Configuration Properties
+
+### accessToken (Required)
+
+Meta API access token for authentication.
+
+```typescript
+accessToken: string
+```
+
+**How to get:**
+1. Go to [Meta for Developers](https://developers.facebook.com)
+2. Select your app
+3. Navigate to WhatsApp > API Setup
+4. Copy the temporary or system user access token
+
+**Example:**
+
+```typescript
+const client = new WhatsApp({
+    accessToken: 'EAABsbCS1iHgBO...',
+});
+```
+
+### phoneNumberId
+
+WhatsApp Business phone number ID.
+
+```typescript
+phoneNumberId?: number
+```
+
+**How to get:**
+1. Go to WhatsApp Manager
+2. Select your phone number
+3. Copy the Phone Number ID from API Setup
+
+**Example:**
+
+```typescript
+const client = new WhatsApp({
+    accessToken: 'YOUR_TOKEN',
+    phoneNumberId: 123456789012345,
+});
+```
+
+### businessAcctId
+
+WhatsApp Business Account ID (WABA ID).
+
+```typescript
+businessAcctId?: string
+```
+
+**How to get:**
+1. Go to [Business Manager](https://business.facebook.com)
+2. Navigate to WhatsApp Accounts
+3. Copy the WhatsApp Business Account ID
+
+**Example:**
+
+```typescript
+const client = new WhatsApp({
+    accessToken: 'YOUR_TOKEN',
+    businessAcctId: '123456789012345',
+});
+```
+
+### apiVersion
+
+Cloud API version to use.
+
+```typescript
+apiVersion?: string // Default: 'v21.0'
+```
+
+**Available versions:**
+- `'v21.0'` (Latest)
+- `'v20.0'`
+- `'v19.0'`
+
+**Example:**
+
+```typescript
+const client = new WhatsApp({
+    accessToken: 'YOUR_TOKEN',
+    apiVersion: 'v21.0',
+});
+```
+
+### appId & appSecret
+
+Meta for Developers app credentials (required for certain operations).
+
+```typescript
+appId?: string
+appSecret?: string
+```
+
+**When required:**
+- Generating app access tokens
+- Certain management API operations
+
+**Example:**
+
+```typescript
+const client = new WhatsApp({
+    accessToken: 'YOUR_TOKEN',
+    appId: '1234567890',
+    appSecret: 'abc123def456',
+});
+```
+
+### requestTimeout
+
+HTTP request timeout in milliseconds.
+
+```typescript
+requestTimeout?: number // Default: 30000 (30 seconds)
+```
+
+**Example:**
+
+```typescript
+const client = new WhatsApp({
+    accessToken: 'YOUR_TOKEN',
+    requestTimeout: 60000, // 60 seconds for slow connections
+});
+```
+
+### maxRetriesAfterWait
+
+Number of retry attempts for failed HTTP requests.
+
+```typescript
+maxRetriesAfterWait?: number // Default: 3
+```
+
+**Example:**
+
+```typescript
+const client = new WhatsApp({
+    accessToken: 'YOUR_TOKEN',
+    maxRetriesAfterWait: 5, // Retry up to 5 times
+});
+```
+
+### debug
+
+Enable debug logging for troubleshooting.
+
+```typescript
+debug?: boolean // Default: false
+```
+
+**Example:**
+
+```typescript
+const client = new WhatsApp({
+    accessToken: 'YOUR_TOKEN',
+    debug: process.env.NODE_ENV === 'development',
+});
+```
+
+When enabled, the SDK logs:
+- HTTP requests and responses
+- Webhook payloads
+- Error details
+- Processing steps
+
+### Webhook Configuration
+
+Properties for webhook server setup.
+
+```typescript
+webhookEndpoint?: string           // Default: '/webhook'
+webhookVerificationToken?: string  // Required for verification
+listenerPort?: number              // Default: 3000
+```
+
+**Example:**
+
+```typescript
+const client = new WhatsApp({
+    accessToken: 'YOUR_TOKEN',
+    webhookEndpoint: '/whatsapp-webhook',
+    webhookVerificationToken: 'my-secret-token-123',
+    listenerPort: 8080,
+});
+```
+
+### Flow API Configuration
+
+Credentials for WhatsApp Flows encryption.
+
+```typescript
+privatePem?: string    // Private key in PEM format
+passphrase?: string    // Key passphrase
+```
+
+**Example:**
+
+```typescript
+import fs from 'fs';
+
+const client = new WhatsApp({
+    accessToken: 'YOUR_TOKEN',
+    privatePem: fs.readFileSync('./private-key.pem', 'utf8'),
+    passphrase: 'my-secure-passphrase',
+});
+```
+
+## Environment Variables
+
+Recommended `.env` file structure:
+
+```bash
+# Required
+CLOUD_API_ACCESS_TOKEN=EAABsbCS1iHgBO...
+
+# Recommended
+WA_PHONE_NUMBER_ID=123456789012345
+WA_BUSINESS_ACCOUNT_ID=123456789012345
+
+# Optional
+M4D_APP_ID=1234567890
+M4D_APP_SECRET=abc123def456
+CLOUD_API_VERSION=v21.0
+
+# Webhook
+WEBHOOK_ENDPOINT=/webhook
+WEBHOOK_VERIFICATION_TOKEN=my-secret-token-123
+LISTENER_PORT=3000
+
+# HTTP Client
+REQUEST_TIMEOUT=30000
+MAX_RETRIES_AFTER_WAIT=3
+
+# Debugging
+DEBUG=false
+
+# Flow API
+FLOW_API_PRIVATE_PEM=-----BEGIN PRIVATE KEY-----...
+FLOW_API_PASSPHRASE=my-passphrase
+```
+
+**Loading Configuration:**
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+    apiVersion: process.env.CLOUD_API_VERSION,
+    webhookEndpoint: process.env.WEBHOOK_ENDPOINT,
+    webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN,
+    listenerPort: Number(process.env.LISTENER_PORT),
+    debug: process.env.DEBUG === 'true',
+    requestTimeout: Number(process.env.REQUEST_TIMEOUT),
+    maxRetriesAfterWait: Number(process.env.MAX_RETRIES_AFTER_WAIT),
+});
+```
+
+## Base API Classes
+
+### BaseClass
+
+Base class interface for API modules.
+
+```typescript
+declare class BaseClass {
+    constructor(config: WabaConfigType);
+}
+```
+
+### BaseAPI
+
+Base implementation class for all API modules.
+
+```typescript
+class BaseAPI implements BaseClass {
+    protected config: WabaConfigType;
+    protected client: RequesterClass;
+
+    constructor(config: WabaConfigType, client: RequesterClass) {
+        this.config = config;
+        this.client = client;
+    }
+
+    protected sendJson<T>(
+        method: HttpMethodsEnum,
+        endpoint: string,
+        timeout: number,
+        body?: any
+    ): Promise<T>;
+
+    protected sendFormData<T>(
+        method: HttpMethodsEnum,
+        endpoint: string,
+        timeout: number,
+        body?: any
+    ): Promise<T>;
+
+    protected sendUrlEncodedForm<T>(
+        method: HttpMethodsEnum,
+        endpoint: string,
+        timeout: number,
+        body?: any
+    ): Promise<T>;
+}
+```
+
+**Usage (Internal):**
+
+All API classes extend `BaseAPI`:
+
+```typescript
+import { BaseAPI } from '@shared/base';
+
+class MessagesApi extends BaseAPI {
+    async text(params: TextMessageParams) {
+        return this.sendJson<MessagesResponse>(
+            HttpMethodsEnum.Post,
+            `/${this.config[WabaConfigEnum.PhoneNumberId]}/messages`,
+            this.config[WabaConfigEnum.RequestTimeout],
+            { ...params }
+        );
+    }
+}
+```
+
+## HTTP Client Types
+
+### HttpMethodsEnum
+
+HTTP methods supported by the client.
+
+```typescript
+enum HttpMethodsEnum {
+    Get = 'GET',
+    Post = 'POST',
+    Put = 'PUT',
+    Delete = 'DELETE',
+}
+```
+
+### RequesterClass
+
+HTTP client interface (internal).
+
+```typescript
+declare class RequesterClass {
+    getJson<T>(
+        method: HttpMethodsEnum,
+        endpoint: string,
+        timeout: number,
+        body?: any
+    ): Promise<T>;
+
+    sendFormData<T>(
+        method: HttpMethodsEnum,
+        endpoint: string,
+        timeout: number,
+        body?: any
+    ): Promise<T>;
+
+    sendUrlEncodedForm<T>(
+        method: HttpMethodsEnum,
+        endpoint: string,
+        timeout: number,
+        body?: any
+    ): Promise<T>;
+}
+```
+
+## Configuration Best Practices
+
+### 1. Use Environment Variables
+
+Never hardcode credentials:
+
+```typescript
+// ❌ Bad
+const client = new WhatsApp({
+    accessToken: 'EAABsbCS1iHgBO...',
+});
+
+// ✅ Good
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+});
+```
+
+### 2. Validate Configuration
+
+Check required fields before initialization:
+
+```typescript
+function validateConfig() {
+    if (!process.env.CLOUD_API_ACCESS_TOKEN) {
+        throw new Error('CLOUD_API_ACCESS_TOKEN is required');
+    }
+    if (!process.env.WA_PHONE_NUMBER_ID) {
+        throw new Error('WA_PHONE_NUMBER_ID is required');
+    }
+}
+
+validateConfig();
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+});
+```
+
+### 3. Environment-Specific Configuration
+
+Different settings for dev/staging/production:
+
+```typescript
+const isDevelopment = process.env.NODE_ENV === 'development';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    debug: isDevelopment,
+    requestTimeout: isDevelopment ? 60000 : 30000,
+    maxRetriesAfterWait: isDevelopment ? 1 : 3,
+});
+```
+
+### 4. Secure Flow API Keys
+
+Load PEM files securely:
+
+```typescript
+import fs from 'fs';
+import path from 'path';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    privatePem: process.env.FLOW_API_PRIVATE_PEM ||
+        fs.readFileSync(
+            path.join(__dirname, '../keys/private-key.pem'),
+            'utf8'
+        ),
+    passphrase: process.env.FLOW_API_PASSPHRASE,
+});
+```
+
+### 5. Configuration Factory
+
+Create a factory for consistent initialization:
+
+```typescript
+// config/whatsapp.ts
+import WhatsApp from 'meta-cloud-api';
+
+export function createWhatsAppClient(): WhatsApp {
+    return new WhatsApp({
+        accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+        phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+        businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+        apiVersion: process.env.CLOUD_API_VERSION || 'v21.0',
+        debug: process.env.DEBUG === 'true',
+    });
+}
+
+// Usage
+import { createWhatsAppClient } from './config/whatsapp';
+
+const client = createWhatsAppClient();
+```
+
+## TypeScript Configuration
+
+For strict type checking:
+
+```json
+{
+    "compilerOptions": {
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "moduleResolution": "node",
+        "resolveJsonModule": true
+    }
+}
+```
+
+## Related Documentation
+
+- [Enums Reference](/types/enums) - Configuration enums (WabaConfigEnum)
+- [Getting Started](/getting-started/quick-start) - Basic setup
+- [Configuration Guide](/getting-started/configuration) - Detailed config guide
+- [Environment Variables](/getting-started/configuration#environment-variables) - .env setup
+
+## Source Code
+
+View the source code on GitHub:
+- [types/config.ts](https://github.com/froggy1014/meta-cloud-api/blob/main/src/types/config.ts)
+- [types/base.ts](https://github.com/froggy1014/meta-cloud-api/blob/main/src/types/base.ts)
+- [types/enums.ts](https://github.com/froggy1014/meta-cloud-api/blob/main/src/types/enums.ts)

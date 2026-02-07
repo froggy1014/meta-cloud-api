@@ -1,0 +1,473 @@
+---
+title: QR Codes API
+description: Create and manage QR codes with prefilled messages for WhatsApp
+---
+
+# QR Codes API
+
+Create, manage, and track QR codes that open WhatsApp conversations with prefilled messages, perfect for marketing, support, and customer engagement.
+
+**Official Documentation**: [WhatsApp QR Codes API](https://developers.facebook.com/documentation/business-messaging/whatsapp/qr-codes/)
+
+## Overview
+
+The QR Codes API enables QR code generation and management:
+
+- **Create QR Codes**: Generate QR codes with prefilled messages
+- **List QR Codes**: Retrieve all QR codes for your phone number
+- **Get QR Details**: Fetch specific QR code information
+- **Update QR Codes**: Modify existing QR code messages
+- **Delete QR Codes**: Remove QR codes you no longer need
+- **Track Usage**: Monitor QR code scan metrics
+
+## Endpoints
+
+```
+POST /{PHONE_NUMBER_ID}/message_qrdls
+GET /{PHONE_NUMBER_ID}/message_qrdls
+GET /{PHONE_NUMBER_ID}/message_qrdls/{QR_CODE_ID}
+POST /{PHONE_NUMBER_ID}/message_qrdls
+DELETE /{PHONE_NUMBER_ID}/message_qrdls/{QR_CODE_ID}
+```
+
+## Important Notes
+
+:::tip[Prefilled Messages]
+The `prefilled_message` parameter sets the text that appears in the user's message input when they scan the QR code. Users can modify before sending.
+:::
+
+:::tip[QR Image Generation]
+Set `generate_qr_image` to `'PNG'` to receive a downloadable QR code image. Otherwise, you'll get a deep link URL.
+:::
+
+:::caution[ID vs Code]
+- Use the numeric **ID** for get, update, and delete operations
+- The **code** string is used in deep links and some update operations
+:::
+
+## Quick Start
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+});
+
+// Create QR code with image
+const qr = await client.qrCode.createQrCode({
+    prefilled_message: 'Hello! I need support.',
+    generate_qr_image: 'PNG',
+});
+
+console.log('QR Code URL:', qr.qr_image_url);
+console.log('Deep Link:', qr.deep_link_url);
+
+// List all QR codes
+const allQrCodes = await client.qrCode.getQrCodes();
+
+// Update QR code message
+await client.qrCode.updateQrCode({
+    code: qr.code,
+    prefilled_message: 'Hi! I have a question.',
+});
+
+// Delete QR code
+await client.qrCode.deleteQrCode(qr.id);
+```
+
+## Create QR Code
+
+Generate a new QR code with a prefilled message.
+
+### Create with Image
+
+```typescript
+const qrCode = await client.qrCode.createQrCode({
+    prefilled_message: 'Hello! I scanned your QR code.',
+    generate_qr_image: 'PNG',
+});
+
+console.log(qrCode);
+// {
+//     code: 'QRCODE123',
+//     prefilled_message: 'Hello! I scanned your QR code.',
+//     deep_link_url: 'https://wa.me/message/QRCODE123',
+//     qr_image_url: 'https://...'
+// }
+```
+
+### Create without Image (Deep Link Only)
+
+```typescript
+const qrCode = await client.qrCode.createQrCode({
+    prefilled_message: 'Support request from website',
+});
+
+// Use deep_link_url to generate QR code with your own tool
+console.log('Deep link:', qrCode.deep_link_url);
+```
+
+### Marketing Campaign QR Code
+
+```typescript
+const marketingQR = await client.qrCode.createQrCode({
+    prefilled_message: 'PROMO2024 - I want to learn more about the special offer!',
+    generate_qr_image: 'PNG',
+});
+
+// Download and use qr_image_url in marketing materials
+console.log('Download QR:', marketingQR.qr_image_url);
+```
+
+### Support QR Code
+
+```typescript
+const supportQR = await client.qrCode.createQrCode({
+    prefilled_message: 'I need help with my account',
+    generate_qr_image: 'PNG',
+});
+
+// Place on support page or print for in-store support
+```
+
+## List QR Codes
+
+Retrieve all QR codes for your phone number.
+
+```typescript
+const qrCodes = await client.qrCode.getQrCodes();
+
+qrCodes.forEach(qr => {
+    console.log(`ID: ${qr.id}`);
+    console.log(`Message: ${qr.prefilled_message}`);
+    console.log(`Link: ${qr.deep_link_url}`);
+    console.log('---');
+});
+```
+
+## Get QR Code Details
+
+Fetch information about a specific QR code.
+
+```typescript
+const qrCode = await client.qrCode.getQrCode('QR_CODE_ID');
+
+console.log(qrCode);
+// {
+//     id: 'QR_CODE_ID',
+//     code: 'QRCODE123',
+//     prefilled_message: 'Hello!',
+//     deep_link_url: 'https://wa.me/message/QRCODE123',
+//     qr_image_url: 'https://...'
+// }
+```
+
+## Update QR Code
+
+Modify the prefilled message of an existing QR code.
+
+```typescript
+// Update using the code string
+await client.qrCode.updateQrCode({
+    code: 'QRCODE123',
+    prefilled_message: 'Updated message text',
+});
+
+// Generate new image after update
+const updated = await client.qrCode.getQrCode('QR_CODE_ID');
+console.log('Updated QR:', updated.qr_image_url);
+```
+
+:::tip[Image Regeneration]
+After updating a QR code, fetch it again to get the updated image URL if needed.
+:::
+
+## Delete QR Code
+
+Remove QR codes you no longer need.
+
+```typescript
+await client.qrCode.deleteQrCode('QR_CODE_ID');
+
+console.log('QR code deleted');
+```
+
+## Use Cases and Examples
+
+### 1. Product Registration QR Code
+
+```typescript
+async function createProductQRCode(productId: string) {
+    const qr = await client.qrCode.createQrCode({
+        prefilled_message: `Register product ${productId}`,
+        generate_qr_image: 'PNG',
+    });
+
+    // Save QR code info to database
+    await database.products.update(productId, {
+        qrCodeId: qr.id,
+        qrImageUrl: qr.qr_image_url,
+    });
+
+    return qr;
+}
+```
+
+### 2. Event Check-in QR Code
+
+```typescript
+async function createEventQRCode(eventName: string, date: string) {
+    return await client.qrCode.createQrCode({
+        prefilled_message: `Check-in for ${eventName} on ${date}`,
+        generate_qr_image: 'PNG',
+    });
+}
+```
+
+### 3. Restaurant Table QR Codes
+
+```typescript
+async function createTableQRCodes(tableCount: number) {
+    const qrCodes = [];
+
+    for (let i = 1; i <= tableCount; i++) {
+        const qr = await client.qrCode.createQrCode({
+            prefilled_message: `Hi! I'm at Table ${i} and I'd like to order.`,
+            generate_qr_image: 'PNG',
+        });
+
+        qrCodes.push({ table: i, qrCode: qr });
+    }
+
+    return qrCodes;
+}
+```
+
+### 4. Customer Feedback QR Code
+
+```typescript
+async function createFeedbackQRCode() {
+    return await client.qrCode.createQrCode({
+        prefilled_message: 'I have feedback about my recent purchase',
+        generate_qr_image: 'PNG',
+    });
+}
+```
+
+### 5. Real Estate Property QR Codes
+
+```typescript
+async function createPropertyQRCode(propertyId: string, address: string) {
+    return await client.qrCode.createQrCode({
+        prefilled_message: `I'm interested in the property at ${address} (ID: ${propertyId})`,
+        generate_qr_image: 'PNG',
+    });
+}
+```
+
+## Track QR Code Usage
+
+Monitor which QR codes are being used.
+
+```typescript
+// Store QR code info when created
+interface QRCodeRecord {
+    id: string;
+    code: string;
+    purpose: string;
+    createdAt: Date;
+    scans: number;
+}
+
+// When receiving messages via webhook
+app.post('/webhook', async (req, res) => {
+    const message = req.body.entry[0]?.changes[0]?.value?.messages[0];
+
+    if (message?.text?.body) {
+        // Check if message matches any QR code prefilled text
+        const qrCode = await findQRCodeByMessage(message.text.body);
+
+        if (qrCode) {
+            // Increment scan counter
+            await incrementQRCodeScans(qrCode.id);
+
+            console.log(`QR code ${qrCode.code} was scanned`);
+        }
+    }
+
+    res.sendStatus(200);
+});
+```
+
+## Response Formats
+
+### Create QR Code Response
+
+```typescript
+{
+    code: 'QRCODE123ABC',
+    prefilled_message: 'Hello! I scanned your QR code.',
+    deep_link_url: 'https://wa.me/message/QRCODE123ABC',
+    qr_image_url: 'https://lookaside.fbsbx.com/...png' // Only if generate_qr_image: 'PNG'
+}
+```
+
+### List QR Codes Response
+
+```typescript
+{
+    data: [
+        {
+            id: '123',
+            code: 'QR1',
+            prefilled_message: 'Message 1',
+            deep_link_url: 'https://wa.me/message/QR1'
+        },
+        {
+            id: '456',
+            code: 'QR2',
+            prefilled_message: 'Message 2',
+            deep_link_url: 'https://wa.me/message/QR2'
+        }
+    ]
+}
+```
+
+### Get QR Code Response
+
+```typescript
+{
+    id: '123',
+    code: 'QRCODE123',
+    prefilled_message: 'Hello!',
+    deep_link_url: 'https://wa.me/message/QRCODE123',
+    qr_image_url: 'https://lookaside.fbsbx.com/...png'
+}
+```
+
+## Error Handling
+
+```typescript
+try {
+    await client.qrCode.createQrCode({
+        prefilled_message: 'Hello',
+        generate_qr_image: 'PNG',
+    });
+} catch (error) {
+    if (error.response) {
+        const { code, message } = error.response.data.error;
+
+        switch (code) {
+            case 131000:
+                console.error('Invalid prefilled message content');
+                break;
+            case 100:
+                console.error('Invalid parameter');
+                break;
+            default:
+                console.error(`Error ${code}: ${message}`);
+        }
+    }
+}
+```
+
+## Best Practices
+
+1. **Use Descriptive Messages**: Make the purpose clear
+   ```typescript
+   // ✅ Good
+   prefilled_message: 'I need help with my order #12345'
+
+   // ❌ Bad
+   prefilled_message: 'Hi'
+   ```
+
+2. **Include Context in Messages**: Help identify the source
+   ```typescript
+   // ✅ Good - includes context
+   prefilled_message: 'Support request from product page - Battery issue'
+
+   // ❌ Less useful - no context
+   prefilled_message: 'I need help'
+   ```
+
+3. **Generate Images for Physical Use**: Always use PNG for print
+   ```typescript
+   // For printed materials, flyers, etc.
+   const qr = await client.qrCode.createQrCode({
+       prefilled_message: 'Event registration',
+       generate_qr_image: 'PNG', // ✅ Get image
+   });
+   ```
+
+4. **Track and Organize QR Codes**: Maintain a database
+   ```typescript
+   interface QRCodeCampaign {
+       qrCodeId: string;
+       campaign: string;
+       location: string;
+       createdAt: Date;
+   }
+
+   await database.qrCodes.insert({
+       qrCodeId: qr.id,
+       campaign: 'Summer Sale 2024',
+       location: 'Store Front',
+       createdAt: new Date(),
+   });
+   ```
+
+5. **Update Instead of Delete**: Preserve analytics
+   ```typescript
+   // ✅ Update existing QR codes
+   await client.qrCode.updateQrCode({
+       code: existingQR.code,
+       prefilled_message: 'Updated campaign message',
+   });
+
+   // ❌ Avoid creating duplicates
+   // await client.qrCode.createQrCode({ ... });
+   ```
+
+6. **Clean Up Unused QR Codes**: Regular maintenance
+   ```typescript
+   async function cleanupOldQRCodes() {
+       const allQRs = await client.qrCode.getQrCodes();
+       const oldQRs = allQRs.filter(isOlderThan90Days);
+
+       for (const qr of oldQRs) {
+           await client.qrCode.deleteQrCode(qr.id);
+       }
+   }
+   ```
+
+## Message Format Tips
+
+- Keep messages concise (under 100 characters recommended)
+- Include tracking codes or campaign IDs when needed
+- Make the message actionable
+- Avoid special characters that might not render well
+- Test messages before printing QR codes
+
+```typescript
+// Good message examples
+'Support: Order #12345'
+'SALE2024 - I want the 20% discount'
+'Table 5 - Ready to order'
+'Register warranty for Product ABC'
+'Event check-in: Tech Conference 2024'
+```
+
+## Related Documentation
+
+- [Messages API](/api/messages) - Handle incoming messages from QR scans
+- [Webhooks](/webhooks/overview) - Receive QR code scan notifications
+- [Marketing Guide](/guides/marketing) - QR code marketing strategies
+- [Analytics](/guides/analytics) - Track QR code performance
+
+## Source Code
+
+View the source code on GitHub: [QrCodeApi.ts](https://github.com/froggy1014/meta-cloud-api/blob/main/src/api/qrCode/QrCodeApi.ts)

@@ -1,0 +1,536 @@
+---
+title: Commerce Settings API
+description: Configure WhatsApp Commerce settings for catalog and cart functionality
+---
+
+# Commerce Settings API
+
+Manage WhatsApp Commerce settings to enable shopping cart and catalog visibility for your business phone number.
+
+**Official Documentation**: [WhatsApp Commerce Settings API](https://developers.facebook.com/documentation/business-messaging/whatsapp/catalogs/sell-products-and-services/set-commerce-settings/)
+
+## Overview
+
+The Commerce Settings API controls e-commerce features:
+
+- **Cart Functionality**: Enable/disable shopping cart for product orders
+- **Catalog Visibility**: Control whether customers can view your product catalog
+- **Commerce Configuration**: Manage commerce-related settings for your phone number
+
+## Endpoints
+
+```
+GET /{PHONE_NUMBER_ID}/whatsapp_commerce_settings
+POST /{PHONE_NUMBER_ID}/whatsapp_commerce_settings?is_cart_enabled&is_catalog_visible
+```
+
+## Important Notes
+
+:::caution[Query Parameters]
+Settings updates use query parameters, not JSON request bodies. Both `is_cart_enabled` and `is_catalog_visible` are sent as URL parameters.
+:::
+
+:::tip[Cart Requirement]
+To use the cart feature, you must have products in your catalog and `is_catalog_visible` must be set to `true`.
+:::
+
+:::tip[Catalog Requirement]
+Before enabling commerce settings, ensure you have a product catalog configured for your business.
+:::
+
+## Quick Start
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+});
+
+// Get current settings
+const settings = await client.commerce.getCommerceSettings();
+
+console.log('Cart enabled:', settings.is_cart_enabled);
+console.log('Catalog visible:', settings.is_catalog_visible);
+
+// Enable cart and show catalog
+await client.commerce.updateCommerceSettings({
+    is_cart_enabled: true,
+    is_catalog_visible: true,
+});
+
+// Disable cart but keep catalog visible
+await client.commerce.updateCommerceSettings({
+    is_cart_enabled: false,
+    is_catalog_visible: true,
+});
+```
+
+## Get Commerce Settings
+
+Retrieve current commerce configuration.
+
+```typescript
+const settings = await client.commerce.getCommerceSettings();
+
+console.log(settings);
+// {
+//     is_cart_enabled: true,
+//     is_catalog_visible: true
+// }
+```
+
+### Check Settings Before Update
+
+```typescript
+async function checkCommerceStatus() {
+    const settings = await client.commerce.getCommerceSettings();
+
+    if (!settings.is_catalog_visible) {
+        console.log('Catalog is hidden from customers');
+    }
+
+    if (!settings.is_cart_enabled) {
+        console.log('Shopping cart is disabled');
+    }
+
+    return settings;
+}
+```
+
+## Update Commerce Settings
+
+Modify cart and catalog visibility settings.
+
+### Enable Cart and Catalog
+
+```typescript
+await client.commerce.updateCommerceSettings({
+    is_cart_enabled: true,
+    is_catalog_visible: true,
+});
+
+console.log('Commerce features enabled');
+```
+
+### Disable Cart, Keep Catalog Visible
+
+```typescript
+await client.commerce.updateCommerceSettings({
+    is_cart_enabled: false,
+    is_catalog_visible: true,
+});
+
+console.log('Catalog visible, cart disabled');
+```
+
+### Hide Everything
+
+```typescript
+await client.commerce.updateCommerceSettings({
+    is_cart_enabled: false,
+    is_catalog_visible: false,
+});
+
+console.log('Commerce features hidden');
+```
+
+### Update Only Specific Setting
+
+```typescript
+// Enable cart only (catalog setting unchanged)
+await client.commerce.updateCommerceSettings({
+    is_cart_enabled: true,
+});
+
+// Show catalog only (cart setting unchanged)
+await client.commerce.updateCommerceSettings({
+    is_catalog_visible: true,
+});
+```
+
+## Common Use Cases
+
+### Setup Commerce for New Business
+
+```typescript
+async function setupCommerce() {
+    console.log('Setting up commerce features...');
+
+    // Step 1: Verify catalog exists
+    const hasCatalog = await checkCatalogExists();
+    if (!hasCatalog) {
+        throw new Error('Please create a catalog first');
+    }
+
+    // Step 2: Enable commerce settings
+    await client.commerce.updateCommerceSettings({
+        is_cart_enabled: true,
+        is_catalog_visible: true,
+    });
+
+    // Step 3: Verify settings
+    const settings = await client.commerce.getCommerceSettings();
+
+    console.log('Commerce setup complete:', settings);
+}
+
+async function checkCatalogExists(): Promise<boolean> {
+    // Check if business has products in catalog
+    // Implementation depends on your catalog management
+    return true;
+}
+```
+
+### Temporarily Disable Shopping
+
+```typescript
+async function maintenanceMode(enabled: boolean) {
+    if (enabled) {
+        // Enter maintenance - disable cart
+        await client.commerce.updateCommerceSettings({
+            is_cart_enabled: false,
+            is_catalog_visible: true, // Keep catalog viewable
+        });
+
+        console.log('Maintenance mode: Cart disabled');
+    } else {
+        // Exit maintenance - re-enable cart
+        await client.commerce.updateCommerceSettings({
+            is_cart_enabled: true,
+            is_catalog_visible: true,
+        });
+
+        console.log('Maintenance mode: Cart enabled');
+    }
+}
+
+// Usage
+await maintenanceMode(true);  // Start maintenance
+await maintenanceMode(false); // End maintenance
+```
+
+### Seasonal Commerce Control
+
+```typescript
+async function setSeasonalSettings(season: 'active' | 'inactive') {
+    const settings = {
+        active: {
+            is_cart_enabled: true,
+            is_catalog_visible: true,
+        },
+        inactive: {
+            is_cart_enabled: false,
+            is_catalog_visible: false,
+        },
+    };
+
+    await client.commerce.updateCommerceSettings(settings[season]);
+
+    console.log(`Commerce settings updated for ${season} season`);
+}
+
+// Enable during business hours
+await setSeasonalSettings('active');
+
+// Disable outside business hours
+await setSeasonalSettings('inactive');
+```
+
+### Configure Based on Inventory
+
+```typescript
+async function updateBasedOnInventory() {
+    const inventory = await checkInventoryLevels();
+
+    if (inventory.totalProducts === 0) {
+        // No products - hide everything
+        await client.commerce.updateCommerceSettings({
+            is_cart_enabled: false,
+            is_catalog_visible: false,
+        });
+
+        console.log('No inventory - commerce disabled');
+    } else if (inventory.availableProducts === 0) {
+        // Products exist but out of stock - show catalog, disable cart
+        await client.commerce.updateCommerceSettings({
+            is_cart_enabled: false,
+            is_catalog_visible: true,
+        });
+
+        console.log('Out of stock - cart disabled');
+    } else {
+        // Products available - enable everything
+        await client.commerce.updateCommerceSettings({
+            is_cart_enabled: true,
+            is_catalog_visible: true,
+        });
+
+        console.log('Inventory available - commerce enabled');
+    }
+}
+
+async function checkInventoryLevels() {
+    // Your inventory checking logic
+    return {
+        totalProducts: 50,
+        availableProducts: 30,
+    };
+}
+```
+
+## Response Formats
+
+### Get Settings Response
+
+```typescript
+{
+    is_cart_enabled: true,
+    is_catalog_visible: true
+}
+```
+
+### Update Settings Response
+
+```typescript
+{
+    success: true
+}
+```
+
+## Error Handling
+
+```typescript
+try {
+    await client.commerce.updateCommerceSettings({
+        is_cart_enabled: true,
+        is_catalog_visible: true,
+    });
+} catch (error) {
+    if (error.response) {
+        const { code, message } = error.response.data.error;
+
+        switch (code) {
+            case 100:
+                console.error('Invalid parameter value');
+                break;
+            case 131000:
+                console.error('Commerce settings update failed');
+                break;
+            case 200:
+                console.error('Insufficient permissions');
+                break;
+            default:
+                console.error(`Error ${code}: ${message}`);
+        }
+    }
+}
+```
+
+## Best Practices
+
+1. **Check Before Enabling**: Verify catalog exists
+   ```typescript
+   async function safeEnableCommerce() {
+       // Verify prerequisites
+       const hasCatalog = await verifyCatalog();
+       const hasProducts = await verifyProducts();
+
+       if (!hasCatalog || !hasProducts) {
+           throw new Error('Catalog and products required');
+       }
+
+       // Enable commerce
+       await client.commerce.updateCommerceSettings({
+           is_cart_enabled: true,
+           is_catalog_visible: true,
+       });
+   }
+   ```
+
+2. **Log Settings Changes**: Maintain audit trail
+   ```typescript
+   async function updateSettingsWithLog(
+       settings: { is_cart_enabled?: boolean; is_catalog_visible?: boolean },
+       userId: string
+   ) {
+       // Update settings
+       await client.commerce.updateCommerceSettings(settings);
+
+       // Log change
+       await auditLog.record({
+           action: 'update_commerce_settings',
+           settings,
+           userId,
+           timestamp: new Date(),
+       });
+   }
+   ```
+
+3. **Graceful Degradation**: Handle errors smoothly
+   ```typescript
+   async function updateCommerceWithFallback(enable: boolean) {
+       try {
+           await client.commerce.updateCommerceSettings({
+               is_cart_enabled: enable,
+               is_catalog_visible: enable,
+           });
+       } catch (error) {
+           console.error('Failed to update settings:', error);
+
+           // Fall back to catalog-only mode
+           await client.commerce.updateCommerceSettings({
+               is_cart_enabled: false,
+               is_catalog_visible: true,
+           });
+       }
+   }
+   ```
+
+4. **Notify Customers**: Inform about changes
+   ```typescript
+   async function disableCommerceWithNotification() {
+       // Disable commerce
+       await client.commerce.updateCommerceSettings({
+           is_cart_enabled: false,
+           is_catalog_visible: false,
+       });
+
+       // Notify subscribed customers
+       const subscribers = await getCommerceSubscribers();
+
+       for (const customer of subscribers) {
+           await client.messages.text({
+               to: customer.phoneNumber,
+               body: 'Our shop is temporarily unavailable. We will notify you when it is back online.',
+           });
+       }
+   }
+   ```
+
+5. **Monitor Settings**: Regular health checks
+   ```typescript
+   async function monitorCommerceHealth() {
+       const settings = await client.commerce.getCommerceSettings();
+
+       // Alert if unexpectedly disabled
+       if (!settings.is_cart_enabled || !settings.is_catalog_visible) {
+           await alertTeam('Commerce settings disabled', settings);
+       }
+
+       return settings;
+   }
+
+   // Check every hour
+   setInterval(monitorCommerceHealth, 60 * 60 * 1000);
+   ```
+
+6. **Test Before Production**: Verify in sandbox
+   ```typescript
+   async function testCommerceSettings() {
+       // Test enable
+       await client.commerce.updateCommerceSettings({
+           is_cart_enabled: true,
+           is_catalog_visible: true,
+       });
+
+       const enabled = await client.commerce.getCommerceSettings();
+       console.assert(enabled.is_cart_enabled === true);
+
+       // Test disable
+       await client.commerce.updateCommerceSettings({
+           is_cart_enabled: false,
+           is_catalog_visible: false,
+       });
+
+       const disabled = await client.commerce.getCommerceSettings();
+       console.assert(disabled.is_cart_enabled === false);
+
+       console.log('Commerce settings test passed');
+   }
+   ```
+
+## Settings Combinations
+
+### Recommended Configurations
+
+```typescript
+// 1. Full Commerce (Recommended for active stores)
+await client.commerce.updateCommerceSettings({
+    is_cart_enabled: true,
+    is_catalog_visible: true,
+});
+
+// 2. Browse Only (Good for out-of-stock or inquiry-only)
+await client.commerce.updateCommerceSettings({
+    is_cart_enabled: false,
+    is_catalog_visible: true,
+});
+
+// 3. Fully Disabled (Maintenance or setup phase)
+await client.commerce.updateCommerceSettings({
+    is_cart_enabled: false,
+    is_catalog_visible: false,
+});
+```
+
+## Automation Examples
+
+### Business Hours Control
+
+```typescript
+import { CronJob } from 'cron';
+
+// Enable at 9 AM
+new CronJob('0 9 * * *', async () => {
+    await client.commerce.updateCommerceSettings({
+        is_cart_enabled: true,
+        is_catalog_visible: true,
+    });
+    console.log('Commerce enabled for business hours');
+}).start();
+
+// Disable at 9 PM
+new CronJob('0 21 * * *', async () => {
+    await client.commerce.updateCommerceSettings({
+        is_cart_enabled: false,
+        is_catalog_visible: true,
+    });
+    console.log('Cart disabled outside business hours');
+}).start();
+```
+
+### Inventory-Based Automation
+
+```typescript
+setInterval(async () => {
+    const inventory = await checkInventoryLevels();
+
+    if (inventory.lowStock) {
+        // Disable cart when low on stock
+        await client.commerce.updateCommerceSettings({
+            is_cart_enabled: false,
+            is_catalog_visible: true,
+        });
+    } else {
+        // Enable cart when stock is available
+        await client.commerce.updateCommerceSettings({
+            is_cart_enabled: true,
+            is_catalog_visible: true,
+        });
+    }
+}, 5 * 60 * 1000); // Check every 5 minutes
+```
+
+## Related Documentation
+
+- [Messages API](/api/messages) - Send product messages
+- [Catalogs Management](https://developers.facebook.com/docs/whatsapp/cloud-api/guides/sell-products-and-services) - Manage product catalogs
+- [Business Profile](/api/business-profile) - Configure business information
+- [Shopping Cart Guide](https://developers.facebook.com/docs/whatsapp/cloud-api/guides/shopping-cart) - Implement shopping cart
+
+## Source Code
+
+View the source code on GitHub: [CommerceApi.ts](https://github.com/froggy1014/meta-cloud-api/blob/main/src/api/commerce/CommerceApi.ts)

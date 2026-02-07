@@ -1,0 +1,507 @@
+---
+title: Templates API
+description: Create, manage, and use message templates for WhatsApp Business
+---
+
+# Templates API
+
+Create, update, list, and delete message templates for your WhatsApp Business Account. Templates must be approved by Meta before they can be used to send messages.
+
+**Official Documentation**: [WhatsApp Templates API](https://developers.facebook.com/documentation/business-messaging/whatsapp/templates/)
+
+## Overview
+
+The Templates API allows you to manage pre-approved message templates:
+
+- **Create Templates**: Define reusable message structures with placeholders
+- **List Templates**: Retrieve all templates or filter by name
+- **Update Templates**: Modify existing template components
+- **Delete Templates**: Remove templates you no longer need
+- **Template Status**: Track approval status and quality ratings
+
+## Endpoints
+
+```
+GET /{WABA_ID}/message_templates?...
+POST /{WABA_ID}/message_templates
+GET /{TEMPLATE_ID}
+POST /{TEMPLATE_ID}
+DELETE /{WABA_ID}/message_templates?...
+```
+
+## Important Notes
+
+:::caution[Template Approval Required]
+All templates must be approved by Meta before use. The approval process typically takes a few minutes to a few hours. Templates with quality issues may be rejected or paused.
+:::
+
+:::tip[Template Categories]
+Choose the right category for your template:
+- **MARKETING**: Promotional offers, announcements
+- **UTILITY**: Account updates, order notifications
+- **AUTHENTICATION**: OTP codes, verification messages
+:::
+
+:::caution[WABA ID Required]
+Template operations use the **WABA Business Account ID**, not the phone number ID. Configure this when initializing the client.
+:::
+
+## Quick Start
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID!,
+});
+
+// List templates
+const templates = await client.templates.getTemplates({
+    name: 'order_update',
+    limit: 10,
+});
+
+// Create a new template
+const created = await client.templates.createTemplate({
+    name: 'welcome_message',
+    category: 'MARKETING',
+    language: 'en_US',
+    components: [
+        {
+            type: 'BODY',
+            text: 'Hi {{1}}, welcome to {{2}}! We are excited to have you.',
+        },
+    ],
+});
+
+// Update template
+await client.templates.updateTemplate(created.id, {
+    components: [
+        {
+            type: 'BODY',
+            text: 'Hi {{1}}, thanks for joining {{2}}!',
+        },
+    ],
+});
+
+// Delete template
+await client.templates.deleteTemplate({
+    name: 'old_template',
+});
+```
+
+## Create Template
+
+Create a new message template with header, body, footer, and buttons.
+
+### Basic Text Template
+
+```typescript
+import { TemplateCategory } from 'meta-cloud-api/types';
+
+await client.templates.createTemplate({
+    name: 'appointment_reminder',
+    category: TemplateCategory.UTILITY,
+    language: 'en_US',
+    components: [
+        {
+            type: 'BODY',
+            text: 'Hi {{1}}, your appointment is scheduled for {{2}}.',
+        },
+    ],
+});
+```
+
+### Template with Header
+
+```typescript
+await client.templates.createTemplate({
+    name: 'order_confirmation',
+    category: 'UTILITY',
+    language: 'en_US',
+    components: [
+        {
+            type: 'HEADER',
+            format: 'TEXT',
+            text: 'Order Confirmed',
+        },
+        {
+            type: 'BODY',
+            text: 'Thank you {{1}}! Your order #{{2}} has been confirmed and will be delivered by {{3}}.',
+        },
+        {
+            type: 'FOOTER',
+            text: 'Thank you for shopping with us',
+        },
+    ],
+});
+```
+
+### Template with Media Header
+
+```typescript
+await client.templates.createTemplate({
+    name: 'promo_offer',
+    category: 'MARKETING',
+    language: 'en_US',
+    components: [
+        {
+            type: 'HEADER',
+            format: 'IMAGE',
+            example: {
+                header_handle: ['https://example.com/promo-image.jpg'],
+            },
+        },
+        {
+            type: 'BODY',
+            text: 'Special offer for {{1}}! Get {{2}}% off your next purchase.',
+            example: {
+                body_text: [['John', '20']],
+            },
+        },
+    ],
+});
+```
+
+### Template with Buttons
+
+```typescript
+await client.templates.createTemplate({
+    name: 'support_options',
+    category: 'UTILITY',
+    language: 'en_US',
+    components: [
+        {
+            type: 'BODY',
+            text: 'Hi {{1}}, how can we help you today?',
+        },
+        {
+            type: 'BUTTONS',
+            buttons: [
+                {
+                    type: 'QUICK_REPLY',
+                    text: 'Track Order',
+                },
+                {
+                    type: 'QUICK_REPLY',
+                    text: 'Contact Support',
+                },
+                {
+                    type: 'URL',
+                    text: 'Visit Website',
+                    url: 'https://example.com',
+                },
+            ],
+        },
+    ],
+});
+```
+
+### Authentication Template
+
+```typescript
+await client.templates.createTemplate({
+    name: 'otp_verification',
+    category: 'AUTHENTICATION',
+    language: 'en_US',
+    components: [
+        {
+            type: 'BODY',
+            text: 'Your verification code is {{1}}. It expires in 5 minutes.',
+            example: {
+                body_text: [['123456']],
+            },
+        },
+        {
+            type: 'BUTTONS',
+            buttons: [
+                {
+                    type: 'OTP',
+                    otp_type: 'COPY_CODE',
+                    text: 'Copy Code',
+                },
+            ],
+        },
+    ],
+});
+```
+
+## List Templates
+
+Retrieve all templates or filter by specific criteria.
+
+### Get All Templates
+
+```typescript
+const allTemplates = await client.templates.getTemplates();
+
+console.log(allTemplates.data); // Array of templates
+console.log(allTemplates.paging); // Pagination info
+```
+
+### Filter by Name
+
+```typescript
+const templates = await client.templates.getTemplates({
+    name: 'order_update',
+});
+```
+
+### Pagination
+
+```typescript
+// Get first page
+const page1 = await client.templates.getTemplates({
+    limit: 20,
+});
+
+// Get next page using cursor
+if (page1.paging?.next) {
+    const page2 = await client.templates.getTemplates({
+        limit: 20,
+        after: page1.paging.cursors.after,
+    });
+}
+```
+
+### Filter by Status
+
+```typescript
+const templates = await client.templates.getTemplates({
+    status: 'APPROVED',
+    limit: 50,
+});
+```
+
+## Get Template Details
+
+Retrieve detailed information about a specific template.
+
+```typescript
+const template = await client.templates.getTemplate('TEMPLATE_ID');
+
+console.log(template);
+// {
+//     id: 'TEMPLATE_ID',
+//     name: 'order_update',
+//     status: 'APPROVED',
+//     category: 'UTILITY',
+//     language: 'en_US',
+//     components: [...],
+//     quality_score: { score: 'GREEN', date: '...' }
+// }
+```
+
+## Update Template
+
+Modify existing template components. Updates are partial - only provide fields you want to change.
+
+```typescript
+await client.templates.updateTemplate('TEMPLATE_ID', {
+    components: [
+        {
+            type: 'BODY',
+            text: 'Updated message: Hi {{1}}, your order {{2}} is ready!',
+        },
+    ],
+});
+```
+
+:::caution[Template Re-approval]
+Modifying a template triggers a new approval process. The template will be unavailable until approved again.
+:::
+
+## Delete Template
+
+Remove templates you no longer need.
+
+### Delete by Name
+
+```typescript
+await client.templates.deleteTemplate({
+    name: 'old_template',
+});
+```
+
+### Delete Specific Language Version
+
+```typescript
+await client.templates.deleteTemplate({
+    name: 'welcome_message',
+    language: 'es_ES',
+});
+```
+
+## Response Formats
+
+### Create/Get Template Response
+
+```typescript
+{
+    id: '1234567890',
+    name: 'order_update',
+    status: 'PENDING', // PENDING, APPROVED, REJECTED, PAUSED
+    category: 'UTILITY',
+    language: 'en_US',
+    components: [
+        {
+            type: 'BODY',
+            text: 'Hi {{1}}, your order is ready!',
+        }
+    ],
+    quality_score: {
+        score: 'GREEN', // GREEN, YELLOW, RED
+        date: '2024-01-15T10:30:00Z'
+    }
+}
+```
+
+### List Templates Response
+
+```typescript
+{
+    data: [
+        { id: '...', name: '...', ... },
+        { id: '...', name: '...', ... }
+    ],
+    paging: {
+        cursors: {
+            before: 'CURSOR_STRING',
+            after: 'CURSOR_STRING'
+        },
+        next: 'https://graph.facebook.com/...'
+    }
+}
+```
+
+## Error Handling
+
+```typescript
+try {
+    await client.templates.createTemplate({
+        name: 'my_template',
+        category: 'UTILITY',
+        language: 'en_US',
+        components: [{ type: 'BODY', text: 'Hello!' }],
+    });
+} catch (error) {
+    if (error.response) {
+        const { code, message } = error.response.data.error;
+
+        switch (code) {
+            case 100:
+                console.error('Template name already exists');
+                break;
+            case 2388124:
+                console.error('Template format invalid');
+                break;
+            case 131000:
+                console.error('Template content violates policies');
+                break;
+            default:
+                console.error(`Error ${code}: ${message}`);
+        }
+    }
+}
+```
+
+## Best Practices
+
+1. **Use Clear Template Names**: Choose descriptive, lowercase names with underscores
+   ```typescript
+   // ✅ Good
+   name: 'appointment_reminder'
+   name: 'order_confirmation'
+
+   // ❌ Bad
+   name: 'template1'
+   name: 'TEMP-MSG'
+   ```
+
+2. **Provide Examples for Variables**: Help reviewers understand your template
+   ```typescript
+   components: [
+       {
+           type: 'BODY',
+           text: 'Hi {{1}}, your order {{2}} will arrive on {{3}}.',
+           example: {
+               body_text: [['John', '#A123', 'Jan 15']]
+           }
+       }
+   ]
+   ```
+
+3. **Choose Appropriate Categories**: Use the right category to avoid rejection
+   ```typescript
+   // Marketing - requires opt-in
+   category: 'MARKETING'
+
+   // Utility - for transactional messages
+   category: 'UTILITY'
+
+   // Authentication - for security codes
+   category: 'AUTHENTICATION'
+   ```
+
+4. **Monitor Quality Scores**: Keep templates at GREEN status
+   ```typescript
+   const template = await client.templates.getTemplate(templateId);
+
+   if (template.quality_score.score !== 'GREEN') {
+       console.warn('Template quality degraded:', template.quality_score);
+   }
+   ```
+
+5. **Handle Different Languages**: Create localized versions
+   ```typescript
+   // English version
+   await client.templates.createTemplate({
+       name: 'welcome',
+       language: 'en_US',
+       // ...
+   });
+
+   // Spanish version
+   await client.templates.createTemplate({
+       name: 'welcome',
+       language: 'es_ES',
+       // ...
+   });
+   ```
+
+## Template Components
+
+### Header Types
+- **TEXT**: Plain text header
+- **IMAGE**: Image header
+- **VIDEO**: Video header
+- **DOCUMENT**: Document header
+
+### Body
+- Contains the main message text
+- Supports up to 1024 characters
+- Use `{{1}}`, `{{2}}`, etc. for variables
+
+### Footer
+- Optional text below the body
+- Up to 60 characters
+- No variables allowed
+
+### Buttons
+- **QUICK_REPLY**: Up to 3 quick reply buttons
+- **URL**: Up to 2 URL buttons (static or dynamic)
+- **PHONE_NUMBER**: Up to 1 phone number button
+- **OTP**: Special button for authentication templates
+
+## Related Documentation
+
+- [Messages API](/api/messages) - Send template messages
+- [Flows API](/api/flows) - Create interactive experiences
+- [Marketing Messages](/api/marketing-messages) - Send marketing templates
+- [Template Guidelines](https://developers.facebook.com/docs/whatsapp/message-templates/guidelines) - Meta's template policies
+
+## Source Code
+
+View the source code on GitHub: [TemplateApi.ts](https://github.com/froggy1014/meta-cloud-api/blob/main/src/api/template/TemplateApi.ts)

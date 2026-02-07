@@ -1,0 +1,549 @@
+---
+title: Payments API
+description: Manage WhatsApp Payments configurations for India
+---
+
+# Payments API
+
+Manage payment configurations for WhatsApp Payments in India, including UPI and payment gateway integrations.
+
+**Official Documentation**: [WhatsApp Payments API (India)](https://developers.facebook.com/documentation/business-messaging/whatsapp/payments/payments-in/onboarding-apis/)
+
+## Overview
+
+The Payments API enables payment configuration management:
+
+- **List Configurations**: View all payment setups for your WABA
+- **Create Configuration**: Set up new payment providers
+- **Get Configuration**: Retrieve specific payment configuration details
+- **Update Configuration**: Modify existing payment settings
+- **Generate OAuth Link**: Create authorization links for gateway providers
+- **Delete Configuration**: Remove payment configurations
+
+## Endpoints
+
+```
+GET /{WABA_ID}/payment_configurations
+GET /{WABA_ID}/payment_configuration/{CONFIGURATION_NAME}
+POST /{WABA_ID}/payment_configuration
+POST /{WABA_ID}/payment_configuration/{CONFIGURATION_NAME}
+POST /{WABA_ID}/generate_payment_configuration_oauth_link
+DELETE /{WABA_ID}/payment_configuration
+```
+
+## Important Notes
+
+:::caution[India Only]
+WhatsApp Payments is currently available only for businesses operating in India. Your WABA must be registered in India to use these features.
+:::
+
+:::tip[Provider Names]
+Supported payment providers:
+- `upi_vpa`: Direct UPI Virtual Payment Address
+- `razorpay`: Razorpay payment gateway
+- `payu`: PayU payment gateway
+- `zaakpay`: Zaakpay payment gateway
+:::
+
+:::caution[Configuration Name]
+The `configuration_name` must be unique within your WABA. Use descriptive names to identify different payment setups.
+:::
+
+:::tip[OAuth Required]
+Gateway providers (Razorpay, PayU, Zaakpay) require OAuth authorization via the generated OAuth link.
+:::
+
+## Quick Start
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID!,
+});
+
+// List all payment configurations
+const configs = await client.payments.listPaymentConfigurations('WABA_ID');
+
+// Create new payment configuration
+await client.payments.createPaymentConfiguration('WABA_ID', {
+    configuration_name: 'primary_upi',
+    provider_name: 'upi_vpa',
+    upi_vpa: 'business@paytm',
+});
+
+// Generate OAuth link for gateway
+const oauthLink = await client.payments.generatePaymentConfigurationOauthLink('WABA_ID', {
+    configuration_name: 'razorpay_config',
+    redirect_url: 'https://example.com/oauth-callback',
+});
+
+// Delete configuration
+await client.payments.deletePaymentConfiguration('WABA_ID', {
+    configuration_name: 'old_config',
+});
+```
+
+## List Payment Configurations
+
+Retrieve all payment configurations for your WABA.
+
+```typescript
+const configs = await client.payments.listPaymentConfigurations('WABA_ID');
+
+configs.data.forEach(config => {
+    console.log(`${config.configuration_name}: ${config.provider_name}`);
+});
+```
+
+## Get Payment Configuration
+
+Fetch details about a specific payment configuration.
+
+```typescript
+const config = await client.payments.getPaymentConfiguration(
+    'WABA_ID',
+    'primary_upi'
+);
+
+console.log(config);
+// {
+//     configuration_name: 'primary_upi',
+//     provider_name: 'upi_vpa',
+//     upi_vpa: 'business@paytm',
+//     status: 'ACTIVE'
+// }
+```
+
+## Create Payment Configuration
+
+Set up a new payment provider configuration.
+
+### UPI VPA Configuration
+
+```typescript
+await client.payments.createPaymentConfiguration('WABA_ID', {
+    configuration_name: 'primary_upi',
+    provider_name: 'upi_vpa',
+    upi_vpa: 'yourbusiness@upi',
+});
+
+console.log('UPI VPA configured');
+```
+
+### Razorpay Configuration
+
+```typescript
+// Step 1: Create configuration
+await client.payments.createPaymentConfiguration('WABA_ID', {
+    configuration_name: 'razorpay_primary',
+    provider_name: 'razorpay',
+    redirect_url: 'https://example.com/oauth-callback',
+});
+
+// Step 2: Generate OAuth link
+const oauthLink = await client.payments.generatePaymentConfigurationOauthLink('WABA_ID', {
+    configuration_name: 'razorpay_primary',
+    redirect_url: 'https://example.com/oauth-callback',
+});
+
+console.log('Complete OAuth at:', oauthLink.oauth_url);
+```
+
+### PayU Configuration
+
+```typescript
+await client.payments.createPaymentConfiguration('WABA_ID', {
+    configuration_name: 'payu_gateway',
+    provider_name: 'payu',
+    redirect_url: 'https://example.com/payu-callback',
+});
+
+// Generate OAuth link for authorization
+const oauthLink = await client.payments.generatePaymentConfigurationOauthLink('WABA_ID', {
+    configuration_name: 'payu_gateway',
+    redirect_url: 'https://example.com/payu-callback',
+});
+```
+
+### Zaakpay Configuration
+
+```typescript
+await client.payments.createPaymentConfiguration('WABA_ID', {
+    configuration_name: 'zaakpay_payments',
+    provider_name: 'zaakpay',
+    redirect_url: 'https://example.com/zaakpay-callback',
+});
+```
+
+## Update Payment Configuration
+
+Modify existing payment configuration settings.
+
+```typescript
+await client.payments.updatePaymentConfiguration('WABA_ID', 'primary_upi', {
+    upi_vpa: 'newbusiness@upi',
+});
+
+console.log('Payment configuration updated');
+```
+
+## Generate OAuth Link
+
+Create authorization link for payment gateway providers.
+
+```typescript
+const oauthLink = await client.payments.generatePaymentConfigurationOauthLink('WABA_ID', {
+    configuration_name: 'razorpay_primary',
+    redirect_url: 'https://example.com/oauth-callback',
+});
+
+console.log('OAuth URL:', oauthLink.oauth_url);
+
+// Direct merchant to complete authorization
+// After completion, they'll be redirected to your redirect_url
+```
+
+### Handle OAuth Callback
+
+```typescript
+import express from 'express';
+
+const app = express();
+
+app.get('/oauth-callback', async (req, res) => {
+    const { code, state, error } = req.query;
+
+    if (error) {
+        console.error('OAuth error:', error);
+        return res.status(400).send('Authorization failed');
+    }
+
+    // OAuth successful - configuration is now authorized
+    console.log('OAuth successful for configuration:', state);
+
+    // Verify configuration status
+    const config = await client.payments.getPaymentConfiguration(
+        'WABA_ID',
+        state as string
+    );
+
+    if (config.status === 'ACTIVE') {
+        res.send('Payment configuration authorized successfully!');
+    } else {
+        res.send('Please contact support if issues persist.');
+    }
+});
+```
+
+## Delete Payment Configuration
+
+Remove a payment configuration.
+
+```typescript
+await client.payments.deletePaymentConfiguration('WABA_ID', {
+    configuration_name: 'old_config',
+});
+
+console.log('Payment configuration deleted');
+```
+
+## Complete Payment Setup Flow
+
+Example of complete payment configuration process:
+
+```typescript
+async function setupPayments(wabaId: string, provider: string) {
+    console.log(`Setting up ${provider} payment configuration...`);
+
+    if (provider === 'upi_vpa') {
+        // UPI VPA setup (direct)
+        await client.payments.createPaymentConfiguration(wabaId, {
+            configuration_name: 'upi_primary',
+            provider_name: 'upi_vpa',
+            upi_vpa: process.env.UPI_VPA!,
+        });
+
+        console.log('UPI VPA configured successfully');
+    } else {
+        // Gateway setup (requires OAuth)
+        const configName = `${provider}_config`;
+
+        // Create configuration
+        await client.payments.createPaymentConfiguration(wabaId, {
+            configuration_name: configName,
+            provider_name: provider,
+            redirect_url: process.env.OAUTH_REDIRECT_URL!,
+        });
+
+        // Generate OAuth link
+        const oauthLink = await client.payments.generatePaymentConfigurationOauthLink(wabaId, {
+            configuration_name: configName,
+            redirect_url: process.env.OAUTH_REDIRECT_URL!,
+        });
+
+        console.log('Complete OAuth authorization at:', oauthLink.oauth_url);
+        console.log('After authorization, configuration will be active');
+    }
+}
+
+// Usage
+await setupPayments('WABA_ID', 'razorpay');
+```
+
+## Multiple Payment Methods
+
+Manage multiple payment providers for flexibility:
+
+```typescript
+async function setupMultiplePaymentMethods(wabaId: string) {
+    // Primary: UPI VPA (instant, no OAuth)
+    await client.payments.createPaymentConfiguration(wabaId, {
+        configuration_name: 'primary_upi',
+        provider_name: 'upi_vpa',
+        upi_vpa: 'business@paytm',
+    });
+
+    // Backup: Razorpay (for card payments)
+    await client.payments.createPaymentConfiguration(wabaId, {
+        configuration_name: 'razorpay_backup',
+        provider_name: 'razorpay',
+        redirect_url: 'https://example.com/oauth',
+    });
+
+    // Generate OAuth for Razorpay
+    const razorpayOAuth = await client.payments.generatePaymentConfigurationOauthLink(wabaId, {
+        configuration_name: 'razorpay_backup',
+        redirect_url: 'https://example.com/oauth',
+    });
+
+    console.log('Complete Razorpay OAuth:', razorpayOAuth.oauth_url);
+
+    // List all configurations
+    const allConfigs = await client.payments.listPaymentConfigurations(wabaId);
+    console.log('Configured payment methods:', allConfigs.data.length);
+}
+```
+
+## Response Formats
+
+### List Configurations Response
+
+```typescript
+{
+    data: [
+        {
+            configuration_name: 'primary_upi',
+            provider_name: 'upi_vpa',
+            upi_vpa: 'business@paytm',
+            status: 'ACTIVE'
+        },
+        {
+            configuration_name: 'razorpay_primary',
+            provider_name: 'razorpay',
+            status: 'PENDING_AUTHORIZATION'
+        }
+    ]
+}
+```
+
+### Get Configuration Response
+
+```typescript
+{
+    configuration_name: 'primary_upi',
+    provider_name: 'upi_vpa',
+    upi_vpa: 'business@paytm',
+    status: 'ACTIVE'
+}
+```
+
+### OAuth Link Response
+
+```typescript
+{
+    oauth_url: 'https://razorpay.com/oauth/authorize?...',
+    configuration_name: 'razorpay_primary'
+}
+```
+
+## Error Handling
+
+```typescript
+try {
+    await client.payments.createPaymentConfiguration('WABA_ID', {
+        configuration_name: 'test_config',
+        provider_name: 'razorpay',
+        redirect_url: 'https://example.com/callback',
+    });
+} catch (error) {
+    if (error.response) {
+        const { code, message } = error.response.data.error;
+
+        switch (code) {
+            case 100:
+                console.error('Invalid configuration parameters');
+                break;
+            case 131000:
+                console.error('Configuration name already exists');
+                break;
+            case 131001:
+                console.error('Invalid provider name');
+                break;
+            case 200:
+                console.error('Insufficient permissions');
+                break;
+            default:
+                console.error(`Error ${code}: ${message}`);
+        }
+    }
+}
+```
+
+## Best Practices
+
+1. **Use Descriptive Configuration Names**: Easy to identify
+   ```typescript
+   // ✅ Good
+   configuration_name: 'razorpay_production'
+   configuration_name: 'upi_backup'
+
+   // ❌ Bad
+   configuration_name: 'config1'
+   configuration_name: 'test'
+   ```
+
+2. **Validate Before Creation**: Check prerequisites
+   ```typescript
+   async function validateAndCreate(wabaId: string, config: any) {
+       // Check if name already exists
+       const existing = await client.payments.listPaymentConfigurations(wabaId);
+       const nameExists = existing.data.some(
+           c => c.configuration_name === config.configuration_name
+       );
+
+       if (nameExists) {
+           throw new Error('Configuration name already exists');
+       }
+
+       // Create configuration
+       await client.payments.createPaymentConfiguration(wabaId, config);
+   }
+   ```
+
+3. **Handle OAuth Flow Properly**: Guide users through authorization
+   ```typescript
+   async function setupWithOAuth(wabaId: string) {
+       // Create config
+       await client.payments.createPaymentConfiguration(wabaId, {
+           configuration_name: 'razorpay_prod',
+           provider_name: 'razorpay',
+           redirect_url: process.env.OAUTH_REDIRECT!,
+       });
+
+       // Generate OAuth link
+       const oauth = await client.payments.generatePaymentConfigurationOauthLink(wabaId, {
+           configuration_name: 'razorpay_prod',
+           redirect_url: process.env.OAUTH_REDIRECT!,
+       });
+
+       // Send link to admin
+       await sendOAuthLinkToAdmin(oauth.oauth_url);
+
+       // Monitor for completion
+       await waitForOAuthCompletion('razorpay_prod');
+   }
+   ```
+
+4. **Maintain Backup Configurations**: Have redundancy
+   ```typescript
+   async function ensureBackupPaymentMethod(wabaId: string) {
+       const configs = await client.payments.listPaymentConfigurations(wabaId);
+
+       if (configs.data.length < 2) {
+           console.warn('Only one payment method configured - consider adding backup');
+
+           // Add backup UPI
+           await client.payments.createPaymentConfiguration(wabaId, {
+               configuration_name: 'backup_upi',
+               provider_name: 'upi_vpa',
+               upi_vpa: process.env.BACKUP_UPI!,
+           });
+       }
+   }
+   ```
+
+5. **Monitor Configuration Status**: Regular health checks
+   ```typescript
+   async function checkPaymentHealth(wabaId: string) {
+       const configs = await client.payments.listPaymentConfigurations(wabaId);
+
+       for (const config of configs.data) {
+           if (config.status !== 'ACTIVE') {
+               await alertTeam(
+                   `Payment config ${config.configuration_name} is ${config.status}`
+               );
+           }
+       }
+   }
+
+   // Check hourly
+   setInterval(() => checkPaymentHealth('WABA_ID'), 60 * 60 * 1000);
+   ```
+
+6. **Secure Redirect URLs**: Use HTTPS and validate
+   ```typescript
+   function validateRedirectUrl(url: string): boolean {
+       try {
+           const parsed = new URL(url);
+           return parsed.protocol === 'https:';
+       } catch {
+           return false;
+       }
+   }
+
+   const redirectUrl = 'https://example.com/oauth';
+   if (validateRedirectUrl(redirectUrl)) {
+       await client.payments.createPaymentConfiguration('WABA_ID', {
+           configuration_name: 'config',
+           provider_name: 'razorpay',
+           redirect_url: redirectUrl,
+       });
+   }
+   ```
+
+## Payment Provider Details
+
+### UPI VPA
+- **Direct setup**: No OAuth required
+- **Instant activation**: Immediately active
+- **Best for**: Simple UPI transactions
+- **Format**: `username@bank`
+
+### Razorpay
+- **Requires OAuth**: Authorization needed
+- **Supports**: Cards, UPI, Net Banking, Wallets
+- **Best for**: Comprehensive payment options
+
+### PayU
+- **Requires OAuth**: Authorization needed
+- **Supports**: Cards, UPI, Net Banking, EMI
+- **Best for**: EMI and flexible payment plans
+
+### Zaakpay
+- **Requires OAuth**: Authorization needed
+- **Supports**: Cards, UPI, Net Banking
+- **Best for**: Enterprise payment processing
+
+## Related Documentation
+
+- [Messages API](/api/messages) - Send payment-related messages
+- [Templates API](/api/templates) - Create payment templates
+- [WABA API](/api/waba) - Manage business accounts
+- [WhatsApp Payments Guide](https://developers.facebook.com/docs/whatsapp/payments) - Complete payments documentation
+
+## Source Code
+
+View the source code on GitHub: [PaymentsApi.ts](https://github.com/froggy1014/meta-cloud-api/blob/main/src/api/payments/PaymentsApi.ts)

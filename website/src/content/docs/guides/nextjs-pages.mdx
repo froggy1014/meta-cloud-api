@@ -1,0 +1,946 @@
+---
+title: Next.js Pages Router Integration
+description: Complete guide to integrating meta-cloud-api with Next.js Pages Router for traditional WhatsApp applications
+---
+
+# Next.js Pages Router Integration
+
+Build WhatsApp applications using the traditional Next.js Pages Router with meta-cloud-api. This guide covers API routes, getServerSideProps, and client-side integration.
+
+**Official Documentation**: [Next.js Pages Router](https://nextjs.org/docs/pages)
+
+## Overview
+
+The Pages Router is the original Next.js routing system. It uses file-based routing in the `pages/` directory and provides server-side rendering through `getServerSideProps` and `getStaticProps`.
+
+## Project Setup
+
+### 1. Create Next.js Project
+
+```bash
+# Create new Next.js app without App Router
+npx create-next-app@latest whatsapp-nextjs-pages --typescript --tailwind --src-dir --no-app
+
+cd whatsapp-nextjs-pages
+
+# Install meta-cloud-api
+pnpm add meta-cloud-api
+```
+
+### 2. Project Structure
+
+```
+whatsapp-nextjs-pages/
+├── src/
+│   ├── pages/
+│   │   ├── api/
+│   │   │   ├── webhook/
+│   │   │   │   └── index.ts           # Webhook endpoint
+│   │   │   ├── messages/
+│   │   │   │   ├── send.ts            # Send message API
+│   │   │   │   └── history.ts         # Get message history
+│   │   │   └── health.ts              # Health check
+│   │   ├── dashboard/
+│   │   │   └── index.tsx              # Dashboard page
+│   │   ├── _app.tsx                   # App wrapper
+│   │   └── index.tsx                  # Home page
+│   ├── lib/
+│   │   ├── whatsapp/
+│   │   │   ├── client.ts              # WhatsApp client
+│   │   │   └── handlers/              # Message handlers
+│   │   │       ├── text.ts
+│   │   │       ├── image.ts
+│   │   │       └── interactive.ts
+│   │   ├── db/
+│   │   │   └── prisma.ts              # Prisma client
+│   │   └── utils.ts                   # Utilities
+│   ├── components/
+│   │   ├── MessageForm.tsx            # Send message form
+│   │   ├── MessageList.tsx            # Message list
+│   │   └── Layout.tsx                 # Page layout
+│   └── types/
+│       └── index.ts                   # Type definitions
+├── prisma/
+│   └── schema.prisma                  # Database schema
+├── .env.local                         # Environment variables
+└── next.config.js                     # Next.js config
+```
+
+### 3. Environment Configuration
+
+Create `.env.local`:
+
+```bash
+# WhatsApp Cloud API
+CLOUD_API_ACCESS_TOKEN=your_access_token
+WA_PHONE_NUMBER_ID=your_phone_number_id
+WA_BUSINESS_ACCOUNT_ID=your_business_account_id
+WHATSAPP_WEBHOOK_VERIFICATION_TOKEN=your_verification_token
+
+# Database
+DATABASE_URL="postgresql://user:password@localhost:5432/whatsapp"
+
+# API Security
+API_SECRET=your_secret_key
+
+# Next.js
+NEXT_PUBLIC_API_URL=http://localhost:3000
+```
+
+## WhatsApp Client Setup
+
+### Create Client (`src/lib/whatsapp/client.ts`)
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+if (!process.env.CLOUD_API_ACCESS_TOKEN) {
+    throw new Error('CLOUD_API_ACCESS_TOKEN is required');
+}
+
+if (!process.env.WA_PHONE_NUMBER_ID) {
+    throw new Error('WA_PHONE_NUMBER_ID is required');
+}
+
+export const whatsappClient = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+});
+```
+
+## Webhook Handling
+
+### Webhook API Route (`src/pages/api/webhook/index.ts`)
+
+```typescript
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { webhookHandler } from 'meta-cloud-api/webhook/nextjs-page';
+import {
+    handleTextMessage,
+    handleImageMessage,
+    handleInteractiveMessage,
+} from '@/lib/whatsapp/handlers';
+
+// WhatsApp configuration
+const whatsappConfig = {
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID!),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+    webhookVerificationToken: process.env.WHATSAPP_WEBHOOK_VERIFICATION_TOKEN!,
+};
+
+// Create webhook handler
+const Whatsapp = webhookHandler(whatsappConfig);
+
+// Register message handlers
+Whatsapp.processor.onText(handleTextMessage);
+Whatsapp.processor.onImage(handleImageMessage);
+Whatsapp.processor.onInteractive(handleInteractiveMessage);
+
+// Export handler
+export default async function handler(
+    req: NextApiRequest,
+    res: NextApiResponse
+) {
+    if (req.method === 'GET') {
+        return Whatsapp.GET(req, res);
+    }
+
+    if (req.method === 'POST') {
+        return Whatsapp.POST(req, res);
+    }
+
+    res.status(405).json({ error: 'Method not allowed' });
+}
+```
+
+### Message Handlers
+
+#### Text Handler (`src/lib/whatsapp/handlers/text.ts`)
+
+```typescript
+import type { WebhookMessage, WhatsApp } from 'meta-cloud-api';
+import { prisma } from '@/lib/db/prisma';
+
+export async function handleTextMessage(
+    whatsapp: WhatsApp,
+    message: WebhookMessage
+) {
+    console.log(`📨 Text from ${message.from}: ${message.text?.body}`);
+
+    try {
+        // Save to database
+        await prisma.message.create({
+            data: {
+                messageId: message.id,
+                from: message.from,
+                type: 'text',
+                content: message.text?.body || '',
+                timestamp: new Date(parseInt(message.timestamp) * 1000),
+            },
+        });
+
+        // Mark as read
+        await whatsapp.messages.markAsRead({ messageId: message.id });
+
+        // Process command
+        const command = message.text?.body?.toLowerCase().trim();
+
+        if (command === '/menu') {
+            await sendMenu(whatsapp, message.from);
+        } else if (command === '/help') {
+            await sendHelp(whatsapp, message.from);
+        } else {
+            await whatsapp.messages.text({
+                to: message.from,
+                body: `You said: "${message.text?.body}"\n\nType /menu for options.`,
+                context: { message_id: message.id },
+            });
+        }
+
+    } catch (error) {
+        console.error('Error handling text:', error);
+        await whatsapp.messages.text({
+            to: message.from,
+            body: 'Sorry, an error occurred. Please try again.',
+        });
+    }
+}
+
+async function sendMenu(whatsapp: WhatsApp, to: string) {
+    await whatsapp.messages.interactive({
+        to,
+        type: 'button',
+        body: { text: 'Choose an option:' },
+        action: {
+            buttons: [
+                {
+                    type: 'reply',
+                    reply: { id: 'products', title: 'Products' },
+                },
+                {
+                    type: 'reply',
+                    reply: { id: 'support', title: 'Support' },
+                },
+                {
+                    type: 'reply',
+                    reply: { id: 'account', title: 'My Account' },
+                },
+            ],
+        },
+    });
+}
+
+async function sendHelp(whatsapp: WhatsApp, to: string) {
+    await whatsapp.messages.text({
+        to,
+        body: `📖 Help Menu\n\nAvailable commands:\n• /menu - Show main menu\n• /help - Show this help\n• /products - View products\n• /support - Contact support`,
+    });
+}
+```
+
+#### Interactive Handler (`src/lib/whatsapp/handlers/interactive.ts`)
+
+```typescript
+import type { WebhookMessage, WhatsApp } from 'meta-cloud-api';
+import { prisma } from '@/lib/db/prisma';
+
+export async function handleInteractiveMessage(
+    whatsapp: WhatsApp,
+    message: WebhookMessage
+) {
+    const interactive = message.interactive;
+    if (!interactive) return;
+
+    try {
+        // Save interaction
+        await prisma.interaction.create({
+            data: {
+                messageId: message.id,
+                from: message.from,
+                type: interactive.type,
+                payload: JSON.stringify(interactive),
+                timestamp: new Date(parseInt(message.timestamp) * 1000),
+            },
+        });
+
+        // Route to appropriate handler
+        if (interactive.type === 'button_reply') {
+            await handleButtonReply(whatsapp, message.from, interactive.button_reply!);
+        } else if (interactive.type === 'list_reply') {
+            await handleListReply(whatsapp, message.from, interactive.list_reply!);
+        }
+
+        await whatsapp.messages.markAsRead({ messageId: message.id });
+
+    } catch (error) {
+        console.error('Error handling interactive:', error);
+    }
+}
+
+async function handleButtonReply(
+    whatsapp: WhatsApp,
+    to: string,
+    reply: { id: string; title: string }
+) {
+    const buttonHandlers: Record<string, () => Promise<void>> = {
+        'products': async () => {
+            await whatsapp.messages.interactive({
+                to,
+                type: 'list',
+                body: { text: 'Our Products:' },
+                action: {
+                    button: 'View Products',
+                    sections: [
+                        {
+                            title: 'Categories',
+                            rows: [
+                                { id: 'electronics', title: 'Electronics' },
+                                { id: 'clothing', title: 'Clothing' },
+                                { id: 'books', title: 'Books' },
+                            ],
+                        },
+                    ],
+                },
+            });
+        },
+        'support': async () => {
+            await whatsapp.messages.text({
+                to,
+                body: '🆘 Support\n\nEmail: support@example.com\nPhone: +1-555-0123\nHours: 9 AM - 5 PM EST',
+            });
+        },
+        'account': async () => {
+            await whatsapp.messages.text({
+                to,
+                body: '👤 Account Information\n\nTo view your account, visit:\nhttps://example.com/account',
+            });
+        },
+    };
+
+    const handler = buttonHandlers[reply.id];
+    if (handler) {
+        await handler();
+    }
+}
+
+async function handleListReply(
+    whatsapp: WhatsApp,
+    to: string,
+    reply: { id: string; title: string; description?: string }
+) {
+    await whatsapp.messages.text({
+        to,
+        body: `You selected: ${reply.title}\n\nLoading ${reply.id} details...`,
+    });
+}
+```
+
+## API Routes
+
+### Send Message API (`src/pages/api/messages/send.ts`)
+
+```typescript
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { whatsappClient } from '@/lib/whatsapp/client';
+import { prisma } from '@/lib/db/prisma';
+
+interface SendMessageRequest {
+    to: string;
+    type: 'text' | 'image' | 'button';
+    content: any;
+}
+
+export default async function handler(
+    req: NextApiRequest,
+    res: NextApiResponse
+) {
+    // Only allow POST
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' });
+    }
+
+    // Authenticate request
+    const apiKey = req.headers['x-api-key'];
+    if (apiKey !== process.env.API_SECRET) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    try {
+        const { to, type, content } = req.body as SendMessageRequest;
+
+        // Validate input
+        if (!to || !type || !content) {
+            return res.status(400).json({
+                error: 'Missing required fields: to, type, content',
+            });
+        }
+
+        let response;
+
+        // Send based on type
+        switch (type) {
+            case 'text':
+                response = await whatsappClient.messages.text({
+                    to,
+                    body: content.message,
+                });
+                break;
+
+            case 'image':
+                response = await whatsappClient.messages.image({
+                    to,
+                    image: {
+                        link: content.url,
+                        caption: content.caption,
+                    },
+                });
+                break;
+
+            case 'button':
+                response = await whatsappClient.messages.interactive({
+                    to,
+                    type: 'button',
+                    body: { text: content.text },
+                    action: {
+                        buttons: content.buttons.map((btn: any) => ({
+                            type: 'reply',
+                            reply: {
+                                id: btn.id,
+                                title: btn.title,
+                            },
+                        })),
+                    },
+                });
+                break;
+
+            default:
+                return res.status(400).json({ error: 'Invalid message type' });
+        }
+
+        // Save to database
+        await prisma.sentMessage.create({
+            data: {
+                messageId: response.messages[0].id,
+                to,
+                type,
+                content: JSON.stringify(content),
+            },
+        });
+
+        res.status(200).json({
+            success: true,
+            messageId: response.messages[0].id,
+        });
+
+    } catch (error: any) {
+        console.error('Send message error:', error);
+        res.status(500).json({
+            error: 'Failed to send message',
+            details: error.response?.data || error.message,
+        });
+    }
+}
+```
+
+### Get Message History API (`src/pages/api/messages/history.ts`)
+
+```typescript
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { prisma } from '@/lib/db/prisma';
+
+export default async function handler(
+    req: NextApiRequest,
+    res: NextApiResponse
+) {
+    if (req.method !== 'GET') {
+        return res.status(405).json({ error: 'Method not allowed' });
+    }
+
+    try {
+        const { phone, limit = '50' } = req.query;
+
+        const messages = await prisma.message.findMany({
+            where: phone ? { from: phone as string } : {},
+            orderBy: { timestamp: 'desc' },
+            take: parseInt(limit as string),
+        });
+
+        res.status(200).json({ messages });
+
+    } catch (error) {
+        console.error('Get history error:', error);
+        res.status(500).json({ error: 'Failed to fetch messages' });
+    }
+}
+```
+
+## Pages with Server-Side Rendering
+
+### Dashboard Page (`src/pages/dashboard/index.tsx`)
+
+```typescript
+import { GetServerSideProps } from 'next';
+import Head from 'next/head';
+import { useState } from 'react';
+import { prisma } from '@/lib/db/prisma';
+import Layout from '@/components/Layout';
+import MessageForm from '@/components/MessageForm';
+import MessageList from '@/components/MessageList';
+
+interface DashboardProps {
+    initialMessages: Array<{
+        id: string;
+        from: string;
+        type: string;
+        content: string;
+        timestamp: string;
+    }>;
+}
+
+export default function Dashboard({ initialMessages }: DashboardProps) {
+    const [messages, setMessages] = useState(initialMessages);
+
+    const refreshMessages = async () => {
+        const response = await fetch('/api/messages/history');
+        const data = await response.json();
+        setMessages(data.messages);
+    };
+
+    return (
+        <Layout>
+            <Head>
+                <title>WhatsApp Dashboard</title>
+            </Head>
+
+            <div className="max-w-7xl mx-auto px-4 py-8">
+                <h1 className="text-4xl font-bold mb-8">WhatsApp Dashboard</h1>
+
+                <div className="grid lg:grid-cols-2 gap-8">
+                    <div>
+                        <h2 className="text-2xl font-semibold mb-4">
+                            Send Message
+                        </h2>
+                        <MessageForm onSuccess={refreshMessages} />
+                    </div>
+
+                    <div>
+                        <h2 className="text-2xl font-semibold mb-4">
+                            Recent Messages
+                        </h2>
+                        <MessageList messages={messages} />
+                    </div>
+                </div>
+            </div>
+        </Layout>
+    );
+}
+
+// Server-side data fetching
+export const getServerSideProps: GetServerSideProps = async (context) => {
+    try {
+        const messages = await prisma.message.findMany({
+            orderBy: { timestamp: 'desc' },
+            take: 50,
+            select: {
+                id: true,
+                from: true,
+                type: true,
+                content: true,
+                timestamp: true,
+            },
+        });
+
+        return {
+            props: {
+                initialMessages: messages.map(msg => ({
+                    ...msg,
+                    timestamp: msg.timestamp.toISOString(),
+                })),
+            },
+        };
+    } catch (error) {
+        console.error('Failed to fetch messages:', error);
+        return {
+            props: {
+                initialMessages: [],
+            },
+        };
+    }
+};
+```
+
+## Client Components
+
+### Message Form (`src/components/MessageForm.tsx`)
+
+```typescript
+import { useState } from 'react';
+
+interface MessageFormProps {
+    onSuccess?: () => void;
+}
+
+export default function MessageForm({ onSuccess }: MessageFormProps) {
+    const [loading, setLoading] = useState(false);
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [message, setMessage] = useState('');
+    const [result, setResult] = useState('');
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setResult('');
+
+        try {
+            const response = await fetch('/api/messages/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': process.env.NEXT_PUBLIC_API_KEY || '',
+                },
+                body: JSON.stringify({
+                    to: phoneNumber,
+                    type: 'text',
+                    content: { message },
+                }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setResult(`✅ Message sent! ID: ${data.messageId}`);
+                setMessage('');
+                onSuccess?.();
+            } else {
+                setResult(`❌ Error: ${data.error}`);
+            }
+        } catch (error) {
+            setResult(`❌ Error: ${error.message}`);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+                <label className="block text-sm font-medium mb-2">
+                    Phone Number
+                </label>
+                <input
+                    type="text"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder="15551234567"
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                    required
+                    disabled={loading}
+                />
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium mb-2">
+                    Message
+                </label>
+                <textarea
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Enter your message..."
+                    rows={4}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                    required
+                    disabled={loading}
+                />
+            </div>
+
+            <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
+            >
+                {loading ? 'Sending...' : 'Send Message'}
+            </button>
+
+            {result && (
+                <div className={`p-3 rounded-lg ${
+                    result.startsWith('✅') ? 'bg-green-100' : 'bg-red-100'
+                }`}>
+                    {result}
+                </div>
+            )}
+        </form>
+    );
+}
+```
+
+### Message List (`src/components/MessageList.tsx`)
+
+```typescript
+interface Message {
+    id: string;
+    from: string;
+    type: string;
+    content: string;
+    timestamp: string;
+}
+
+interface MessageListProps {
+    messages: Message[];
+}
+
+export default function MessageList({ messages }: MessageListProps) {
+    return (
+        <div className="space-y-4">
+            {messages.map((msg) => (
+                <div
+                    key={msg.id}
+                    className="p-4 bg-white rounded-lg shadow border"
+                >
+                    <div className="flex justify-between items-start mb-2">
+                        <span className="font-semibold text-blue-600">
+                            {msg.from}
+                        </span>
+                        <span className="text-sm text-gray-500">
+                            {new Date(msg.timestamp).toLocaleString()}
+                        </span>
+                    </div>
+
+                    <div className="text-gray-700 mb-2">{msg.content}</div>
+
+                    <div className="text-xs text-gray-400">
+                        Type: {msg.type}
+                    </div>
+                </div>
+            ))}
+
+            {messages.length === 0 && (
+                <p className="text-center text-gray-500 py-8">
+                    No messages yet
+                </p>
+            )}
+        </div>
+    );
+}
+```
+
+### Layout Component (`src/components/Layout.tsx`)
+
+```typescript
+import Head from 'next/head';
+import Link from 'next/link';
+
+interface LayoutProps {
+    children: React.ReactNode;
+}
+
+export default function Layout({ children }: LayoutProps) {
+    return (
+        <>
+            <Head>
+                <title>WhatsApp Integration</title>
+                <meta name="description" content="WhatsApp Cloud API Integration" />
+                <link rel="icon" href="/favicon.ico" />
+            </Head>
+
+            <div className="min-h-screen bg-gray-50">
+                <nav className="bg-white shadow">
+                    <div className="max-w-7xl mx-auto px-4 py-4">
+                        <div className="flex items-center justify-between">
+                            <Link href="/" className="text-xl font-bold">
+                                WhatsApp API
+                            </Link>
+
+                            <div className="space-x-4">
+                                <Link
+                                    href="/dashboard"
+                                    className="text-gray-700 hover:text-blue-600"
+                                >
+                                    Dashboard
+                                </Link>
+                                <Link
+                                    href="/api-docs"
+                                    className="text-gray-700 hover:text-blue-600"
+                                >
+                                    API Docs
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+
+                <main>{children}</main>
+
+                <footer className="bg-white border-t mt-12">
+                    <div className="max-w-7xl mx-auto px-4 py-6 text-center text-gray-600">
+                        Powered by meta-cloud-api
+                    </div>
+                </footer>
+            </div>
+        </>
+    );
+}
+```
+
+## Database with Prisma
+
+Use the same Prisma schema and client as shown in the [App Router guide](/guides/nextjs-app#database-integration-with-prisma).
+
+## Environment Variables
+
+### Client-Side Access
+
+```typescript
+// src/lib/config.ts
+export const config = {
+    apiUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
+    // Add other public config here
+};
+```
+
+### Server-Side Only
+
+```typescript
+// src/lib/server-config.ts
+export const serverConfig = {
+    whatsappToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: process.env.WA_PHONE_NUMBER_ID!,
+    webhookToken: process.env.WHATSAPP_WEBHOOK_VERIFICATION_TOKEN!,
+};
+```
+
+## Deployment
+
+### Vercel Deployment
+
+```bash
+# Install Vercel CLI
+pnpm add -g vercel
+
+# Deploy
+vercel
+
+# Add environment variables
+vercel env add CLOUD_API_ACCESS_TOKEN
+vercel env add WA_PHONE_NUMBER_ID
+vercel env add WHATSAPP_WEBHOOK_VERIFICATION_TOKEN
+vercel env add DATABASE_URL
+vercel env add API_SECRET
+
+# Deploy to production
+vercel --prod
+```
+
+### Update `next.config.js`
+
+```javascript
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+    reactStrictMode: true,
+    swcMinify: true,
+};
+
+module.exports = nextConfig;
+```
+
+## Testing
+
+### API Route Tests (`src/__tests__/api/send.test.ts`)
+
+```typescript
+import { createMocks } from 'node-mocks-http';
+import handler from '@/pages/api/messages/send';
+
+describe('/api/messages/send', () => {
+    it('should send message successfully', async () => {
+        const { req, res } = createMocks({
+            method: 'POST',
+            headers: {
+                'x-api-key': process.env.API_SECRET,
+            },
+            body: {
+                to: '15551234567',
+                type: 'text',
+                content: { message: 'Test' },
+            },
+        });
+
+        await handler(req, res);
+
+        expect(res._getStatusCode()).toBe(200);
+        expect(JSON.parse(res._getData())).toHaveProperty('success', true);
+    });
+
+    it('should reject unauthorized requests', async () => {
+        const { req, res } = createMocks({
+            method: 'POST',
+        });
+
+        await handler(req, res);
+
+        expect(res._getStatusCode()).toBe(401);
+    });
+});
+```
+
+## Best Practices
+
+1. **Use getServerSideProps for dynamic data** - Fetch fresh data on each request
+2. **Separate API routes from page logic** - Keep concerns separate
+3. **Validate API requests** - Check authentication and input
+4. **Handle errors gracefully** - Return appropriate status codes
+5. **Use TypeScript** - Type safety for API contracts
+6. **Implement middleware patterns** - Reuse common logic
+7. **Cache data when appropriate** - Use SWR or React Query
+
+## Troubleshooting
+
+### API Route Not Found
+
+```typescript
+// Ensure file is in correct location
+// pages/api/webhook/index.ts (NOT webhook.ts)
+```
+
+### getServerSideProps Type Errors
+
+```typescript
+import type { GetServerSideProps, InferGetServerSidePropsType } from 'next';
+
+export const getServerSideProps: GetServerSideProps<{
+    messages: Message[];
+}> = async (context) => {
+    // ...
+};
+```
+
+### Environment Variables Not Loading
+
+```typescript
+// Restart dev server after adding .env.local
+// Use NEXT_PUBLIC_ prefix for client-side access
+```
+
+## Next Steps
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<CardGrid>
+  <Card title="App Router Guide" link="/guides/nextjs-app">
+    Learn App Router integration
+  </Card>
+  <Card title="Express Guide" link="/guides/express">
+    Build with Express.js
+  </Card>
+  <Card title="Error Handling" link="/guides/error-handling">
+    Handle errors effectively
+  </Card>
+  <Card title="Testing Guide" link="/guides/testing">
+    Test your integration
+  </Card>
+</CardGrid>
+
+## Example Repository
+
+View example on GitHub: [nextjs-pages-example](https://github.com/froggy1014/meta-cloud-api/tree/main/examples)
