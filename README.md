@@ -13,7 +13,17 @@
 
 ## Resources
 
-- [Documentation](https://www.meta-cloud-api.xyz/)
+- **[📚 Documentation](https://www.meta-cloud-api.xyz/)** - Complete documentation with guides and examples
+- **[🚀 Getting Started](https://www.meta-cloud-api.xyz/getting-started/installation)** - Quick start guide
+- **[📖 API Reference](https://www.meta-cloud-api.xyz/api/messages)** - Comprehensive API documentation
+- **[🔧 Examples](./examples/)** - Production-ready code examples
+
+## Examples
+
+- **[express-simple](./examples/express-simple/)** - Basic Express.js integration
+- **[express-production](./examples/express-production/)** - Production-ready example with conversation flows, database, and queue processing
+- **[nextjs-app-router-example](./examples/nextjs-app-router-example/)** - Next.js App Router integration
+- **[nextjs-page-router-example](./examples/nextjs-page-router-example/)** - Next.js Pages Router integration
 
 ## Local API Docs
 
@@ -37,12 +47,14 @@
 
 ## Features
 
-- **Type-Safe Development** - Built with TypeScript to provide code completion and catch errors during development
-- **Comprehensive Coverage** - Full support for WhatsApp Business Platform APIs including Messages, Media, Templates, Flows, and more
-- **Modular Architecture** - Clean separation of concerns with dedicated API classes for each domain
-- **Framework-Specific Webhooks** - Built-in support for Express.js and Next.js webhook handling
-- **Advanced Features** - Support for Flows, Encryption, QR Codes, Two-Step Verification, and WABA management
-- **Error Handling** - Standardized error handling with detailed Meta API error information
+- **🔒 Type-Safe Development** - Built with TypeScript strict mode for complete type safety and excellent IntelliSense
+- **📦 Comprehensive Coverage** - Full support for 17+ WhatsApp Business Platform APIs including Messages, Media, Templates, Flows, and more
+- **🏗️ Modular Architecture** - Clean separation with dedicated API classes, tree-shakeable imports, and minimal bundle size
+- **🔌 Framework-Specific Webhooks** - Built-in adapters for Express.js and Next.js (App Router & Pages Router)
+- **⚡ Production Ready** - Battle-tested with error handling, retry logic, rate limiting, and comprehensive logging
+- **🎯 Advanced Features** - Support for Flows, End-to-End Encryption, QR Codes, Two-Step Verification, Groups, and WABA management
+- **📚 Excellent Documentation** - Complete documentation site with guides, API reference, and working examples
+- **🧪 Well Tested** - Comprehensive test coverage with unit, integration, and E2E tests
 
 ## Installation
 
