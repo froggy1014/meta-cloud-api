@@ -1,6 +1,6 @@
 {
   "name": "meta-cloud-api-express-simple",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "type": "module",
   "description": "Simple WhatsApp Bot using meta-cloud-api - Basic example for quick start",
