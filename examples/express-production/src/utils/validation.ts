@@ -23,8 +23,9 @@ export function isValidEmail(email: string): boolean {
  */
 export function isValidUrl(url: string): boolean {
     try {
-        new URL(url);
-        return true;
+        const urlObj = new URL(url);
+        // Ensure protocol is http or https
+        return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
     } catch {
         return false;
     }

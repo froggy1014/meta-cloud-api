@@ -20,17 +20,37 @@ process.env.LOG_LEVEL = 'error'; // Reduce log noise in tests
  */
 
 // Mock WhatsApp client
+const mockWhatsAppClient = {
+    messages: {
+        text: vi.fn().mockResolvedValue({ messages: [{ id: 'msg_123' }] }),
+        replyButtons: vi.fn().mockResolvedValue({ messages: [{ id: 'msg_123' }] }),
+        list: vi.fn().mockResolvedValue({ messages: [{ id: 'msg_123' }] }),
+        template: vi.fn().mockResolvedValue({ messages: [{ id: 'msg_123' }] }),
+    },
+    phone: {
+        get: vi.fn().mockResolvedValue({ verified_name: 'Test Business' }),
+    },
+};
+
+const mockWebhookProcessor = {
+    onText: vi.fn(),
+    onInteractive: vi.fn(),
+    onImage: vi.fn(),
+    onDocument: vi.fn(),
+    onVideo: vi.fn(),
+    onAudio: vi.fn(),
+    onStatus: vi.fn(),
+    onFlows: vi.fn(),
+    on: vi.fn(),
+};
+
 vi.mock('meta-cloud-api', () => ({
-    WhatsApp: vi.fn().mockImplementation(() => ({
-        messages: {
-            text: vi.fn().mockResolvedValue({ messages: [{ id: 'msg_123' }] }),
-            replyButtons: vi.fn().mockResolvedValue({ messages: [{ id: 'msg_123' }] }),
-            list: vi.fn().mockResolvedValue({ messages: [{ id: 'msg_123' }] }),
-            template: vi.fn().mockResolvedValue({ messages: [{ id: 'msg_123' }] }),
-        },
-        phone: {
-            get: vi.fn().mockResolvedValue({ verified_name: 'Test Business' }),
-        },
+    WhatsApp: vi.fn().mockImplementation(() => mockWhatsAppClient),
+    expressWebhookHandler: vi.fn().mockImplementation(() => ({
+        client: mockWhatsAppClient,
+        processor: mockWebhookProcessor,
+        GET: vi.fn((req, res) => res.status(200).send('OK')),
+        POST: vi.fn((req, res) => res.status(200).json({ success: true })),
     })),
 }));
 
@@ -40,6 +60,7 @@ vi.mock('@prisma/client', () => ({
         $connect: vi.fn().mockResolvedValue(undefined),
         $disconnect: vi.fn().mockResolvedValue(undefined),
         $queryRaw: vi.fn().mockResolvedValue([{ 1: 1 }]),
+        $on: vi.fn(),
         conversation: {
             create: vi.fn(),
             findUnique: vi.fn(),

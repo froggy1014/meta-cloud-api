@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { webhookHandler } from 'meta-cloud-api/webhook/express';
+import { expressWebhookHandler } from 'meta-cloud-api';
 import { config } from '@config/index.js';
 import { webhookRateLimiter } from '@middleware/rateLimiter.js';
 import { logger } from '@config/logger.js';
@@ -30,7 +30,7 @@ const whatsappConfig = {
 /**
  * Initialize webhook handler
  */
-const Whatsapp = webhookHandler(whatsappConfig);
+const Whatsapp = expressWebhookHandler(whatsappConfig);
 
 // ===================================
 // REGISTER MESSAGE HANDLERS
