@@ -1,0 +1,284 @@
+---
+title: Quick Start
+description: Send your first WhatsApp message with meta-cloud-api in under 5 minutes
+---
+
+# Quick Start
+
+This guide will help you send your first WhatsApp message using meta-cloud-api in under 5 minutes.
+
+## Prerequisites
+
+Before starting, ensure you have:
+
+- ✓ Installed meta-cloud-api ([Installation Guide](/getting-started/installation))
+- ✓ Set up environment variables with your credentials
+- ✓ A test phone number to receive messages
+
+## Step 1: Initialize the Client
+
+Create a new file `index.ts` and initialize the WhatsApp client:
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+});
+```
+
+## Step 2: Send a Text Message
+
+Send your first text message:
+
+```typescript
+async function sendMessage() {
+    try {
+        const response = await client.messages.text({
+            to: '15551234567', // Replace with your phone number
+            body: 'Hello from meta-cloud-api! 👋',
+        });
+
+        console.log('Message sent successfully!');
+        console.log('Message ID:', response.messages[0].id);
+    } catch (error) {
+        console.error('Failed to send message:', error);
+    }
+}
+
+sendMessage();
+```
+
+:::tip[Phone Number Format]
+Use international format without + or spaces: `15551234567` (US), `821012345678` (Korea), `447123456789` (UK)
+:::
+
+## Step 3: Run Your Code
+
+Execute your script:
+
+```bash
+tsx index.ts
+# or
+node --loader ts-node/esm index.ts
+```
+
+You should see:
+```
+Message sent successfully!
+Message ID: wamid.ABC123...
+```
+
+🎉 Congratulations! You've sent your first WhatsApp message!
+
+## What's Next?
+
+Now that you've sent a basic text message, explore more features:
+
+### Send Media Messages
+
+```typescript
+// Send an image
+await client.messages.image({
+    to: '15551234567',
+    image: {
+        link: 'https://example.com/image.jpg',
+        caption: 'Check out this image!',
+    },
+});
+
+// Send a document
+await client.messages.document({
+    to: '15551234567',
+    document: {
+        link: 'https://example.com/document.pdf',
+        filename: 'invoice.pdf',
+        caption: 'Your invoice',
+    },
+});
+```
+
+### Send Interactive Messages
+
+```typescript
+// Button message
+await client.messages.interactive({
+    to: '15551234567',
+    type: 'button',
+    body: {
+        text: 'Choose an option:',
+    },
+    action: {
+        buttons: [
+            {
+                type: 'reply',
+                reply: {
+                    id: 'option_1',
+                    title: 'Option 1',
+                },
+            },
+            {
+                type: 'reply',
+                reply: {
+                    id: 'option_2',
+                    title: 'Option 2',
+                },
+            },
+        ],
+    },
+});
+```
+
+### Send Template Messages
+
+```typescript
+// Template with parameters
+await client.messages.template({
+    to: '15551234567',
+    template: {
+        name: 'hello_world',
+        language: {
+            code: 'en_US',
+        },
+    },
+});
+```
+
+## Common Patterns
+
+### Error Handling
+
+Always wrap API calls in try-catch:
+
+```typescript
+try {
+    await client.messages.text({
+        to: '15551234567',
+        body: 'Hello!',
+    });
+} catch (error) {
+    if (error.response) {
+        // API error response
+        console.error('API Error:', error.response.data);
+    } else {
+        // Network or other error
+        console.error('Error:', error.message);
+    }
+}
+```
+
+### Environment Configuration
+
+Use environment-specific configs:
+
+```typescript
+import 'dotenv/config';
+
+const isDev = process.env.NODE_ENV === 'development';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+    logLevel: isDev ? 'debug' : 'info',
+});
+```
+
+### Async/Await Best Practices
+
+```typescript
+// ✅ Good: Proper async handling
+async function sendWelcomeMessage(phoneNumber: string) {
+    const response = await client.messages.text({
+        to: phoneNumber,
+        body: 'Welcome!',
+    });
+    return response.messages[0].id;
+}
+
+// ❌ Bad: Missing await
+function sendWelcomeMessage(phoneNumber: string) {
+    const response = client.messages.text({ // Missing await!
+        to: phoneNumber,
+        body: 'Welcome!',
+    });
+    return response.messages[0].id; // Will fail!
+}
+```
+
+## Next Steps
+
+Ready to build more complex applications?
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<CardGrid>
+  <Card title="Configuration Guide" link="/getting-started/configuration">
+    Learn advanced configuration options
+  </Card>
+  <Card title="Messages API" link="/api/messages">
+    Explore all message types
+  </Card>
+  <Card title="Webhooks" link="/webhooks/overview">
+    Set up webhook handling
+  </Card>
+  <Card title="Framework Guides" link="/guides/express">
+    Integrate with your framework
+  </Card>
+</CardGrid>
+
+## Complete Example
+
+Here's a complete working example:
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+import 'dotenv/config';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+});
+
+async function main() {
+    try {
+        // Send text message
+        const textResponse = await client.messages.text({
+            to: '15551234567',
+            body: 'Hello! This is a test message.',
+        });
+        console.log('Text sent:', textResponse.messages[0].id);
+
+        // Send button message
+        const buttonResponse = await client.messages.interactive({
+            to: '15551234567',
+            type: 'button',
+            body: { text: 'Choose an action:' },
+            action: {
+                buttons: [
+                    {
+                        type: 'reply',
+                        reply: { id: 'help', title: 'Get Help' },
+                    },
+                    {
+                        type: 'reply',
+                        reply: { id: 'status', title: 'Check Status' },
+                    },
+                ],
+            },
+        });
+        console.log('Button message sent:', buttonResponse.messages[0].id);
+
+        console.log('✓ All messages sent successfully!');
+    } catch (error) {
+        console.error('Error:', error);
+        process.exit(1);
+    }
+}
+
+main();
+```
+
+Save this as `example.ts` and run with `tsx example.ts`!

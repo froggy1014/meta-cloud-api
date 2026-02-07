@@ -1,0 +1,357 @@
+---
+title: Configuration
+description: Advanced configuration options for meta-cloud-api
+---
+
+# Configuration
+
+Learn how to configure meta-cloud-api for your specific needs with advanced options and best practices.
+
+## Basic Configuration
+
+The minimal configuration requires only an access token and phone number ID:
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+});
+```
+
+## Configuration Options
+
+### Required Options
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `accessToken` | `string` | Your Meta access token from the Developer Portal |
+| `phoneNumberId` | `number` | Your WhatsApp Business phone number ID |
+
+### Optional Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `businessAcctId` | `string` | `undefined` | Your WhatsApp Business Account ID (required for some APIs) |
+| `apiVersion` | `string` | `'v21.0'` | Meta Graph API version to use |
+| `logLevel` | `'debug' \| 'info' \| 'warn' \| 'error'` | `'info'` | Logging verbosity level |
+| `timeout` | `number` | `30000` | Request timeout in milliseconds |
+| `retries` | `number` | `3` | Number of retry attempts for failed requests |
+| `retryDelay` | `number` | `1000` | Delay between retries in milliseconds |
+
+### Full Configuration Example
+
+```typescript
+const client = new WhatsApp({
+    // Required
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+
+    // Optional
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+    apiVersion: 'v21.0',
+    logLevel: 'debug',
+    timeout: 60000, // 60 seconds
+    retries: 5,
+    retryDelay: 2000, // 2 seconds
+});
+```
+
+## Environment-Specific Configuration
+
+### Development Environment
+
+```typescript
+// config/development.ts
+export const devConfig = {
+    accessToken: process.env.DEV_CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.DEV_WA_PHONE_NUMBER_ID),
+    logLevel: 'debug' as const,
+    timeout: 60000,
+};
+```
+
+### Production Environment
+
+```typescript
+// config/production.ts
+export const prodConfig = {
+    accessToken: process.env.PROD_CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.PROD_WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.PROD_WA_BUSINESS_ACCOUNT_ID,
+    logLevel: 'warn' as const,
+    timeout: 30000,
+    retries: 3,
+};
+```
+
+### Configuration Factory
+
+```typescript
+// config/index.ts
+import { devConfig } from './development';
+import { prodConfig } from './production';
+
+export function createWhatsAppClient() {
+    const config = process.env.NODE_ENV === 'production'
+        ? prodConfig
+        : devConfig;
+
+    return new WhatsApp(config);
+}
+```
+
+## Logging Configuration
+
+### Log Levels
+
+Control SDK logging with the `logLevel` option:
+
+```typescript
+// Debug: See all requests and responses
+const debugClient = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    logLevel: 'debug',
+});
+
+// Info: Normal operation logs (default)
+const infoClient = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    logLevel: 'info',
+});
+
+// Warn: Only warnings and errors
+const warnClient = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    logLevel: 'warn',
+});
+
+// Error: Only errors
+const errorClient = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    logLevel: 'error',
+});
+```
+
+### Custom Logger
+
+You can integrate with your own logging system:
+
+```typescript
+import winston from 'winston';
+
+const logger = winston.createLogger({
+    level: 'info',
+    format: winston.format.json(),
+    transports: [
+        new winston.transports.File({ filename: 'whatsapp.log' }),
+    ],
+});
+
+// Use the logger in your application code
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+});
+
+try {
+    await client.messages.text({ to: '15551234567', body: 'Hello' });
+    logger.info('Message sent successfully');
+} catch (error) {
+    logger.error('Failed to send message', { error });
+}
+```
+
+## Retry Configuration
+
+Configure automatic retries for failed requests:
+
+```typescript
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    retries: 5,        // Retry up to 5 times
+    retryDelay: 2000,  // Wait 2 seconds between retries
+});
+```
+
+The SDK uses exponential backoff for retries:
+- 1st retry: 2 seconds
+- 2nd retry: 4 seconds
+- 3rd retry: 8 seconds
+- And so on...
+
+## Timeout Configuration
+
+Set request timeout to prevent hanging requests:
+
+```typescript
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    timeout: 45000, // 45 seconds
+});
+```
+
+:::caution[Timeout Considerations]
+- **Media uploads**: Use higher timeout (60s+) for large files
+- **Template operations**: Standard timeout (30s) is sufficient
+- **Message sending**: 10-15s timeout is usually enough
+:::
+
+## API Version Configuration
+
+Specify which Meta Graph API version to use:
+
+```typescript
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    apiVersion: 'v21.0', // Use specific version
+});
+```
+
+:::tip[Version Pinning]
+Pin to a specific API version in production to avoid unexpected breaking changes when Meta updates the API.
+:::
+
+## Multiple Client Instances
+
+You can create multiple client instances for different phone numbers:
+
+```typescript
+const salesClient = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.SALES_PHONE_NUMBER_ID),
+});
+
+const supportClient = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.SUPPORT_PHONE_NUMBER_ID),
+});
+
+// Send from different numbers
+await salesClient.messages.text({ to: '15551234567', body: 'Sales message' });
+await supportClient.messages.text({ to: '15551234567', body: 'Support message' });
+```
+
+## Validation
+
+Use Zod or similar libraries to validate configuration:
+
+```typescript
+import { z } from 'zod';
+
+const ConfigSchema = z.object({
+    accessToken: z.string().min(1, 'Access token is required'),
+    phoneNumberId: z.number().positive('Phone number ID must be positive'),
+    businessAcctId: z.string().optional(),
+    apiVersion: z.string().default('v21.0'),
+    logLevel: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
+    timeout: z.number().positive().default(30000),
+    retries: z.number().min(0).max(10).default(3),
+});
+
+type Config = z.infer<typeof ConfigSchema>;
+
+export function createValidatedClient(config: Config) {
+    const validated = ConfigSchema.parse(config);
+    return new WhatsApp(validated);
+}
+
+// Usage
+const client = createValidatedClient({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+});
+```
+
+## Best Practices
+
+### 1. Use Environment Variables
+
+Never hardcode credentials:
+
+```typescript
+// ❌ Bad: Hardcoded credentials
+const client = new WhatsApp({
+    accessToken: 'EAABsbCS1iHgBO...',
+    phoneNumberId: 123456789,
+});
+
+// ✅ Good: Environment variables
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+});
+```
+
+### 2. Type-Safe Configuration
+
+Use TypeScript for compile-time safety:
+
+```typescript
+import type { WhatsAppConfig } from 'meta-cloud-api/types';
+
+const config: WhatsAppConfig = {
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    logLevel: 'info', // TypeScript ensures valid value
+};
+
+const client = new WhatsApp(config);
+```
+
+### 3. Centralize Configuration
+
+Keep configuration in one place:
+
+```typescript
+// config/whatsapp.ts
+export const whatsappConfig = {
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+    logLevel: (process.env.LOG_LEVEL as any) || 'info',
+    timeout: Number(process.env.TIMEOUT) || 30000,
+};
+
+// Usage in multiple files
+import { whatsappConfig } from './config/whatsapp';
+const client = new WhatsApp(whatsappConfig);
+```
+
+### 4. Handle Missing Configuration
+
+Validate required variables at startup:
+
+```typescript
+function validateConfig() {
+    const required = ['CLOUD_API_ACCESS_TOKEN', 'WA_PHONE_NUMBER_ID'];
+    const missing = required.filter(key => !process.env[key]);
+
+    if (missing.length > 0) {
+        throw new Error(`Missing required env vars: ${missing.join(', ')}`);
+    }
+}
+
+validateConfig();
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+});
+```
+
+## Next Steps
+
+Now that you understand configuration, explore:
+
+- [API Reference](/api/messages): Learn about available APIs
+- [Webhooks](/webhooks/overview): Set up webhook handling
+- [Framework Guides](/guides/express): Integrate with your framework

@@ -1,0 +1,121 @@
+---
+title: Introduction
+description: Learn about meta-cloud-api and what it can do for your WhatsApp Business integration
+---
+
+# Introduction to meta-cloud-api
+
+**meta-cloud-api** is a TypeScript SDK wrapper for Meta's WhatsApp Cloud API, providing a type-safe, comprehensive, and modular way to integrate WhatsApp Business Platform into your applications.
+
+## What is meta-cloud-api?
+
+meta-cloud-api simplifies the process of building WhatsApp Business applications by providing:
+
+- **Type-Safe Interface**: Full TypeScript support with strict mode for compile-time safety
+- **Comprehensive Coverage**: Support for all WhatsApp Cloud API endpoints
+- **Modular Design**: 17 specialized API modules for different functionality
+- **Framework Adapters**: Built-in webhook handlers for Express.js and Next.js
+- **Production Ready**: Battle-tested error handling, retry logic, and utilities
+
+## Core Features
+
+### 17 API Modules
+
+The SDK is organized into domain-specific modules:
+
+- **Messages**: Send text, media, interactive, template, and reaction messages
+- **Media**: Upload, download, and manage media files
+- **Templates**: Create and manage message templates
+- **Flows**: Build interactive flows for complex conversations
+- **Phone Numbers**: Manage business phone numbers
+- **Business Profile**: Update your business profile information
+- **Registration**: Register new phone numbers
+- **Two-Step Verification**: Enable two-factor authentication
+- **Encryption**: End-to-end encryption utilities
+- **QR Codes**: Generate QR codes for easy contact
+- **WABA**: Manage WhatsApp Business Accounts
+- **Block Users**: Block and unblock users
+- **Calling**: Voice and video calling features
+- **Groups**: Manage group conversations
+- **Marketing Messages**: Send marketing campaigns
+- **Commerce**: Manage product catalogs
+- **Payments**: Process payments (India)
+
+### Webhook System
+
+Framework-agnostic webhook processing with adapters for:
+
+- Express.js
+- Next.js App Router
+- Next.js Pages Router
+- Custom frameworks (using the base processor)
+
+### Type System
+
+Comprehensive TypeScript types including:
+
+- Request/response payload types
+- Discriminated unions for message types
+- Webhook event types
+- Configuration types
+- Enum definitions
+
+## Architecture
+
+The SDK follows a composite pattern where the main `WhatsApp` class composes all API domain classes:
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+});
+
+// Access API modules through the client
+await client.messages.text({ to: '15551234567', body: 'Hello!' });
+await client.media.upload({ file: './image.jpg' });
+await client.templates.list();
+```
+
+## Package Exports
+
+The package provides multiple entry points for tree-shaking:
+
+```typescript
+// Main SDK
+import WhatsApp from 'meta-cloud-api';
+
+// Types only
+import type { MessageRequestBody } from 'meta-cloud-api/types';
+
+// Enums only
+import { MessageTypesEnum } from 'meta-cloud-api/enums';
+
+// Utilities only
+import { generateEncryption } from 'meta-cloud-api/utils';
+```
+
+## Who Should Use meta-cloud-api?
+
+This SDK is perfect for:
+
+- **Developers** building WhatsApp Business integrations
+- **Teams** needing type-safe API interfaces
+- **Projects** requiring comprehensive WhatsApp features
+- **Applications** using Express.js or Next.js frameworks
+
+## Prerequisites
+
+Before using meta-cloud-api, you'll need:
+
+- Node.js >= 18
+- A Meta WhatsApp Business Account
+- Access token from Meta
+- Phone Number ID
+- Business Account ID (optional)
+
+## Next Steps
+
+Ready to get started? Check out the [Installation Guide](/getting-started/installation) to begin using meta-cloud-api in your project.

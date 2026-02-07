@@ -1,0 +1,90 @@
+---
+title: |
+  meta-cloud-api
+description: TypeScript SDK wrapper for Meta's WhatsApp Cloud API
+template: splash
+hero:
+  tagline: Type-safe, comprehensive, and modular WhatsApp Business Platform integration
+  image:
+    file: ../../../public/meta-cloud-api.png
+    alt: meta-cloud-api logo
+  actions:
+    - text: Get Started
+      link: /getting-started/introduction
+      icon: right-arrow
+      variant: primary
+    - text: View on GitHub
+      link: https://github.com/froggy1014/meta-cloud-api
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## Features
+
+<CardGrid stagger>
+  <Card title="Type-Safe" icon="approve-check">
+    Full TypeScript support with strict mode and comprehensive type definitions for all API endpoints.
+  </Card>
+  <Card title="Modular Architecture" icon="puzzle">
+    17 API modules including messages, media, templates, flows, webhooks, and more.
+  </Card>
+  <Card title="Framework Support" icon="rocket">
+    Built-in webhook adapters for Express.js and Next.js (App Router & Pages Router).
+  </Card>
+  <Card title="Production Ready" icon="star">
+    Battle-tested with comprehensive error handling, retry logic, and logging utilities.
+  </Card>
+</CardGrid>
+
+## Quick Start
+
+Install the package via npm, yarn, or pnpm:
+
+```bash
+pnpm add meta-cloud-api
+```
+
+Initialize the SDK:
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+});
+```
+
+Send your first message:
+
+```typescript
+await client.messages.text({
+    to: '15551234567',
+    body: 'Hello from meta-cloud-api!',
+});
+```
+
+## What's Included
+
+- **17 API Modules**: Messages, Media, Templates, Flows, Phone, Profile, Registration, Two-Step Verification, Encryption, QR Codes, WABA, Block Users, Calling, Groups, Marketing Messages, Commerce, Payments
+- **Webhook System**: Framework-agnostic webhook processor with Express.js and Next.js adapters
+- **Type Definitions**: Comprehensive TypeScript types for all request/response payloads
+- **Utilities**: Encryption helpers, loggers, HTTP client, and more
+- **Examples**: Production-ready examples for Express.js and Next.js
+
+## Next Steps
+
+<CardGrid>
+  <Card title="Read the Guides" link="/getting-started/introduction">
+    Learn how to use the SDK with step-by-step tutorials
+  </Card>
+  <Card title="API Reference" link="/api/messages">
+    Explore all 17 API modules with detailed documentation
+  </Card>
+  <Card title="Examples" link="/guides/express">
+    Check out production-ready examples for your framework
+  </Card>
+</CardGrid>
