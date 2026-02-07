@@ -1,0 +1,979 @@
+---
+title: Error Handling Guide
+description: Comprehensive strategies for handling errors in WhatsApp Cloud API integrations with meta-cloud-api
+---
+
+# Error Handling Guide
+
+Learn how to handle errors gracefully, implement retry logic, and build resilient WhatsApp applications with meta-cloud-api.
+
+**Official Documentation**: [WhatsApp Error Codes](https://developers.facebook.com/docs/whatsapp/cloud-api/support/error-codes)
+
+## Overview
+
+Proper error handling is critical for building reliable WhatsApp applications. This guide covers Meta API error types, retry strategies, circuit breakers, logging, and testing error scenarios.
+
+## Meta API Error Types
+
+### Error Response Structure
+
+Meta API returns errors in a consistent format:
+
+```typescript
+{
+    "error": {
+        "message": "Message failed to send because more than 24 hours have passed since the customer last replied to this number.",
+        "type": "OAuthException",
+        "code": 131047,
+        "error_subcode": 2388001,
+        "fbtrace_id": "ABC123XYZ456"
+    }
+}
+```
+
+### Common Error Codes
+
+| Code | Subcode | Type | Description | Action |
+|------|---------|------|-------------|---------|
+| 100 | - | OAuthException | Invalid access token | Refresh token |
+| 131047 | 2388001 | OAuthException | 24-hour window expired | Request opt-in template |
+| 131031 | 2388003 | OAuthException | Message failed to send | Check phone number validity |
+| 131026 | 2388082 | OAuthException | Media upload failed | Retry with valid media |
+| 130429 | - | Rate limit | Rate limit exceeded | Implement backoff |
+| 133016 | 131051 | User error | Unsupported message type | Check API version |
+| 131053 | - | Business error | Template does not exist | Create template first |
+
+### Error Categories
+
+```typescript
+export enum ErrorCategory {
+    Authentication = 'authentication',
+    RateLimit = 'rate_limit',
+    InvalidInput = 'invalid_input',
+    BusinessPolicy = 'business_policy',
+    MediaError = 'media_error',
+    NetworkError = 'network_error',
+    ServerError = 'server_error',
+    Unknown = 'unknown',
+}
+
+export interface WhatsAppError {
+    category: ErrorCategory;
+    code: number;
+    subcode?: number;
+    message: string;
+    retryable: boolean;
+    fbtrace_id?: string;
+}
+```
+
+## Error Detection and Classification
+
+### Error Parser
+
+Create a utility to parse and classify errors:
+
+```typescript
+// lib/errors/parser.ts
+import type { AxiosError } from 'axios';
+
+export function parseWhatsAppError(error: any): WhatsAppError {
+    // Handle Axios errors
+    if (error.response) {
+        const { data, status } = error.response;
+        const apiError = data?.error;
+
+        if (!apiError) {
+            return {
+                category: ErrorCategory.ServerError,
+                code: status,
+                message: 'Unknown server error',
+                retryable: status >= 500,
+            };
+        }
+
+        return {
+            category: categorizeError(apiError.code, apiError.error_subcode),
+            code: apiError.code,
+            subcode: apiError.error_subcode,
+            message: apiError.message,
+            retryable: isRetryable(apiError.code, apiError.error_subcode),
+            fbtrace_id: apiError.fbtrace_id,
+        };
+    }
+
+    // Handle network errors
+    if (error.request) {
+        return {
+            category: ErrorCategory.NetworkError,
+            code: 0,
+            message: 'Network error - no response received',
+            retryable: true,
+        };
+    }
+
+    // Handle other errors
+    return {
+        category: ErrorCategory.Unknown,
+        code: 0,
+        message: error.message || 'Unknown error',
+        retryable: false,
+    };
+}
+
+function categorizeError(code: number, subcode?: number): ErrorCategory {
+    // Authentication errors
+    if (code === 100 || code === 190) {
+        return ErrorCategory.Authentication;
+    }
+
+    // Rate limiting
+    if (code === 130429 || code === 4) {
+        return ErrorCategory.RateLimit;
+    }
+
+    // Invalid input
+    if (code === 131031 || code === 131051) {
+        return ErrorCategory.InvalidInput;
+    }
+
+    // Business policy violations
+    if (code === 131047 || subcode === 2388001) {
+        return ErrorCategory.BusinessPolicy;
+    }
+
+    // Media errors
+    if (code === 131026 || subcode === 2388082) {
+        return ErrorCategory.MediaError;
+    }
+
+    // Server errors (5xx)
+    if (code >= 500) {
+        return ErrorCategory.ServerError;
+    }
+
+    return ErrorCategory.Unknown;
+}
+
+function isRetryable(code: number, subcode?: number): boolean {
+    // Server errors are retryable
+    if (code >= 500) return true;
+
+    // Rate limits are retryable
+    if (code === 130429 || code === 4) return true;
+
+    // Temporary network issues
+    if (code === 0) return true;
+
+    // Media errors are sometimes retryable
+    if (code === 131026) return true;
+
+    // Business policy and auth errors are not retryable
+    return false;
+}
+```
+
+### Custom Error Classes
+
+```typescript
+// lib/errors/types.ts
+export class WhatsAppApiError extends Error {
+    constructor(
+        public readonly whatsappError: WhatsAppError,
+        public readonly originalError?: any
+    ) {
+        super(whatsappError.message);
+        this.name = 'WhatsAppApiError';
+        Object.setPrototypeOf(this, WhatsAppApiError.prototype);
+    }
+
+    get isRetryable(): boolean {
+        return this.whatsappError.retryable;
+    }
+
+    get category(): ErrorCategory {
+        return this.whatsappError.category;
+    }
+}
+
+export class RateLimitError extends WhatsAppApiError {
+    constructor(whatsappError: WhatsAppError, public readonly retryAfter?: number) {
+        super(whatsappError);
+        this.name = 'RateLimitError';
+    }
+}
+
+export class AuthenticationError extends WhatsAppApiError {
+    constructor(whatsappError: WhatsAppError) {
+        super(whatsappError);
+        this.name = 'AuthenticationError';
+    }
+}
+```
+
+## Retry Logic Patterns
+
+### Exponential Backoff
+
+```typescript
+// lib/errors/retry.ts
+export interface RetryOptions {
+    maxRetries: number;
+    initialDelay: number;
+    maxDelay: number;
+    backoffMultiplier: number;
+    retryableErrors: ErrorCategory[];
+}
+
+export const DEFAULT_RETRY_OPTIONS: RetryOptions = {
+    maxRetries: 3,
+    initialDelay: 1000, // 1 second
+    maxDelay: 30000, // 30 seconds
+    backoffMultiplier: 2,
+    retryableErrors: [
+        ErrorCategory.RateLimit,
+        ErrorCategory.NetworkError,
+        ErrorCategory.ServerError,
+    ],
+};
+
+export async function withRetry<T>(
+    fn: () => Promise<T>,
+    options: Partial<RetryOptions> = {}
+): Promise<T> {
+    const opts = { ...DEFAULT_RETRY_OPTIONS, ...options };
+    let lastError: WhatsAppApiError | undefined;
+
+    for (let attempt = 0; attempt <= opts.maxRetries; attempt++) {
+        try {
+            return await fn();
+        } catch (error) {
+            const parsedError = parseWhatsAppError(error);
+            lastError = new WhatsAppApiError(parsedError, error);
+
+            // Don't retry if not retryable
+            if (!shouldRetry(lastError, opts, attempt)) {
+                throw lastError;
+            }
+
+            // Calculate delay
+            const delay = calculateDelay(attempt, opts);
+
+            console.warn(
+                `Attempt ${attempt + 1}/${opts.maxRetries + 1} failed: ${parsedError.message}. ` +
+                `Retrying in ${delay}ms...`
+            );
+
+            await sleep(delay);
+        }
+    }
+
+    throw lastError;
+}
+
+function shouldRetry(
+    error: WhatsAppApiError,
+    options: RetryOptions,
+    attempt: number
+): boolean {
+    // Max retries exceeded
+    if (attempt >= options.maxRetries) {
+        return false;
+    }
+
+    // Check if error category is retryable
+    if (!options.retryableErrors.includes(error.category)) {
+        return false;
+    }
+
+    return error.isRetryable;
+}
+
+function calculateDelay(attempt: number, options: RetryOptions): number {
+    const delay = options.initialDelay * Math.pow(options.backoffMultiplier, attempt);
+    // Add jitter (±20%)
+    const jitter = delay * 0.2 * (Math.random() * 2 - 1);
+    return Math.min(delay + jitter, options.maxDelay);
+}
+
+function sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+```
+
+### Usage Example
+
+```typescript
+import { whatsappClient } from '@/lib/whatsapp/client';
+import { withRetry } from '@/lib/errors/retry';
+
+// Send message with automatic retry
+async function sendMessageWithRetry(to: string, message: string) {
+    try {
+        const response = await withRetry(
+            () => whatsappClient.messages.text({ to, body: message }),
+            {
+                maxRetries: 3,
+                initialDelay: 1000,
+            }
+        );
+
+        console.log('✅ Message sent:', response.messages[0].id);
+        return response;
+    } catch (error) {
+        if (error instanceof WhatsAppApiError) {
+            console.error(`❌ Failed after retries: ${error.message}`);
+            console.error(`Category: ${error.category}`);
+            console.error(`Code: ${error.whatsappError.code}`);
+        }
+        throw error;
+    }
+}
+```
+
+## Circuit Breaker Pattern
+
+Prevent cascading failures by implementing a circuit breaker:
+
+```typescript
+// lib/errors/circuit-breaker.ts
+export enum CircuitState {
+    Closed = 'closed',
+    Open = 'open',
+    HalfOpen = 'half_open',
+}
+
+export interface CircuitBreakerOptions {
+    failureThreshold: number;
+    successThreshold: number;
+    timeout: number;
+    monitoringPeriod: number;
+}
+
+export class CircuitBreaker {
+    private state: CircuitState = CircuitState.Closed;
+    private failureCount = 0;
+    private successCount = 0;
+    private nextAttempt = 0;
+    private failures: number[] = [];
+
+    constructor(
+        private readonly name: string,
+        private readonly options: CircuitBreakerOptions = {
+            failureThreshold: 5,
+            successThreshold: 2,
+            timeout: 60000, // 1 minute
+            monitoringPeriod: 10000, // 10 seconds
+        }
+    ) {}
+
+    async execute<T>(fn: () => Promise<T>): Promise<T> {
+        // Check circuit state
+        if (this.state === CircuitState.Open) {
+            if (Date.now() < this.nextAttempt) {
+                throw new Error(
+                    `Circuit breaker [${this.name}] is OPEN. ` +
+                    `Next attempt in ${Math.ceil((this.nextAttempt - Date.now()) / 1000)}s`
+                );
+            }
+            // Transition to half-open
+            this.state = CircuitState.HalfOpen;
+            console.log(`Circuit breaker [${this.name}] transitioning to HALF-OPEN`);
+        }
+
+        try {
+            const result = await fn();
+            this.onSuccess();
+            return result;
+        } catch (error) {
+            this.onFailure();
+            throw error;
+        }
+    }
+
+    private onSuccess() {
+        this.failureCount = 0;
+
+        if (this.state === CircuitState.HalfOpen) {
+            this.successCount++;
+
+            if (this.successCount >= this.options.successThreshold) {
+                this.state = CircuitState.Closed;
+                this.successCount = 0;
+                console.log(`✅ Circuit breaker [${this.name}] is now CLOSED`);
+            }
+        }
+    }
+
+    private onFailure() {
+        this.failures.push(Date.now());
+        this.successCount = 0;
+
+        // Remove old failures outside monitoring period
+        const cutoff = Date.now() - this.options.monitoringPeriod;
+        this.failures = this.failures.filter(time => time > cutoff);
+
+        this.failureCount = this.failures.length;
+
+        if (
+            this.failureCount >= this.options.failureThreshold &&
+            this.state !== CircuitState.Open
+        ) {
+            this.state = CircuitState.Open;
+            this.nextAttempt = Date.now() + this.options.timeout;
+            console.error(
+                `⚠️ Circuit breaker [${this.name}] is now OPEN. ` +
+                `Threshold: ${this.failureCount}/${this.options.failureThreshold}`
+            );
+        }
+    }
+
+    getState() {
+        return {
+            state: this.state,
+            failureCount: this.failureCount,
+            successCount: this.successCount,
+            nextAttemptIn: Math.max(0, this.nextAttempt - Date.now()),
+        };
+    }
+
+    reset() {
+        this.state = CircuitState.Closed;
+        this.failureCount = 0;
+        this.successCount = 0;
+        this.failures = [];
+        console.log(`🔄 Circuit breaker [${this.name}] has been reset`);
+    }
+}
+```
+
+### Usage with Circuit Breaker
+
+```typescript
+// lib/whatsapp/client-with-circuit-breaker.ts
+import { CircuitBreaker } from '@/lib/errors/circuit-breaker';
+import { whatsappClient } from './client';
+
+const messageCircuitBreaker = new CircuitBreaker('whatsapp-messages', {
+    failureThreshold: 5,
+    successThreshold: 2,
+    timeout: 60000,
+});
+
+export async function sendTextWithCircuitBreaker(to: string, body: string) {
+    return messageCircuitBreaker.execute(async () => {
+        return withRetry(
+            () => whatsappClient.messages.text({ to, body }),
+            { maxRetries: 2 }
+        );
+    });
+}
+
+// Monitor circuit breaker state
+export function getCircuitBreakerStatus() {
+    return messageCircuitBreaker.getState();
+}
+
+// Health check endpoint
+export async function healthCheck() {
+    const status = messageCircuitBreaker.getState();
+
+    return {
+        healthy: status.state === 'closed',
+        circuitBreaker: status,
+    };
+}
+```
+
+## Error Logging and Monitoring
+
+### Structured Logging
+
+```typescript
+// lib/logging/logger.ts
+export enum LogLevel {
+    Debug = 'debug',
+    Info = 'info',
+    Warn = 'warn',
+    Error = 'error',
+}
+
+interface LogContext {
+    operation?: string;
+    phoneNumber?: string;
+    messageId?: string;
+    duration?: number;
+    [key: string]: any;
+}
+
+class Logger {
+    constructor(private readonly service: string) {}
+
+    private log(level: LogLevel, message: string, context?: LogContext, error?: Error) {
+        const logEntry = {
+            timestamp: new Date().toISOString(),
+            level,
+            service: this.service,
+            message,
+            ...context,
+            ...(error && {
+                error: {
+                    name: error.name,
+                    message: error.message,
+                    stack: error.stack,
+                },
+            }),
+        };
+
+        // Console logging for development
+        if (process.env.NODE_ENV === 'development') {
+            console[level === 'debug' ? 'log' : level](JSON.stringify(logEntry, null, 2));
+        } else {
+            // Production: Send to logging service (e.g., Datadog, Sentry)
+            console.log(JSON.stringify(logEntry));
+        }
+
+        // Send to external monitoring
+        this.sendToMonitoring(logEntry);
+    }
+
+    debug(message: string, context?: LogContext) {
+        this.log(LogLevel.Debug, message, context);
+    }
+
+    info(message: string, context?: LogContext) {
+        this.log(LogLevel.Info, message, context);
+    }
+
+    warn(message: string, context?: LogContext) {
+        this.log(LogLevel.Warn, message, context);
+    }
+
+    error(message: string, error?: Error, context?: LogContext) {
+        this.log(LogLevel.Error, message, context, error);
+    }
+
+    private sendToMonitoring(logEntry: any) {
+        // Integrate with monitoring services
+        // Example: Sentry, Datadog, CloudWatch, etc.
+    }
+}
+
+export const logger = new Logger('whatsapp-api');
+```
+
+### Monitoring Errors
+
+```typescript
+// lib/monitoring/error-tracker.ts
+import * as Sentry from '@sentry/node';
+import { WhatsAppApiError } from '@/lib/errors/types';
+
+export function initializeErrorTracking() {
+    if (process.env.SENTRY_DSN) {
+        Sentry.init({
+            dsn: process.env.SENTRY_DSN,
+            environment: process.env.NODE_ENV,
+            tracesSampleRate: 1.0,
+        });
+    }
+}
+
+export function trackError(error: Error, context?: Record<string, any>) {
+    // Log to console
+    logger.error('Error occurred', error, context);
+
+    // Send to Sentry
+    if (error instanceof WhatsAppApiError) {
+        Sentry.captureException(error, {
+            tags: {
+                error_category: error.category,
+                error_code: error.whatsappError.code,
+                retryable: error.isRetryable,
+            },
+            extra: {
+                ...context,
+                whatsapp_error: error.whatsappError,
+            },
+        });
+    } else {
+        Sentry.captureException(error, {
+            extra: context,
+        });
+    }
+}
+
+// Track error metrics
+export class ErrorMetrics {
+    private static errorCounts = new Map<string, number>();
+    private static lastReset = Date.now();
+
+    static increment(category: string) {
+        const count = this.errorCounts.get(category) || 0;
+        this.errorCounts.set(category, count + 1);
+    }
+
+    static getMetrics() {
+        const now = Date.now();
+        const duration = (now - this.lastReset) / 1000;
+
+        return {
+            duration,
+            errors: Array.from(this.errorCounts.entries()).map(([category, count]) => ({
+                category,
+                count,
+                rate: count / duration,
+            })),
+        };
+    }
+
+    static reset() {
+        this.errorCounts.clear();
+        this.lastReset = Date.now();
+    }
+}
+```
+
+## User-Friendly Error Messages
+
+### Error Message Mapper
+
+```typescript
+// lib/errors/user-messages.ts
+export function getUserFriendlyMessage(error: WhatsAppApiError): string {
+    const { code, subcode, category } = error.whatsappError;
+
+    // Specific error messages
+    if (code === 131047 && subcode === 2388001) {
+        return 'This conversation has expired. Please start a new conversation or use a template message.';
+    }
+
+    if (code === 131031) {
+        return 'The phone number is invalid. Please check and try again.';
+    }
+
+    if (code === 131026) {
+        return 'Failed to upload media. Please check the file format and size.';
+    }
+
+    if (code === 131053) {
+        return 'The message template does not exist. Please create it first.';
+    }
+
+    // Category-based messages
+    switch (category) {
+        case ErrorCategory.Authentication:
+            return 'Authentication failed. Please contact support.';
+
+        case ErrorCategory.RateLimit:
+            return 'Too many requests. Please try again in a few moments.';
+
+        case ErrorCategory.InvalidInput:
+            return 'Invalid input provided. Please check your data and try again.';
+
+        case ErrorCategory.BusinessPolicy:
+            return 'This action violates WhatsApp Business policies. Please review the guidelines.';
+
+        case ErrorCategory.MediaError:
+            return 'Media upload failed. Please check the file and try again.';
+
+        case ErrorCategory.NetworkError:
+            return 'Network connection failed. Please check your internet and try again.';
+
+        case ErrorCategory.ServerError:
+            return 'Server error occurred. We are working to fix it. Please try again later.';
+
+        default:
+            return 'An unexpected error occurred. Please try again or contact support.';
+    }
+}
+
+// Usage in API responses
+export function formatErrorResponse(error: any) {
+    const parsedError = parseWhatsAppError(error);
+    const apiError = new WhatsAppApiError(parsedError);
+
+    return {
+        success: false,
+        error: {
+            message: getUserFriendlyMessage(apiError),
+            code: parsedError.code,
+            category: parsedError.category,
+            retryable: parsedError.retryable,
+            ...(process.env.NODE_ENV === 'development' && {
+                details: parsedError.message,
+                trace: parsedError.fbtrace_id,
+            }),
+        },
+    };
+}
+```
+
+## Webhook Error Handling
+
+### Webhook Error Handler
+
+```typescript
+// lib/webhook/error-handler.ts
+import type { WebhookMessage, WhatsApp } from 'meta-cloud-api';
+
+export async function safeHandleWebhook(
+    handler: (whatsapp: WhatsApp, message: WebhookMessage) => Promise<void>,
+    whatsapp: WhatsApp,
+    message: WebhookMessage
+) {
+    try {
+        await handler(whatsapp, message);
+    } catch (error) {
+        logger.error('Webhook handler failed', error as Error, {
+            messageId: message.id,
+            from: message.from,
+            type: message.type,
+        });
+
+        // Send error notification to user (optional)
+        try {
+            await whatsapp.messages.text({
+                to: message.from,
+                body: 'Sorry, we encountered an error processing your message. Please try again.',
+            });
+        } catch (notifyError) {
+            logger.error('Failed to send error notification', notifyError as Error);
+        }
+
+        // Track error
+        trackError(error as Error, {
+            context: 'webhook_handler',
+            messageId: message.id,
+        });
+    }
+}
+```
+
+## Testing Error Scenarios
+
+### Mock Error Responses
+
+```typescript
+// __tests__/errors/error-handling.test.ts
+import { describe, it, expect, vi } from 'vitest';
+import { withRetry } from '@/lib/errors/retry';
+import { WhatsAppApiError } from '@/lib/errors/types';
+
+describe('Error Handling', () => {
+    describe('Retry Logic', () => {
+        it('should retry on retryable errors', async () => {
+            const mockFn = vi.fn()
+                .mockRejectedValueOnce(createRateLimitError())
+                .mockRejectedValueOnce(createRateLimitError())
+                .mockResolvedValueOnce({ success: true });
+
+            const result = await withRetry(mockFn, {
+                maxRetries: 3,
+                initialDelay: 10,
+            });
+
+            expect(mockFn).toHaveBeenCalledTimes(3);
+            expect(result).toEqual({ success: true });
+        });
+
+        it('should not retry on non-retryable errors', async () => {
+            const mockFn = vi.fn()
+                .mockRejectedValue(createAuthError());
+
+            await expect(
+                withRetry(mockFn, { maxRetries: 3 })
+            ).rejects.toThrow(WhatsAppApiError);
+
+            expect(mockFn).toHaveBeenCalledTimes(1);
+        });
+
+        it('should respect max retries', async () => {
+            const mockFn = vi.fn()
+                .mockRejectedValue(createServerError());
+
+            await expect(
+                withRetry(mockFn, { maxRetries: 2, initialDelay: 10 })
+            ).rejects.toThrow();
+
+            expect(mockFn).toHaveBeenCalledTimes(3); // initial + 2 retries
+        });
+    });
+
+    describe('Circuit Breaker', () => {
+        it('should open circuit after threshold failures', async () => {
+            const breaker = new CircuitBreaker('test', {
+                failureThreshold: 3,
+                successThreshold: 2,
+                timeout: 1000,
+                monitoringPeriod: 5000,
+            });
+
+            const mockFn = vi.fn().mockRejectedValue(new Error('Failed'));
+
+            // Fail 3 times to open circuit
+            for (let i = 0; i < 3; i++) {
+                await expect(breaker.execute(mockFn)).rejects.toThrow();
+            }
+
+            expect(breaker.getState().state).toBe('open');
+
+            // Next call should fail immediately
+            await expect(breaker.execute(mockFn)).rejects.toThrow('Circuit breaker');
+        });
+    });
+});
+
+// Helper functions
+function createRateLimitError() {
+    return {
+        response: {
+            status: 429,
+            data: {
+                error: {
+                    code: 130429,
+                    message: 'Rate limit exceeded',
+                    type: 'OAuthException',
+                },
+            },
+        },
+    };
+}
+
+function createAuthError() {
+    return {
+        response: {
+            status: 401,
+            data: {
+                error: {
+                    code: 190,
+                    message: 'Invalid access token',
+                    type: 'OAuthException',
+                },
+            },
+        },
+    };
+}
+
+function createServerError() {
+    return {
+        response: {
+            status: 500,
+            data: {
+                error: {
+                    code: 500,
+                    message: 'Internal server error',
+                },
+            },
+        },
+    };
+}
+```
+
+## Complete Error Handling Example
+
+```typescript
+// lib/whatsapp/resilient-client.ts
+import { whatsappClient } from './client';
+import { withRetry } from '@/lib/errors/retry';
+import { CircuitBreaker } from '@/lib/errors/circuit-breaker';
+import { logger } from '@/lib/logging/logger';
+import { trackError } from '@/lib/monitoring/error-tracker';
+
+const circuitBreaker = new CircuitBreaker('whatsapp-api');
+
+export class ResilientWhatsAppClient {
+    async sendText(to: string, body: string) {
+        return this.executeWithResilience(
+            'sendText',
+            () => whatsappClient.messages.text({ to, body }),
+            { to }
+        );
+    }
+
+    async sendImage(to: string, imageUrl: string, caption?: string) {
+        return this.executeWithResilience(
+            'sendImage',
+            () => whatsappClient.messages.image({
+                to,
+                image: { link: imageUrl, caption },
+            }),
+            { to, imageUrl }
+        );
+    }
+
+    private async executeWithResilience<T>(
+        operation: string,
+        fn: () => Promise<T>,
+        context: Record<string, any>
+    ): Promise<T> {
+        const startTime = Date.now();
+
+        try {
+            logger.debug(`Starting ${operation}`, context);
+
+            const result = await circuitBreaker.execute(() =>
+                withRetry(fn, {
+                    maxRetries: 3,
+                    initialDelay: 1000,
+                })
+            );
+
+            const duration = Date.now() - startTime;
+            logger.info(`${operation} completed`, { ...context, duration });
+
+            return result;
+
+        } catch (error) {
+            const duration = Date.now() - startTime;
+
+            logger.error(
+                `${operation} failed`,
+                error as Error,
+                { ...context, duration }
+            );
+
+            trackError(error as Error, {
+                operation,
+                ...context,
+            });
+
+            throw error;
+        }
+    }
+}
+
+export const resilientClient = new ResilientWhatsAppClient();
+```
+
+## Best Practices
+
+1. **Always parse and classify errors** - Understand what went wrong
+2. **Implement retry logic for transient failures** - Network issues, rate limits
+3. **Use circuit breakers for critical paths** - Prevent cascading failures
+4. **Log errors with context** - Make debugging easier
+5. **Monitor error rates and patterns** - Detect issues early
+6. **Provide user-friendly error messages** - Don't expose technical details
+7. **Test error scenarios** - Ensure resilience
+8. **Set up alerts for critical errors** - Respond quickly
+9. **Document error handling strategies** - Team knowledge
+10. **Review error logs regularly** - Continuous improvement
+
+## Next Steps
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<CardGrid>
+  <Card title="Testing Guide" link="/guides/testing">
+    Test your error handling
+  </Card>
+  <Card title="Deployment Guide" link="/guides/deployment">
+    Deploy with monitoring
+  </Card>
+  <Card title="Express Integration" link="/guides/express">
+    Implement in Express
+  </Card>
+  <Card title="Next.js Integration" link="/guides/nextjs-app">
+    Implement in Next.js
+  </Card>
+</CardGrid>

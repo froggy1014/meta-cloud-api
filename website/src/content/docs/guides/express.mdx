@@ -1,0 +1,1109 @@
+---
+title: Express.js Integration Guide
+description: Complete guide to integrating meta-cloud-api with Express.js for production WhatsApp applications
+---
+
+# Express.js Integration Guide
+
+Learn how to build production-ready WhatsApp applications with Express.js and meta-cloud-api. This guide covers everything from initial setup to deployment.
+
+**Official Documentation**: [Express.js](https://expressjs.com/)
+
+## Overview
+
+Express.js is a minimal and flexible Node.js web framework that provides robust features for building web and mobile applications. This guide demonstrates how to integrate the WhatsApp Cloud API into an Express.js application with best practices for production environments.
+
+## Project Setup
+
+### 1. Initialize Your Project
+
+```bash
+# Create project directory
+mkdir whatsapp-express-app
+cd whatsapp-express-app
+
+# Initialize package.json
+pnpm init
+
+# Install dependencies
+pnpm add meta-cloud-api express dotenv
+pnpm add -D @types/express @types/node typescript tsx nodemon
+
+# Initialize TypeScript
+npx tsc --init
+```
+
+### 2. Project Structure
+
+Organize your project for maintainability:
+
+```
+whatsapp-express-app/
+├── src/
+│   ├── config/
+│   │   └── whatsapp.ts          # WhatsApp client configuration
+│   ├── handlers/
+│   │   ├── messages/
+│   │   │   ├── text.ts          # Text message handler
+│   │   │   ├── image.ts         # Image message handler
+│   │   │   ├── interactive.ts   # Button/list handler
+│   │   │   └── index.ts         # Export all handlers
+│   │   └── webhooks/
+│   │       ├── flows.ts         # Flow webhook handler
+│   │       └── index.ts         # Export all webhook handlers
+│   ├── middleware/
+│   │   ├── errorHandler.ts      # Error handling middleware
+│   │   ├── logger.ts            # Request logging
+│   │   └── auth.ts              # Authentication middleware
+│   ├── routes/
+│   │   ├── webhook.ts           # Webhook routes
+│   │   └── api.ts               # API routes for sending messages
+│   ├── services/
+│   │   └── database.ts          # Database service (Prisma/MongoDB)
+│   ├── types/
+│   │   └── index.ts             # Custom type definitions
+│   └── server.ts                # Main server file
+├── .env                         # Environment variables
+├── .env.example                 # Example environment file
+├── package.json
+└── tsconfig.json
+```
+
+### 3. Environment Configuration
+
+Create `.env` file:
+
+```bash
+# WhatsApp Cloud API Configuration
+CLOUD_API_ACCESS_TOKEN=your_access_token_here
+WA_PHONE_NUMBER_ID=your_phone_number_id
+WA_BUSINESS_ACCOUNT_ID=your_business_account_id
+WHATSAPP_WEBHOOK_VERIFICATION_TOKEN=your_verification_token
+
+# Server Configuration
+PORT=3000
+NODE_ENV=development
+
+# Database (optional)
+DATABASE_URL=mongodb://localhost:27017/whatsapp
+# or PostgreSQL
+# DATABASE_URL=postgresql://user:password@localhost:5432/whatsapp
+
+# Logging
+LOG_LEVEL=debug
+```
+
+Create `.env.example`:
+
+```bash
+CLOUD_API_ACCESS_TOKEN=
+WA_PHONE_NUMBER_ID=
+WA_BUSINESS_ACCOUNT_ID=
+WHATSAPP_WEBHOOK_VERIFICATION_TOKEN=
+PORT=3000
+NODE_ENV=development
+DATABASE_URL=
+LOG_LEVEL=info
+```
+
+## WhatsApp Client Configuration
+
+### Create WhatsApp Client (`src/config/whatsapp.ts`)
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+if (!process.env.CLOUD_API_ACCESS_TOKEN) {
+    throw new Error('CLOUD_API_ACCESS_TOKEN is required');
+}
+
+if (!process.env.WA_PHONE_NUMBER_ID) {
+    throw new Error('WA_PHONE_NUMBER_ID is required');
+}
+
+export const whatsappClient = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+});
+
+// Validate configuration on startup
+export async function validateWhatsAppConfig() {
+    try {
+        // Test API connection by fetching phone number info
+        const phoneInfo = await whatsappClient.phone.get();
+        console.log('✅ WhatsApp API connected successfully');
+        console.log(`📱 Phone Number: ${phoneInfo.display_phone_number}`);
+        return true;
+    } catch (error) {
+        console.error('❌ Failed to connect to WhatsApp API:', error);
+        throw error;
+    }
+}
+```
+
+## Sending Messages
+
+### Basic Message Sending API (`src/routes/api.ts`)
+
+```typescript
+import { Router } from 'express';
+import { whatsappClient } from '../config/whatsapp';
+import { MessageTypesEnum } from 'meta-cloud-api/enums';
+
+const router = Router();
+
+// Send text message
+router.post('/messages/text', async (req, res) => {
+    try {
+        const { to, message } = req.body;
+
+        if (!to || !message) {
+            return res.status(400).json({
+                error: 'Missing required fields: to, message'
+            });
+        }
+
+        const response = await whatsappClient.messages.text({
+            to,
+            body: message,
+        });
+
+        res.json({
+            success: true,
+            messageId: response.messages[0].id,
+        });
+    } catch (error: any) {
+        res.status(500).json({
+            error: 'Failed to send message',
+            details: error.response?.data || error.message,
+        });
+    }
+});
+
+// Send image with caption
+router.post('/messages/image', async (req, res) => {
+    try {
+        const { to, imageUrl, caption } = req.body;
+
+        if (!to || !imageUrl) {
+            return res.status(400).json({
+                error: 'Missing required fields: to, imageUrl'
+            });
+        }
+
+        const response = await whatsappClient.messages.image({
+            to,
+            image: {
+                link: imageUrl,
+                caption: caption || undefined,
+            },
+        });
+
+        res.json({
+            success: true,
+            messageId: response.messages[0].id,
+        });
+    } catch (error: any) {
+        res.status(500).json({
+            error: 'Failed to send image',
+            details: error.response?.data || error.message,
+        });
+    }
+});
+
+// Send interactive button message
+router.post('/messages/buttons', async (req, res) => {
+    try {
+        const { to, text, buttons } = req.body;
+
+        if (!to || !text || !buttons || !Array.isArray(buttons)) {
+            return res.status(400).json({
+                error: 'Missing required fields: to, text, buttons (array)'
+            });
+        }
+
+        const response = await whatsappClient.messages.interactive({
+            to,
+            type: 'button',
+            body: { text },
+            action: {
+                buttons: buttons.map((btn: any, idx: number) => ({
+                    type: 'reply',
+                    reply: {
+                        id: btn.id || `btn_${idx}`,
+                        title: btn.title,
+                    },
+                })),
+            },
+        });
+
+        res.json({
+            success: true,
+            messageId: response.messages[0].id,
+        });
+    } catch (error: any) {
+        res.status(500).json({
+            error: 'Failed to send button message',
+            details: error.response?.data || error.message,
+        });
+    }
+});
+
+// Send template message
+router.post('/messages/template', async (req, res) => {
+    try {
+        const { to, templateName, languageCode, parameters } = req.body;
+
+        if (!to || !templateName) {
+            return res.status(400).json({
+                error: 'Missing required fields: to, templateName'
+            });
+        }
+
+        const response = await whatsappClient.messages.template({
+            to,
+            template: {
+                name: templateName,
+                language: {
+                    code: languageCode || 'en_US',
+                },
+                components: parameters ? [
+                    {
+                        type: 'body',
+                        parameters: parameters.map((text: string) => ({
+                            type: 'text',
+                            text,
+                        })),
+                    },
+                ] : undefined,
+            },
+        });
+
+        res.json({
+            success: true,
+            messageId: response.messages[0].id,
+        });
+    } catch (error: any) {
+        res.status(500).json({
+            error: 'Failed to send template',
+            details: error.response?.data || error.message,
+        });
+    }
+});
+
+export default router;
+```
+
+## Webhook Handling
+
+### Setup Webhook Handler (`src/routes/webhook.ts`)
+
+```typescript
+import { Router } from 'express';
+import { webhookHandler } from 'meta-cloud-api/webhook/express';
+
+// Import message handlers
+import {
+    handleTextMessage,
+    handleImageMessage,
+    handleInteractiveMessage,
+    handleDocumentMessage,
+} from '../handlers/messages';
+
+// Import webhook field handlers
+import { handleFlowsWebhook } from '../handlers/webhooks';
+
+const router = Router();
+
+// WhatsApp configuration
+const whatsappConfig = {
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID!),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+    webhookVerificationToken: process.env.WHATSAPP_WEBHOOK_VERIFICATION_TOKEN!,
+};
+
+// Create webhook handler
+const Whatsapp = webhookHandler(whatsappConfig);
+
+// Register message handlers
+Whatsapp.processor.onText(handleTextMessage);
+Whatsapp.processor.onImage(handleImageMessage);
+Whatsapp.processor.onInteractive(handleInteractiveMessage);
+Whatsapp.processor.onDocument(handleDocumentMessage);
+
+// Register webhook field handlers
+Whatsapp.processor.onFlows(handleFlowsWebhook);
+
+// Webhook routes
+const { GET, POST } = Whatsapp;
+
+router.get('/', GET);
+router.post('/', POST);
+
+export default router;
+```
+
+### Message Handlers
+
+#### Text Message Handler (`src/handlers/messages/text.ts`)
+
+```typescript
+import type { WebhookMessage, WhatsApp } from 'meta-cloud-api';
+import { saveMessageToDatabase } from '../../services/database';
+
+export async function handleTextMessage(
+    whatsapp: WhatsApp,
+    message: WebhookMessage
+) {
+    console.log(`📨 Text from ${message.from}: ${message.text?.body}`);
+
+    try {
+        // Save message to database
+        await saveMessageToDatabase({
+            messageId: message.id,
+            from: message.from,
+            type: 'text',
+            content: message.text?.body || '',
+            timestamp: new Date(parseInt(message.timestamp) * 1000),
+        });
+
+        // Mark message as read
+        await whatsapp.messages.markAsRead({ messageId: message.id });
+
+        // Show typing indicator
+        await whatsapp.messages.showTypingIndicator({ messageId: message.id });
+
+        // Simulate processing delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // Process message and send response
+        const response = await processTextMessage(message.text?.body || '');
+
+        await whatsapp.messages.text({
+            to: message.from,
+            body: response,
+            context: { message_id: message.id }, // Reply to the message
+        });
+
+        console.log(`✅ Response sent to ${message.from}`);
+    } catch (error) {
+        console.error('Error handling text message:', error);
+
+        // Send error message to user
+        await whatsapp.messages.text({
+            to: message.from,
+            body: 'Sorry, something went wrong. Please try again later.',
+        });
+    }
+}
+
+// Simple message processing logic
+function processTextMessage(text: string): string {
+    const lowerText = text.toLowerCase();
+
+    if (lowerText.includes('hello') || lowerText.includes('hi')) {
+        return 'Hello! How can I help you today?';
+    }
+
+    if (lowerText.includes('help')) {
+        return 'Here are some commands:\n• "hello" - Greet the bot\n• "help" - Show this menu\n• "status" - Check bot status';
+    }
+
+    if (lowerText.includes('status')) {
+        return 'Bot is running perfectly! ✅';
+    }
+
+    return `You said: "${text}"\n\nType "help" for available commands.`;
+}
+```
+
+#### Interactive Message Handler (`src/handlers/messages/interactive.ts`)
+
+```typescript
+import type { WebhookMessage, WhatsApp } from 'meta-cloud-api';
+
+export async function handleInteractiveMessage(
+    whatsapp: WhatsApp,
+    message: WebhookMessage
+) {
+    const interactive = message.interactive;
+
+    if (!interactive) return;
+
+    console.log(`🎯 Interactive response from ${message.from}`);
+
+    try {
+        // Handle button replies
+        if (interactive.type === 'button_reply') {
+            const buttonId = interactive.button_reply?.id;
+            console.log(`Button clicked: ${buttonId}`);
+
+            await handleButtonClick(whatsapp, message.from, buttonId || '');
+        }
+
+        // Handle list replies
+        if (interactive.type === 'list_reply') {
+            const listId = interactive.list_reply?.id;
+            console.log(`List item selected: ${listId}`);
+
+            await handleListSelection(whatsapp, message.from, listId || '');
+        }
+
+        // Mark as read
+        await whatsapp.messages.markAsRead({ messageId: message.id });
+
+    } catch (error) {
+        console.error('Error handling interactive message:', error);
+    }
+}
+
+async function handleButtonClick(
+    whatsapp: WhatsApp,
+    to: string,
+    buttonId: string
+) {
+    const responses: Record<string, string> = {
+        'help': 'Here is the help information...',
+        'status': 'Current status: All systems operational ✅',
+        'contact': 'Contact us at: support@example.com',
+    };
+
+    const response = responses[buttonId] || 'Unknown button clicked';
+
+    await whatsapp.messages.text({
+        to,
+        body: response,
+    });
+}
+
+async function handleListSelection(
+    whatsapp: WhatsApp,
+    to: string,
+    listId: string
+) {
+    await whatsapp.messages.text({
+        to,
+        body: `You selected: ${listId}`,
+    });
+}
+```
+
+#### Image Message Handler (`src/handlers/messages/image.ts`)
+
+```typescript
+import type { WebhookMessage, WhatsApp } from 'meta-cloud-api';
+
+export async function handleImageMessage(
+    whatsapp: WhatsApp,
+    message: WebhookMessage
+) {
+    console.log(`📷 Image received from ${message.from}`);
+
+    try {
+        const image = message.image;
+
+        if (!image) return;
+
+        // Download image metadata
+        console.log(`Image ID: ${image.id}`);
+        console.log(`MIME type: ${image.mime_type}`);
+        console.log(`Caption: ${image.caption || 'No caption'}`);
+
+        // Optional: Download the actual image file
+        const mediaUrl = await whatsapp.media.getUrl({ mediaId: image.id });
+        console.log(`Media URL: ${mediaUrl.url}`);
+
+        // Send confirmation
+        await whatsapp.messages.text({
+            to: message.from,
+            body: `✅ Image received! ${image.caption ? `Caption: "${image.caption}"` : ''}`,
+            context: { message_id: message.id },
+        });
+
+        await whatsapp.messages.markAsRead({ messageId: message.id });
+
+    } catch (error) {
+        console.error('Error handling image:', error);
+    }
+}
+```
+
+### Export All Handlers (`src/handlers/messages/index.ts`)
+
+```typescript
+export { handleTextMessage } from './text';
+export { handleImageMessage } from './image';
+export { handleInteractiveMessage } from './interactive';
+export { handleDocumentMessage } from './document';
+```
+
+## Middleware Patterns
+
+### Error Handling Middleware (`src/middleware/errorHandler.ts`)
+
+```typescript
+import { Request, Response, NextFunction } from 'express';
+
+export interface AppError extends Error {
+    statusCode?: number;
+    isOperational?: boolean;
+}
+
+export function errorHandler(
+    err: AppError,
+    req: Request,
+    res: Response,
+    next: NextFunction
+) {
+    console.error('Error:', {
+        message: err.message,
+        stack: err.stack,
+        url: req.url,
+        method: req.method,
+    });
+
+    const statusCode = err.statusCode || 500;
+    const message = err.isOperational ? err.message : 'Internal server error';
+
+    res.status(statusCode).json({
+        success: false,
+        error: message,
+        ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+    });
+}
+
+export function asyncHandler(
+    fn: (req: Request, res: Response, next: NextFunction) => Promise<any>
+) {
+    return (req: Request, res: Response, next: NextFunction) => {
+        Promise.resolve(fn(req, res, next)).catch(next);
+    };
+}
+```
+
+### Request Logger (`src/middleware/logger.ts`)
+
+```typescript
+import { Request, Response, NextFunction } from 'express';
+
+export function requestLogger(req: Request, res: Response, next: NextFunction) {
+    const start = Date.now();
+
+    res.on('finish', () => {
+        const duration = Date.now() - start;
+        console.log(`${req.method} ${req.path} ${res.statusCode} - ${duration}ms`);
+    });
+
+    next();
+}
+```
+
+### Authentication Middleware (`src/middleware/auth.ts`)
+
+```typescript
+import { Request, Response, NextFunction } from 'express';
+
+export function authenticateApiKey(
+    req: Request,
+    res: Response,
+    next: NextFunction
+) {
+    const apiKey = req.headers['x-api-key'];
+
+    if (!apiKey || apiKey !== process.env.API_KEY) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    next();
+}
+
+export function rateLimiter() {
+    const requests = new Map<string, number[]>();
+
+    return (req: Request, res: Response, next: NextFunction) => {
+        const ip = req.ip || 'unknown';
+        const now = Date.now();
+        const windowMs = 60000; // 1 minute
+        const maxRequests = 10;
+
+        if (!requests.has(ip)) {
+            requests.set(ip, []);
+        }
+
+        const timestamps = requests.get(ip)!.filter(time => now - time < windowMs);
+        timestamps.push(now);
+        requests.set(ip, timestamps);
+
+        if (timestamps.length > maxRequests) {
+            return res.status(429).json({ error: 'Too many requests' });
+        }
+
+        next();
+    };
+}
+```
+
+## Database Integration
+
+### Prisma Example (`src/services/database.ts`)
+
+```typescript
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+export interface SaveMessageParams {
+    messageId: string;
+    from: string;
+    type: string;
+    content: string;
+    timestamp: Date;
+}
+
+export async function saveMessageToDatabase(params: SaveMessageParams) {
+    try {
+        await prisma.message.create({
+            data: {
+                messageId: params.messageId,
+                from: params.from,
+                type: params.type,
+                content: params.content,
+                timestamp: params.timestamp,
+            },
+        });
+        console.log(`✅ Message saved to database: ${params.messageId}`);
+    } catch (error) {
+        console.error('Failed to save message:', error);
+        throw error;
+    }
+}
+
+export async function getMessageHistory(phoneNumber: string, limit = 50) {
+    return prisma.message.findMany({
+        where: { from: phoneNumber },
+        orderBy: { timestamp: 'desc' },
+        take: limit,
+    });
+}
+
+export async function disconnectDatabase() {
+    await prisma.$disconnect();
+}
+```
+
+### Prisma Schema Example
+
+```prisma
+// prisma/schema.prisma
+datasource db {
+  provider = "postgresql" // or "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  messageId String   @unique
+  from      String
+  type      String
+  content   String
+  timestamp DateTime
+  createdAt DateTime @default(now())
+
+  @@index([from])
+  @@index([timestamp])
+}
+```
+
+## Main Server File
+
+### Complete Server Setup (`src/server.ts`)
+
+```typescript
+import 'dotenv/config';
+import express from 'express';
+import { validateWhatsAppConfig } from './config/whatsapp';
+import webhookRoutes from './routes/webhook';
+import apiRoutes from './routes/api';
+import { errorHandler } from './middleware/errorHandler';
+import { requestLogger } from './middleware/logger';
+import { authenticateApiKey, rateLimiter } from './middleware/auth';
+
+const app = express();
+
+// Middleware
+app.use(express.json());
+app.use(requestLogger);
+
+// Health check endpoint
+app.get('/', (req, res) => {
+    res.json({
+        status: 'ok',
+        service: 'WhatsApp API Server',
+        version: '1.0.0',
+    });
+});
+
+// Webhook routes (no authentication for Meta verification)
+app.use('/webhook', webhookRoutes);
+
+// API routes (protected with API key and rate limiting)
+app.use('/api', authenticateApiKey, rateLimiter(), apiRoutes);
+
+// Error handling middleware (must be last)
+app.use(errorHandler);
+
+// Start server
+const PORT = process.env.PORT || 3000;
+
+async function startServer() {
+    try {
+        // Validate WhatsApp configuration
+        await validateWhatsAppConfig();
+
+        app.listen(PORT, () => {
+            console.log(`🚀 Server running on port ${PORT}`);
+            console.log(`📱 Webhook endpoint: http://localhost:${PORT}/webhook`);
+            console.log(`🔧 API endpoint: http://localhost:${PORT}/api`);
+            console.log(`🌐 Environment: ${process.env.NODE_ENV}`);
+        });
+    } catch (error) {
+        console.error('Failed to start server:', error);
+        process.exit(1);
+    }
+}
+
+// Handle graceful shutdown
+process.on('SIGTERM', () => {
+    console.log('SIGTERM received, shutting down gracefully...');
+    process.exit(0);
+});
+
+process.on('SIGINT', () => {
+    console.log('SIGINT received, shutting down gracefully...');
+    process.exit(0);
+});
+
+startServer();
+```
+
+## Testing
+
+### Unit Tests with Vitest (`src/__tests__/api.test.ts`)
+
+```typescript
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import request from 'supertest';
+import express from 'express';
+import apiRoutes from '../routes/api';
+
+// Mock the WhatsApp client
+vi.mock('../config/whatsapp', () => ({
+    whatsappClient: {
+        messages: {
+            text: vi.fn().mockResolvedValue({
+                messages: [{ id: 'wamid.test123' }],
+            }),
+            image: vi.fn().mockResolvedValue({
+                messages: [{ id: 'wamid.test456' }],
+            }),
+        },
+    },
+}));
+
+describe('API Routes', () => {
+    let app: express.Application;
+
+    beforeEach(() => {
+        app = express();
+        app.use(express.json());
+        app.use('/api', apiRoutes);
+    });
+
+    describe('POST /api/messages/text', () => {
+        it('should send text message successfully', async () => {
+            const response = await request(app)
+                .post('/api/messages/text')
+                .send({
+                    to: '15551234567',
+                    message: 'Test message',
+                });
+
+            expect(response.status).toBe(200);
+            expect(response.body).toHaveProperty('success', true);
+            expect(response.body).toHaveProperty('messageId');
+        });
+
+        it('should return 400 if required fields are missing', async () => {
+            const response = await request(app)
+                .post('/api/messages/text')
+                .send({ to: '15551234567' });
+
+            expect(response.status).toBe(400);
+            expect(response.body).toHaveProperty('error');
+        });
+    });
+
+    describe('POST /api/messages/image', () => {
+        it('should send image message successfully', async () => {
+            const response = await request(app)
+                .post('/api/messages/image')
+                .send({
+                    to: '15551234567',
+                    imageUrl: 'https://example.com/image.jpg',
+                    caption: 'Test image',
+                });
+
+            expect(response.status).toBe(200);
+            expect(response.body).toHaveProperty('success', true);
+        });
+    });
+});
+```
+
+### Package.json Scripts
+
+```json
+{
+  "scripts": {
+    "dev": "nodemon --exec tsx src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\""
+  }
+}
+```
+
+## Production Deployment
+
+### Using PM2
+
+```bash
+# Install PM2
+pnpm add -g pm2
+
+# Build the project
+pnpm build
+
+# Start with PM2
+pm2 start dist/server.js --name whatsapp-api
+
+# View logs
+pm2 logs whatsapp-api
+
+# Restart
+pm2 restart whatsapp-api
+
+# Stop
+pm2 stop whatsapp-api
+```
+
+### PM2 Ecosystem File (`ecosystem.config.js`)
+
+```javascript
+module.exports = {
+    apps: [{
+        name: 'whatsapp-api',
+        script: './dist/server.js',
+        instances: 2,
+        exec_mode: 'cluster',
+        env: {
+            NODE_ENV: 'production',
+            PORT: 3000
+        },
+        env_production: {
+            NODE_ENV: 'production',
+            PORT: 3000
+        },
+        error_file: './logs/err.log',
+        out_file: './logs/out.log',
+        log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+        max_memory_restart: '500M'
+    }]
+};
+```
+
+### Docker Deployment
+
+Create `Dockerfile`:
+
+```dockerfile
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Install pnpm
+RUN npm install -g pnpm
+
+# Copy package files
+COPY package.json pnpm-lock.yaml ./
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+# Copy source code
+COPY . .
+
+# Build
+RUN pnpm build
+
+# Production stage
+FROM node:20-alpine
+
+WORKDIR /app
+
+RUN npm install -g pnpm
+
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --prod --frozen-lockfile
+
+COPY --from=builder /app/dist ./dist
+
+EXPOSE 3000
+
+CMD ["node", "dist/server.js"]
+```
+
+Create `docker-compose.yml`:
+
+```yaml
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    restart: unless-stopped
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: whatsapp
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+```
+
+Deploy with Docker:
+
+```bash
+# Build and start
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop
+docker-compose down
+```
+
+## Troubleshooting
+
+### Common Issues
+
+#### Webhook Verification Fails
+
+```typescript
+// Ensure verification token matches
+app.get('/webhook', (req, res) => {
+    const mode = req.query['hub.mode'];
+    const token = req.query['hub.verify_token'];
+    const challenge = req.query['hub.challenge'];
+
+    if (mode === 'subscribe' && token === process.env.WHATSAPP_WEBHOOK_VERIFICATION_TOKEN) {
+        console.log('✅ Webhook verified');
+        res.status(200).send(challenge);
+    } else {
+        res.sendStatus(403);
+    }
+});
+```
+
+#### Messages Not Sending
+
+```typescript
+// Add detailed error logging
+try {
+    const response = await whatsappClient.messages.text({ to, body });
+    console.log('Message sent:', response);
+} catch (error: any) {
+    console.error('Send error:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+    });
+}
+```
+
+#### Rate Limiting Issues
+
+```typescript
+// Implement exponential backoff
+async function sendWithRetry(fn: () => Promise<any>, maxRetries = 3) {
+    for (let i = 0; i < maxRetries; i++) {
+        try {
+            return await fn();
+        } catch (error: any) {
+            if (error.response?.status === 429 && i < maxRetries - 1) {
+                const delay = Math.pow(2, i) * 1000;
+                console.log(`Rate limited, retrying in ${delay}ms...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+            } else {
+                throw error;
+            }
+        }
+    }
+}
+```
+
+## Best Practices
+
+1. **Always validate environment variables on startup**
+2. **Use TypeScript for type safety**
+3. **Implement proper error handling and logging**
+4. **Store messages in a database for audit trails**
+5. **Use middleware for authentication and rate limiting**
+6. **Test webhook handlers with mock data**
+7. **Monitor API usage and quotas**
+8. **Implement graceful shutdown**
+
+## Next Steps
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<CardGrid>
+  <Card title="Error Handling" link="/guides/error-handling">
+    Learn error handling strategies
+  </Card>
+  <Card title="Testing Guide" link="/guides/testing">
+    Test your WhatsApp integration
+  </Card>
+  <Card title="Deployment Guide" link="/guides/deployment">
+    Deploy to production
+  </Card>
+  <Card title="Messages API" link="/api/messages">
+    Explore all message types
+  </Card>
+</CardGrid>
+
+## Example Repository
+
+View the complete Express.js example on GitHub: [express-example](https://github.com/froggy1014/meta-cloud-api/tree/main/examples/express-example)
