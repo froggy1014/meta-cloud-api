@@ -1,24 +1,24 @@
-import { DocumentMessageBuilder, type WebhookMessage, type WhatsApp } from 'meta-cloud-api';
+import type { DocumentProcessedMessage, DocumentMessageHandler } from 'meta-cloud-api';
 
 /**
  * Handler for document messages
- * Responds with a sample PDF document using builder pattern
+ * Responds with a sample document using plain object API
  */
-export const handleDocumentMessage = async (whatsapp: WhatsApp, message: WebhookMessage) => {
+export const handleDocumentMessage: DocumentMessageHandler = async (whatsapp, processed: DocumentProcessedMessage) => {
+    const { message } = processed;
     console.log(`📄 Document message received from ${message.from}`);
 
     await whatsapp.messages.markAsRead({ messageId: message.id });
+    await whatsapp.messages.showTypingIndicator({ messageId: message.id });
 
-    // Build and send document response
-    const documentMessage = new DocumentMessageBuilder()
-        .setLink('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf')
-        .setCaption('Here is a sample document for you')
-        .setFilename('sample-document.pdf')
-        .build();
-
+    // Send document response using plain object API
     await whatsapp.messages.document({
         to: message.from,
-        body: documentMessage,
+        body: {
+            link: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+            caption: 'Here is a sample PDF document 📎',
+            filename: 'sample.pdf',
+        },
     });
 
     console.log(`✅ Document response sent to ${message.from}`);

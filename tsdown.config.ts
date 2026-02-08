@@ -13,6 +13,7 @@ export default defineConfig([
         treeshake: true,
         target: 'es2022',
         platform: 'node',
+        hash: false,
         external: ['node:*', 'crypto', 'fs', 'path', 'url', 'util'],
         plugins: [
             {
@@ -43,6 +44,7 @@ export default defineConfig([
         treeshake: true,
         target: 'es2022',
         platform: 'neutral',
+        hash: false,
     },
     {
         entry: ['src/utils/index.ts'],
@@ -54,5 +56,6 @@ export default defineConfig([
         treeshake: true,
         target: 'es2022',
         platform: 'neutral',
+        hash: false,
     },
 ]);

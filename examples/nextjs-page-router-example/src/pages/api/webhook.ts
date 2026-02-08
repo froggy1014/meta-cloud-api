@@ -5,7 +5,7 @@ import { handleImageMessage } from '@/lib/messageHandlers/image';
 import { handleInteractiveMessage } from '@/lib/messageHandlers/interactive';
 import { handleLocationMessage } from '@/lib/messageHandlers/location';
 import { handleTextMessage } from '@/lib/messageHandlers/text';
-import { nextjsWebhookHandler } from 'meta-cloud-api';
+import { nextjsPagesWebhookHandler } from 'meta-cloud-api';
 
 // Disable Next.js body parser to handle raw body for webhook verification
 export const config = {
@@ -23,7 +23,7 @@ const whatsappConfig = {
 };
 
 // 🤖 Create WhatsApp Bot with new clean architecture
-const Whatsapp = nextjsWebhookHandler(whatsappConfig);
+const Whatsapp = nextjsPagesWebhookHandler(whatsappConfig);
 
 // ===================================
 // 🎯 REGISTER MESSAGE HANDLERS

@@ -1,4 +1,4 @@
-import { webhookHandler } from 'meta-cloud-api/webhook/nextjs-app';
+import { nextjsAppWebhookHandler } from 'meta-cloud-api';
 
 // Import all message handlers
 import {
@@ -19,7 +19,7 @@ const whatsappConfig = {
 };
 
 // 🤖 Create WhatsApp Bot
-const Whatsapp = webhookHandler(whatsappConfig);
+const Whatsapp = nextjsAppWebhookHandler(whatsappConfig);
 
 // ===================================
 // 🎯 REGISTER MESSAGE HANDLERS

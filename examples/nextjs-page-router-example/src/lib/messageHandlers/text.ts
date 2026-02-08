@@ -1,11 +1,12 @@
-import { TextMessageBuilder, WebhookMessage, WhatsApp } from 'meta-cloud-api';
+import type { TextProcessedMessage, TextMessageHandler } from 'meta-cloud-api';
 
 /**
  * Handler for text messages
- * Echoes back the received text with builder pattern
+ * Echoes back the received text with plain object API
  */
-export const handleTextMessage = async (whatsapp: WhatsApp, message: WebhookMessage) => {
-    console.log(`📨 Text message: "${message.text?.body}" from ${message.from}`);
+export const handleTextMessage: TextMessageHandler = async (whatsapp, processed: TextProcessedMessage) => {
+    const { message } = processed;
+    console.log(`📨 Text message: "${message.text.body}" from ${message.from}`);
 
     // Mark message as read
     await whatsapp.messages.markAsRead({ messageId: message.id });
@@ -16,15 +17,11 @@ export const handleTextMessage = async (whatsapp: WhatsApp, message: WebhookMess
     // Simulate thinking time
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    // Build and send text response using builder pattern
-    const textMessage = new TextMessageBuilder()
-        .setBody(`Echo: ${message.text?.body}`)
-        .setPreviewUrl(true) // Enable URL preview if message contains links
-        .build();
-
+    // Send text response using plain object API
     await whatsapp.messages.text({
         to: message.from,
-        ...textMessage,
+        body: `Echo: ${message.text.body}`,
+        previewUrl: true, // Enable URL preview if message contains links
     });
 
     console.log(`✅ Text response sent to ${message.from}`);

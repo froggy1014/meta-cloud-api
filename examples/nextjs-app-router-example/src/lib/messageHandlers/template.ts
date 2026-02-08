@@ -1,20 +1,31 @@
 import type { WhatsApp } from 'meta-cloud-api';
-import { TemplateMessageBuilder } from 'meta-cloud-api/api/messages/builders';
+import { LanguagesEnum, ComponentTypesEnum, ParametersTypesEnum } from 'meta-cloud-api/enums';
 
 /**
- * Send a template message
+ * Send a template message using plain object API
  * Note: Template name must be approved by WhatsApp before use
  */
 export const sendTemplateMessage = async (whatsapp: WhatsApp, to: string) => {
-    const templateMessage = new TemplateMessageBuilder()
-        .setName('hello_world') // Use your approved template name
-        .setLanguage('en_US')
-        .addBody(['John']) // Parameters for template body
-        .build();
-
     await whatsapp.messages.template({
         to,
-        body: templateMessage,
+        body: {
+            name: 'hello_world', // Use your approved template name
+            language: {
+                policy: 'deterministic',
+                code: LanguagesEnum.English_US,
+            },
+            components: [
+                {
+                    type: ComponentTypesEnum.Body,
+                    parameters: [
+                        {
+                            type: ParametersTypesEnum.Text,
+                            text: 'John',
+                        },
+                    ],
+                },
+            ],
+        },
     });
 
     console.log(`✅ Template message sent to ${to}`);
