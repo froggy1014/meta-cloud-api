@@ -114,7 +114,7 @@
         "vitest": "^2.1.8"
     },
     "lint-staged": {
-        "*.{js,jsx,ts,tsx,json}": "biome check --write --"
+        "!website/**/*.{js,jsx,ts,tsx,json}": "biome check --write --"
     },
     "config": {
         "commitizen": {
