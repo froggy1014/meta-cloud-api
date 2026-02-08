@@ -16,8 +16,8 @@
 - `pnpm build`: Clean build with `tsdown --clean`.
 - `pnpm test`: Run unit tests with Vitest.
 - `pnpm test:watch`: Watch mode for tests.
-- `pnpm lint`: ESLint for the repo.
-- `pnpm format`: Prettier for the repo.
+- `pnpm lint`: Biome linting for the repo.
+- `pnpm format`: Biome formatting (auto-fix) for the repo.
 - `pnpm typecheck`: TypeScript type checking without emit.
 
 ## WhatsApp Business Platform API References
@@ -46,6 +46,7 @@ Use these official docs when updating `src/api` endpoints or types:
 ## Coding Style & Naming Conventions
 
 - TypeScript, ESM modules, 4-space indentation, single quotes, semicolons.
+- Enforced by Biome (linting and formatting).
 - API classes use PascalCase (`MessageApi.ts`), folders are lower-case (`src/api/messages`).
 - Keep request payloads as plain objects (avoid functional-style builders).
 - API files keep a top-level doc link comment: `// Docs: <url>`.
