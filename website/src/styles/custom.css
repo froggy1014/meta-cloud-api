@@ -17,6 +17,11 @@
     gap: 0.5rem;
 }
 
+/* Reduce hero section padding */
+.hero {
+    padding-block: clamp(1rem, calc(0.5rem + 4vmin), 3rem);
+}
+
 /* Inline code styling */
 .sl-markdown-content code {
     background-color: rgba(175, 184, 193, 0.2);
