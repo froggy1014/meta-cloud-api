@@ -13,7 +13,7 @@ const gaId = import.meta.env.PUBLIC_GA_ID;
     <meta name="twitter:image" content="https://meta-cloud-api.xyz/meta-cloud-api.png" />
 
     {/* JSON-LD structured data */}
-    <script type="application/ld+json" set:html={JSON.stringify({
+    <script is:inline type="application/ld+json" set:html={JSON.stringify({
         "@context": "https://schema.org",
         "@type": "SoftwareSourceCode",
         "name": "meta-cloud-api",
@@ -29,7 +29,7 @@ const gaId = import.meta.env.PUBLIC_GA_ID;
     {/* Google Analytics (GA4) */}
     {gaId && (
         <>
-            <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>
+            <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>
             <script is:inline define:vars={{ gaId }}>
                 window.dataLayer = window.dataLayer || [];
                 function gtag() { dataLayer.push(arguments); }
