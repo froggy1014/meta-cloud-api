@@ -1,3 +1,4 @@
+import sitemap from '@astrojs/sitemap';
 import starlight from '@astrojs/starlight';
 import { defineConfig } from 'astro/config';
 
@@ -5,6 +6,7 @@ import { defineConfig } from 'astro/config';
 export default defineConfig({
     site: 'https://meta-cloud-api.xyz',
     integrations: [
+        sitemap(),
         starlight({
             title: 'meta-cloud-api',
             description: 'TypeScript SDK wrapper for Meta WhatsApp Cloud API',
