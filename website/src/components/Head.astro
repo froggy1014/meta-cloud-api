@@ -1,8 +1,41 @@
 ---
 import StarlightHead from '@astrojs/starlight/components/Head.astro';
 import type { Props } from '@astrojs/starlight/props';
+
+const gaId = import.meta.env.PUBLIC_GA_ID;
 ---
 
 <StarlightHead {...Astro.props}>
     <slot />
+
+    {/* Open Graph image */}
+    <meta property="og:image" content="https://meta-cloud-api.xyz/meta-cloud-api.png" />
+    <meta name="twitter:image" content="https://meta-cloud-api.xyz/meta-cloud-api.png" />
+
+    {/* JSON-LD structured data */}
+    <script type="application/ld+json" set:html={JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "SoftwareSourceCode",
+        "name": "meta-cloud-api",
+        "description": "TypeScript SDK wrapper for Meta WhatsApp Cloud API",
+        "url": "https://meta-cloud-api.xyz",
+        "codeRepository": "https://github.com/froggy1014/meta-cloud-api",
+        "programmingLanguage": "TypeScript",
+        "runtimePlatform": "Node.js",
+        "license": "https://opensource.org/licenses/ISC",
+        "operatingSystem": "Cross-platform",
+    })} />
+
+    {/* Google Analytics (GA4) */}
+    {gaId && (
+        <>
+            <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>
+            <script is:inline define:vars={{ gaId }}>
+                window.dataLayer = window.dataLayer || [];
+                function gtag() { dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', gaId);
+            </script>
+        </>
+    )}
 </StarlightHead>
