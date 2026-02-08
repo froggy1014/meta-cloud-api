@@ -12,6 +12,11 @@
     --sl-color-black: #0f172a;
 }
 
+/* Reduce gap between logo and site title */
+.site-title {
+    gap: 0.5rem;
+}
+
 /* Inline code styling */
 .sl-markdown-content code {
     background-color: rgba(175, 184, 193, 0.2);
