@@ -1,7 +1,7 @@
-import { Queue, QueueOptions, Job } from 'bullmq';
-import { redis } from '@config/redis.js';
 import { config } from '@config/index.js';
 import { logger } from '@config/logger.js';
+import { redis } from '@config/redis.js';
+import { type Job, Queue, type QueueOptions } from 'bullmq';
 
 /**
  * Queue names enum
@@ -64,8 +64,8 @@ export class QueueManager {
      * Get or create a queue
      */
     static getQueue<T = any>(name: QueueName): Queue<T> {
-        if (!this.queues.has(name)) {
-            const queue = new Queue<T>(name, this.getQueueOptions());
+        if (!QueueManager.queues.has(name)) {
+            const queue = new Queue<T>(name, QueueManager.getQueueOptions());
 
             // Setup queue event listeners
             queue.on('error', (error) => {
@@ -116,12 +116,12 @@ export class QueueManager {
                 });
             });
 
-            this.queues.set(name, queue);
+            QueueManager.queues.set(name, queue);
 
             logger.info('Queue initialized', { queue: name });
         }
 
-        return this.queues.get(name)! as Queue<T>;
+        return QueueManager.queues.get(name)! as Queue<T>;
     }
 
     /**
@@ -131,7 +131,7 @@ export class QueueManager {
         data: NotificationJobData,
         options?: { delay?: number },
     ): Promise<Job<NotificationJobData>> {
-        const queue = this.getQueue<NotificationJobData>(QueueName.NOTIFICATION);
+        const queue = QueueManager.getQueue<NotificationJobData>(QueueName.NOTIFICATION);
 
         const job = await queue.add(data.type, data, {
             ...(options?.delay && { delay: options.delay }),
@@ -153,7 +153,7 @@ export class QueueManager {
         data: TicketJobData,
         options?: { delay?: number; priority?: number },
     ): Promise<Job<TicketJobData>> {
-        const queue = this.getQueue<TicketJobData>(QueueName.TICKET);
+        const queue = QueueManager.getQueue<TicketJobData>(QueueName.TICKET);
 
         const job = await queue.add(data.type, data, {
             ...(options?.delay && { delay: options.delay }),
@@ -173,7 +173,7 @@ export class QueueManager {
      * Get job by ID
      */
     static async getJob(queueName: QueueName, jobId: string): Promise<Job | undefined> {
-        const queue = this.getQueue(queueName);
+        const queue = QueueManager.getQueue(queueName);
         return await queue.getJob(jobId);
     }
 
@@ -181,7 +181,7 @@ export class QueueManager {
      * Remove job by ID
      */
     static async removeJob(queueName: QueueName, jobId: string): Promise<void> {
-        const job = await this.getJob(queueName, jobId);
+        const job = await QueueManager.getJob(queueName, jobId);
         if (job) {
             await job.remove();
             logger.info('Job removed', { queue: queueName, jobId });
@@ -198,7 +198,7 @@ export class QueueManager {
         failed: number;
         delayed: number;
     }> {
-        const queue = this.getQueue(queueName);
+        const queue = QueueManager.getQueue(queueName);
 
         const [waiting, active, completed, failed, delayed] = await Promise.all([
             queue.getWaitingCount(),
@@ -221,7 +221,7 @@ export class QueueManager {
      * Pause queue
      */
     static async pauseQueue(queueName: QueueName): Promise<void> {
-        const queue = this.getQueue(queueName);
+        const queue = QueueManager.getQueue(queueName);
         await queue.pause();
         logger.info('Queue paused', { queue: queueName });
     }
@@ -230,7 +230,7 @@ export class QueueManager {
      * Resume queue
      */
     static async resumeQueue(queueName: QueueName): Promise<void> {
-        const queue = this.getQueue(queueName);
+        const queue = QueueManager.getQueue(queueName);
         await queue.resume();
         logger.info('Queue resumed', { queue: queueName });
     }
@@ -239,7 +239,7 @@ export class QueueManager {
      * Clean completed jobs
      */
     static async cleanQueue(queueName: QueueName, grace: number = 3600000): Promise<string[]> {
-        const queue = this.getQueue(queueName);
+        const queue = QueueManager.getQueue(queueName);
         const jobs = await queue.clean(grace, 1000, 'completed');
         logger.info('Queue cleaned', {
             queue: queueName,
@@ -252,13 +252,13 @@ export class QueueManager {
      * Close all queues
      */
     static async closeAll(): Promise<void> {
-        const closePromises = Array.from(this.queues.entries()).map(async ([name, queue]) => {
+        const closePromises = Array.from(QueueManager.queues.entries()).map(async ([name, queue]) => {
             await queue.close();
             logger.info('Queue closed', { queue: name });
         });
 
         await Promise.all(closePromises);
-        this.queues.clear();
+        QueueManager.queues.clear();
     }
 
     /**
@@ -266,7 +266,7 @@ export class QueueManager {
      */
     static async healthCheck(): Promise<boolean> {
         try {
-            for (const [name, queue] of this.queues.entries()) {
+            for (const [name, queue] of QueueManager.queues.entries()) {
                 await queue.getJobCounts();
             }
             return true;

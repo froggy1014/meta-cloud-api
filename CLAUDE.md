@@ -13,8 +13,8 @@ pnpm dev          # Watch mode development
 pnpm build        # Clean production build
 pnpm test         # Run all tests
 pnpm test:watch   # Watch mode tests
-pnpm lint         # ESLint
-pnpm format       # Prettier
+pnpm lint         # Biome linting
+pnpm format       # Biome formatting (auto-fix)
 pnpm typecheck    # TypeScript checking
 ```
 

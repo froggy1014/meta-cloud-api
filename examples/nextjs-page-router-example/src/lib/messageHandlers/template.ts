@@ -1,5 +1,5 @@
 import type { WhatsApp } from 'meta-cloud-api';
-import { LanguagesEnum, ComponentTypesEnum, ParametersTypesEnum } from 'meta-cloud-api/enums';
+import { ComponentTypesEnum, LanguagesEnum, ParametersTypesEnum } from 'meta-cloud-api/enums';
 
 /**
  * Send a template message using plain object API

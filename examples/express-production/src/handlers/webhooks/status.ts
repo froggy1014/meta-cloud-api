@@ -1,5 +1,5 @@
-import { StatusCallback } from 'meta-cloud-api/webhook';
 import { logger } from '@config/logger.js';
+import type { StatusCallback } from 'meta-cloud-api/webhook';
 
 /**
  * Message status webhook handler

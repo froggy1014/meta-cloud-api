@@ -9,11 +9,9 @@ export type {
     MessagesResponse,
     StatusParams,
 } from './common';
-
-export type { TextMessageParams, TextObject } from './text';
-
-export * from './template';
-
+export type { ContactObject } from './contact';
+export type { InteractiveObject } from './interactive';
+export type { LocationObject } from './location';
 export type {
     AudioMediaObject,
     DocumentMediaObject,
@@ -21,11 +19,6 @@ export type {
     StickerMediaObject,
     VideoMediaObject,
 } from './media';
-
-export type { ContactObject } from './contact';
-
-export type { LocationObject } from './location';
-
-export type { InteractiveObject } from './interactive';
-
 export type { ReactionParams } from './reaction';
+export * from './template';
+export type { TextMessageParams, TextObject } from './text';

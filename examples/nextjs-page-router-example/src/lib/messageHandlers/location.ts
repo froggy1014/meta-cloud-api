@@ -1,4 +1,4 @@
-import type { LocationProcessedMessage, LocationMessageHandler } from 'meta-cloud-api';
+import type { LocationMessageHandler, LocationProcessedMessage } from 'meta-cloud-api';
 
 /**
  * Handler for location messages

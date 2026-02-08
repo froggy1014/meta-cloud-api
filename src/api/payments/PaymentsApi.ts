@@ -9,9 +9,8 @@
 // - DELETE /{WABA_ID}/payment_configuration
 
 import { BaseAPI } from '../../types/base';
-import type { WabaConfigType } from '../../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
-import type { RequesterClass, ResponseSuccess } from '../../types/request';
+import type { ResponseSuccess } from '../../types/request';
 
 import type * as payments from './types';
 
@@ -19,10 +18,6 @@ import type * as payments from './types';
  * API for WhatsApp Payments (India payment configuration).
  */
 export default class PaymentsApi extends BaseAPI implements payments.PaymentsClass {
-    constructor(config: WabaConfigType, client: RequesterClass) {
-        super(config, client);
-    }
-
     async listPaymentConfigurations(wabaId: string): Promise<payments.PaymentConfigurationsResponse> {
         return this.sendJson(
             HttpMethodsEnum.Get,

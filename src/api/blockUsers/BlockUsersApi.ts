@@ -7,10 +7,8 @@
 
 import { BaseAPI } from '../../types/base';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
-import type { RequesterClass } from '../../types/request';
-import type { WabaConfigType } from '../../types/config';
-import * as blockUsers from './types/blockUsers';
 import { objectToQueryString } from '../../utils/objectToQueryString';
+import type * as blockUsers from './types/blockUsers';
 
 /**
  * Block Users API
@@ -22,10 +20,6 @@ import { objectToQueryString } from '../../utils/objectToQueryString';
  */
 export default class BlockUsersApi extends BaseAPI implements blockUsers.BlockUsersClass {
     private readonly endpoint = 'block_users';
-
-    constructor(config: WabaConfigType, client: RequesterClass) {
-        super(config, client);
-    }
 
     /**
      * Build request body for block/unblock operations

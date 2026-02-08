@@ -1,6 +1,6 @@
-import { ImageMessage, DocumentMessage, VideoMessage, AudioMessage } from 'meta-cloud-api/webhook';
 import { logger } from '@config/logger.js';
 import { MessageTemplates } from '@services/whatsapp/templates.js';
+import type { AudioMessage, DocumentMessage, ImageMessage, VideoMessage } from 'meta-cloud-api/webhook';
 
 /**
  * Image message handler

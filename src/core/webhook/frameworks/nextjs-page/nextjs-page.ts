@@ -1,5 +1,5 @@
-import { BaseRequest, BaseResponse, BaseWebhookConfig, BaseWebhookHandler } from '../handler';
-import { WebhookResponse } from '../../WebhookProcessor';
+import type { WebhookResponse } from '../../WebhookProcessor';
+import { type BaseRequest, type BaseResponse, type BaseWebhookConfig, BaseWebhookHandler } from '../handler';
 
 // Next.js specific interfaces
 export interface BaseApiRequest extends BaseRequest {
@@ -13,8 +13,8 @@ export interface BaseApiRequest extends BaseRequest {
 
 export interface BaseApiResponse extends BaseResponse {
     status(code: number): any;
-    json(data: any): void | any;
-    send(data?: any): void | any;
+    json(data: any): undefined | any;
+    send(data?: any): undefined | any;
     setHeader(name: string, value: string): void;
 }
 
@@ -29,10 +29,6 @@ class NextJsWebhookHandler<
     TRequest extends BaseApiRequest,
     TResponse extends BaseApiResponse,
 > extends BaseWebhookHandler<TRequest, TResponse> {
-    constructor(config: NextJsWebhookConfig) {
-        super(config);
-    }
-
     // Helper function to parse request body for POST requests
     private async parseRequestBody(req: TRequest, preserveRaw: boolean = false): Promise<void> {
         if (req.method === 'POST' && !req.body) {
@@ -55,7 +51,7 @@ class NextJsWebhookHandler<
                 if (body.trim()) {
                     try {
                         req.body = JSON.parse(body);
-                    } catch (error) {
+                    } catch (_error) {
                         throw new Error('Invalid JSON in request body');
                     }
                 } else {

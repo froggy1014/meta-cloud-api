@@ -1,9 +1,7 @@
 import { WhatsApp } from '@core/whatsapp';
-
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-import type { TemplateDeleteParams, TemplateGetParams, TemplateRequestBody } from '../types';
 import { CategoryEnum, LanguagesEnum, TemplateStatusEnum } from 'src/types/enums';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { TemplateDeleteParams, TemplateGetParams, TemplateRequestBody } from '../types';
 
 describe('Template API - Unit Tests', () => {
     let whatsApp: WhatsApp;

@@ -1,10 +1,10 @@
-import { Worker, Job } from 'bullmq';
-import { redis } from '@config/redis.js';
 import { config } from '@config/index.js';
 import { logger } from '@config/logger.js';
-import { QueueName, NotificationJobData } from '../queueManager.js';
-import { MessageSender } from '@services/whatsapp/sender.js';
+import { redis } from '@config/redis.js';
 import { TicketService } from '@services/tickets/ticketService.js';
+import { MessageSender } from '@services/whatsapp/sender.js';
+import { type Job, Worker } from 'bullmq';
+import { type NotificationJobData, QueueName } from '../queueManager.js';
 
 /**
  * Notification worker
@@ -102,7 +102,7 @@ export class NotificationWorker {
             // Send to support team if configured
             if (config.SUPPORT_TEAM_PHONE) {
                 const message =
-                    `🎫 *New Ticket Created*\n\n` +
+                    '🎫 *New Ticket Created*\n\n' +
                     `*Ticket:* ${ticketNumber}\n` +
                     `*User:* ${ticket.userName} (${userId})\n` +
                     `*Category:* ${ticket.category}\n` +
@@ -198,7 +198,7 @@ export class NotificationWorker {
             }
 
             const message =
-                `⏰ *Ticket Reminder*\n\n` +
+                '⏰ *Ticket Reminder*\n\n' +
                 `*Ticket:* ${ticketNumber}\n` +
                 `*Category:* ${ticket.category}\n\n` +
                 `We're still waiting for your response. Please reply to help us resolve your issue.\n\n` +

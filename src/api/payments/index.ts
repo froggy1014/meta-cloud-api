@@ -16,8 +16,8 @@ export type {
     PaymentConfigurationOauthLinkResponse,
     PaymentConfigurationProvider,
     PaymentConfigurationStatus,
+    PaymentConfigurationsResponse,
     PaymentConfigurationUpdateRequest,
     PaymentConfigurationUpdateResponse,
-    PaymentConfigurationsResponse,
     PaymentsClass,
 } from './types';

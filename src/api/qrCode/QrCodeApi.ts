@@ -8,9 +8,8 @@
 // - DELETE /{PHONE_NUMBER_ID}/message_qrdls/{QR_CODE_ID}
 
 import { BaseAPI } from '../../types/base';
-import type { WabaConfigType } from '../../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
-import type { RequesterClass, ResponseSuccess } from '../../types/request';
+import type { ResponseSuccess } from '../../types/request';
 
 import type * as qrCode from './types';
 
@@ -26,10 +25,6 @@ import type * as qrCode from './types';
  */
 export default class QrCodeApi extends BaseAPI implements qrCode.QrCodeClass {
     private readonly endpoint = 'message_qrdls';
-
-    constructor(config: WabaConfigType, client: RequesterClass) {
-        super(config, client);
-    }
 
     /**
      * Create a new QR code with a prefilled message.

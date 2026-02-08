@@ -1,5 +1,5 @@
-import { whatsappClient } from './client.js';
 import { logger } from '@config/logger.js';
+import { whatsappClient } from './client.js';
 
 /**
  * Retry configuration for message sending
@@ -68,7 +68,7 @@ export class MessageSender {
 
                 // Don't retry if it's the last attempt
                 if (attempt < config.maxRetries) {
-                    const delay = config.retryDelay * Math.pow(config.backoffMultiplier, attempt);
+                    const delay = config.retryDelay * config.backoffMultiplier ** attempt;
                     await sleep(delay);
                 }
             }
@@ -150,7 +150,7 @@ export class MessageSender {
                 });
 
                 if (attempt < config.maxRetries) {
-                    const delay = config.retryDelay * Math.pow(config.backoffMultiplier, attempt);
+                    const delay = config.retryDelay * config.backoffMultiplier ** attempt;
                     await sleep(delay);
                 }
             }
@@ -234,7 +234,7 @@ export class MessageSender {
                 });
 
                 if (attempt < config.maxRetries) {
-                    const delay = config.retryDelay * Math.pow(config.backoffMultiplier, attempt);
+                    const delay = config.retryDelay * config.backoffMultiplier ** attempt;
                     await sleep(delay);
                 }
             }
@@ -298,7 +298,7 @@ export class MessageSender {
                 });
 
                 if (attempt < config.maxRetries) {
-                    const delay = config.retryDelay * Math.pow(config.backoffMultiplier, attempt);
+                    const delay = config.retryDelay * config.backoffMultiplier ** attempt;
                     await sleep(delay);
                 }
             }

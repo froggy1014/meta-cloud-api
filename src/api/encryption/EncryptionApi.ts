@@ -5,17 +5,12 @@
 // - POST /{PHONE_NUMBER_ID}/whatsapp_business_encryption
 
 import { BaseAPI } from '../../types/base';
-import type { WabaConfigType } from '../../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
-import type { RequesterClass, ResponseSuccess } from '../../types/request';
+import type { ResponseSuccess } from '../../types/request';
 import type { EncryptionClass, EncryptionPublicKeyResponse } from './types';
 
 export default class EncryptionApi extends BaseAPI implements EncryptionClass {
     private readonly endpoint = 'whatsapp_business_encryption';
-
-    constructor(config: WabaConfigType, client: RequesterClass) {
-        super(config, client);
-    }
 
     async getEncryptionPublicKey(): Promise<EncryptionPublicKeyResponse> {
         return this.sendJson(

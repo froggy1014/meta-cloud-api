@@ -1,5 +1,4 @@
-import { ProcessedAccountUpdate } from 'meta-cloud-api';
-import { WhatsApp } from 'meta-cloud-api';
+import type { ProcessedAccountUpdate, WhatsApp } from 'meta-cloud-api';
 
 /**
  * Example handler for account_update webhook field

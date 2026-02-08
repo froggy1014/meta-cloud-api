@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import type { Application } from 'express';
 import request from 'supertest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { createApp } from '../../../src/app.js';
-import { textMessageWebhook, buttonReplyWebhook, listReplyWebhook } from '../../fixtures/webhooks.js';
-import { Application } from 'express';
+import { buttonReplyWebhook, listReplyWebhook, textMessageWebhook } from '../../fixtures/webhooks.js';
 
 describe('Webhook Routes', () => {
     let app: Application;

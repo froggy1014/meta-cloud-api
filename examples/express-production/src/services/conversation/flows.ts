@@ -1,9 +1,9 @@
-import { ConversationState } from '@prisma/client';
-import { SessionStore, SessionData } from './sessionStore.js';
-import { ConversationStateMachine } from './stateMachine.js';
-import { MessageTemplates } from '@services/whatsapp/templates.js';
-import { logger } from '@config/logger.js';
 import { prisma } from '@config/database.js';
+import { logger } from '@config/logger.js';
+import { ConversationState } from '@prisma/client';
+import { MessageTemplates } from '@services/whatsapp/templates.js';
+import { type SessionData, SessionStore } from './sessionStore.js';
+import { ConversationStateMachine } from './stateMachine.js';
 
 /**
  * Conversation flow manager
@@ -21,7 +21,7 @@ export class ConversationFlows {
             // If already in a conversation, reset to idle first
             if (session.state !== ConversationState.IDLE) {
                 logger.info('Resetting existing conversation', { userId, currentState: session.state });
-                await this.reset(userId);
+                await ConversationFlows.reset(userId);
             }
 
             // Send welcome message
@@ -77,7 +77,7 @@ export class ConversationFlows {
 
             if (!session || session.state !== ConversationState.COLLECTING_NAME) {
                 logger.warn('Invalid state for name input', { userId, state: session?.state });
-                await this.start(userId);
+                await ConversationFlows.start(userId);
                 return;
             }
 
@@ -122,7 +122,7 @@ export class ConversationFlows {
 
             if (!session || session.state !== ConversationState.COLLECTING_ISSUE) {
                 logger.warn('Invalid state for issue input', { userId, state: session?.state });
-                await this.start(userId);
+                await ConversationFlows.start(userId);
                 return;
             }
 
@@ -170,7 +170,7 @@ export class ConversationFlows {
 
             if (!session || session.state !== ConversationState.SELECTING_CATEGORY) {
                 logger.warn('Invalid state for category selection', { userId, state: session?.state });
-                await this.start(userId);
+                await ConversationFlows.start(userId);
                 return;
             }
 
@@ -227,13 +227,13 @@ export class ConversationFlows {
 
             if (!session || session.state !== ConversationState.CONFIRMING_TICKET) {
                 logger.warn('Invalid state for ticket confirmation', { userId, state: session?.state });
-                await this.start(userId);
+                await ConversationFlows.start(userId);
                 return;
             }
 
             if (confirmed) {
                 // Create ticket in database
-                const ticketNumber = await this.createTicket(session);
+                const ticketNumber = await ConversationFlows.createTicket(session);
 
                 // Transition to completed
                 const nextState = ConversationStateMachine.transition(
@@ -249,13 +249,13 @@ export class ConversationFlows {
 
                 // Clean up session after a delay
                 setTimeout(async () => {
-                    await this.reset(userId);
+                    await ConversationFlows.reset(userId);
                 }, 5000);
 
                 logger.info('Ticket created', { userId, ticketNumber });
             } else {
                 // Cancel ticket creation
-                await this.cancel(userId);
+                await ConversationFlows.cancel(userId);
             }
         } catch (error) {
             logger.error('Failed to handle ticket confirmation', {
@@ -331,7 +331,7 @@ export class ConversationFlows {
 
             // Reset after a delay
             setTimeout(async () => {
-                await this.reset(userId);
+                await ConversationFlows.reset(userId);
             }, 3000);
 
             logger.info('Conversation cancelled', { userId });

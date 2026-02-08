@@ -1,11 +1,11 @@
-import { Router, Request, Response } from 'express';
 import { checkDatabaseHealth } from '@config/database.js';
-import { checkRedisHealth } from '@config/redis.js';
-import { checkWhatsAppHealth } from '@services/whatsapp/client.js';
-import { QueueManager } from '@services/queue/queueManager.js';
-import { sendSuccess, sendError } from '@utils/responses.js';
-import { HealthCheckResult } from '@types/index.js';
 import { logger } from '@config/logger.js';
+import { checkRedisHealth } from '@config/redis.js';
+import { QueueManager } from '@services/queue/queueManager.js';
+import { checkWhatsAppHealth } from '@services/whatsapp/client.js';
+import type { HealthCheckResult } from '@types/index.js';
+import { sendError, sendSuccess } from '@utils/responses.js';
+import { type Request, type Response, Router } from 'express';
 
 const router = Router();
 

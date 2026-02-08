@@ -11,7 +11,7 @@ const DEFAULT_REQUEST_TIMEOUT = 20000;
 
 const emptyConfigChecker = (config: WhatsAppConfig | undefined) => {
     if (!process.env[WabaConfigEnum.AccessToken] && !config?.accessToken) {
-        LOGGER.log(`Environmental variable: CLOUD_API_ACCESS_TOKEN and/or access token argument is undefined.`);
+        LOGGER.log('Environmental variable: CLOUD_API_ACCESS_TOKEN and/or access token argument is undefined.');
         throw new Error('Missing WhatsApp access token.');
     }
 };
@@ -30,13 +30,13 @@ export const importConfig = (inputConfig?: WhatsAppConfig) => {
         [WabaConfigEnum.WebhookVerificationToken]:
             inputConfig?.webhookVerificationToken || process.env.WEBHOOK_VERIFICATION_TOKEN || '',
         [WabaConfigEnum.ListenerPort]:
-            inputConfig?.listenerPort || parseInt(process.env.LISTENER_PORT || '') || DEFAULT_LISTENER_PORT,
+            inputConfig?.listenerPort || parseInt(process.env.LISTENER_PORT || '', 10) || DEFAULT_LISTENER_PORT,
         [WabaConfigEnum.MaxRetriesAfterWait]:
             inputConfig?.maxRetriesAfterWait ||
-            parseInt(process.env.MAX_RETRIES_AFTER_WAIT || '') ||
+            parseInt(process.env.MAX_RETRIES_AFTER_WAIT || '', 10) ||
             DEFAULT_MAX_RETRIES_AFTER_WAIT,
         [WabaConfigEnum.RequestTimeout]:
-            inputConfig?.requestTimeout || parseInt(process.env.REQUEST_TIMEOUT || '') || DEFAULT_REQUEST_TIMEOUT,
+            inputConfig?.requestTimeout || parseInt(process.env.REQUEST_TIMEOUT || '', 10) || DEFAULT_REQUEST_TIMEOUT,
         [WabaConfigEnum.Debug]: inputConfig?.debug || process.env.DEBUG === 'true',
         [WabaConfigEnum.PrivatePem]: inputConfig?.privatePem || process.env.FLOW_API_PRIVATE_PEM || '',
         [WabaConfigEnum.Passphrase]: inputConfig?.passphrase || process.env.FLOW_API_PASSPHRASE || '',

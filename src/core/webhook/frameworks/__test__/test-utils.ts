@@ -1,4 +1,4 @@
-import { vi, expect } from 'vitest';
+import { expect, vi } from 'vitest';
 
 /**
  * Common test configuration used across all webhook handler tests

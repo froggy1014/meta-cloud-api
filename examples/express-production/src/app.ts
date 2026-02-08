@@ -1,11 +1,11 @@
-import express, { Application } from 'express';
-import { securityMiddleware } from '@middleware/security.js';
-import { skipHealthCheckLogs } from '@middleware/requestLogger.js';
+import { config } from '@config/index.js';
+import { logger } from '@config/logger.js';
 import { errorHandler, notFoundHandler } from '@middleware/errorHandler.js';
 import { rateLimiter } from '@middleware/rateLimiter.js';
+import { skipHealthCheckLogs } from '@middleware/requestLogger.js';
+import { securityMiddleware } from '@middleware/security.js';
 import routes from '@routes/index.js';
-import { logger } from '@config/logger.js';
-import { config } from '@config/index.js';
+import express, { type Application } from 'express';
 
 /**
  * Create Express application

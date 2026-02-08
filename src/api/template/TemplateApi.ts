@@ -8,9 +8,8 @@
 // - DELETE /{WABA_ID}/message_templates?...
 
 import { BaseAPI } from '../../types/base';
-import type { WabaConfigType } from '../../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
-import type { RequesterClass, ResponsePagination, ResponseSuccess } from '../../types/request';
+import type { ResponsePagination, ResponseSuccess } from '../../types/request';
 import { objectToQueryString } from '../../utils/objectToQueryString';
 import type {
     TemplateClass,
@@ -22,10 +21,6 @@ import type {
 
 export default class TemplateApi extends BaseAPI implements TemplateClass {
     private readonly endpoint = 'message_templates';
-
-    constructor(config: WabaConfigType, client: RequesterClass) {
-        super(config, client);
-    }
 
     async getTemplate(templateId: string): Promise<TemplateResponse> {
         return this.sendJson(HttpMethodsEnum.Get, `${templateId}`, this.config[WabaConfigEnum.RequestTimeout], null);

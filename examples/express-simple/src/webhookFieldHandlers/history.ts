@@ -1,5 +1,4 @@
-import { ProcessedHistory } from 'meta-cloud-api';
-import { WhatsApp } from 'meta-cloud-api';
+import type { ProcessedHistory, WhatsApp } from 'meta-cloud-api';
 
 /**
  * Example handler for history webhook field

@@ -1,4 +1,4 @@
-import { ConversationState } from '@prisma/client';
+import type { ConversationState } from '@prisma/client';
 
 /**
  * Conversation-related type definitions

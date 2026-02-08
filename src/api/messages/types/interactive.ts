@@ -1,7 +1,7 @@
 // Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/messages/
 
-import { InteractiveTypesEnum, MessageTypesEnum } from '../../../types/enums';
-import { MessageRequestBody } from './common';
+import { type InteractiveTypesEnum, MessageTypesEnum } from '../../../types/enums';
+import type { MessageRequestBody } from './common';
 
 // Import media types to avoid circular dependencies
 type DocumentMediaObject = {

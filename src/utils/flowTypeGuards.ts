@@ -1,9 +1,9 @@
 import {
     FlowActionEnum,
-    FlowDataExchangeRequest,
-    FlowEndpointRequest,
-    FlowErrorNotificationRequest,
-    FlowHealthCheckRequest,
+    type FlowDataExchangeRequest,
+    type FlowEndpointRequest,
+    type FlowErrorNotificationRequest,
+    type FlowHealthCheckRequest,
 } from '../api/flow/types';
 
 /**

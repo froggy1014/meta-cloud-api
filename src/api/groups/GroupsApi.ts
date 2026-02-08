@@ -14,9 +14,8 @@
 // - POST /{GROUP_ID}
 
 import { BaseAPI } from '../../types/base';
-import type { WabaConfigType } from '../../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
-import type { RequesterClass, ResponseSuccess } from '../../types/request';
+import type { ResponseSuccess } from '../../types/request';
 import { objectToQueryString } from '../../utils/objectToQueryString';
 
 import type * as groups from './types';
@@ -33,10 +32,6 @@ import type * as groups from './types';
  * - Fetch group metadata and active groups
  */
 export default class GroupsApi extends BaseAPI implements groups.GroupsClass {
-    constructor(config: WabaConfigType, client: RequesterClass) {
-        super(config, client);
-    }
-
     async createGroup(params: groups.GroupCreateRequest): Promise<groups.GroupCreateResponse> {
         const body = {
             messaging_product: 'whatsapp',

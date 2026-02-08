@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import { logger } from './logger.js';
 import { config } from './index.js';
+import { logger } from './logger.js';
 
 /**
  * Prisma Client instance with logging and error handling

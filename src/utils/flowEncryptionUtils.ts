@@ -4,10 +4,10 @@
  * @see https://developers.facebook.com/docs/whatsapp/cloud-api/reference/whatsapp-business-encryption/
  */
 
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
-import { FlowEndpointRequest } from '../api/flow';
-import { WabaConfigType } from '../types/config';
+import type { FlowEndpointRequest } from '../api/flow';
+import type { WabaConfigType } from '../types/config';
 import Logger from './logger';
 
 const LIB_NAME = 'FLOW_ENCRYPTION_UTILS';
@@ -48,7 +48,7 @@ function validateNodeEnvironment(): void {
     }
 
     // Check Node.js version (crypto.generateKeyPairSync requires Node.js 10.12.0+)
-    if (process.versions && process.versions.node) {
+    if (process.versions?.node) {
         const nodeVersion = process.versions.node.split('.').map(Number);
         const major = nodeVersion[0] ?? 0;
         const minor = nodeVersion[1] ?? 0;
@@ -215,7 +215,7 @@ export function decryptFlowRequest(
         format: isPKCS8 ? 'PKCS#8' : isPKCS1 ? 'PKCS#1' : 'Unknown',
     });
 
-    let privateKey;
+    let privateKey: crypto.KeyObject;
     try {
         // Try to create private key with passphrase
         if (passphrase) {

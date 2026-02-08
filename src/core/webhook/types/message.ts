@@ -1,4 +1,4 @@
-import { MessageTypesEnum } from '../../../types/enums';
+import type { MessageTypesEnum } from '../../../types/enums';
 import type { ForwardedContext, ProductContext, ReferralInfo, ReplyContext, WebhookError } from './common';
 
 // ============================================================================

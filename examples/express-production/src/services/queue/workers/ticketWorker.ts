@@ -1,10 +1,10 @@
-import { Worker, Job } from 'bullmq';
-import { redis } from '@config/redis.js';
 import { config } from '@config/index.js';
 import { logger } from '@config/logger.js';
-import { QueueName, TicketJobData, QueueManager } from '../queueManager.js';
-import { TicketService } from '@services/tickets/ticketService.js';
+import { redis } from '@config/redis.js';
 import { TicketStatus } from '@prisma/client';
+import { TicketService } from '@services/tickets/ticketService.js';
+import { type Job, Worker } from 'bullmq';
+import { QueueManager, QueueName, type TicketJobData } from '../queueManager.js';
 
 /**
  * Ticket worker

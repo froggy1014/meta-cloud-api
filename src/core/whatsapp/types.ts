@@ -1,4 +1,5 @@
-import {
+import type {
+    BlockUsersApi,
     BusinessProfileApi,
     CallingApi,
     CommerceApi,
@@ -14,10 +15,9 @@ import {
     RegistrationApi,
     TemplateApi,
     TwoStepVerificationApi,
-    BlockUsersApi,
     WabaApi,
 } from 'src/api';
-import { WhatsAppConfig } from '../../types/config';
+import type { WhatsAppConfig } from '../../types/config';
 import type { EncryptionKeyPair } from '../../utils/flowEncryptionUtils';
 
 export declare class WhatsAppClass {

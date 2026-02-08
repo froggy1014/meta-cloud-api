@@ -1,6 +1,5 @@
 // Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/templates/
 
-export * from './common';
 export type {
     CatalogButton,
     ComponentTypes,
@@ -27,6 +26,7 @@ export type {
     TemplateResponse,
     URLButton,
 } from './common';
+export * from './common';
 
 export type {
     AuthenticationTemplateOptions,

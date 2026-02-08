@@ -1,6 +1,5 @@
 // Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/business-phone-numbers/phone-numbers/
 
-export * from './common';
 export type {
     AccountMode,
     CodeVerificationStatus,
@@ -24,3 +23,4 @@ export type {
     TwoStepVerificationParams,
     VerifyCodeRequest,
 } from './common';
+export * from './common';

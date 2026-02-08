@@ -1,4 +1,4 @@
-import { Ticket, TicketStatus, TicketCategory, TicketPriority } from '@prisma/client';
+import type { Ticket, TicketCategory, TicketPriority, TicketStatus } from '@prisma/client';
 
 /**
  * Ticket-related type definitions

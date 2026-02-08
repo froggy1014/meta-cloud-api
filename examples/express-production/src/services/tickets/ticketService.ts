@@ -1,6 +1,6 @@
 import { prisma } from '@config/database.js';
 import { logger } from '@config/logger.js';
-import { Ticket, TicketStatus, TicketPriority, TicketCategory, Prisma } from '@prisma/client';
+import { type Prisma, type Ticket, type TicketCategory, TicketPriority, TicketStatus } from '@prisma/client';
 
 /**
  * Ticket service

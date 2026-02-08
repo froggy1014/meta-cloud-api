@@ -1,5 +1,5 @@
-import { FlowsCallback } from 'meta-cloud-api/webhook';
 import { logger } from '@config/logger.js';
+import type { FlowsCallback } from 'meta-cloud-api/webhook';
 
 /**
  * Flows webhook handler

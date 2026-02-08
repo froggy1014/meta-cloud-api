@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { inspect } from 'util';
+import { inspect } from 'node:util';
 import type { LoggerInterface } from '../types/logger';
 
 export default class Logger implements LoggerInterface {

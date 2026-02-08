@@ -5,9 +5,8 @@
 // - POST /{PHONE_NUMBER_ID}/deregister
 
 import { BaseAPI } from '../../types/base';
-import type { WabaConfigType } from '../../types/config';
-import { DataLocalizationRegionEnum, HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
-import type { RequesterClass, ResponseSuccess } from '../../types/request';
+import { type DataLocalizationRegionEnum, HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
+import type { ResponseSuccess } from '../../types/request';
 
 import type * as registration from './types';
 
@@ -19,10 +18,6 @@ import type * as registration from './types';
  * - Deregister a WhatsApp Business Account
  */
 export default class RegistrationApi extends BaseAPI implements registration.RegistrationClass {
-    constructor(config: WabaConfigType, client: RequesterClass) {
-        super(config, client);
-    }
-
     /**
      * Register a WhatsApp Business Account using a PIN.
      *

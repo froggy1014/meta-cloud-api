@@ -1,4 +1,4 @@
-import { vi, beforeAll, afterAll, afterEach } from 'vitest';
+import { afterAll, afterEach, beforeAll, vi } from 'vitest';
 
 /**
  * Test environment setup

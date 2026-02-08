@@ -7,9 +7,8 @@
 // - POST /{PHONE_NUMBER_ID}/calls
 
 import { BaseAPI } from '../../types/base';
-import type { WabaConfigType } from '../../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
-import type { RequesterClass, ResponseSuccess } from '../../types/request';
+import type { ResponseSuccess } from '../../types/request';
 import { objectToQueryString } from '../../utils/objectToQueryString';
 
 import type * as calling from './types';
@@ -19,10 +18,6 @@ import type * as calling from './types';
  */
 export default class CallingApi extends BaseAPI implements calling.CallingClass {
     private readonly endpoint = 'calls';
-
-    constructor(config: WabaConfigType, client: RequesterClass) {
-        super(config, client);
-    }
 
     async updateCallingSettings(params: calling.UpdateCallingSettingsRequest): Promise<ResponseSuccess> {
         return this.sendJson(

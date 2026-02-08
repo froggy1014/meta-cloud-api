@@ -7,9 +7,8 @@
 // - GET {MEDIA_URL}
 
 import { BaseAPI } from '../../types/base';
-import type { WabaConfigType } from '../../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
-import type { RequesterClass, ResponseSuccess } from '../../types/request';
+import type { ResponseSuccess } from '../../types/request';
 
 import type * as media from './types';
 
@@ -25,10 +24,6 @@ import type * as media from './types';
 export default class MediaApi extends BaseAPI implements media.MediaClass {
     private readonly endpoint = 'media';
 
-    constructor(config: WabaConfigType, client: RequesterClass) {
-        super(config, client);
-    }
-
     /**
      * Retrieve media information by media ID.
      *
@@ -39,7 +34,7 @@ export default class MediaApi extends BaseAPI implements media.MediaClass {
      * @example
      * const mediaInfo = await whatsappClient.media.getMediaById('media_id_123');
      */
-    async getMediaById(mediaId: string, phone_number_id?: string): Promise<media.MediaResponse> {
+    async getMediaById(mediaId: string, _phone_number_id?: string): Promise<media.MediaResponse> {
         return this.sendJson(HttpMethodsEnum.Get, `${mediaId}`, this.config[WabaConfigEnum.RequestTimeout], null);
     }
 
@@ -78,7 +73,7 @@ export default class MediaApi extends BaseAPI implements media.MediaClass {
      * @example
      * await whatsappClient.media.deleteMedia('media_id_123');
      */
-    async deleteMedia(mediaId: string, phone_number_id?: string): Promise<ResponseSuccess> {
+    async deleteMedia(mediaId: string, _phone_number_id?: string): Promise<ResponseSuccess> {
         return this.sendJson(HttpMethodsEnum.Delete, `${mediaId}`, this.config[WabaConfigEnum.RequestTimeout], null);
     }
 

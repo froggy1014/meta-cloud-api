@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from 'express';
 import { logger } from '@config/logger.js';
-import { ZodError } from 'zod';
 import { Prisma } from '@prisma/client';
+import type { NextFunction, Request, Response } from 'express';
+import { ZodError } from 'zod';
 
 /**
  * Custom error class for application-specific errors

@@ -1,7 +1,7 @@
 // Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/flows/
 
-import { ResponseSuccess } from '../../../types';
-import { IncomingHttpHeaders, IncomingMessage } from 'http';
+import type { IncomingHttpHeaders, IncomingMessage } from 'node:http';
+import type { ResponseSuccess } from '../../../types';
 
 /**
  * Enum for Flow Status

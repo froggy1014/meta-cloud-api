@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { ConversationStateMachine } from '../../../src/services/conversation/stateMachine.js';
 import { ConversationState } from '@prisma/client';
+import { describe, expect, it } from 'vitest';
+import { ConversationStateMachine } from '../../../src/services/conversation/stateMachine.js';
 
 describe('ConversationStateMachine', () => {
     describe('canTransition', () => {

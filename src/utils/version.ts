@@ -1,5 +1,5 @@
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 /**
  * Get SDK version from package.json
@@ -9,7 +9,7 @@ export function getVersion(): string {
         const packagePath = join(__dirname, '../../package.json');
         const packageJson = JSON.parse(readFileSync(packagePath, 'utf-8'));
         return packageJson.version;
-    } catch (error) {
+    } catch (_error) {
         return 'unknown';
     }
 }

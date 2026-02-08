@@ -1,4 +1,4 @@
-import type { InteractiveProcessedMessage, InteractiveMessageHandler } from 'meta-cloud-api';
+import type { InteractiveMessageHandler, InteractiveProcessedMessage } from 'meta-cloud-api';
 
 /**
  * Handler for interactive messages (button/list responses)

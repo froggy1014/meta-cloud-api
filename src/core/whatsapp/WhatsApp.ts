@@ -1,17 +1,8 @@
-import { importConfig } from '../../config/importConfig';
-import { WabaConfigType, WhatsAppConfig } from '../../types/config';
-import * as SDKEnums from '../../types/enums';
-import { formatConfigTable } from '../../utils/configTable';
-import { generateEncryption, EncryptionKeyPair } from '../../utils/flowEncryptionUtils';
-import Requester from '../../utils/http/request';
-import Logger from '../../utils/logger';
-import { getUserAgent, getVersion } from '../../utils/version';
-
 import {
     BlockUsersApi,
+    BusinessProfileApi,
     CallingApi,
     CommerceApi,
-    BusinessProfileApi,
     EncryptionApi,
     FlowApi,
     GroupsApi,
@@ -26,7 +17,15 @@ import {
     TwoStepVerificationApi,
     WabaApi,
 } from '../../api';
+import { importConfig } from '../../config/importConfig';
+import type { WabaConfigType, WhatsAppConfig } from '../../types/config';
+import * as SDKEnums from '../../types/enums';
+import { formatConfigTable } from '../../utils/configTable';
+import { type EncryptionKeyPair, generateEncryption } from '../../utils/flowEncryptionUtils';
+import Requester from '../../utils/http/request';
+import Logger from '../../utils/logger';
 import { printLogo } from '../../utils/logoConsole';
+import { getUserAgent, getVersion } from '../../utils/version';
 
 const LIB_NAME = 'WHATSAPP';
 const LOGGER = new Logger(LIB_NAME, process.env.DEBUG === 'true');
@@ -86,7 +85,7 @@ export default class WhatsApp {
         this.registration = new RegistrationApi(this.config, this.requester);
         this.waba = new WabaApi(this.config, this.requester);
 
-        LOGGER.log('\n' + formatConfigTable(this.config));
+        LOGGER.log(`\n${formatConfigTable(this.config)}`);
     }
 
     /**

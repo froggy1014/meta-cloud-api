@@ -1,14 +1,14 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ExpressRequest, ExpressResponse, ExpressWebhookConfig, NextFunction } from '../express';
 import { expressWebhookHandler } from '../express';
-import type { ExpressWebhookConfig, ExpressRequest, ExpressResponse, NextFunction } from '../express';
 import {
-    mockWebhookConfig,
     createMockExpressRequest,
     createMockExpressResponse,
-    webhookVerificationData,
-    webhookProcessingData,
-    flowProcessingData,
     errorScenarios,
+    flowProcessingData,
+    mockWebhookConfig,
+    webhookProcessingData,
+    webhookVerificationData,
 } from './test-utils';
 
 // Mock the WebhookProcessor

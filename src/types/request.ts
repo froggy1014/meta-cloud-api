@@ -1,4 +1,4 @@
-import { HttpMethodsEnum } from './enums';
+import type { HttpMethodsEnum } from './enums';
 
 export type GeneralRequestBody = Record<string, unknown>;
 

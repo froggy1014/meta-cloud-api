@@ -2,32 +2,30 @@
 
 import { CategoryEnum } from '../../../types/enums';
 import type {
-    ComponentTypes,
-    MediaCarouselCard,
-    ProductCarouselCard,
-    TemplateBody,
-    TemplateButton,
-    TemplateButtons,
-    TemplateFooter,
-    TemplateHeader,
-    TemplateRequestBody,
-} from '../types';
-import type {
     AuthenticationTemplateOptions,
     BodyOptions,
     ButtonOptions,
     CatalogTemplateOptions,
+    ComponentTypes,
     CouponTemplateOptions,
     FooterOptions,
     HeaderOptions,
     LimitedTimeOfferTemplateOptions,
     MediaCardCarouselTemplateOptions,
+    MediaCarouselCard,
     MPMTemplateOptions,
     OTPTemplateOptions,
     ProductCardCarouselTemplateOptions,
+    ProductCarouselCard,
     SPMTemplateOptions,
+    TemplateBody,
+    TemplateButton,
+    TemplateButtons,
+    TemplateFooter,
+    TemplateHeader,
     TemplateOptions,
     TemplateParameter,
+    TemplateRequestBody,
 } from '../types';
 
 // Helper function to create header component
@@ -192,7 +190,7 @@ export function createTemplate(options: TemplateOptions): TemplateRequestBody {
     if (options.carousel) {
         // Handle carousel components
         const carouselComponents: ComponentTypes[] = [];
-        options.carousel.cards.forEach((card, index) => {
+        options.carousel.cards.forEach((card, _index) => {
             if (card.image || card.video || card.product) {
                 const format = card.image ? 'IMAGE' : card.video ? 'VIDEO' : 'DOCUMENT';
                 const handle = card.image || card.video || card.product || '';

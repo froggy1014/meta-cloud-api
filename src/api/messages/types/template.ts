@@ -1,6 +1,6 @@
 // Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/messages/
 
-import {
+import type {
     ButtonPositionEnum,
     ComponentTypesEnum,
     CurrencyCodesEnum,
@@ -9,7 +9,7 @@ import {
     ParametersTypesEnum,
     SubTypeEnum,
 } from '../../../types/enums';
-import { MessageRequestBody } from './common';
+import type { MessageRequestBody } from './common';
 
 // Template Message Types
 type LanguageObject = {

@@ -4,9 +4,7 @@
 // - POST /{PHONE_NUMBER_ID}/marketing_messages
 
 import { BaseAPI } from '../../types/base';
-import type { WabaConfigType } from '../../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
-import type { RequesterClass } from '../../types/request';
 
 import type { MessagesResponse } from '../messages/types';
 import type * as marketing from './types';
@@ -16,10 +14,6 @@ import type * as marketing from './types';
  */
 export default class MarketingMessagesApi extends BaseAPI implements marketing.MarketingMessagesClass {
     private readonly endpoint = 'marketing_messages';
-
-    constructor(config: WabaConfigType, client: RequesterClass) {
-        super(config, client);
-    }
 
     async sendTemplateMessage(params: marketing.MarketingMessageRequest): Promise<MessagesResponse> {
         const body = {

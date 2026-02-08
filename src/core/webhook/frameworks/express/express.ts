@@ -1,5 +1,5 @@
-import { BaseRequest, BaseResponse, BaseWebhookConfig, BaseWebhookHandler } from '../handler';
-import { WebhookResponse } from '../../WebhookProcessor';
+import type { WebhookResponse } from '../../WebhookProcessor';
+import { type BaseRequest, type BaseResponse, type BaseWebhookConfig, BaseWebhookHandler } from '../handler';
 
 // Express-like interfaces to avoid direct Express dependency
 export interface ExpressRequest extends BaseRequest {
@@ -18,9 +18,7 @@ export interface ExpressResponse extends BaseResponse<ExpressResponse> {
     setHeader(name: string, value: string): void;
 }
 
-export interface NextFunction {
-    (error?: any): void;
-}
+export type NextFunction = (error?: any) => void;
 
 export interface ExpressWebhookConfig extends BaseWebhookConfig {
     path?: string;
@@ -30,10 +28,6 @@ export interface ExpressWebhookConfig extends BaseWebhookConfig {
  * Express-specific webhook handler extending the base handler
  */
 class ExpressWebhookHandler extends BaseWebhookHandler<ExpressRequest, ExpressResponse> {
-    constructor(config: ExpressWebhookConfig) {
-        super(config);
-    }
-
     protected async handleGet(req: ExpressRequest, res: ExpressResponse, next: NextFunction): Promise<WebhookResponse> {
         try {
             const { 'hub.mode': mode, 'hub.verify_token': token, 'hub.challenge': challenge } = req.query;

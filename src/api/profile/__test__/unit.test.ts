@@ -2,7 +2,7 @@ import { WhatsApp } from '@core/whatsapp';
 
 import { BusinessVerticalEnum } from 'src/types/enums';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { UpdateBusinessProfileRequest } from '../types';
+import type { UpdateBusinessProfileRequest } from '../types';
 
 describe('Business Profile API - Unit Tests', () => {
     let whatsApp: WhatsApp;
@@ -60,7 +60,7 @@ describe('Business Profile API - Unit Tests', () => {
                 ],
             });
 
-            const profile = await whatsApp.businessProfile.getBusinessProfile(['about', 'email']);
+            const _profile = await whatsApp.businessProfile.getBusinessProfile(['about', 'email']);
 
             expect(mockRequestSend).toHaveBeenCalled();
             const [_, endpoint] = mockRequestSend.mock.calls[0];
@@ -77,7 +77,7 @@ describe('Business Profile API - Unit Tests', () => {
                 ],
             });
 
-            const profile = await whatsApp.businessProfile.getBusinessProfile('about,address');
+            const _profile = await whatsApp.businessProfile.getBusinessProfile('about,address');
 
             expect(mockRequestSend).toHaveBeenCalled();
             const [_, endpoint] = mockRequestSend.mock.calls[0];

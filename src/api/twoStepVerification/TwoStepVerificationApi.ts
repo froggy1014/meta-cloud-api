@@ -4,9 +4,8 @@
 // - POST /{PHONE_NUMBER_ID}
 
 import { BaseAPI } from '../../types/base';
-import type { WabaConfigType } from '../../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
-import type { RequesterClass, ResponseSuccess } from '../../types/request';
+import type { ResponseSuccess } from '../../types/request';
 
 import type * as twoStepVerification from './types';
 
@@ -18,10 +17,6 @@ import type * as twoStepVerification from './types';
  * - Manage two-step verification settings
  */
 export default class TwoStepVerificationApi extends BaseAPI implements twoStepVerification.TwoStepVerificationClass {
-    constructor(config: WabaConfigType, client: RequesterClass) {
-        super(config, client);
-    }
-
     /**
      * Set a two-step verification PIN code.
      *

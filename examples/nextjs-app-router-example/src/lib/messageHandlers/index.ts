@@ -1,9 +1,10 @@
 // Export all message handlers for easy imports
-export { handleTextMessage } from './text';
-export { handleImageMessage } from './image';
-export { handleDocumentMessage } from './document';
+
 export { handleContactMessage } from './contact';
-export { handleLocationMessage } from './location';
+export { handleDocumentMessage } from './document';
+export { handleImageMessage } from './image';
 export { handleInteractiveMessage } from './interactive';
+export { handleLocationMessage } from './location';
 export { sendReactionMessage } from './reaction';
 export { sendTemplateMessage } from './template';
+export { handleTextMessage } from './text';

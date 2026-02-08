@@ -13,9 +13,8 @@
 // - POST /{DESTINATION_WABA_ID}/migrate_flows
 
 import { BaseAPI } from '../../types/base';
-import type { WabaConfigType } from '../../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
-import type { RequesterClass, ResponseSuccess } from '../../types/request';
+import type { ResponseSuccess } from '../../types/request';
 
 import type * as flow from './types';
 
@@ -33,10 +32,6 @@ import type * as flow from './types';
  * - Validate flow JSON
  */
 export default class FlowApi extends BaseAPI implements flow.FlowClass {
-    constructor(config: WabaConfigType, client: RequesterClass) {
-        super(config, client);
-    }
-
     /**
      * List Flows
      *
@@ -206,7 +201,7 @@ export default class FlowApi extends BaseAPI implements flow.FlowClass {
                 // Create a Blob from the JSON string and cast it to the global Blob type
                 fileContent = new globalThis.Blob([JSON.stringify(data.file, null, 2)], { type: 'application/json' });
                 formData.append('file', fileContent as unknown as Blob);
-            } catch (e) {
+            } catch (_e) {
                 throw new Error('Failed to stringify JSON object for Flow JSON update.');
             }
         } else if (data.file instanceof Blob) {
@@ -240,22 +235,18 @@ export default class FlowApi extends BaseAPI implements flow.FlowClass {
         flowId: string,
         flowJsonData: Blob | Buffer | object,
     ): Promise<flow.ValidateFlowJsonResponse> {
-        try {
-            const result = await this.updateFlowJson(flowId, {
-                file: flowJsonData,
-            });
+        const result = await this.updateFlowJson(flowId, {
+            file: flowJsonData,
+        });
 
-            const isValid = !result.validation_errors || result.validation_errors.length === 0;
+        const isValid = !result.validation_errors || result.validation_errors.length === 0;
 
-            const enhancedResponse = {
-                ...result,
-                valid: isValid,
-            };
+        const enhancedResponse = {
+            ...result,
+            valid: isValid,
+        };
 
-            return enhancedResponse;
-        } catch (error) {
-            throw error;
-        }
+        return enhancedResponse;
     }
 
     /**

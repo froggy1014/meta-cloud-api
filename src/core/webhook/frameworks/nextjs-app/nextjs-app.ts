@@ -1,4 +1,4 @@
-import { WhatsAppConfig } from '../../../../types/config';
+import type { WhatsAppConfig } from '../../../../types/config';
 import { WebhookProcessor } from '../../WebhookProcessor';
 
 // Define Next.js types locally to avoid requiring Next.js as a dependency

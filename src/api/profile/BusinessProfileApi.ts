@@ -8,9 +8,8 @@
 // - GET /{UPLOAD_ID}
 
 import { BaseAPI } from '../../types/base';
-import type { WabaConfigType } from '../../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
-import type { RequesterClass, ResponseSuccess } from '../../types/request';
+import type { ResponseSuccess } from '../../types/request';
 import { buildFieldsQueryString } from '../../utils/buildFieldsQueryString';
 import { objectToQueryString } from '../../utils/objectToQueryString';
 
@@ -29,10 +28,6 @@ import type * as bp from './types';
  */
 export default class BusinessProfileApi extends BaseAPI implements bp.BusinessProfileClass {
     private readonly endpoint = 'whatsapp_business_profile';
-
-    constructor(config: WabaConfigType, client: RequesterClass) {
-        super(config, client);
-    }
 
     /**
      * Get your business profile information.

@@ -1,4 +1,4 @@
-import type { TextProcessedMessage, TextMessageHandler } from 'meta-cloud-api';
+import type { TextMessageHandler, TextProcessedMessage } from 'meta-cloud-api';
 
 /**
  * Handler for text messages

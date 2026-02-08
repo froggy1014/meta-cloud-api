@@ -1,7 +1,7 @@
 // Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/templates/
 
-import { CategoryEnum, LanguagesEnum, TemplateStatusEnum } from '../../../types/enums';
-import { GeneralRequestBody, ResponsePagination, ResponseSuccess } from '../../../types/request';
+import type { CategoryEnum, LanguagesEnum, TemplateStatusEnum } from '../../../types/enums';
+import type { GeneralRequestBody, ResponsePagination, ResponseSuccess } from '../../../types/request';
 
 export type TemplateFormat = 'TEXT' | 'IMAGE' | 'VIDEO' | 'DOCUMENT' | 'LOCATION' | 'PRODUCT';
 

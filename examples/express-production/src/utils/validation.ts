@@ -36,7 +36,7 @@ export function isValidUrl(url: string): boolean {
  * Removes potentially dangerous characters
  */
 export function sanitizeString(input: string): string {
-    return input.replace(/[<>\"']/g, '').trim();
+    return input.replace(/[<>"']/g, '').trim();
 }
 
 /**
@@ -58,7 +58,7 @@ export function isValidCuid(id: string): boolean {
  * Removes spaces, dashes, and parentheses
  */
 export function normalizePhoneNumber(phone: string): string {
-    return phone.replace(/[\s\-\(\)]/g, '');
+    return phone.replace(/[\s\-()]/g, '');
 }
 
 /**

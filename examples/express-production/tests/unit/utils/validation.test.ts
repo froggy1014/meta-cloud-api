@@ -1,15 +1,15 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
-    isValidPhoneNumber,
-    isValidEmail,
-    isValidUrl,
-    isValidTicketNumber,
-    isValidCuid,
-    normalizePhoneNumber,
-    isValidLength,
     isAlphanumeric,
-    isValidDate,
     isInRange,
+    isValidCuid,
+    isValidDate,
+    isValidEmail,
+    isValidLength,
+    isValidPhoneNumber,
+    isValidTicketNumber,
+    isValidUrl,
+    normalizePhoneNumber,
 } from '../../../src/utils/validation.js';
 
 describe('Validation Utilities', () => {

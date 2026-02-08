@@ -1,6 +1,6 @@
-import { WhatsApp } from 'meta-cloud-api';
 import { config } from '@config/index.js';
 import { logger } from '@config/logger.js';
+import { WhatsApp } from 'meta-cloud-api';
 
 /**
  * WhatsApp client singleton

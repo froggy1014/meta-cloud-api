@@ -1,31 +1,24 @@
 // Enhanced Framework-Specific Webhooks (Recommended)
-export * from './frameworks/express';
-export * from './frameworks/nextjs-page';
-export * from './frameworks/nextjs-app';
-
-// Framework interfaces
-export type { ExpressRequest, ExpressResponse, ExpressWebhookConfig, NextFunction } from './frameworks/express/express';
-export type { NextJsWebhookConfig } from './frameworks/nextjs-page/nextjs-page';
-
-// Core Processor (for advanced usage)
-export { WebhookProcessor } from './WebhookProcessor';
-export type { WebhookResponse } from './WebhookProcessor';
-
-// Types
-export type {
-    MessageStatus,
-    WebhookContact,
-    WebhookEvent,
-    WebhookValue,
-    MessageWebhookValue,
-    StatusWebhookValue,
-    WhatsAppMessage,
-    StatusWebhook,
-} from './types';
 
 // Main SDK class
 export { default as WhatsApp } from '../whatsapp/WhatsApp';
-
+export * from './frameworks/express';
+// Framework interfaces
+export type { ExpressRequest, ExpressResponse, ExpressWebhookConfig, NextFunction } from './frameworks/express/express';
+export * from './frameworks/nextjs-app';
+export * from './frameworks/nextjs-page';
+export type { NextJsWebhookConfig } from './frameworks/nextjs-page/nextjs-page';
+// Types
+export type {
+    MessageStatus,
+    MessageWebhookValue,
+    StatusWebhook,
+    StatusWebhookValue,
+    WebhookContact,
+    WebhookEvent,
+    WebhookValue,
+    WhatsAppMessage,
+} from './types';
 // Utils
 export * from './utils/generateXHub256Sig';
 export type {
@@ -62,3 +55,6 @@ export type {
     VideoProcessedMessage,
 } from './utils/webhookUtils';
 export { constructFullUrl, processFlowRequest, processWebhookMessages } from './utils/webhookUtils';
+export type { WebhookResponse } from './WebhookProcessor';
+// Core Processor (for advanced usage)
+export { WebhookProcessor } from './WebhookProcessor';

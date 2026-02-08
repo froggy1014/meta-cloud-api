@@ -1,8 +1,8 @@
 // Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/messages/
 
 import type { BaseClass } from '../../../types/base';
-import { ComponentTypesEnum, InteractiveTypesEnum, MessageTypesEnum } from '../../../types/enums';
-import { GeneralRequestBody } from '../../../types/request';
+import type { ComponentTypesEnum, InteractiveTypesEnum, MessageTypesEnum } from '../../../types/enums';
+import type { GeneralRequestBody } from '../../../types/request';
 
 export type GeneralMessageBody = GeneralRequestBody & {
     /**

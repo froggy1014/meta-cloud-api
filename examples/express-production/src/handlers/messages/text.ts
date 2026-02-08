@@ -1,8 +1,8 @@
-import { TextMessage } from 'meta-cloud-api/webhook';
 import { logger } from '@config/logger.js';
-import { SessionStore } from '@services/conversation/sessionStore.js';
-import { ConversationFlows } from '@services/conversation/flows.js';
 import { ConversationState } from '@prisma/client';
+import { ConversationFlows } from '@services/conversation/flows.js';
+import { SessionStore } from '@services/conversation/sessionStore.js';
+import type { TextMessage } from 'meta-cloud-api/webhook';
 
 /**
  * Text message handler

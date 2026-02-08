@@ -1,14 +1,14 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
-import { FlowEndpointRequest } from '../../../api/flow';
+import type { FlowEndpointRequest } from '../../../api/flow';
 import { FlowTypeEnum } from '../../../api/flow/types';
-import { WabaConfigType } from '../../../types/config';
+import type { WabaConfigType } from '../../../types/config';
 import { MessageTypesEnum } from '../../../types/enums';
 import { decryptFlowRequest, encryptFlowResponse } from '../../../utils/flowEncryptionUtils';
 import { isFlowDataExchangeRequest, isFlowErrorRequest, isFlowPingRequest } from '../../../utils/flowTypeGuards';
 import Logger from '../../../utils/logger';
-import WhatsApp from '../../whatsapp/WhatsApp';
-import {
+import type WhatsApp from '../../whatsapp/WhatsApp';
+import type {
     AccountAlertsWebhookValue,
     AccountReviewUpdateWebhookValue,
     AccountUpdateWebhookValue,

@@ -1,6 +1,6 @@
-import { WhatsAppConfig } from '../../../types/config';
-import { WebhookProcessor } from '../WebhookProcessor';
+import type { WhatsAppConfig } from '../../../types/config';
 import { constructFullUrl } from '../utils/webhookUtils';
+import { WebhookProcessor } from '../WebhookProcessor';
 
 // Generic request/response interfaces for framework abstraction
 export interface BaseRequest {
@@ -14,8 +14,8 @@ export interface BaseRequest {
 
 export interface BaseResponse<T = any> {
     status(code: number): T;
-    json?(data: any): T | void;
-    send?(data?: any): T | void;
+    json?(data: any): T | undefined;
+    send?(data?: any): T | undefined;
     setHeader?(name: string, value: string): void;
 }
 
@@ -98,7 +98,7 @@ export abstract class BaseWebhookHandler<TRequest extends BaseRequest, TResponse
     protected applyHeaders(result: WebhookResult, res: TResponse): void {
         if (res.setHeader) {
             Object.entries(result.headers).forEach(([key, value]) => {
-                res.setHeader!(key, value);
+                res.setHeader?.(key, value);
             });
         }
     }

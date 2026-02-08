@@ -2,12 +2,12 @@ import { nextjsAppWebhookHandler } from 'meta-cloud-api';
 
 // Import all message handlers
 import {
-    handleTextMessage,
-    handleImageMessage,
-    handleDocumentMessage,
     handleContactMessage,
-    handleLocationMessage,
+    handleDocumentMessage,
+    handleImageMessage,
     handleInteractiveMessage,
+    handleLocationMessage,
+    handleTextMessage,
 } from '@/lib/messageHandlers';
 
 // 🔧 Configuration from environment variables

@@ -1,4 +1,4 @@
-import type { ImageProcessedMessage, ImageMessageHandler } from 'meta-cloud-api';
+import type { ImageMessageHandler, ImageProcessedMessage } from 'meta-cloud-api';
 
 /**
  * Handler for image messages

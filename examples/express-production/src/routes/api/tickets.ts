@@ -1,17 +1,17 @@
-import { Router, Request, Response } from 'express';
-import { TicketService } from '@services/tickets/ticketService.js';
-import {
-    sendSuccess,
-    sendSuccessWithPagination,
-    sendError,
-    sendNotFound,
-    calculatePaginationMeta,
-} from '@utils/responses.js';
-import { validate, commonSchemas } from '@middleware/validator.js';
 import { asyncHandler } from '@middleware/errorHandler.js';
 import { apiRateLimiter } from '@middleware/rateLimiter.js';
+import { commonSchemas, validate } from '@middleware/validator.js';
+import { TicketCategory, TicketPriority, TicketStatus } from '@prisma/client';
+import { TicketService } from '@services/tickets/ticketService.js';
+import {
+    calculatePaginationMeta,
+    sendError,
+    sendNotFound,
+    sendSuccess,
+    sendSuccessWithPagination,
+} from '@utils/responses.js';
+import { type Request, type Response, Router } from 'express';
 import { z } from 'zod';
-import { TicketStatus, TicketPriority, TicketCategory } from '@prisma/client';
 
 const router = Router();
 

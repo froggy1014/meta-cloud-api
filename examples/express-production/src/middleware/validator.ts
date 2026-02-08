@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
-import { z, ZodSchema } from 'zod';
+import type { NextFunction, Request, Response } from 'express';
+import { type ZodSchema, z } from 'zod';
 import { AppError } from './errorHandler.js';
 
 /**

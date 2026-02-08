@@ -1,6 +1,6 @@
-import { redis } from '@config/redis.js';
-import { logger } from '@config/logger.js';
 import { config } from '@config/index.js';
+import { logger } from '@config/logger.js';
+import { redis } from '@config/redis.js';
 import { ConversationState } from '@prisma/client';
 
 /**
@@ -30,14 +30,14 @@ export class SessionStore {
      * Generate session key
      */
     private static getSessionKey(userId: string): string {
-        return `${this.SESSION_PREFIX}${userId}`;
+        return `${SessionStore.SESSION_PREFIX}${userId}`;
     }
 
     /**
      * Generate lock key
      */
     private static getLockKey(userId: string): string {
-        return `${this.LOCK_PREFIX}${userId}`;
+        return `${SessionStore.LOCK_PREFIX}${userId}`;
     }
 
     /**
@@ -45,7 +45,7 @@ export class SessionStore {
      */
     static async get(userId: string): Promise<SessionData | null> {
         try {
-            const key = this.getSessionKey(userId);
+            const key = SessionStore.getSessionKey(userId);
             const data = await redis.get(key);
 
             if (!data) {
@@ -75,7 +75,7 @@ export class SessionStore {
      */
     static async set(userId: string, data: SessionData): Promise<boolean> {
         try {
-            const key = this.getSessionKey(userId);
+            const key = SessionStore.getSessionKey(userId);
             const serialized = JSON.stringify(data);
 
             await redis.setex(key, config.SESSION_TIMEOUT, serialized);
@@ -101,7 +101,7 @@ export class SessionStore {
      */
     static async update(userId: string, updates: Partial<SessionData>): Promise<boolean> {
         try {
-            const existing = await this.get(userId);
+            const existing = await SessionStore.get(userId);
 
             if (!existing) {
                 logger.warn('Cannot update non-existent session', { userId });
@@ -114,7 +114,7 @@ export class SessionStore {
                 lastMessageAt: Date.now(),
             };
 
-            return await this.set(userId, updated);
+            return await SessionStore.set(userId, updated);
         } catch (error) {
             logger.error('Failed to update session', {
                 userId,
@@ -129,7 +129,7 @@ export class SessionStore {
      */
     static async delete(userId: string): Promise<boolean> {
         try {
-            const key = this.getSessionKey(userId);
+            const key = SessionStore.getSessionKey(userId);
             await redis.del(key);
 
             logger.debug('Session deleted', { userId });
@@ -156,7 +156,7 @@ export class SessionStore {
             context: {},
         };
 
-        await this.set(userId, session);
+        await SessionStore.set(userId, session);
 
         logger.info('Session created', { userId, state });
 
@@ -167,13 +167,13 @@ export class SessionStore {
      * Get or create session
      */
     static async getOrCreate(userId: string): Promise<SessionData> {
-        const existing = await this.get(userId);
+        const existing = await SessionStore.get(userId);
 
         if (existing) {
             return existing;
         }
 
-        return await this.create(userId);
+        return await SessionStore.create(userId);
     }
 
     /**
@@ -182,8 +182,8 @@ export class SessionStore {
      */
     static async acquireLock(userId: string): Promise<boolean> {
         try {
-            const key = this.getLockKey(userId);
-            const result = await redis.set(key, '1', 'PX', this.LOCK_TIMEOUT, 'NX');
+            const key = SessionStore.getLockKey(userId);
+            const result = await redis.set(key, '1', 'PX', SessionStore.LOCK_TIMEOUT, 'NX');
 
             return result === 'OK';
         } catch (error) {
@@ -200,7 +200,7 @@ export class SessionStore {
      */
     static async releaseLock(userId: string): Promise<boolean> {
         try {
-            const key = this.getLockKey(userId);
+            const key = SessionStore.getLockKey(userId);
             await redis.del(key);
 
             return true;
@@ -217,7 +217,7 @@ export class SessionStore {
      * Execute a function with a lock
      */
     static async withLock<T>(userId: string, fn: () => Promise<T>): Promise<T | null> {
-        const acquired = await this.acquireLock(userId);
+        const acquired = await SessionStore.acquireLock(userId);
 
         if (!acquired) {
             logger.warn('Failed to acquire lock, skipping operation', { userId });
@@ -227,7 +227,7 @@ export class SessionStore {
         try {
             return await fn();
         } finally {
-            await this.releaseLock(userId);
+            await SessionStore.releaseLock(userId);
         }
     }
 
@@ -236,7 +236,7 @@ export class SessionStore {
      */
     static async getTTL(userId: string): Promise<number> {
         try {
-            const key = this.getSessionKey(userId);
+            const key = SessionStore.getSessionKey(userId);
             return await redis.ttl(key);
         } catch (error) {
             logger.error('Failed to get TTL', {
@@ -252,7 +252,7 @@ export class SessionStore {
      */
     static async extendTTL(userId: string): Promise<boolean> {
         try {
-            const key = this.getSessionKey(userId);
+            const key = SessionStore.getSessionKey(userId);
             await redis.expire(key, config.SESSION_TIMEOUT);
 
             logger.debug('Session TTL extended', { userId, ttl: config.SESSION_TIMEOUT });
@@ -272,7 +272,7 @@ export class SessionStore {
      */
     static async cleanup(): Promise<number> {
         try {
-            const pattern = `${this.SESSION_PREFIX}*`;
+            const pattern = `${SessionStore.SESSION_PREFIX}*`;
             const keys = await redis.keys(pattern);
 
             let cleaned = 0;

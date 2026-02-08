@@ -1,11 +1,11 @@
-import { Server } from 'http';
-import { createApp } from './app.js';
+import { connectDatabase, disconnectDatabase } from '@config/database.js';
 import { config, isProduction } from '@config/index.js';
 import { logger } from '@config/logger.js';
-import { connectDatabase, disconnectDatabase } from '@config/database.js';
 import { disconnectRedis } from '@config/redis.js';
-import { QueueManager } from '@services/queue/queueManager.js';
 import { SessionStore } from '@services/conversation/sessionStore.js';
+import { QueueManager } from '@services/queue/queueManager.js';
+import type { Server } from 'http';
+import { createApp } from './app.js';
 
 /**
  * HTTP Server instance

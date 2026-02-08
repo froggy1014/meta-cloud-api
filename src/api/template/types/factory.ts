@@ -1,6 +1,6 @@
 // Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/templates/
 
-import { CategoryEnum, CurrencyCodesEnum, LanguagesEnum } from '../../../types/enums';
+import type { CategoryEnum, CurrencyCodesEnum, LanguagesEnum } from '../../../types/enums';
 import type { TemplateFormat } from './common';
 
 // Parameter types for template factory functions

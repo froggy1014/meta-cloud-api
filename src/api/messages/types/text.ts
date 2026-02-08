@@ -1,7 +1,7 @@
 // Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/messages/
 
 import { MessageTypesEnum } from '../../../types/enums';
-import { MessageRequestBody, MessageRequestParams } from './common';
+import type { MessageRequestBody, MessageRequestParams } from './common';
 
 // Text Message Types
 export type TextObject = {

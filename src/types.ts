@@ -1,188 +1,47 @@
 // Types-only entry point for users who only need type imports
 // This allows tree-shaking and reduces bundle size when only types are needed
 
-// Essential webhook types
+// Calling types
 export type {
-    WebhookContact,
-    WebhookEvent,
-    WebhookMessage,
-    // New message types
-    TextMessage,
-    ImageMessage,
-    VideoMessage,
-    AudioMessage,
-    DocumentMessage,
-    StickerMessage,
-    InteractiveMessage,
-    InteractiveListReplyMessage,
-    InteractiveButtonReplyMessage,
-    ButtonMessage,
-    LocationMessage,
-    ContactsMessage,
-    ReactionMessage,
-    OrderMessage,
-    SystemMessage,
-    UnsupportedMessage,
-    GroupMessage,
-    WhatsAppMessage,
-    // Webhook value types
-    MessageWebhookValue,
-    StatusWebhookValue,
-    ErrorWebhookValue,
-    WebhookValue,
-    StatusWebhook,
-    WebhookPayload,
-} from './core/webhook/types';
-
-// Base types and enums
-export * from './types/enums';
-export * from './types/index';
-
-// Business Profile types
+    AcceptCallRequest,
+    CallAction,
+    CallActionResponse,
+    CallbackPermissionStatus,
+    CallHours,
+    CallHoursDay,
+    CallHoursStatus,
+    CallIconVisibility,
+    CallingClass,
+    CallingSettings,
+    CallingSettingsResponse,
+    CallingStatus,
+    CallPermission,
+    CallPermissionAction,
+    CallPermissionLimit,
+    CallPermissionsResponse,
+    CallSdpType,
+    CallSession,
+    HolidaySchedule,
+    InitiateCallRequest,
+    InitiateCallResponse,
+    PreAcceptCallRequest,
+    RejectCallRequest,
+    SipServer,
+    SipSettings,
+    SipStatus,
+    TerminateCallRequest,
+    UpdateCallingSettingsRequest,
+    WeeklyOperatingHours,
+} from './api/calling/types';
+// Commerce types
 export type {
-    BusinessProfileData,
-    UpdateBusinessProfileRequest,
-    BusinessProfileResponse,
-    BusinessProfileField,
-    BusinessProfileFieldsParam,
-    BusinessProfileClass,
-} from './api/profile/types';
-
-// Phone Number types
-export type {
-    AccountMode,
-    CodeVerificationStatus,
-    Cursors,
-    HealthStatus,
-    HealthStatusEntity,
-    MessagingLimitTier,
-    PhoneNumberClass,
-    PhoneNumberResponse,
-    PhoneNumbersResponse,
-    PlatformType,
-    QualityRating,
-    QualityScore,
-    RequestVerificationCodeRequest,
-    Throughput,
-    ThroughputLevel,
-    TwoStepVerificationParams,
-    VerifyCodeRequest,
-} from './api/phone/types';
-
-// Template types
-export type {
-    CatalogButton,
-    ComponentTypes,
-    CopyCodeButton,
-    FlowButton,
-    MediaCarouselCard,
-    MPMButton,
-    OTPButton,
-    PhoneNumberButton,
-    ProductCarouselCard,
-    QuickReplyButton,
-    SPMButton,
-    TemplateBody,
-    TemplateButton,
-    TemplateButtons,
-    TemplateCarousel,
-    TemplateClass,
-    TemplateDeleteParams,
-    TemplateFooter,
-    TemplateFormat,
-    TemplateGetParams,
-    TemplateHeader,
-    TemplateHeaderExample,
-    TemplateLimitedTimeOffer,
-    TemplateRequestBody,
-    TemplateResponse,
-    URLButton,
-    // Factory types
-    AuthenticationTemplateOptions,
-    BodyOptions,
-    ButtonOptions,
-    CarouselCard,
-    CarouselOptions,
-    CatalogTemplateOptions,
-    CouponTemplateOptions,
-    CurrencyParameter,
-    DateTimeParameter,
-    FooterOptions,
-    HeaderOptions,
-    LimitedTimeOfferOptions,
-    LimitedTimeOfferTemplateOptions,
-    LocationParameter,
-    MediaCardCarouselTemplateOptions,
-    MediaParameter,
-    MPMTemplateOptions,
-    OTPTemplateOptions,
-    ProductCardCarouselTemplateOptions,
-    ProductParameter,
-    ProductSection,
-    SPMTemplateOptions,
-    TemplateOptions,
-    TemplateParameter,
-    TextParameter,
-} from './api/template/types';
-
-// QR Code types
-export type {
-    CreateQrCodeRequest,
-    QrCodeClass,
-    QrCodeResponse,
-    QrCodesResponse,
-    UpdateQrCodeRequest,
-} from './api/qrCode/types';
-
-// WABA types
-export type {
-    UpdateWabaSubscription,
-    WabaAccount,
-    WABAClass,
-    WabaAccountFields,
-    WabaAccountFieldsParam,
-    WabaHealthStatus,
-    WabaHealthStatusEntity,
-    WabaHealthStatusError,
-    WabaSubscription,
-    WabaSubscriptions,
-} from './api/waba/types';
-
-// WABA enums (needed for type definitions)
-export {
-    WabaAccountReviewStatus,
-    WabaAccountStatus,
-    WabaBusinessVerificationStatus,
-    WabaHealthStatusCanSendMessage,
-} from './api/waba/types';
-
-// Messages types
-export type {
-    GeneralMessageBody,
-    MessageRequestBody,
-    MessageRequestParams,
-    MessagesClass,
-    MessagesResponse,
-    StatusParams,
-    TextMessageParams,
-    TextObject,
-    AudioMediaObject,
-    DocumentMediaObject,
-    ImageMediaObject,
-    StickerMediaObject,
-    VideoMediaObject,
-    ContactObject,
-    LocationObject,
-    InteractiveObject,
-    ReactionParams,
-    MessageTemplateObject,
-} from './api/messages/types';
-
-// Media types
-export type { MediaClass, MediaResponse, MediasResponse, UploadMediaResponse } from './api/media/types';
-
-// Flow types and enums
-export { FlowTypeEnum, FlowActionEnum, FlowCategoryEnum, FlowStatusEnum } from './api/flow/types';
+    CommerceClass,
+    CommerceSetting,
+    CommerceSettingsResponse,
+    UpdateCommerceSettingsRequest,
+} from './api/commerce/types';
+// Encryption types
+export type { EncryptionPublicKeyResponse } from './api/encryption/types';
 export type {
     Flow,
     FlowAsset,
@@ -200,12 +59,12 @@ export type {
     FlowHealthCheckResponse,
     FlowHttpRequest,
     FlowMigrationFailure,
-    FlowMigrationResult,
     FlowMigrationResponse,
+    FlowMigrationResult,
     FlowPreview,
     FlowPreviewResponse,
-    FlowsListResponse,
     FlowSuccessScreenResponse,
+    FlowsListResponse,
     FlowType,
     FlowValidationError,
     FlowValidationErrorPointer,
@@ -214,16 +73,8 @@ export type {
     UpdateFlowResponse,
     ValidateFlowJsonResponse,
 } from './api/flow/types';
-
-// Registration types
-export type { RegistrationClass, RegistrationRequest } from './api/registration/types';
-
-// Two Step Verification types
-export type { TwoStepVerificationClass, TwoStepVerificationRequest } from './api/twoStepVerification/types';
-
-// Encryption types
-export type { EncryptionPublicKeyResponse } from './api/encryption/types';
-
+// Flow types and enums
+export { FlowActionEnum, FlowCategoryEnum, FlowStatusEnum, FlowTypeEnum } from './api/flow/types';
 // Groups types
 export type {
     GroupCreateRequest,
@@ -245,51 +96,31 @@ export type {
     GroupsClass,
     UpdateGroupSettingsRequest,
 } from './api/groups/types';
-
-// Calling types
-export type {
-    AcceptCallRequest,
-    CallAction,
-    CallActionResponse,
-    CallHours,
-    CallHoursDay,
-    CallHoursStatus,
-    CallIconVisibility,
-    CallPermission,
-    CallPermissionAction,
-    CallPermissionLimit,
-    CallPermissionsResponse,
-    CallSession,
-    CallSdpType,
-    CallingClass,
-    CallingSettings,
-    CallingSettingsResponse,
-    CallingStatus,
-    CallbackPermissionStatus,
-    HolidaySchedule,
-    InitiateCallRequest,
-    InitiateCallResponse,
-    PreAcceptCallRequest,
-    RejectCallRequest,
-    SipServer,
-    SipSettings,
-    SipStatus,
-    TerminateCallRequest,
-    UpdateCallingSettingsRequest,
-    WeeklyOperatingHours,
-} from './api/calling/types';
-
 // Marketing Messages types
 export type { MarketingMessageRequest, MarketingMessagesClass } from './api/marketingMessages/types';
-
-// Commerce types
+// Media types
+export type { MediaClass, MediaResponse, MediasResponse, UploadMediaResponse } from './api/media/types';
+// Messages types
 export type {
-    CommerceClass,
-    CommerceSetting,
-    CommerceSettingsResponse,
-    UpdateCommerceSettingsRequest,
-} from './api/commerce/types';
-
+    AudioMediaObject,
+    ContactObject,
+    DocumentMediaObject,
+    GeneralMessageBody,
+    ImageMediaObject,
+    InteractiveObject,
+    LocationObject,
+    MessageRequestBody,
+    MessageRequestParams,
+    MessagesClass,
+    MessagesResponse,
+    MessageTemplateObject,
+    ReactionParams,
+    StatusParams,
+    StickerMediaObject,
+    TextMessageParams,
+    TextObject,
+    VideoMediaObject,
+} from './api/messages/types';
 // Payments types
 export type {
     PaymentConfiguration,
@@ -301,15 +132,162 @@ export type {
     PaymentConfigurationOauthLinkResponse,
     PaymentConfigurationProvider,
     PaymentConfigurationStatus,
+    PaymentConfigurationsResponse,
     PaymentConfigurationUpdateRequest,
     PaymentConfigurationUpdateResponse,
-    PaymentConfigurationsResponse,
     PaymentsClass,
 } from './api/payments/types';
+// Phone Number types
+export type {
+    AccountMode,
+    CodeVerificationStatus,
+    Cursors,
+    HealthStatus,
+    HealthStatusEntity,
+    MessagingLimitTier,
+    PhoneNumberClass,
+    PhoneNumberResponse,
+    PhoneNumbersResponse,
+    PlatformType,
+    QualityRating,
+    QualityScore,
+    RequestVerificationCodeRequest,
+    Throughput,
+    ThroughputLevel,
+    TwoStepVerificationParams,
+    VerifyCodeRequest,
+} from './api/phone/types';
+// Business Profile types
+export type {
+    BusinessProfileClass,
+    BusinessProfileData,
+    BusinessProfileField,
+    BusinessProfileFieldsParam,
+    BusinessProfileResponse,
+    UpdateBusinessProfileRequest,
+} from './api/profile/types';
+// QR Code types
+export type {
+    CreateQrCodeRequest,
+    QrCodeClass,
+    QrCodeResponse,
+    QrCodesResponse,
+    UpdateQrCodeRequest,
+} from './api/qrCode/types';
 
-// Utility types
-export type { ApiPermissionErrorCode, MetaError, MetaErrorData, WhatsAppErrorCode } from './utils/isMetaError';
-
+// Registration types
+export type { RegistrationClass, RegistrationRequest } from './api/registration/types';
+// Template types
+export type {
+    // Factory types
+    AuthenticationTemplateOptions,
+    BodyOptions,
+    ButtonOptions,
+    CarouselCard,
+    CarouselOptions,
+    CatalogButton,
+    CatalogTemplateOptions,
+    ComponentTypes,
+    CopyCodeButton,
+    CouponTemplateOptions,
+    CurrencyParameter,
+    DateTimeParameter,
+    FlowButton,
+    FooterOptions,
+    HeaderOptions,
+    LimitedTimeOfferOptions,
+    LimitedTimeOfferTemplateOptions,
+    LocationParameter,
+    MediaCardCarouselTemplateOptions,
+    MediaCarouselCard,
+    MediaParameter,
+    MPMButton,
+    MPMTemplateOptions,
+    OTPButton,
+    OTPTemplateOptions,
+    PhoneNumberButton,
+    ProductCardCarouselTemplateOptions,
+    ProductCarouselCard,
+    ProductParameter,
+    ProductSection,
+    QuickReplyButton,
+    SPMButton,
+    SPMTemplateOptions,
+    TemplateBody,
+    TemplateButton,
+    TemplateButtons,
+    TemplateCarousel,
+    TemplateClass,
+    TemplateDeleteParams,
+    TemplateFooter,
+    TemplateFormat,
+    TemplateGetParams,
+    TemplateHeader,
+    TemplateHeaderExample,
+    TemplateLimitedTimeOffer,
+    TemplateOptions,
+    TemplateParameter,
+    TemplateRequestBody,
+    TemplateResponse,
+    TextParameter,
+    URLButton,
+} from './api/template/types';
+// Two Step Verification types
+export type { TwoStepVerificationClass, TwoStepVerificationRequest } from './api/twoStepVerification/types';
+// WABA types
+export type {
+    UpdateWabaSubscription,
+    WABAClass,
+    WabaAccount,
+    WabaAccountFields,
+    WabaAccountFieldsParam,
+    WabaHealthStatus,
+    WabaHealthStatusEntity,
+    WabaHealthStatusError,
+    WabaSubscription,
+    WabaSubscriptions,
+} from './api/waba/types';
+// WABA enums (needed for type definitions)
+export {
+    WabaAccountReviewStatus,
+    WabaAccountStatus,
+    WabaBusinessVerificationStatus,
+    WabaHealthStatusCanSendMessage,
+} from './api/waba/types';
+// Essential webhook types
+export type {
+    AudioMessage,
+    ButtonMessage,
+    ContactsMessage,
+    DocumentMessage,
+    ErrorWebhookValue,
+    GroupMessage,
+    ImageMessage,
+    InteractiveButtonReplyMessage,
+    InteractiveListReplyMessage,
+    InteractiveMessage,
+    LocationMessage,
+    // Webhook value types
+    MessageWebhookValue,
+    OrderMessage,
+    ReactionMessage,
+    StatusWebhook,
+    StatusWebhookValue,
+    StickerMessage,
+    SystemMessage,
+    // New message types
+    TextMessage,
+    UnsupportedMessage,
+    VideoMessage,
+    WebhookContact,
+    WebhookEvent,
+    WebhookMessage,
+    WebhookPayload,
+    WebhookValue,
+    WhatsAppMessage,
+} from './core/webhook/types';
+// Base types and enums
+export * from './types/enums';
 // Common enums that users need frequently
 export {
     AudioMediaTypesEnum,
@@ -337,3 +315,6 @@ export {
     WabaConfigEnum,
     WebhookTypesEnum,
 } from './types/enums';
+export * from './types/index';
+// Utility types
+export type { ApiPermissionErrorCode, MetaError, MetaErrorData, WhatsAppErrorCode } from './utils/isMetaError';

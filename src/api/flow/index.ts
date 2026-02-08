@@ -5,8 +5,6 @@ import FlowApi from './FlowApi';
 export default FlowApi;
 export { FlowApi };
 
-export { FlowTypeEnum } from './types';
-
 export type {
     CreateFlowResponse,
     Flow,
@@ -18,10 +16,11 @@ export type {
     FlowEndpointResponse,
     FlowMigrationResponse,
     FlowPreviewResponse,
-    FlowsListResponse,
     FlowStatusEnum,
+    FlowsListResponse,
     FlowType,
     FlowValidationError,
     UpdateFlowResponse,
     ValidateFlowJsonResponse,
 } from './types';
+export { FlowTypeEnum } from './types';

@@ -1,7 +1,12 @@
-import { Agent } from 'https';
+import { Agent } from 'node:https';
 
-import { HttpMethodsEnum } from '../../types/enums';
-import { HttpsClientClass, HttpsClientResponseClass, ResponseHeaders, ResponseJSONBody } from '../../types/httpsClient';
+import type { HttpMethodsEnum } from '../../types/enums';
+import type {
+    HttpsClientClass,
+    HttpsClientResponseClass,
+    ResponseHeaders,
+    ResponseJSONBody,
+} from '../../types/httpsClient';
 import Logger from '../logger';
 
 const LIB_NAME = 'HttpsClient';
@@ -77,7 +82,7 @@ export class HttpsClientResponse implements HttpsClientResponseClass {
             return (await this.res.json()) as ResponseJSONBody;
         } catch (err) {
             // TODO Error Handling
-            throw new Error('Failed to parse response body to JSON: ' + (err as Error).message);
+            throw new Error(`Failed to parse response body to JSON: ${(err as Error).message}`);
         }
     }
 }

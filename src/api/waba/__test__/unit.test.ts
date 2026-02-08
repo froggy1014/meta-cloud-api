@@ -1,6 +1,6 @@
 import { WhatsApp } from '@core/whatsapp';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { WabaAccountFields } from '../types';
+import type { WabaAccountFields } from '../types';
 
 describe('WABA API - Unit Tests', () => {
     let whatsApp: WhatsApp;

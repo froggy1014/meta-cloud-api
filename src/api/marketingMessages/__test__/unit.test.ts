@@ -1,6 +1,6 @@
 import { WhatsApp } from '@core/whatsapp';
-import { LanguagesEnum } from '../../../types/enums';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { LanguagesEnum } from '../../../types/enums';
 
 describe('Marketing Messages API - Unit Tests', () => {
     let whatsApp: WhatsApp;

@@ -1,4 +1,4 @@
-import type { ContactsProcessedMessage, ContactsMessageHandler } from 'meta-cloud-api';
+import type { ContactsMessageHandler, ContactsProcessedMessage } from 'meta-cloud-api';
 
 /**
  * Handler for contact messages

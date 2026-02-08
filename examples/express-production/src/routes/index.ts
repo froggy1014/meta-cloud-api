@@ -1,8 +1,8 @@
-import { Router } from 'express';
-import webhookRoutes from './webhook.js';
-import healthRoutes from './health.js';
-import ticketRoutes from './api/tickets.js';
 import { config } from '@config/index.js';
+import { Router } from 'express';
+import ticketRoutes from './api/tickets.js';
+import healthRoutes from './health.js';
+import webhookRoutes from './webhook.js';
 
 const router = Router();
 
@@ -24,6 +24,7 @@ router.get('/', (req, res) => {
  */
 
 // Webhook routes
+
 router.use('/webhook', webhookRoutes);
 
 // Health check routes

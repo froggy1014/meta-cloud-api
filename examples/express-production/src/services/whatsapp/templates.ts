@@ -1,5 +1,5 @@
-import { MessageSender } from './sender.js';
 import { config } from '@config/index.js';
+import { MessageSender } from './sender.js';
 
 /**
  * Template message helpers
@@ -126,11 +126,11 @@ export class MessageTemplates {
         };
 
         const message =
-            `📝 *Ticket Summary*\n\n` +
+            '📝 *Ticket Summary*\n\n' +
             `*Name:* ${userName}\n` +
             `*Category:* ${categoryNames[category] || category}\n` +
             `*Issue:* ${issue}\n\n` +
-            `Please confirm to create this ticket:`;
+            'Please confirm to create this ticket:';
 
         return MessageSender.sendButtons(
             to,
@@ -152,9 +152,9 @@ export class MessageTemplates {
         ticketNumber: string,
     ): Promise<{ success: boolean; messageId?: string; error?: string }> {
         const message =
-            `✅ *Ticket Created Successfully!*\n\n` +
+            '✅ *Ticket Created Successfully!*\n\n' +
             `Your ticket number is: *${ticketNumber}*\n\n` +
-            `Our support team will review your request and get back to you as soon as possible.\n\n` +
+            'Our support team will review your request and get back to you as soon as possible.\n\n' +
             `You can check your ticket status anytime by sending "status" or clicking the button below.`;
 
         return MessageSender.sendButtons(
@@ -170,7 +170,8 @@ export class MessageTemplates {
      * Send cancellation confirmation
      */
     static async sendCancellation(to: string): Promise<{ success: boolean; messageId?: string; error?: string }> {
-        const message = `❌ Ticket creation cancelled.\n\nIf you need help, feel free to start again by sending a message!`;
+        const message =
+            '❌ Ticket creation cancelled.\n\nIf you need help, feel free to start again by sending a message!';
 
         return MessageSender.sendButtons(to, message, [{ id: 'new_issue', title: '🆕 New Issue' }]);
     }
@@ -179,7 +180,7 @@ export class MessageTemplates {
      * Send error message
      */
     static async sendError(to: string): Promise<{ success: boolean; messageId?: string; error?: string }> {
-        const message = `❌ Oops! Something went wrong.\n\nPlease try again or contact our support team directly.`;
+        const message = '❌ Oops! Something went wrong.\n\nPlease try again or contact our support team directly.';
 
         return MessageSender.sendText(to, message);
     }

@@ -1,4 +1,4 @@
-import { PrismaClient, ConversationState, TicketCategory, TicketStatus, TicketPriority } from '@prisma/client';
+import { ConversationState, PrismaClient, TicketCategory, TicketPriority, TicketStatus } from '@prisma/client';
 
 const prisma = new PrismaClient();
 

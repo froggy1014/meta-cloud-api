@@ -1,6 +1,6 @@
 import Redis from 'ioredis';
-import { logger } from './logger.js';
 import { config } from './index.js';
+import { logger } from './logger.js';
 
 /**
  * Redis Client instance for session storage and caching

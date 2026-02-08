@@ -1,5 +1,4 @@
-import { ProcessedFlows } from 'meta-cloud-api';
-import { WhatsApp } from 'meta-cloud-api';
+import type { ProcessedFlows, WhatsApp } from 'meta-cloud-api';
 
 /**
  * Example handler for flows webhook field

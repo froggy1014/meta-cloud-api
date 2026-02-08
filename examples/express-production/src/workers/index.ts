@@ -1,6 +1,6 @@
-import { logger } from '@config/logger.js';
-import { config, isProduction } from '@config/index.js';
 import { connectDatabase, disconnectDatabase } from '@config/database.js';
+import { config, isProduction } from '@config/index.js';
+import { logger } from '@config/logger.js';
 import { disconnectRedis } from '@config/redis.js';
 import { NotificationWorker } from '@services/queue/workers/notificationWorker.js';
 import { TicketWorker } from '@services/queue/workers/ticketWorker.js';

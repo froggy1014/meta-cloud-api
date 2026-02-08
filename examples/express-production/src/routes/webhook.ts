@@ -1,21 +1,19 @@
-import { Router } from 'express';
-import { expressWebhookHandler } from 'meta-cloud-api';
 import { config } from '@config/index.js';
-import { webhookRateLimiter } from '@middleware/rateLimiter.js';
 import { logger } from '@config/logger.js';
-
 // Import message handlers
 import {
-    handleTextMessage,
-    handleInteractiveMessage,
-    handleImageMessage,
-    handleDocumentMessage,
-    handleVideoMessage,
     handleAudioMessage,
+    handleDocumentMessage,
+    handleImageMessage,
+    handleInteractiveMessage,
+    handleTextMessage,
+    handleVideoMessage,
 } from '@handlers/messages/index.js';
-
 // Import webhook field handlers
-import { handleStatusWebhook, handleFlowsWebhook } from '@handlers/webhooks/index.js';
+import { handleFlowsWebhook, handleStatusWebhook } from '@handlers/webhooks/index.js';
+import { webhookRateLimiter } from '@middleware/rateLimiter.js';
+import { Router } from 'express';
+import { expressWebhookHandler } from 'meta-cloud-api';
 
 /**
  * WhatsApp webhook configuration

@@ -1,8 +1,5 @@
 // Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/business-profiles/
 
-export * from './common';
-export * from './upload';
-
 // Common types
 export type {
     BusinessProfileClass,
@@ -12,7 +9,7 @@ export type {
     BusinessProfileResponse,
     UpdateBusinessProfileRequest,
 } from './common';
-
+export * from './common';
 // Upload types
 export type {
     CreateUploadSessionParams,
@@ -23,3 +20,4 @@ export type {
     UploadSession,
     UploadSessionResponse,
 } from './upload';
+export * from './upload';

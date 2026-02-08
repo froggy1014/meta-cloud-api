@@ -1,18 +1,16 @@
 import 'dotenv/config';
 import express from 'express';
 import { webhookHandler } from 'meta-cloud-api/webhook/express';
-
+import { handleContactMessage } from './contact.ts';
+import { handleDocumentMessage } from './document.ts';
+import { handleImageMessage } from './image.ts';
+import { handleInteractiveMessage } from './interactive.ts';
+import { handleLocationMessage } from './location.ts';
 // Import message handlers
 import { handleTextMessage } from './text.ts';
-import { handleImageMessage } from './image.ts';
-import { handleDocumentMessage } from './document.ts';
-import { handleContactMessage } from './contact.ts';
-import { handleLocationMessage } from './location.ts';
-import { handleInteractiveMessage } from './interactive.ts';
-
+import { handleAccountUpdateWebhook } from './webhookFieldHandlers/accountUpdate.ts';
 // Import webhook field handlers
 import { handleFlowsWebhook } from './webhookFieldHandlers/flows.ts';
-import { handleAccountUpdateWebhook } from './webhookFieldHandlers/accountUpdate.ts';
 import { handleHistoryWebhook } from './webhookFieldHandlers/history.ts';
 
 const app = express();

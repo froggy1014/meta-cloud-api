@@ -1,9 +1,9 @@
 // Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/business-profiles/
 
 import type { BaseClass } from 'src/types/base';
-import { BusinessVerticalEnum } from '../../../types/enums';
-import { ResponseSuccess } from '../../../types/request';
-import { UploadBusinessProfileResponse, UploadHandle, UploadSessionResponse } from './upload';
+import type { BusinessVerticalEnum } from '../../../types/enums';
+import type { ResponseSuccess } from '../../../types/request';
+import type { UploadBusinessProfileResponse, UploadHandle, UploadSessionResponse } from './upload';
 
 /**
  * Available fields that can be requested when retrieving a business profile.

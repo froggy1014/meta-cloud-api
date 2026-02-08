@@ -1,4 +1,4 @@
-import type { DocumentProcessedMessage, DocumentMessageHandler } from 'meta-cloud-api';
+import type { DocumentMessageHandler, DocumentProcessedMessage } from 'meta-cloud-api';
 
 /**
  * Handler for document messages

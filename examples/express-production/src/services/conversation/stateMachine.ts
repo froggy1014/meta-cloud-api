@@ -1,5 +1,5 @@
-import { ConversationState } from '@prisma/client';
 import { logger } from '@config/logger.js';
+import { ConversationState } from '@prisma/client';
 
 /**
  * Conversation state machine
@@ -55,7 +55,7 @@ export class ConversationStateMachine {
         currentState: ConversationState,
         nextState: ConversationState,
     ): ConversationState {
-        if (!this.canTransition(currentState, nextState)) {
+        if (!ConversationStateMachine.canTransition(currentState, nextState)) {
             logger.error('Invalid state transition', {
                 userId,
                 currentState,

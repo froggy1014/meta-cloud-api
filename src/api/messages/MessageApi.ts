@@ -4,7 +4,6 @@
 // - POST /{PHONE_NUMBER_ID}/messages
 
 import { BaseAPI } from '../../types/base';
-import type { WabaConfigType } from '../../types/config';
 import {
     type ComponentTypesEnum,
     HttpMethodsEnum,
@@ -12,7 +11,6 @@ import {
     MessageTypesEnum,
     WabaConfigEnum,
 } from '../../types/enums';
-import type { RequesterClass } from '../../types/request';
 
 import type * as m from './types';
 
@@ -47,10 +45,6 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
     private readonly commonMethod = HttpMethodsEnum.Post;
     private readonly commonEndpoint = 'messages';
 
-    constructor(config: WabaConfigType, client: RequesterClass) {
-        super(config, client);
-    }
-
     /**
      * Builds the request body for WhatsApp API messages
      * @param type The type of message to send
@@ -73,7 +67,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
             [type]: payload,
         };
 
-        if (replyMessageId) body['context'] = { message_id: replyMessageId };
+        if (replyMessageId) body.context = { message_id: replyMessageId };
 
         return body;
     }

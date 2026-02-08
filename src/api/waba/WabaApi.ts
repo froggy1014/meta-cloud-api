@@ -7,9 +7,8 @@
 // - DELETE /{WABA_ID}/subscribed_apps
 
 import { BaseAPI } from '../../types/base';
-import type { WabaConfigType } from '../../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
-import type { RequesterClass, ResponseSuccess } from '../../types/request';
+import type { ResponseSuccess } from '../../types/request';
 import { buildFieldsQueryString } from '../../utils/buildFieldsQueryString';
 
 import type * as waba from './types';
@@ -24,10 +23,6 @@ import type * as waba from './types';
  * - Update subscription settings
  */
 export default class WabaApi extends BaseAPI implements waba.WABAClass {
-    constructor(config: WabaConfigType, client: RequesterClass) {
-        super(config, client);
-    }
-
     /**
      * Retrieve WhatsApp Business Account information.
      *

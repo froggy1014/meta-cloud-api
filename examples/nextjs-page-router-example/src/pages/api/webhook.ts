@@ -1,11 +1,12 @@
 // Import all message handlers
+
+import { nextjsPagesWebhookHandler } from 'meta-cloud-api';
 import { handleContactMessage } from '@/lib/messageHandlers/contact';
 import { handleDocumentMessage } from '@/lib/messageHandlers/document';
 import { handleImageMessage } from '@/lib/messageHandlers/image';
 import { handleInteractiveMessage } from '@/lib/messageHandlers/interactive';
 import { handleLocationMessage } from '@/lib/messageHandlers/location';
 import { handleTextMessage } from '@/lib/messageHandlers/text';
-import { nextjsPagesWebhookHandler } from 'meta-cloud-api';
 
 // Disable Next.js body parser to handle raw body for webhook verification
 export const config = {

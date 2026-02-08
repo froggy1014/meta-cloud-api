@@ -4,7 +4,7 @@ export declare class BaseClass {
     constructor(config: WabaConfigType);
 }
 
-import { HttpMethodsEnum } from './enums';
+import type { HttpMethodsEnum } from './enums';
 import type { RequesterClass } from './request';
 
 export class BaseAPI implements BaseClass {

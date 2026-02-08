@@ -10,9 +10,8 @@
 // - GET /{PHONE_NUMBER_ID}?fields=throughput
 
 import { BaseAPI } from '../../types/base';
-import type { WabaConfigType } from '../../types/config';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
-import type { RequesterClass, ResponseSuccess } from '../../types/request';
+import type { ResponseSuccess } from '../../types/request';
 import { objectToQueryString } from '../../utils/objectToQueryString';
 
 import type * as phoneNumber from './types';
@@ -28,10 +27,6 @@ import type * as phoneNumber from './types';
  */
 export default class PhoneNumberApi extends BaseAPI implements phoneNumber.PhoneNumberClass {
     private readonly endpoint = 'phone_numbers';
-
-    constructor(config: WabaConfigType, client: RequesterClass) {
-        super(config, client);
-    }
 
     /**
      * Get phone number information by ID.
