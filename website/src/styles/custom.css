@@ -12,20 +12,6 @@
     --sl-color-black: #0f172a;
 }
 
-:root[data-theme="dark"] {
-    --sl-color-accent-low: #1e3a8a;
-    --sl-color-accent: #60a5fa;
-    --sl-color-accent-high: #93c5fd;
-    --sl-color-white: #0f172a;
-    --sl-color-gray-1: #1e293b;
-    --sl-color-gray-2: #334155;
-    --sl-color-gray-3: #475569;
-    --sl-color-gray-4: #64748b;
-    --sl-color-gray-5: #94a3b8;
-    --sl-color-gray-6: #cbd5e1;
-    --sl-color-black: #f8fafc;
-}
-
 /* Inline code styling */
 .sl-markdown-content code {
     background-color: rgba(175, 184, 193, 0.2);
@@ -34,12 +20,6 @@
     border-radius: 0.25rem;
     font-size: 0.875em;
     border: 1px solid rgba(175, 184, 193, 0.3);
-}
-
-/* Dark mode inline code */
-:root[data-theme="dark"] .sl-markdown-content code {
-    background-color: rgba(100, 116, 139, 0.3);
-    border: 1px solid rgba(100, 116, 139, 0.4);
 }
 
 /* Code blocks - keep default background */
