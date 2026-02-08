@@ -1,0 +1,56 @@
+# meta-cloud-api
+
+> TypeScript SDK wrapper for Meta's WhatsApp Cloud API
+
+meta-cloud-api provides a type-safe, comprehensive, and modular way to integrate WhatsApp Business Platform into Node.js applications.
+
+## Documentation
+
+- [Introduction](https://meta-cloud-api.xyz/getting-started/introduction): Overview of the SDK
+- [Installation](https://meta-cloud-api.xyz/getting-started/installation): Setup guide
+- [Quick Start](https://meta-cloud-api.xyz/getting-started/quick-start): Send your first message
+- [Configuration](https://meta-cloud-api.xyz/getting-started/configuration): Advanced configuration
+
+## API Reference
+
+- [Messages](https://meta-cloud-api.xyz/api/messages): Send text, media, template, interactive messages
+- [Media](https://meta-cloud-api.xyz/api/media): Upload, download, manage media files
+- [Templates](https://meta-cloud-api.xyz/api/templates): Create and manage message templates
+- [Flows](https://meta-cloud-api.xyz/api/flows): Interactive data collection flows
+- [Phone Numbers](https://meta-cloud-api.xyz/api/phone-numbers): Manage business phone numbers
+- [Business Profile](https://meta-cloud-api.xyz/api/business-profile): Manage business profile
+- [QR Codes](https://meta-cloud-api.xyz/api/qr-codes): Create QR codes with prefilled messages
+- [Groups](https://meta-cloud-api.xyz/api/groups): Create and manage WhatsApp groups
+- [WABA](https://meta-cloud-api.xyz/api/waba): WhatsApp Business Account management
+- [Registration](https://meta-cloud-api.xyz/api/registration): Register/deregister phone numbers
+- [Two-Step Verification](https://meta-cloud-api.xyz/api/two-step-verification): 2SV PIN management
+- [Encryption](https://meta-cloud-api.xyz/api/encryption): Business encryption keys
+- [Calling](https://meta-cloud-api.xyz/api/calling): Voice calling configuration
+- [Commerce Settings](https://meta-cloud-api.xyz/api/commerce-settings): Cart and catalog settings
+- [Marketing Messages](https://meta-cloud-api.xyz/api/marketing-messages): Marketing endpoint
+- [Payments](https://meta-cloud-api.xyz/api/payments): Payment configurations (India)
+- [Block Users](https://meta-cloud-api.xyz/api/block-users): Block/unblock users
+
+## Webhooks
+
+- [Overview](https://meta-cloud-api.xyz/webhooks/overview): Webhook concepts
+- [Verification](https://meta-cloud-api.xyz/webhooks/verification): Webhook verification setup
+- [Express](https://meta-cloud-api.xyz/webhooks/express): Express.js webhook integration
+- [Next.js](https://meta-cloud-api.xyz/webhooks/nextjs): Next.js webhook integration
+- [Custom](https://meta-cloud-api.xyz/webhooks/custom): Custom webhook handlers
+
+## Framework Guides
+
+- [Express.js](https://meta-cloud-api.xyz/guides/express): Express.js integration
+- [Next.js App Router](https://meta-cloud-api.xyz/guides/nextjs-app): Next.js App Router integration
+- [Next.js Pages Router](https://meta-cloud-api.xyz/guides/nextjs-pages): Next.js Pages Router integration
+- [Testing](https://meta-cloud-api.xyz/guides/testing): Testing guide
+- [Error Handling](https://meta-cloud-api.xyz/guides/error-handling): Error handling strategies
+- [Deployment](https://meta-cloud-api.xyz/guides/deployment): Production deployment
+
+## Type Reference
+
+- [Message Types](https://meta-cloud-api.xyz/types/message-types): Message TypeScript types
+- [Webhook Types](https://meta-cloud-api.xyz/types/webhook-types): Webhook event types
+- [Config Types](https://meta-cloud-api.xyz/types/config-types): Configuration types
+- [Enums](https://meta-cloud-api.xyz/types/enums): SDK enums reference
