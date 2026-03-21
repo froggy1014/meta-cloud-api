@@ -229,11 +229,14 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * @returns Promise with the API response
      */
     async showTypingIndicator(params: { messageId: string }): Promise<m.MessagesResponse> {
-        return this.status({
-            status: 'read',
-            messageId: params.messageId,
-            typingIndicator: { type: 'text' },
-        });
+        const body = {
+            messaging_product: 'whatsapp',
+            status: 'typing',
+            message_id: params.messageId,
+            typing_indicator: { type: 'text' },
+        };
+
+        return this.send(JSON.stringify(body));
     }
 
     /**

@@ -93,9 +93,7 @@ export default class WhatsApp {
      */
     updateTimeout(timeout: number): void {
         this.config[SDKEnums.WabaConfigEnum.RequestTimeout] = timeout;
-        if ('updateTimeout' in this.requester) {
-            (this.requester as any).updateTimeout(timeout);
-        }
+        this.requester.updateTimeout(timeout);
         LOGGER.log(`Timeout updated to ${timeout}ms`);
     }
 
@@ -106,9 +104,7 @@ export default class WhatsApp {
 
     updateAccessToken(accessToken: string): void {
         this.config[SDKEnums.WabaConfigEnum.AccessToken] = accessToken;
-        if ('updateAccessToken' in this.requester) {
-            (this.requester as any).updateAccessToken(accessToken);
-        }
+        this.requester.updateAccessToken(accessToken);
         LOGGER.log('Access token updated');
     }
 

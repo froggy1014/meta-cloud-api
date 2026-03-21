@@ -81,8 +81,9 @@ export class HttpsClientResponse implements HttpsClientResponseClass {
         try {
             return (await this.res.json()) as ResponseJSONBody;
         } catch (err) {
-            // TODO Error Handling
-            throw new Error(`Failed to parse response body to JSON: ${(err as Error).message}`);
+            const error = new Error(`Failed to parse response body to JSON: ${(err as Error).message}`);
+            error.cause = err;
+            throw error;
         }
     }
 }

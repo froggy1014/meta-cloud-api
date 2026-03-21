@@ -22,7 +22,8 @@ export const importConfig = (inputConfig?: WhatsAppConfig) => {
     const wabaConfig: WabaConfigType = {
         [WabaConfigEnum.AppId]: inputConfig?.appId || process.env.M4D_APP_ID || '',
         [WabaConfigEnum.AppSecret]: inputConfig?.appSecret || process.env.M4D_APP_SECRET || '',
-        [WabaConfigEnum.PhoneNumberId]: inputConfig?.phoneNumberId || Number(process.env.WA_PHONE_NUMBER_ID),
+        [WabaConfigEnum.PhoneNumberId]:
+            inputConfig?.phoneNumberId || (process.env.WA_PHONE_NUMBER_ID ? Number(process.env.WA_PHONE_NUMBER_ID) : 0),
         [WabaConfigEnum.BusinessAcctId]: inputConfig?.businessAcctId || process.env.WA_BUSINESS_ACCOUNT_ID || '',
         [WabaConfigEnum.APIVersion]: inputConfig?.apiVersion || process.env.CLOUD_API_VERSION || '',
         [WabaConfigEnum.AccessToken]: inputConfig?.accessToken || process.env.CLOUD_API_ACCESS_TOKEN || '',

@@ -147,6 +147,16 @@ export default class Requester implements RequesterClass {
         return (await res.json()) as T;
     }
 
+    updateTimeout(timeout: number): void {
+        // Timeout is passed per-request from config, this is a no-op anchor for interface compliance
+        LOGGER.log(`Timeout updated to ${timeout}ms`);
+    }
+
+    updateAccessToken(accessToken: string): void {
+        (this as { accessToken: string }).accessToken = accessToken;
+        LOGGER.log('Access token updated');
+    }
+
     async sendUrlEncodedForm<T>(
         method: HttpMethodsEnum,
         endpoint: string,

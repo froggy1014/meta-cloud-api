@@ -34,7 +34,7 @@ export default class MediaApi extends BaseAPI implements media.MediaClass {
      * @example
      * const mediaInfo = await whatsappClient.media.getMediaById('media_id_123');
      */
-    async getMediaById(mediaId: string, _phone_number_id?: string): Promise<media.MediaResponse> {
+    async getMediaById(mediaId: string): Promise<media.MediaResponse> {
         return this.sendJson(HttpMethodsEnum.Get, `${mediaId}`, this.config[WabaConfigEnum.RequestTimeout], null);
     }
 
@@ -55,7 +55,7 @@ export default class MediaApi extends BaseAPI implements media.MediaClass {
         formData.append('messaging_product', messagingProduct);
         formData.append('type', file.type);
 
-        return this.sendJson(
+        return this.sendFormData(
             HttpMethodsEnum.Post,
             `${this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}`,
             this.config[WabaConfigEnum.RequestTimeout],
@@ -73,7 +73,7 @@ export default class MediaApi extends BaseAPI implements media.MediaClass {
      * @example
      * await whatsappClient.media.deleteMedia('media_id_123');
      */
-    async deleteMedia(mediaId: string, _phone_number_id?: string): Promise<ResponseSuccess> {
+    async deleteMedia(mediaId: string): Promise<ResponseSuccess> {
         return this.sendJson(HttpMethodsEnum.Delete, `${mediaId}`, this.config[WabaConfigEnum.RequestTimeout], null);
     }
 

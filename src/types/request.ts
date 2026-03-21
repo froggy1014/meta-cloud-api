@@ -101,4 +101,8 @@ export declare class RequesterClass {
         formData: Record<string, string>,
         additionalHeaders?: Record<string, string>,
     ): Promise<T>;
+
+    updateTimeout(timeout: number): void;
+
+    updateAccessToken(accessToken: string): void;
 }

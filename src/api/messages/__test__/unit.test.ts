@@ -497,8 +497,9 @@ describe('Messages API - Unit Tests', () => {
 
             expect(requestBody).toMatchObject({
                 messaging_product: 'whatsapp',
-                status: 'read',
+                status: 'typing',
                 message_id: 'msg_test_123',
+                typing_indicator: { type: 'text' },
             });
         });
     });

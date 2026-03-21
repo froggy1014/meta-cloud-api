@@ -3,7 +3,17 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('Media API - Unit Tests', () => {
     let whatsApp: WhatsApp;
-    let mockRequestSend: any;
+    let mockGetJson: any;
+    let mockSendFormData: any;
+
+    const mockMediaResponse = {
+        id: 'media_123',
+        url: 'https://example.com/media.jpg',
+        mime_type: 'image/jpeg',
+        sha256: 'abcd1234',
+        file_size: 102400,
+        messaging_product: 'whatsapp',
+    };
 
     beforeEach(() => {
         whatsApp = new WhatsApp({
@@ -12,15 +22,11 @@ describe('Media API - Unit Tests', () => {
             businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID || 'test_business_id',
         });
 
-        mockRequestSend = vi.spyOn(whatsApp.requester, 'getJson');
-        mockRequestSend.mockResolvedValue({
-            id: 'media_123',
-            url: 'https://example.com/media.jpg',
-            mime_type: 'image/jpeg',
-            sha256: 'abcd1234',
-            file_size: 102400,
-            messaging_product: 'whatsapp',
-        });
+        mockGetJson = vi.spyOn(whatsApp.requester, 'getJson');
+        mockGetJson.mockResolvedValue(mockMediaResponse);
+
+        mockSendFormData = vi.spyOn(whatsApp.requester, 'sendFormData');
+        mockSendFormData.mockResolvedValue({ id: 'media_123' });
     });
 
     describe('Media Operations', () => {
@@ -29,8 +35,8 @@ describe('Media API - Unit Tests', () => {
 
             await whatsApp.media.getMediaById(mediaId);
 
-            expect(mockRequestSend).toHaveBeenCalled();
-            const [method, endpoint, timeout, body] = mockRequestSend.mock.calls[0];
+            expect(mockGetJson).toHaveBeenCalled();
+            const [method, endpoint, timeout, body] = mockGetJson.mock.calls[0];
 
             expect(method).toBe('GET');
             expect(endpoint).toBe(mediaId);
@@ -44,8 +50,8 @@ describe('Media API - Unit Tests', () => {
 
             await whatsApp.media.uploadMedia(mockFile);
 
-            expect(mockRequestSend).toHaveBeenCalled();
-            const [method, endpoint, timeout, formData] = mockRequestSend.mock.calls[0];
+            expect(mockSendFormData).toHaveBeenCalled();
+            const [method, endpoint, timeout, formData] = mockSendFormData.mock.calls[0];
 
             expect(method).toBe('POST');
             expect(endpoint).toBe(`${whatsApp.requester.phoneNumberId}/media`);
@@ -65,8 +71,8 @@ describe('Media API - Unit Tests', () => {
 
             await whatsApp.media.uploadMedia(mockFile, customMessagingProduct);
 
-            expect(mockRequestSend).toHaveBeenCalled();
-            const [_, __, ___, formData] = mockRequestSend.mock.calls[0];
+            expect(mockSendFormData).toHaveBeenCalled();
+            const [_, __, ___, formData] = mockSendFormData.mock.calls[0];
 
             expect(formData).toBeInstanceOf(FormData);
             expect(formData.get('messaging_product')).toBe(customMessagingProduct);
@@ -77,8 +83,8 @@ describe('Media API - Unit Tests', () => {
 
             await whatsApp.media.deleteMedia(mediaId);
 
-            expect(mockRequestSend).toHaveBeenCalled();
-            const [method, endpoint, timeout, body] = mockRequestSend.mock.calls[0];
+            expect(mockGetJson).toHaveBeenCalled();
+            const [method, endpoint, timeout, body] = mockGetJson.mock.calls[0];
 
             expect(method).toBe('DELETE');
             expect(endpoint).toBe(mediaId);
@@ -91,8 +97,8 @@ describe('Media API - Unit Tests', () => {
 
             await whatsApp.media.downloadMedia(mediaUrl);
 
-            expect(mockRequestSend).toHaveBeenCalled();
-            const [method, endpoint, timeout, body] = mockRequestSend.mock.calls[0];
+            expect(mockGetJson).toHaveBeenCalled();
+            const [method, endpoint, timeout, body] = mockGetJson.mock.calls[0];
 
             expect(method).toBe('GET');
             expect(endpoint).toBe(mediaUrl);
@@ -107,7 +113,7 @@ describe('Media API - Unit Tests', () => {
 
             await whatsApp.media.uploadMedia(imageFile);
 
-            const [_, __, ___, formData] = mockRequestSend.mock.calls[0];
+            const [_, __, ___, formData] = mockSendFormData.mock.calls[0];
 
             expect(formData.get('file')).toBe(imageFile);
             expect(formData.get('messaging_product')).toBe('whatsapp');
@@ -120,7 +126,7 @@ describe('Media API - Unit Tests', () => {
 
             await whatsApp.media.uploadMedia(videoFile, customProduct);
 
-            const [_, __, ___, formData] = mockRequestSend.mock.calls[0];
+            const [_, __, ___, formData] = mockSendFormData.mock.calls[0];
 
             expect(formData.get('file')).toBe(videoFile);
             expect(formData.get('messaging_product')).toBe(customProduct);
@@ -132,7 +138,7 @@ describe('Media API - Unit Tests', () => {
 
             await whatsApp.media.uploadMedia(documentFile);
 
-            const [_, __, ___, formData] = mockRequestSend.mock.calls[0];
+            const [_, __, ___, formData] = mockSendFormData.mock.calls[0];
 
             expect(formData.get('file')).toBe(documentFile);
             expect(formData.get('messaging_product')).toBe('whatsapp');
@@ -144,7 +150,7 @@ describe('Media API - Unit Tests', () => {
 
             await whatsApp.media.uploadMedia(audioFile);
 
-            const [_, __, ___, formData] = mockRequestSend.mock.calls[0];
+            const [_, __, ___, formData] = mockSendFormData.mock.calls[0];
 
             expect(formData.get('file')).toBe(audioFile);
             expect(formData.get('messaging_product')).toBe('whatsapp');
@@ -154,26 +160,26 @@ describe('Media API - Unit Tests', () => {
 
     describe('Error Handling', () => {
         it('should handle API errors gracefully', async () => {
-            mockRequestSend.mockRejectedValue(new Error('API Error: Media not found'));
+            mockGetJson.mockRejectedValue(new Error('API Error: Media not found'));
 
             await expect(whatsApp.media.getMediaById('invalid_id')).rejects.toThrow('API Error: Media not found');
         });
 
         it('should handle upload errors', async () => {
-            mockRequestSend.mockRejectedValue(new Error('Upload failed'));
+            mockSendFormData.mockRejectedValue(new Error('Upload failed'));
 
             const file = new File(['content'], 'test.jpg', { type: 'image/jpeg' });
             await expect(whatsApp.media.uploadMedia(file)).rejects.toThrow('Upload failed');
         });
 
         it('should handle delete errors', async () => {
-            mockRequestSend.mockRejectedValue(new Error('Delete failed'));
+            mockGetJson.mockRejectedValue(new Error('Delete failed'));
 
             await expect(whatsApp.media.deleteMedia('media_123')).rejects.toThrow('Delete failed');
         });
 
         it('should handle download errors', async () => {
-            mockRequestSend.mockRejectedValue(new Error('Download failed'));
+            mockGetJson.mockRejectedValue(new Error('Download failed'));
 
             await expect(whatsApp.media.downloadMedia('https://invalid-url.com')).rejects.toThrow('Download failed');
         });
@@ -193,11 +199,11 @@ describe('Media API - Unit Tests', () => {
 
             // Test different operations to ensure endpoint consistency
             await whatsApp.media.getMediaById(mediaId);
-            const getEndpoint = mockRequestSend.mock.calls[0][1];
+            const getEndpoint = mockGetJson.mock.calls[0][1];
 
-            mockRequestSend.mockClear();
+            mockGetJson.mockClear();
             await whatsApp.media.deleteMedia(mediaId);
-            const deleteEndpoint = mockRequestSend.mock.calls[0][1];
+            const deleteEndpoint = mockGetJson.mock.calls[0][1];
 
             expect(getEndpoint).toBe(mediaId);
             expect(deleteEndpoint).toBe(mediaId);
@@ -208,7 +214,7 @@ describe('Media API - Unit Tests', () => {
 
             await whatsApp.media.uploadMedia(file);
 
-            const [_, endpoint] = mockRequestSend.mock.calls[0];
+            const [_, endpoint] = mockSendFormData.mock.calls[0];
             expect(endpoint).toContain(whatsApp.requester.phoneNumberId.toString());
             expect(endpoint).toContain('media');
         });

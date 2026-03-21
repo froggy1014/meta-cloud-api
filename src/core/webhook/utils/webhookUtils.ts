@@ -568,9 +568,8 @@ function extractMessageId(message: WhatsAppMessage): string {
 
     // For interactive and button messages, check context.id
     if (message.type === MessageTypesEnum.Interactive || message.type === MessageTypesEnum.Button) {
-        const msgWithContext = message as any;
-        if (msgWithContext.context?.id) {
-            return msgWithContext.context.id;
+        if ('context' in message && message.context?.id) {
+            return message.context.id;
         }
     }
 
