@@ -111,6 +111,7 @@ export default defineConfig({
                 Head: './src/components/Head.astro',
                 Header: './src/components/Header.astro',
                 Hero: './src/components/Hero.astro',
+                ThemeProvider: './src/components/ThemeProvider.astro',
             },
         }),
     ],

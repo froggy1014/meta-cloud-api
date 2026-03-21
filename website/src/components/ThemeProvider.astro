@@ -1,2 +1,8 @@
 ---
 ---
+
+<script is:inline>
+	if (!localStorage.getItem('starlight-theme')) {
+		document.documentElement.dataset.theme = 'dark';
+	}
+</script>
