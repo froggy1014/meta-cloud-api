@@ -1,0 +1,349 @@
+---
+import type { Props } from '@astrojs/starlight/props';
+
+const { data } = Astro.props.entry;
+const hero = data.hero || {};
+const heroTitle = hero.title || data.title;
+const heroTagline = hero.tagline || '';
+const heroActions = hero.actions || [];
+---
+
+<div class="hero-wrapper">
+    <div class="hero-bg-grid" aria-hidden="true"></div>
+    <div class="hero-glow" aria-hidden="true"></div>
+
+    <div class="hero">
+        <div class="sl-flex stack">
+            <div class="sl-flex copy">
+                <div class="hero-badge">TypeScript SDK for WhatsApp Cloud API</div>
+                <h1 id="_top" data-page-title>
+                    <span class="gradient-text" set:html={heroTitle} />
+                </h1>
+                <div class="tagline" set:html={heroTagline} />
+            </div>
+
+            <div class="install-cmd">
+                <span class="install-prefix">$</span>
+                <code>pnpm add meta-cloud-api</code>
+            </div>
+
+            <div class="sl-flex actions">
+                {heroActions.map((action: any) => (
+                    <a href={action.link} class:list={['action-btn', action.variant]}>
+                        {action.text}
+                    </a>
+                ))}
+            </div>
+        </div>
+
+        <div class="hero-terminal">
+            <div class="terminal-chrome">
+                <span class="terminal-dot dot-red"></span>
+                <span class="terminal-dot dot-yellow"></span>
+                <span class="terminal-dot dot-green"></span>
+                <span class="terminal-title">app.ts</span>
+            </div>
+            <pre class="terminal-code"><code><span class="tk-kw">import</span> WhatsApp <span class="tk-kw">from</span> <span class="tk-str">'meta-cloud-api'</span>;
+
+<span class="tk-kw">const</span> client = <span class="tk-kw">new</span> <span class="tk-cls">WhatsApp</span>({"{"}{"\n"}  accessToken: process.env.<span class="tk-cst">CLOUD_API_ACCESS_TOKEN</span>,{"\n"}  phoneNumberId: <span class="tk-fn">Number</span>(process.env.<span class="tk-cst">WA_PHONE_NUMBER_ID</span>),{"\n"}{"}"});
+
+<span class="tk-kw">await</span> client.messages.<span class="tk-fn">text</span>({"{"}{"\n"}  to: <span class="tk-str">'15551234567'</span>,{"\n"}  body: <span class="tk-str">'Hello from meta-cloud-api!'</span>,{"\n"}{"}"});
+<span class="tk-cmt">// ✓ Message sent successfully</span></code></pre>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hero-wrapper {
+        position: relative;
+        overflow: hidden;
+        padding-block: clamp(2rem, calc(1rem + 6vmin), 5rem);
+    }
+
+    .hero-bg-grid {
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(
+            circle at 1px 1px,
+            hsla(145, 63%, 42%, 0.07) 1px,
+            transparent 0
+        );
+        background-size: 32px 32px;
+        mask-image: radial-gradient(ellipse 70% 70% at 50% 40%, black 20%, transparent 70%);
+        -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 40%, black 20%, transparent 70%);
+    }
+
+    .hero-glow {
+        position: absolute;
+        top: 20%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 600px;
+        height: 400px;
+        background: radial-gradient(
+            ellipse at center,
+            hsla(145, 63%, 42%, 0.08) 0%,
+            transparent 70%
+        );
+        pointer-events: none;
+    }
+
+    .hero {
+        position: relative;
+        display: grid;
+        align-items: center;
+        gap: 2rem;
+    }
+
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.35rem 0.85rem;
+        border-radius: 100px;
+        border: 1px solid hsla(145, 63%, 42%, 0.25);
+        background: hsla(145, 63%, 42%, 0.06);
+        color: var(--sl-color-accent-high);
+        font-family: var(--sl-font-mono);
+        font-size: 0.75rem;
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        width: fit-content;
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    .stack {
+        flex-direction: column;
+        gap: clamp(1.5rem, calc(1.5rem + 1vw), 2rem);
+        text-align: center;
+    }
+
+    .copy {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .copy > * {
+        max-width: 55ch;
+    }
+
+    h1 {
+        font-size: clamp(var(--sl-text-3xl), calc(0.25rem + 5vw), var(--sl-text-6xl));
+        line-height: var(--sl-line-height-headings);
+        font-weight: 800;
+        animation: fadeInUp 0.5s ease-out 0.1s both;
+    }
+
+    .gradient-text {
+        background: linear-gradient(135deg, #4ade80 0%, #25D366 35%, #22c55e 70%, #16a34a 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .tagline {
+        font-size: clamp(var(--sl-text-base), calc(0.0625rem + 2vw), var(--sl-text-xl));
+        color: var(--sl-color-gray-2);
+        animation: fadeInUp 0.5s ease-out 0.2s both;
+    }
+
+    .install-cmd {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-inline: auto;
+        padding: 0.6rem 1.2rem;
+        background: var(--terminal-bg);
+        border: 1px solid var(--terminal-border);
+        border-radius: 8px;
+        font-family: var(--sl-font-mono);
+        font-size: 0.9rem;
+        color: var(--sl-color-gray-1);
+        box-shadow: 0 0 20px var(--glow-color);
+        animation: fadeInUp 0.5s ease-out 0.3s both;
+        user-select: all;
+    }
+
+    .install-prefix {
+        color: var(--sl-color-accent);
+        user-select: none;
+    }
+
+    .install-cmd code {
+        background: none;
+        border: none;
+        padding: 0;
+        font-size: inherit;
+    }
+
+    .actions {
+        gap: 1rem 1.25rem;
+        flex-wrap: wrap;
+        justify-content: center;
+        animation: fadeInUp 0.5s ease-out 0.4s both;
+    }
+
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.65rem 1.5rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .action-btn.primary {
+        background: var(--sl-color-accent);
+        color: hsl(220, 18%, 6%);
+        box-shadow: 0 0 16px var(--glow-color-strong);
+    }
+
+    .action-btn.primary:hover {
+        background: var(--sl-color-accent-high);
+        box-shadow: 0 0 28px var(--glow-color-strong);
+        transform: translateY(-1px);
+    }
+
+    .action-btn.minimal {
+        background: transparent;
+        color: var(--sl-color-gray-1);
+        border: 1px solid var(--terminal-border);
+    }
+
+    .action-btn.minimal:hover {
+        border-color: var(--sl-color-accent);
+        color: var(--sl-color-accent-high);
+        background: hsla(145, 63%, 42%, 0.06);
+    }
+
+    .hero-terminal {
+        background: var(--terminal-bg);
+        border: 1px solid var(--terminal-border);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 0 40px var(--glow-color), 0 20px 60px hsla(0, 0%, 0%, 0.3);
+        animation: fadeInUp 0.6s ease-out 0.3s both;
+        max-width: 520px;
+        margin-inline: auto;
+        width: 100%;
+    }
+
+    .terminal-chrome {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0.65rem 1rem;
+        background: hsla(220, 14%, 8%, 0.8);
+        border-bottom: 1px solid var(--terminal-border);
+    }
+
+    .terminal-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+    }
+
+    .dot-red { background: hsl(0, 60%, 45%); }
+    .dot-yellow { background: hsl(45, 60%, 45%); }
+    .dot-green { background: hsl(145, 60%, 40%); }
+
+    .terminal-title {
+        margin-left: 0.5rem;
+        font-family: var(--sl-font-mono);
+        font-size: 0.7rem;
+        color: var(--sl-color-gray-3);
+        letter-spacing: 0.02em;
+    }
+
+    .terminal-code {
+        margin: 0;
+        padding: 1rem 1.2rem;
+        font-family: var(--sl-font-mono);
+        font-size: 0.8rem;
+        line-height: 1.7;
+        color: var(--sl-color-gray-1);
+        overflow-x: auto;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    .terminal-code::before {
+        display: none !important;
+    }
+
+    .tk-kw { color: hsl(280, 60%, 70%); }
+    .tk-str { color: hsl(145, 60%, 60%); }
+    .tk-fn { color: hsl(200, 80%, 70%); }
+    .tk-cls { color: hsl(35, 80%, 70%); }
+    .tk-cst { color: hsl(35, 70%, 65%); }
+    .tk-cmt { color: hsl(220, 10%, 40%); font-style: italic; }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(16px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (min-width: 50rem) {
+        .hero {
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            padding-block: clamp(2.5rem, calc(1rem + 10vmin), 8rem);
+        }
+
+        .stack {
+            text-align: start;
+        }
+
+        .copy {
+            align-items: flex-start;
+        }
+
+        .install-cmd {
+            margin-inline: 0;
+        }
+
+        .actions {
+            justify-content: flex-start;
+        }
+
+        .hero-terminal {
+            margin-inline: 0;
+            max-width: 100%;
+        }
+
+        .hero-glow {
+            left: 30%;
+        }
+    }
+
+    :root[data-theme='light'] .gradient-text {
+        background: linear-gradient(135deg, #128C7E 0%, #075E54 40%, #054d40 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    :root[data-theme='light'] .hero-bg-grid {
+        background-image: radial-gradient(
+            circle at 1px 1px,
+            hsla(145, 63%, 42%, 0.12) 1px,
+            transparent 0
+        );
+    }
+
+    :root[data-theme='light'] .terminal-chrome {
+        background: hsl(220, 12%, 94%);
+    }
+</style>
