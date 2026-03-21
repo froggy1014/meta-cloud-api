@@ -15,13 +15,19 @@ import type * as twoStepVerification from './types';
  * This API allows you to:
  * - Set a two-step verification PIN code
  * - Manage two-step verification settings
+ *
+ * Endpoints covered:
+ * - `POST /{PHONE_NUMBER_ID}` - Set two-step verification PIN
+ *
+ * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/business-phone-numbers/two-step-verification/
  */
 export default class TwoStepVerificationApi extends BaseAPI implements twoStepVerification.TwoStepVerificationClass {
     /**
      * Set a two-step verification PIN code.
      *
-     * @param pin The PIN code to set for two-step verification (6-digit numeric string)
-     * @returns Response indicating success or failure
+     * @param pin - The PIN code to set for two-step verification (6-digit numeric string).
+     * @returns Response indicating success or failure.
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/business-phone-numbers/two-step-verification/
      *
      * @example
      * await whatsappClient.twoStepVerification.setTwoStepVerificationCode('123456');

@@ -11,18 +11,30 @@ import { objectToQueryString } from '../../utils/objectToQueryString';
 import type * as blockUsers from './types/blockUsers';
 
 /**
- * Block Users API
- * @see https://developers.facebook.com/docs/whatsapp/cloud-api/block-users
+ * API for blocking and unblocking WhatsApp users.
+ *
+ * Provides methods to block, unblock, and list blocked users for your
+ * WhatsApp Business phone number.
  *
  * Limitations:
  * - Can only block users that have messaged your business in the last 24 hours
  * - 64k blocklist limit
+ *
+ * Endpoints covered:
+ * - `POST /{PHONE_NUMBER_ID}/block_users` - Block one or more users
+ * - `DELETE /{PHONE_NUMBER_ID}/block_users` - Unblock one or more users
+ * - `GET /{PHONE_NUMBER_ID}/block_users` - List blocked users with pagination
+ *
+ * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/block-users/
  */
 export default class BlockUsersApi extends BaseAPI implements blockUsers.BlockUsersClass {
     private readonly endpoint = 'block_users';
 
     /**
-     * Build request body for block/unblock operations
+     * Build the request body for block/unblock operations.
+     *
+     * @param users - Array of phone numbers or WhatsApp IDs.
+     * @returns The formatted request body.
      */
     private buildBlockUsersBody(users: string[]): blockUsers.BlockUsersRequest {
         return {
@@ -36,7 +48,7 @@ export default class BlockUsersApi extends BaseAPI implements blockUsers.BlockUs
      * @param users - Array of phone numbers or WhatsApp IDs to block
      * @returns Response with successfully blocked and failed users
      * @throws Error if users have not messaged in last 24 hours
-     * @see https://developers.facebook.com/docs/whatsapp/cloud-api/block-users#block-users
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/block-users/
      *
      * @example
      * ```typescript
@@ -70,7 +82,7 @@ export default class BlockUsersApi extends BaseAPI implements blockUsers.BlockUs
      * Unblock one or more WhatsApp users
      * @param users - Array of phone numbers or WhatsApp IDs to unblock
      * @returns Response with successfully unblocked and failed users
-     * @see https://developers.facebook.com/docs/whatsapp/cloud-api/block-users#unblock-users
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/block-users/
      *
      * @example
      * ```typescript
@@ -104,7 +116,7 @@ export default class BlockUsersApi extends BaseAPI implements blockUsers.BlockUs
      * Get list of blocked WhatsApp users with pagination
      * @param params - Optional pagination parameters
      * @returns List of blocked users with pagination info
-     * @see https://developers.facebook.com/docs/whatsapp/cloud-api/block-users#get-list-of-blocked-numbers
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/block-users/
      *
      * @example
      * ```typescript

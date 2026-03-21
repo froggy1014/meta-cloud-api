@@ -18,36 +18,55 @@ import type * as bp from './types';
 /**
  * API for managing WhatsApp Business Profiles and profile pictures.
  *
- * This API allows you to:
- * - Get business profile information
- * - Update business profile details
- * - Upload profile pictures using a three-step process:
- *   1. Create an upload session
- *   2. Upload the image binary data
- *   3. Get the upload handle to use when updating the profile
+ * Business profiles let customers see relevant information about your business,
+ * such as a description, email, address, website, and profile picture.
+ *
+ * Covered endpoints:
+ * - Get business profile (`GET /{PHONE_NUMBER_ID}/whatsapp_business_profile`)
+ * - Update business profile (`POST /{PHONE_NUMBER_ID}/whatsapp_business_profile`)
+ * - Create an upload session for profile pictures (`POST /app/uploads`)
+ * - Upload file binary data (`POST /{UPLOAD_ID}`)
+ * - Get upload handle (`GET /{UPLOAD_ID}`)
+ *
+ * Profile picture upload follows a three-step process:
+ * 1. Create an upload session ({@link createUploadSession})
+ * 2. Upload the image binary data ({@link uploadMedia})
+ * 3. Get the upload handle ({@link getUploadHandle}) and pass it to {@link updateBusinessProfile}
+ *
+ * Available business profile fields: `about`, `address`, `description`, `email`,
+ * `profile_picture_url`, `websites`, `vertical`, `messaging_product`.
+ *
+ * @see {@link https://developers.facebook.com/docs/whatsapp/cloud-api/reference/business-profiles | Business Profiles API Reference}
+ * @see {@link https://developers.facebook.com/documentation/business-messaging/whatsapp/business-profiles/ | Business Profiles Documentation}
  */
 export default class BusinessProfileApi extends BaseAPI implements bp.BusinessProfileClass {
     private readonly endpoint = 'whatsapp_business_profile';
 
     /**
-     * Get your business profile information.
+     * Get your WhatsApp Business profile information.
      *
-     * Use this method to retrieve details about your WhatsApp business profile, including
-     * about text, address, description, email, profile picture URL, websites, and vertical.
+     * Retrieves the business profile details for the configured phone number.
+     * You can request all fields or specify a subset using the `fields` parameter.
      *
-     * @param fields Fields to be returned in the response. If not specified, all fields will be returned.
-     *               Possible values: about, address, description, email, profile_picture_url, websites, vertical
-     * @returns The business profile information.
+     * @param fields - Optional fields to return. Can be a comma-separated string
+     *   (e.g., `'about,address,email'`) or an array of field names. If omitted,
+     *   all fields are returned. Available fields: `about`, `address`, `description`,
+     *   `email`, `profile_picture_url`, `websites`, `vertical`.
+     * @returns A promise that resolves with the business profile information.
+     *
+     * @see {@link https://developers.facebook.com/docs/whatsapp/cloud-api/reference/business-profiles#get-business-profile | Get Business Profile}
      *
      * @example
+     * ```ts
      * // Get all business profile fields
      * const profile = await whatsappClient.businessProfile.getBusinessProfile();
      *
-     * // Get specific business profile fields
+     * // Get specific fields as a string
      * const profile = await whatsappClient.businessProfile.getBusinessProfile('about,address,email');
      *
-     * // Using the BusinessProfileFieldsParam type
+     * // Get specific fields as an array
      * const profile = await whatsappClient.businessProfile.getBusinessProfile(['about', 'address', 'email']);
+     * ```
      */
     async getBusinessProfile(fields?: bp.BusinessProfileFieldsParam): Promise<bp.BusinessProfileResponse> {
         return this.sendJson(
@@ -59,30 +78,34 @@ export default class BusinessProfileApi extends BaseAPI implements bp.BusinessPr
     }
 
     /**
-     * Update your business profile.
+     * Update your WhatsApp Business profile.
      *
-     * Use this method to update one or more fields of your WhatsApp business profile.
+     * Updates one or more fields of the business profile for the configured phone number.
+     * Only the fields included in the request body are updated; omitted fields remain unchanged.
      *
-     * @param updateRequest The request object containing the fields to update.
-     *        - messaging_product: Required. Always set to "whatsapp".
-     *        - about: Optional. Business's About text (1-139 characters).
-     *        - address: Optional. Business address (max 256 characters).
-     *        - description: Optional. Business description (max 512 characters).
-     *        - vertical: Optional. Business category (use BusinessVerticalEnum for type safety).
-     *        - email: Optional. Contact email (valid format, max 128 characters).
-     *        - websites: Optional. Up to 2 URLs (max 256 characters each).
-     *        - profile_picture_handle: Optional. Handle from upload process.
-     * @returns Response indicating success or failure.
+     * @param updateRequest - The profile fields to update.
+     * @param updateRequest.messaging_product - Required. Must be set to `'whatsapp'`.
+     * @param updateRequest.about - Optional. Business About text (1-139 characters).
+     * @param updateRequest.address - Optional. Business address (max 256 characters).
+     * @param updateRequest.description - Optional. Business description (max 512 characters).
+     * @param updateRequest.vertical - Optional. Business industry/category.
+     * @param updateRequest.email - Optional. Contact email address (max 128 characters).
+     * @param updateRequest.websites - Optional. Up to 2 website URLs (max 256 characters each).
+     * @param updateRequest.profile_picture_handle - Optional. Handle obtained from the upload process.
+     * @returns A promise that resolves with a success indicator.
+     *
+     * @see {@link https://developers.facebook.com/docs/whatsapp/cloud-api/reference/business-profiles#update-business-profile | Update Business Profile}
      *
      * @example
-     * // Update business profile with multiple fields including vertical using enum
+     * ```ts
      * await whatsappClient.businessProfile.updateBusinessProfile({
-     *   messaging_product: 'whatsapp',
-     *   about: 'We provide excellent service',
-     *   email: 'contact@example.com',
-     *   websites: ['https://example.com'],
-     *   vertical: BusinessVerticalEnum.RETAIL
+     *     messaging_product: 'whatsapp',
+     *     about: 'We provide excellent service',
+     *     description: 'Your trusted partner for quality products',
+     *     email: 'contact@example.com',
+     *     websites: ['https://example.com'],
      * });
+     * ```
      */
     async updateBusinessProfile(updateRequest: bp.UpdateBusinessProfileRequest): Promise<ResponseSuccess> {
         return this.sendJson(
@@ -96,21 +119,26 @@ export default class BusinessProfileApi extends BaseAPI implements bp.BusinessPr
     /**
      * Create an upload session for a profile picture.
      *
-     * This is the first step in the profile picture upload process.
+     * This is **step 1** of the three-step profile picture upload process.
+     * It initializes a resumable upload session on the server and returns a session ID
+     * to use in subsequent upload calls.
      *
-     * @param fileLength Length of the file to be uploaded in bytes.
-     * @param fileType MIME type of the file (e.g., 'image/jpeg').
-     * @param fileName Name of the file with extension.
-     * @returns Response containing the upload session ID needed for the next step.
+     * @param fileLength - The size of the file in bytes.
+     * @param fileType - The MIME type of the file (e.g., `'image/jpeg'`, `'image/png'`).
+     * @param fileName - The file name with extension (e.g., `'profile.jpg'`).
+     * @returns A promise that resolves with the upload session ID.
+     *
+     * @see {@link https://developers.facebook.com/docs/whatsapp/cloud-api/reference/business-profiles | Business Profiles - Upload}
      *
      * @example
-     * // Create upload session for profile picture
+     * ```ts
      * const session = await whatsappClient.businessProfile.createUploadSession(
-     *   fileBuffer.length,
-     *   'image/jpeg',
-     *   'profile.jpg'
+     *     fileBuffer.length,
+     *     'image/jpeg',
+     *     'profile.jpg',
      * );
-     * const uploadSessionId = session.upload_session_id;
+     * console.log(session.upload_session_id);
+     * ```
      */
     async createUploadSession(
         fileLength: number,
@@ -132,59 +160,57 @@ export default class BusinessProfileApi extends BaseAPI implements bp.BusinessPr
     }
 
     /**
-     * Upload media file to the upload session.
+     * Upload media file binary data to an upload session.
      *
-     * This is the second step in the profile picture upload process.
-     * Upload the binary content of the file to the previously created upload session.
+     * This is **step 2** of the three-step profile picture upload process.
+     * Uploads the raw binary content of the image to the previously created upload session.
      *
-     * @param uploadId The upload session ID from createUploadSession response.
-     * @param file The binary data of the file (Buffer).
-     * @returns Response indicating success or failure.
+     * @param uploadId - The upload session ID returned from {@link createUploadSession}.
+     * @param file - The binary data of the file as a Buffer.
+     * @returns A promise that resolves with the upload response.
+     *
+     * @see {@link https://developers.facebook.com/docs/whatsapp/cloud-api/reference/business-profiles | Business Profiles - Upload}
      *
      * @example
-     * // Upload the actual file content
+     * ```ts
+     * const fileBuffer = fs.readFileSync('profile.jpg');
      * await whatsappClient.businessProfile.uploadMedia(
-     *   uploadSessionId,
-     *   fileBuffer
+     *     session.upload_session_id,
+     *     fileBuffer,
      * );
+     * ```
      */
     async uploadMedia(uploadId: string, file: Buffer): Promise<bp.UploadBusinessProfileResponse> {
         return this.sendJson(HttpMethodsEnum.Post, `${uploadId}`, this.config[WabaConfigEnum.RequestTimeout], file);
     }
 
     /**
-     * Get the upload handle information.
+     * Get the upload handle for a completed upload.
      *
-     * This is the third step in the profile picture upload process.
-     * After uploading the file, get the handle to use when updating the profile.
+     * This is **step 3** of the three-step profile picture upload process.
+     * After uploading the file binary, retrieve the handle to use when updating
+     * the business profile's `profile_picture_handle` field.
      *
-     * @param uploadId The upload session ID from createUploadSession response.
-     * @returns Response containing the upload handle information.
+     * @param uploadId - The upload session ID returned from {@link createUploadSession}.
+     * @returns A promise that resolves with the upload handle information.
+     *
+     * @see {@link https://developers.facebook.com/docs/whatsapp/cloud-api/reference/business-profiles | Business Profiles - Upload}
      *
      * @example
-     * // Complete profile picture update process
-     * // 1. Create upload session
+     * ```ts
+     * // Complete three-step profile picture upload
      * const session = await whatsappClient.businessProfile.createUploadSession(
-     *   fileBuffer.length, 'image/jpeg', 'profile.jpg'
+     *     fileBuffer.length, 'image/jpeg', 'profile.jpg',
      * );
+     * await whatsappClient.businessProfile.uploadMedia(session.upload_session_id, fileBuffer);
+     * const handleInfo = await whatsappClient.businessProfile.getUploadHandle(session.upload_session_id);
      *
-     * // 2. Upload the image data
-     * await whatsappClient.businessProfile.uploadMedia(
-     *   session.upload_session_id, fileBuffer
-     * );
-     *
-     * // 3. Get the handle for the uploaded file
-     * const handleInfo = await whatsappClient.businessProfile.getUploadHandle(
-     *   session.upload_session_id
-     * );
-     *
-     * // 4. Update profile with new picture and business information
+     * // Use the handle to update the profile picture
      * await whatsappClient.businessProfile.updateBusinessProfile({
-     *   messaging_product: 'whatsapp',
-     *   profile_picture_handle: handleInfo.handle,
-     *   vertical: BusinessVerticalEnum.RESTAURANT,
-     *   about: 'Delicious food served daily'
+     *     messaging_product: 'whatsapp',
+     *     profile_picture_handle: handleInfo.handle,
      * });
+     * ```
      */
     async getUploadHandle(uploadId: string): Promise<bp.UploadHandle> {
         return this.sendJson(HttpMethodsEnum.Get, `${uploadId}`, this.config[WabaConfigEnum.RequestTimeout], null);

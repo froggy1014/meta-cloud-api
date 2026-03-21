@@ -16,14 +16,21 @@ import type * as registration from './types';
  * This API allows you to:
  * - Register a WhatsApp Business Account with a PIN
  * - Deregister a WhatsApp Business Account
+ *
+ * Endpoints covered:
+ * - `POST /{PHONE_NUMBER_ID}/register` - Register a phone number
+ * - `POST /{PHONE_NUMBER_ID}/deregister` - Deregister a phone number
+ *
+ * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/business-phone-numbers/registration/
  */
 export default class RegistrationApi extends BaseAPI implements registration.RegistrationClass {
     /**
      * Register a WhatsApp Business Account using a PIN.
      *
-     * @param pin The registration PIN received via SMS or voice call
-     * @param dataLocalizationRegion Optional data localization region
-     * @returns Response indicating success or failure
+     * @param pin - The registration PIN received via SMS or voice call.
+     * @param dataLocalizationRegion - Optional data localization region for storage compliance.
+     * @returns Response indicating success or failure.
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/business-phone-numbers/registration/
      *
      * @example
      * await whatsappClient.registration.register('123456', DataLocalizationRegionEnum.Asia);
@@ -46,7 +53,8 @@ export default class RegistrationApi extends BaseAPI implements registration.Reg
     /**
      * Deregister a WhatsApp Business Account.
      *
-     * @returns Response indicating success or failure
+     * @returns Response indicating success or failure.
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/business-phone-numbers/registration/
      *
      * @example
      * await whatsappClient.registration.deregister();

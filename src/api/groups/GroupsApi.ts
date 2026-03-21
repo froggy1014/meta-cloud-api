@@ -30,8 +30,33 @@ import type * as groups from './types';
  * - Remove participants
  * - Update group settings
  * - Fetch group metadata and active groups
+ *
+ * Endpoints covered:
+ * - `POST /{PHONE_NUMBER_ID}/groups` - Create a new group
+ * - `DELETE /{GROUP_ID}` - Delete a group
+ * - `GET /{GROUP_ID}` - Get group info
+ * - `GET /{PHONE_NUMBER_ID}/groups` - List active groups
+ * - `GET /{GROUP_ID}/invite_link` - Get group invite link
+ * - `POST /{GROUP_ID}/invite_link` - Reset group invite link
+ * - `GET /{GROUP_ID}/join_requests` - Get pending join requests
+ * - `POST /{GROUP_ID}/join_requests` - Approve join requests
+ * - `DELETE /{GROUP_ID}/join_requests` - Reject join requests
+ * - `DELETE /{GROUP_ID}/participants` - Remove participants
+ * - `POST /{GROUP_ID}` - Update group settings
+ *
+ * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/groups/reference/
  */
 export default class GroupsApi extends BaseAPI implements groups.GroupsClass {
+    /**
+     * Create a new WhatsApp group.
+     *
+     * @param params - The group creation parameters.
+     * @param params.subject - The name/subject of the group.
+     * @param params.description - Optional description for the group.
+     * @param params.join_approval_mode - Optional join approval mode setting.
+     * @returns The created group response with group ID.
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/groups/reference/
+     */
     async createGroup(params: groups.GroupCreateRequest): Promise<groups.GroupCreateResponse> {
         const body = {
             messaging_product: 'whatsapp',
@@ -49,10 +74,25 @@ export default class GroupsApi extends BaseAPI implements groups.GroupsClass {
         );
     }
 
+    /**
+     * Delete a WhatsApp group.
+     *
+     * @param groupId - The ID of the group to delete.
+     * @returns A success response confirming deletion.
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/groups/reference/
+     */
     async deleteGroup(groupId: string): Promise<ResponseSuccess> {
         return this.sendJson(HttpMethodsEnum.Delete, `/${groupId}`, this.config[WabaConfigEnum.RequestTimeout], null);
     }
 
+    /**
+     * Retrieve metadata and information about a specific group.
+     *
+     * @param groupId - The ID of the group to retrieve.
+     * @param fields - Optional fields to include in the response (e.g., subject, description, participants).
+     * @returns The group information including metadata and requested fields.
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/groups/reference/
+     */
     async getGroupInfo(groupId: string, fields?: groups.GroupInfoFieldsParam): Promise<groups.GroupInfoResponse> {
         const fieldValue = Array.isArray(fields) ? fields.join(',') : fields;
         const queryParams = fieldValue ? objectToQueryString({ fields: fieldValue }) : '';
@@ -64,6 +104,16 @@ export default class GroupsApi extends BaseAPI implements groups.GroupsClass {
         );
     }
 
+    /**
+     * List all active groups for the phone number with optional pagination.
+     *
+     * @param params - Optional pagination parameters.
+     * @param params.limit - Maximum number of groups to return.
+     * @param params.after - Cursor for forward pagination.
+     * @param params.before - Cursor for backward pagination.
+     * @returns A paginated list of active groups.
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/groups/reference/
+     */
     async getActiveGroups(params?: groups.GroupListParams): Promise<groups.GroupListResponse> {
         const queryParams = params ? objectToQueryString(params) : '';
         return this.sendJson(
@@ -74,6 +124,13 @@ export default class GroupsApi extends BaseAPI implements groups.GroupsClass {
         );
     }
 
+    /**
+     * Get the current invite link for a group.
+     *
+     * @param groupId - The ID of the group.
+     * @returns The group invite link.
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/groups/reference/
+     */
     async getGroupInviteLink(groupId: string): Promise<groups.GroupInviteLinkResponse> {
         return this.sendJson(
             HttpMethodsEnum.Get,
@@ -83,6 +140,13 @@ export default class GroupsApi extends BaseAPI implements groups.GroupsClass {
         );
     }
 
+    /**
+     * Reset and regenerate the invite link for a group, invalidating the previous link.
+     *
+     * @param groupId - The ID of the group.
+     * @returns The new group invite link.
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/groups/reference/
+     */
     async resetGroupInviteLink(groupId: string): Promise<groups.GroupInviteLinkResponse> {
         const body = {
             messaging_product: 'whatsapp',
@@ -95,6 +159,13 @@ export default class GroupsApi extends BaseAPI implements groups.GroupsClass {
         );
     }
 
+    /**
+     * Get pending join requests for a group.
+     *
+     * @param groupId - The ID of the group.
+     * @returns A list of pending join requests.
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/groups/reference/
+     */
     async getJoinRequests(groupId: string): Promise<groups.GroupJoinRequestsResponse> {
         return this.sendJson(
             HttpMethodsEnum.Get,
@@ -104,6 +175,14 @@ export default class GroupsApi extends BaseAPI implements groups.GroupsClass {
         );
     }
 
+    /**
+     * Approve one or more pending join requests for a group.
+     *
+     * @param groupId - The ID of the group.
+     * @param joinRequestIds - Array of join request IDs to approve.
+     * @returns The result of the approval action.
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/groups/reference/
+     */
     async approveJoinRequests(
         groupId: string,
         joinRequestIds: string[],
@@ -120,6 +199,14 @@ export default class GroupsApi extends BaseAPI implements groups.GroupsClass {
         );
     }
 
+    /**
+     * Reject one or more pending join requests for a group.
+     *
+     * @param groupId - The ID of the group.
+     * @param joinRequestIds - Array of join request IDs to reject.
+     * @returns The result of the rejection action.
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/groups/reference/
+     */
     async rejectJoinRequests(
         groupId: string,
         joinRequestIds: string[],
@@ -136,6 +223,14 @@ export default class GroupsApi extends BaseAPI implements groups.GroupsClass {
         );
     }
 
+    /**
+     * Remove one or more participants from a group.
+     *
+     * @param groupId - The ID of the group.
+     * @param participants - Array of user WhatsApp IDs to remove from the group.
+     * @returns A success response confirming removal.
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/groups/reference/
+     */
     async removeParticipants(groupId: string, participants: string[]): Promise<ResponseSuccess> {
         const body = {
             messaging_product: 'whatsapp',
@@ -149,6 +244,17 @@ export default class GroupsApi extends BaseAPI implements groups.GroupsClass {
         );
     }
 
+    /**
+     * Update group settings such as subject, description, or profile picture.
+     *
+     * @param groupId - The ID of the group to update.
+     * @param params - The settings to update.
+     * @param params.subject - Optional new group subject/name.
+     * @param params.description - Optional new group description.
+     * @param params.profilePictureFile - Optional profile picture as a Buffer or Blob.
+     * @returns The updated group settings response.
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/groups/reference/
+     */
     async updateGroupSettings(
         groupId: string,
         params: groups.UpdateGroupSettingsRequest,

@@ -22,6 +22,15 @@ import type * as qrCode from './types';
  * - Get specific QR code details
  * - Update QR code messages
  * - Delete QR codes
+ *
+ * Endpoints covered:
+ * - `POST /{PHONE_NUMBER_ID}/message_qrdls` - Create a new QR code
+ * - `GET /{PHONE_NUMBER_ID}/message_qrdls` - Get all QR codes
+ * - `GET /{PHONE_NUMBER_ID}/message_qrdls/{QR_CODE_ID}` - Get a specific QR code
+ * - `POST /{PHONE_NUMBER_ID}/message_qrdls/{QR_CODE_ID}` - Update a QR code
+ * - `DELETE /{PHONE_NUMBER_ID}/message_qrdls/{QR_CODE_ID}` - Delete a QR code
+ *
+ * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/qr-codes/
  */
 export default class QrCodeApi extends BaseAPI implements qrCode.QrCodeClass {
     private readonly endpoint = 'message_qrdls';
@@ -29,8 +38,9 @@ export default class QrCodeApi extends BaseAPI implements qrCode.QrCodeClass {
     /**
      * Create a new QR code with a prefilled message.
      *
-     * @param request The QR code creation request
-     * @returns QR code information including code, deep link URL, and optional image URL
+     * @param request - The QR code creation request containing the prefilled message and optional image format.
+     * @returns QR code information including code, deep link URL, and optional image URL.
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/qr-codes/
      *
      * @example
      * const qrCode = await whatsappClient.qrCode.createQrCode({
@@ -50,7 +60,8 @@ export default class QrCodeApi extends BaseAPI implements qrCode.QrCodeClass {
     /**
      * Get all QR codes for the current phone number.
      *
-     * @returns List of all QR codes
+     * @returns List of all QR codes.
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/qr-codes/
      *
      * @example
      * const qrCodes = await whatsappClient.qrCode.getQrCodes();
@@ -67,8 +78,9 @@ export default class QrCodeApi extends BaseAPI implements qrCode.QrCodeClass {
     /**
      * Get a specific QR code by ID.
      *
-     * @param qrCodeId The QR code ID to retrieve
-     * @returns QR code information
+     * @param qrCodeId - The QR code ID to retrieve.
+     * @returns QR code information.
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/qr-codes/
      *
      * @example
      * const qrCode = await whatsappClient.qrCode.getQrCode('qr_code_123');
@@ -85,8 +97,9 @@ export default class QrCodeApi extends BaseAPI implements qrCode.QrCodeClass {
     /**
      * Update an existing QR code's prefilled message.
      *
-     * @param request The QR code update request containing code and new message
-     * @returns Updated QR code information
+     * @param request - The QR code update request containing code and new message.
+     * @returns Updated QR code information.
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/qr-codes/
      *
      * @example
      * const updatedQrCode = await whatsappClient.qrCode.updateQrCode({
@@ -106,8 +119,9 @@ export default class QrCodeApi extends BaseAPI implements qrCode.QrCodeClass {
     /**
      * Delete a QR code.
      *
-     * @param qrCodeId The QR code ID to delete
-     * @returns Response indicating success or failure
+     * @param qrCodeId - The QR code ID to delete.
+     * @returns Response indicating success or failure.
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/qr-codes/
      *
      * @example
      * await whatsappClient.qrCode.deleteQrCode('qr_code_123');

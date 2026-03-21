@@ -17,13 +17,22 @@ import { objectToQueryString } from '../../utils/objectToQueryString';
 import type * as phoneNumber from './types';
 
 /**
- * API for managing WhatsApp Phone Numb ers.
+ * API for managing WhatsApp Business phone numbers.
  *
- * This API allows you to:
- * - Get phone number information by ID
- * - Get all phone numbers for a business account
- * - Request verification codes for phone numbers
- * - Verify phone numbers with codes
+ * This API provides methods for phone number management, verification,
+ * and conversational automation configuration within the WhatsApp Business Platform.
+ *
+ * Covered endpoints:
+ * - Get phone number info by ID (`GET /{PHONE_NUMBER_ID}`)
+ * - List all phone numbers for a WABA (`GET /{WABA_ID}/phone_numbers`)
+ * - Request a verification code (`POST /{PHONE_NUMBER_ID}/request_code`)
+ * - Verify a phone number with a code (`POST /{PHONE_NUMBER_ID}/verify_code`)
+ * - Set conversational automation config (`POST /{PHONE_NUMBER_ID}/conversational_automation`)
+ * - Get conversational automation config (`GET /{PHONE_NUMBER_ID}?fields=conversational_automation`)
+ * - Get throughput info (`GET /{PHONE_NUMBER_ID}?fields=throughput`)
+ *
+ * @see {@link https://developers.facebook.com/docs/whatsapp/cloud-api/reference/phone-numbers | Phone Numbers API Reference}
+ * @see {@link https://developers.facebook.com/documentation/business-messaging/whatsapp/business-phone-numbers/phone-numbers/ | Phone Numbers Documentation}
  */
 export default class PhoneNumberApi extends BaseAPI implements phoneNumber.PhoneNumberClass {
     private readonly endpoint = 'phone_numbers';
@@ -31,12 +40,31 @@ export default class PhoneNumberApi extends BaseAPI implements phoneNumber.Phone
     /**
      * Get phone number information by ID.
      *
-     * @param fields Optional comma-separated list of fields to include in the response
-     * @returns Phone number information including verification status, quality rating, etc.
+     * Retrieves details about the configured phone number, including display phone number,
+     * verified name, quality rating, platform type, and more. Use the `fields` parameter
+     * to request only specific fields.
+     *
+     * @param fields - Optional fields to include in the response. Can be a comma-separated
+     *   string (e.g., `'display_phone_number,verified_name'`) or an array of field names.
+     * @returns A promise that resolves with the phone number information.
+     *
+     * @see {@link https://developers.facebook.com/docs/whatsapp/cloud-api/reference/phone-numbers#get-single | Get Phone Number}
      *
      * @example
+     * ```ts
+     * // Get all available fields
      * const phoneNumber = await whatsappClient.phoneNumber.getPhoneNumberById();
-     * const phoneNumberWithFields = await whatsappClient.phoneNumber.getPhoneNumberById('display_phone_number,verified_name');
+     *
+     * // Get specific fields as a comma-separated string
+     * const phoneNumber = await whatsappClient.phoneNumber.getPhoneNumberById(
+     *     'display_phone_number,verified_name,quality_rating'
+     * );
+     *
+     * // Get specific fields as an array
+     * const phoneNumber = await whatsappClient.phoneNumber.getPhoneNumberById(
+     *     ['display_phone_number', 'verified_name']
+     * );
+     * ```
      */
     async getPhoneNumberById(fields?: phoneNumber.PhoneNumberFieldsParam): Promise<phoneNumber.PhoneNumberResponse> {
         const fieldValue = Array.isArray(fields) ? fields.join(',') : fields;
@@ -50,12 +78,22 @@ export default class PhoneNumberApi extends BaseAPI implements phoneNumber.Phone
     }
 
     /**
-     * Get all phone numbers for the business account.
+     * Get all phone numbers associated with the WhatsApp Business Account.
      *
-     * @returns List of phone numbers associated with the business account
+     * Returns a list of all phone numbers registered under the configured WABA,
+     * including their verification status, quality rating, and display information.
+     *
+     * @returns A promise that resolves with the list of phone numbers.
+     *
+     * @see {@link https://developers.facebook.com/docs/whatsapp/cloud-api/reference/phone-numbers#get-all | List Phone Numbers}
      *
      * @example
-     * const phoneNumbers = await whatsappClient.phoneNumber.getPhoneNumbers();
+     * ```ts
+     * const response = await whatsappClient.phoneNumber.getPhoneNumbers();
+     * for (const number of response.data) {
+     *     console.log(number.display_phone_number, number.verified_name);
+     * }
+     * ```
      */
     async getPhoneNumbers(): Promise<phoneNumber.PhoneNumbersResponse> {
         return this.sendJson(
@@ -69,14 +107,23 @@ export default class PhoneNumberApi extends BaseAPI implements phoneNumber.Phone
     /**
      * Request a verification code for the phone number.
      *
-     * @param request Verification code request containing method and language
-     * @returns Response indicating success or failure
+     * Sends a verification code to the configured phone number via SMS or voice call.
+     * This is the first step of the phone number verification process.
+     *
+     * @param request - The verification code request parameters.
+     * @param request.code_method - The delivery method for the code: `'SMS'` or `'VOICE'`.
+     * @param request.language - The language code for the verification message (e.g., `'en_US'`).
+     * @returns A promise that resolves with a success indicator.
+     *
+     * @see {@link https://developers.facebook.com/docs/whatsapp/cloud-api/reference/phone-numbers#request-verification-code | Request Verification Code}
      *
      * @example
+     * ```ts
      * await whatsappClient.phoneNumber.requestVerificationCode({
-     *   code_method: 'SMS',
-     *   language: 'en_US'
+     *     code_method: 'SMS',
+     *     language: 'en_US',
      * });
+     * ```
      */
     async requestVerificationCode(request: phoneNumber.RequestVerificationCodeRequest): Promise<ResponseSuccess> {
         return this.sendJson(
@@ -88,15 +135,23 @@ export default class PhoneNumberApi extends BaseAPI implements phoneNumber.Phone
     }
 
     /**
-     * Verify the phone number with the received code.
+     * Verify the phone number with a received verification code.
      *
-     * @param request Verification request containing the code
-     * @returns Response indicating success or failure
+     * Completes the phone number verification process by submitting the code
+     * received via SMS or voice call from {@link requestVerificationCode}.
+     *
+     * @param request - The verification request parameters.
+     * @param request.code - The 6-digit verification code received via SMS or voice call.
+     * @returns A promise that resolves with a success indicator.
+     *
+     * @see {@link https://developers.facebook.com/docs/whatsapp/cloud-api/reference/phone-numbers#verify-code | Verify Code}
      *
      * @example
+     * ```ts
      * await whatsappClient.phoneNumber.verifyCode({
-     *   code: '123456'
+     *     code: '123456',
      * });
+     * ```
      */
     async verifyCode(request: phoneNumber.VerifyCodeRequest): Promise<ResponseSuccess> {
         return this.sendJson(
@@ -108,41 +163,36 @@ export default class PhoneNumberApi extends BaseAPI implements phoneNumber.Phone
     }
 
     /**
-     * Configure conversational automation features (Welcome Messages, Ice Breakers, Commands).
+     * Configure conversational automation features for the phone number.
      *
-     * @param request Configuration for conversational components
-     * @returns Response indicating success or failure
+     * Sets up welcome messages, ice breakers (prompts), and commands that users
+     * see when they open a conversation with the business phone number.
+     *
+     * @param request - The conversational automation configuration.
+     * @param request.enable_welcome_message - Optional. Enable or disable the welcome message.
+     * @param request.commands - Optional. Array of command objects with `command_name` and `command_description`.
+     * @param request.prompts - Optional. Array of ice breaker prompt strings shown to users.
+     * @returns A promise that resolves with a success indicator.
+     *
+     * @see {@link https://developers.facebook.com/documentation/business-messaging/whatsapp/business-phone-numbers/phone-numbers/ | Conversational Automation}
      *
      * @example
+     * ```ts
      * // Enable welcome message
      * await whatsappClient.phoneNumber.setConversationalAutomation({
-     *   enable_welcome_message: true
+     *     enable_welcome_message: true,
      * });
      *
-     * @example
-     * // Configure commands
+     * // Configure commands and ice breakers
      * await whatsappClient.phoneNumber.setConversationalAutomation({
-     *   commands: [
-     *     { command_name: 'tickets', command_description: 'Book flight tickets' },
-     *     { command_name: 'hotel', command_description: 'Book hotel' }
-     *   ]
+     *     enable_welcome_message: true,
+     *     commands: [
+     *         { command_name: 'tickets', command_description: 'Book flight tickets' },
+     *         { command_name: 'hotel', command_description: 'Book a hotel room' },
+     *     ],
+     *     prompts: ['Book a flight', 'Plan a vacation'],
      * });
-     *
-     * @example
-     * // Configure ice breakers (prompts)
-     * await whatsappClient.phoneNumber.setConversationalAutomation({
-     *   prompts: ['Book a flight', 'Plan a vacation']
-     * });
-     *
-     * @example
-     * // Configure all features
-     * await whatsappClient.phoneNumber.setConversationalAutomation({
-     *   enable_welcome_message: true,
-     *   commands: [
-     *     { command_name: 'tickets', command_description: 'Book flight tickets' }
-     *   ],
-     *   prompts: ['Book a flight']
-     * });
+     * ```
      */
     async setConversationalAutomation(request: phoneNumber.ConversationalAutomationRequest): Promise<ResponseSuccess> {
         return this.sendJson(
@@ -154,15 +204,23 @@ export default class PhoneNumberApi extends BaseAPI implements phoneNumber.Phone
     }
 
     /**
-     * Get the current configuration of conversational automation features.
+     * Get the current conversational automation configuration for the phone number.
      *
-     * @returns Current configuration including welcome message status, commands, and prompts
+     * Retrieves the current settings for welcome messages, ice breakers (prompts),
+     * and commands configured on the phone number.
+     *
+     * @returns A promise that resolves with the current conversational automation settings,
+     *   including welcome message status, commands, and prompts.
+     *
+     * @see {@link https://developers.facebook.com/documentation/business-messaging/whatsapp/business-phone-numbers/phone-numbers/ | Conversational Automation}
      *
      * @example
+     * ```ts
      * const config = await whatsappClient.phoneNumber.getConversationalAutomation();
-     * console.log(config.enable_welcome_message); // true/false
-     * console.log(config.commands); // Array of commands
-     * console.log(config.prompts); // Array of ice breakers
+     * console.log(config.enable_welcome_message); // true or false
+     * console.log(config.commands);               // Array of command objects
+     * console.log(config.prompts);                // Array of ice breaker strings
+     * ```
      */
     async getConversationalAutomation(): Promise<phoneNumber.ConversationalAutomationResponse> {
         const queryParams = objectToQueryString({ fields: 'conversational_automation' });
@@ -177,16 +235,24 @@ export default class PhoneNumberApi extends BaseAPI implements phoneNumber.Phone
     /**
      * Get the current throughput level for the phone number.
      *
-     * Throughput represents the maximum messages per second (mps) that can be sent/received.
-     * - Default: 80 mps
-     * - Automatic upgrade to 1,000 mps available for eligible numbers
-     * - WhatsApp Business app coexistence numbers: fixed at 5 mps
+     * Throughput represents the maximum messages per second (MPS) that can be
+     * sent or received on this phone number.
      *
-     * @returns Current throughput information including the level (STANDARD, HIGH, or NOT_APPLICABLE)
+     * Throughput levels:
+     * - **STANDARD**: 80 MPS (default for most numbers)
+     * - **HIGH**: 1,000 MPS (automatic upgrade for eligible numbers)
+     * - **NOT_APPLICABLE**: Fixed at 5 MPS (WhatsApp Business app coexistence numbers)
+     *
+     * @returns A promise that resolves with the current throughput information,
+     *   including the throughput level.
+     *
+     * @see {@link https://developers.facebook.com/docs/whatsapp/cloud-api/reference/phone-numbers | Phone Numbers - Throughput}
      *
      * @example
+     * ```ts
      * const throughput = await whatsappClient.phoneNumber.getThroughput();
      * console.log(throughput.throughput.level); // 'STANDARD' | 'HIGH' | 'NOT_APPLICABLE'
+     * ```
      */
     async getThroughput(): Promise<phoneNumber.ThroughputResponse> {
         const queryParams = objectToQueryString({ fields: 'throughput' });
