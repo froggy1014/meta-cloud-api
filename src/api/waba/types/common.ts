@@ -111,6 +111,16 @@ export interface WabaAccount {
     timezone_id?: string;
     primary_business_location?: Record<string, unknown> | string;
     currency?: string;
+    country?: string;
+    analytics?: Record<string, unknown>;
+    is_enabled_for_insights?: boolean;
+    is_shared_with_partners?: boolean;
+    marketing_messages_lite_api_status?: string;
+    marketing_messages_onboarding_status?: string;
+    on_behalf_of_business_info?: Record<string, unknown>;
+    primary_funding_id?: string;
+    purchase_order_number?: string;
+    whatsapp_business_manager_messaging_limit?: string;
 }
 
 /**
@@ -129,7 +139,16 @@ export type WabaAccountFields =
     | 'status'
     | 'ownership_type'
     | 'message_template_namespace'
-    | 'primary_business_location';
+    | 'primary_business_location'
+    | 'analytics'
+    | 'is_enabled_for_insights'
+    | 'is_shared_with_partners'
+    | 'marketing_messages_lite_api_status'
+    | 'marketing_messages_onboarding_status'
+    | 'on_behalf_of_business_info'
+    | 'primary_funding_id'
+    | 'purchase_order_number'
+    | 'whatsapp_business_manager_messaging_limit';
 
 /**
  * Parameter type for specifying which WABA account fields to retrieve
