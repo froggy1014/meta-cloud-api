@@ -286,6 +286,12 @@ importers:
       '@pagefind/default-ui':
         specifier: ^1.1.1
         version: 1.4.0
+      '@types/react':
+        specifier: ^19.2.13
+        version: 19.2.13
+      '@types/react-dom':
+        specifier: ^19.2.3
+        version: 19.2.3(@types/react@19.2.13)
       pagefind:
         specifier: ^1.1.1
         version: 1.4.0

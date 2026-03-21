@@ -2,7 +2,7 @@
 import type { Props } from '@astrojs/starlight/props';
 
 const { data } = Astro.props.entry;
-const hero = data.hero || {};
+const hero = (data as any).hero || {};
 const heroTitle = hero.title || data.title;
 const heroTagline = hero.tagline || '';
 const heroActions = hero.actions || [];
