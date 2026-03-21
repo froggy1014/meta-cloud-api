@@ -1,73 +1,79 @@
 # meta-cloud-api
 
+## 2.1.0
+
+### Minor Changes
+
+- Add comprehensive JSDoc with @see reference links to all 17 API modules, fix type safety issues (as any casts, showTypingIndicator status, MediaApi method call, config NaN), and add missing WABA account fields from official Graph API reference.
+
 ## 2.0.0
 
 ### Major Changes
 
 - 8174951: # v2.0.0 - Complete Documentation Site & Production Examples
 
-    This major release introduces a comprehensive documentation website, production-ready examples, and improved project structure with pnpm workspace.
+  This major release introduces a comprehensive documentation website, production-ready examples, and improved project structure with pnpm workspace.
 
-    ## 🚨 Breaking Changes
-    - **Workspace Migration**: Project now uses pnpm workspace for better monorepo management
-    - **Examples Structure**: `express-example` renamed to `express-simple` for clarity
+  ## 🚨 Breaking Changes
+  - **Workspace Migration**: Project now uses pnpm workspace for better monorepo management
+  - **Examples Structure**: `express-example` renamed to `express-simple` for clarity
 
-    ## ✨ New Features
+  ## ✨ New Features
 
-    ### 📚 Complete Documentation Site (37 pages)
-    - **Getting Started**: Installation, quick start, configuration guides
-    - **API Reference**: Complete documentation for all 17 API modules
-    - **Webhook Guides**: Express, Next.js, and custom webhook implementations
-    - **Framework Guides**: Express, Next.js App/Pages Router integration
-    - **Type Reference**: TypeScript types, enums, and interfaces
-    - Built with Astro + Starlight theme
-    - Full-text search with Pagefind
-    - Mobile responsive design
+  ### 📚 Complete Documentation Site (37 pages)
+  - **Getting Started**: Installation, quick start, configuration guides
+  - **API Reference**: Complete documentation for all 17 API modules
+  - **Webhook Guides**: Express, Next.js, and custom webhook implementations
+  - **Framework Guides**: Express, Next.js App/Pages Router integration
+  - **Type Reference**: TypeScript types, enums, and interfaces
+  - Built with Astro + Starlight theme
+  - Full-text search with Pagefind
+  - Mobile responsive design
 
-    ### 🏗️ Production-Ready Express Example
-    - Complete customer support bot with conversation flows
-    - PostgreSQL database with Prisma ORM
-    - Redis session management
-    - BullMQ background job processing
-    - Comprehensive error handling and logging
-    - Full test suite (unit, integration, e2e)
-    - Docker deployment ready
-    - 57 files, 4,500+ lines of production code
+  ### 🏗️ Production-Ready Express Example
+  - Complete customer support bot with conversation flows
+  - PostgreSQL database with Prisma ORM
+  - Redis session management
+  - BullMQ background job processing
+  - Comprehensive error handling and logging
+  - Full test suite (unit, integration, e2e)
+  - Docker deployment ready
+  - 57 files, 4,500+ lines of production code
 
-    ### 🔄 CI/CD Workflows
-    - Automated documentation deployment to Vercel
-    - Example validation on pull requests
-    - Type checking and build verification
+  ### 🔄 CI/CD Workflows
+  - Automated documentation deployment to Vercel
+  - Example validation on pull requests
+  - Type checking and build verification
 
-    ### 📦 Improved Package Structure
-    - pnpm workspace for efficient dependency management
-    - Examples use `workspace:*` protocol for local SDK linking
-    - Shared tooling configuration across packages
+  ### 📦 Improved Package Structure
+  - pnpm workspace for efficient dependency management
+  - Examples use `workspace:*` protocol for local SDK linking
+  - Shared tooling configuration across packages
 
-    ## 🎯 Documentation
+  ## 🎯 Documentation
 
-    Visit the new documentation site at https://meta-cloud-api.xyz
+  Visit the new documentation site at https://meta-cloud-api.xyz
 
-    ## 📝 Examples
-    - `express-simple`: Basic Express.js integration
-    - `express-production`: Production-ready example with full features
-    - `nextjs-app-router-example`: Next.js 15 App Router
-    - `nextjs-page-router-example`: Next.js Pages Router
+  ## 📝 Examples
+  - `express-simple`: Basic Express.js integration
+  - `express-production`: Production-ready example with full features
+  - `nextjs-app-router-example`: Next.js 15 App Router
+  - `nextjs-page-router-example`: Next.js Pages Router
 
-    ## 🙏 Credits
+  ## 🙏 Credits
 
-    Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
+  Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 
 ## 1.7.3
 
 ### Patch Changes
 
 - a926c52: Improve PKCS#1 private key handling with automatic format conversion
-    - Add automatic conversion of PKCS#1 format keys to PKCS#8 format when decryption fails
-    - Support legacy keys encrypted with DES-EDE3-CBC algorithm by converting to AES-256-CBC
-    - Export additional encryption utilities: `decryptFlowRequest` and `encryptFlowResponse`
-    - Enhance error logging with detailed format detection and conversion attempt tracking
-    - Improve error messages with helpful instructions for manual key conversion
+  - Add automatic conversion of PKCS#1 format keys to PKCS#8 format when decryption fails
+  - Support legacy keys encrypted with DES-EDE3-CBC algorithm by converting to AES-256-CBC
+  - Export additional encryption utilities: `decryptFlowRequest` and `encryptFlowResponse`
+  - Enhance error logging with detailed format detection and conversion attempt tracking
+  - Improve error messages with helpful instructions for manual key conversion
 
 ## 1.7.2
 
@@ -75,48 +81,48 @@
 
 - c0ed913: Implement comprehensive webhook field support with type-safe handlers
 
-    Add full support for Meta Cloud API webhook fields with granular field-level type definitions and handler registration. This update introduces a robust webhook processing system that allows developers to handle specific webhook fields (messages, account updates, flows, etc.) with complete type safety.
+  Add full support for Meta Cloud API webhook fields with granular field-level type definitions and handler registration. This update introduces a robust webhook processing system that allows developers to handle specific webhook fields (messages, account updates, flows, etc.) with complete type safety.
 
-    **Features:**
-    - Add WebhookProcessor class for field-specific handler registration and processing
-    - Add comprehensive type definitions for all webhook fields:
-        - Account updates (account_update, account_alerts)
-        - App state sync (app_state_sync)
-        - Business updates (business_capability_update, business_account_review_update, business_status_update)
-        - Flows (flows)
-        - Message history (history)
-        - Messages (messages)
-        - Message echoes (message_echoes)
-        - Phone number updates (phone_number_name_update, phone_number_quality_update)
-        - Security (security)
-        - Status updates (statuses)
-        - Template updates (message_template_status_update, template_category_update)
-    - Add webhook field type guards and utilities for runtime validation
-    - Add example implementations for account updates, flows, and message history handlers
+  **Features:**
+  - Add WebhookProcessor class for field-specific handler registration and processing
+  - Add comprehensive type definitions for all webhook fields:
+    - Account updates (account_update, account_alerts)
+    - App state sync (app_state_sync)
+    - Business updates (business_capability_update, business_account_review_update, business_status_update)
+    - Flows (flows)
+    - Message history (history)
+    - Messages (messages)
+    - Message echoes (message_echoes)
+    - Phone number updates (phone_number_name_update, phone_number_quality_update)
+    - Security (security)
+    - Status updates (statuses)
+    - Template updates (message_template_status_update, template_category_update)
+  - Add webhook field type guards and utilities for runtime validation
+  - Add example implementations for account updates, flows, and message history handlers
 
-    **Type System Improvements:**
-    - Organize webhook types into modular files by field category
-    - Add detailed TypeScript interfaces for all webhook notification structures
-    - Add proper type exports and re-exports for better developer experience
-    - Improve type safety with discriminated unions for different field types
+  **Type System Improvements:**
+  - Organize webhook types into modular files by field category
+  - Add detailed TypeScript interfaces for all webhook notification structures
+  - Add proper type exports and re-exports for better developer experience
+  - Improve type safety with discriminated unions for different field types
 
-    **Examples:**
-    - Add Express example demonstrating field-specific webhook handler registration
-    - Add handler implementations for common webhook scenarios
-    - Show best practices for processing different webhook field types
+  **Examples:**
+  - Add Express example demonstrating field-specific webhook handler registration
+  - Add handler implementations for common webhook scenarios
+  - Show best practices for processing different webhook field types
 
-    **Breaking Changes:**
-    None - this is an additive change that maintains backward compatibility with existing webhook handlers.
+  **Breaking Changes:**
+  None - this is an additive change that maintains backward compatibility with existing webhook handlers.
 
 ## 1.6.1
 
 ### Patch Changes
 
 - 219650b: Improve Flow encryption utilities with validation and better logging
-    - Add validation for required environment variables (FLOW_API_PRIVATE_PEM, FLOW_API_PASSPHRASE) in decryptFlowRequest
-    - Enhance all log messages with function context prefixes ([generateEncryption], [decryptFlowRequest], [encryptFlowResponse])
-    - Remove sensitive information (PEM preview) from error logs for better security
-    - Clean up and standardize logging messages throughout encryption utilities
+  - Add validation for required environment variables (FLOW_API_PRIVATE_PEM, FLOW_API_PASSPHRASE) in decryptFlowRequest
+  - Enhance all log messages with function context prefixes ([generateEncryption], [decryptFlowRequest], [encryptFlowResponse])
+  - Remove sensitive information (PEM preview) from error logs for better security
+  - Clean up and standardize logging messages throughout encryption utilities
 
 ## 1.6.0
 
@@ -124,144 +130,144 @@
 
 - 0677594: ## Features
 
-    ### Type-Safe Specialized Handlers
+  ### Type-Safe Specialized Handlers
 
-    Add 13 specialized handler methods for better type safety and developer experience:
-    - `onText()`, `onImage()`, `onVideo()`, `onAudio()`, `onDocument()`, `onSticker()`
-    - `onInteractive()`, `onButton()`, `onLocation()`, `onContacts()`
-    - `onReaction()`, `onOrder()`, `onSystem()`
+  Add 13 specialized handler methods for better type safety and developer experience:
+  - `onText()`, `onImage()`, `onVideo()`, `onAudio()`, `onDocument()`, `onSticker()`
+  - `onInteractive()`, `onButton()`, `onLocation()`, `onContacts()`
+  - `onReaction()`, `onOrder()`, `onSystem()`
 
-    These methods provide automatic type narrowing, eliminating the need for optional chaining.
+  These methods provide automatic type narrowing, eliminating the need for optional chaining.
 
-    **Example:**
+  **Example:**
 
-    ```typescript
-    bot.processor.onText(async (whatsapp, processed) => {
-        const { message } = processed;
-        console.log(message.text.body); // ✅ No optional chaining needed!
-    });
-    ```
+  ```typescript
+  bot.processor.onText(async (whatsapp, processed) => {
+    const { message } = processed;
+    console.log(message.text.body); // ✅ No optional chaining needed!
+  });
+  ```
 
-    ### Consistent Message ID Access
+  ### Consistent Message ID Access
 
-    Add `messageId` property to `ProcessedMessage` type for consistent message ID access across all message types:
-    - Automatically extracts ID from the correct location based on message type
-    - For most messages: uses `message.id`
-    - For interactive/button replies (e.g., `nfm_reply`): uses `message.context.id`
+  Add `messageId` property to `ProcessedMessage` type for consistent message ID access across all message types:
+  - Automatically extracts ID from the correct location based on message type
+  - For most messages: uses `message.id`
+  - For interactive/button replies (e.g., `nfm_reply`): uses `message.context.id`
 
-    **Example:**
+  **Example:**
 
-    ```typescript
-    bot.processor.onMessagePreProcess(async (whatsapp, processed) => {
-        // Works for all message types, including nfm_reply
-        await whatsapp.messages.markAsRead({ messageId: processed.messageId });
-    });
-    ```
+  ```typescript
+  bot.processor.onMessagePreProcess(async (whatsapp, processed) => {
+    // Works for all message types, including nfm_reply
+    await whatsapp.messages.markAsRead({ messageId: processed.messageId });
+  });
+  ```
 
-    ### Flow Response Support
+  ### Flow Response Support
 
-    Add support for WhatsApp Flow responses (`nfm_reply` message type):
-    - New `InteractiveNfmReplyMessage` type for Flow response messages
-    - Proper type definitions for Flow webhook data
+  Add support for WhatsApp Flow responses (`nfm_reply` message type):
+  - New `InteractiveNfmReplyMessage` type for Flow response messages
+  - Proper type definitions for Flow webhook data
 
-    ## Documentation
-    - Update README with comprehensive examples of specialized handlers
-    - Add examples showing messageId usage across different message types
-    - Document TypeScript discriminated union approach for type narrowing
+  ## Documentation
+  - Update README with comprehensive examples of specialized handlers
+  - Add examples showing messageId usage across different message types
+  - Document TypeScript discriminated union approach for type narrowing
 
-    console.log("🚀 ~ ## Features
+  console.log("🚀 ~ ## Features
 
-    ### Type-Safe Specialized Handlers
+  ### Type-Safe Specialized Handlers
 
-    Add 13 specialized handler methods for better type safety and developer experience:
-    - `onText()`, `onImage()`, `onVideo()`, `onAudio()`, `onDocument()`, `onSticker()`
-    - `onInteractive()`, `onButton()`, `onLocation()`, `onContacts()`
-    - `onReaction()`, `onOrder()`, `onSystem()`
+  Add 13 specialized handler methods for better type safety and developer experience:
+  - `onText()`, `onImage()`, `onVideo()`, `onAudio()`, `onDocument()`, `onSticker()`
+  - `onInteractive()`, `onButton()`, `onLocation()`, `onContacts()`
+  - `onReaction()`, `onOrder()`, `onSystem()`
 
-    These methods provide automatic type narrowing, eliminating the need for optional chaining.
+  These methods provide automatic type narrowing, eliminating the need for optional chaining.
 
-    **Example:**
+  **Example:**
 
-    ```typescript
-    bot.processor.onText(async (whatsapp, processed) => {
-        const { message } = processed;
-        console.log(message.text.body); // ✅ No optional chaining needed!
-    });
-    ```
+  ```typescript
+  bot.processor.onText(async (whatsapp, processed) => {
+    const { message } = processed;
+    console.log(message.text.body); // ✅ No optional chaining needed!
+  });
+  ```
 
-    ### Consistent Message ID Access
+  ### Consistent Message ID Access
 
-    Add `messageId` property to `ProcessedMessage` type for consistent message ID access across all message types:
-    - Automatically extracts ID from the correct location based on message type
-    - For most messages: uses `message.id`
-    - For interactive/button replies (e.g., `nfm_reply`): uses `message.context.id`
+  Add `messageId` property to `ProcessedMessage` type for consistent message ID access across all message types:
+  - Automatically extracts ID from the correct location based on message type
+  - For most messages: uses `message.id`
+  - For interactive/button replies (e.g., `nfm_reply`): uses `message.context.id`
 
-    **Example:**
+  **Example:**
 
-    ```typescript
-    bot.processor.onMessagePreProcess(async (whatsapp, processed) => {
-        // Works for all message types, including nfm_reply
-        await whatsapp.messages.markAsRead({ messageId: processed.messageId });
-    });
-    ```
+  ```typescript
+  bot.processor.onMessagePreProcess(async (whatsapp, processed) => {
+    // Works for all message types, including nfm_reply
+    await whatsapp.messages.markAsRead({ messageId: processed.messageId });
+  });
+  ```
 
-    ### Flow Response Support
+  ### Flow Response Support
 
-    Add support for WhatsApp Flow responses (`nfm_reply` message type):
-    - New `InteractiveNfmReplyMessage` type for Flow response messages
-    - Proper type definitions for Flow webhook data
+  Add support for WhatsApp Flow responses (`nfm_reply` message type):
+  - New `InteractiveNfmReplyMessage` type for Flow response messages
+  - Proper type definitions for Flow webhook data
 
-    ## Documentation
-    - Update README with comprehensive examples of specialized handlers
-    - Add examples showing messageId usage across different message types
-    - Document TypeScript discriminated union approach for type narrowing
-      :", ## Features
+  ## Documentation
+  - Update README with comprehensive examples of specialized handlers
+  - Add examples showing messageId usage across different message types
+  - Document TypeScript discriminated union approach for type narrowing
+    :", ## Features
 
-    ### Type-Safe Specialized Handlers
+  ### Type-Safe Specialized Handlers
 
-    Add 13 specialized handler methods for better type safety and developer experience:
-    - `onText()`, `onImage()`, `onVideo()`, `onAudio()`, `onDocument()`, `onSticker()`
-    - `onInteractive()`, `onButton()`, `onLocation()`, `onContacts()`
-    - `onReaction()`, `onOrder()`, `onSystem()`
+  Add 13 specialized handler methods for better type safety and developer experience:
+  - `onText()`, `onImage()`, `onVideo()`, `onAudio()`, `onDocument()`, `onSticker()`
+  - `onInteractive()`, `onButton()`, `onLocation()`, `onContacts()`
+  - `onReaction()`, `onOrder()`, `onSystem()`
 
-    These methods provide automatic type narrowing, eliminating the need for optional chaining.
+  These methods provide automatic type narrowing, eliminating the need for optional chaining.
 
-    **Example:**
+  **Example:**
 
-    ```typescript
-    bot.processor.onText(async (whatsapp, processed) => {
-        const { message } = processed;
-        console.log(message.text.body); // ✅ No optional chaining needed!
-    });
-    ```
+  ```typescript
+  bot.processor.onText(async (whatsapp, processed) => {
+    const { message } = processed;
+    console.log(message.text.body); // ✅ No optional chaining needed!
+  });
+  ```
 
-    ### Consistent Message ID Access
+  ### Consistent Message ID Access
 
-    Add `messageId` property to `ProcessedMessage` type for consistent message ID access across all message types:
-    - Automatically extracts ID from the correct location based on message type
-    - For most messages: uses `message.id`
-    - For interactive/button replies (e.g., `nfm_reply`): uses `message.context.id`
+  Add `messageId` property to `ProcessedMessage` type for consistent message ID access across all message types:
+  - Automatically extracts ID from the correct location based on message type
+  - For most messages: uses `message.id`
+  - For interactive/button replies (e.g., `nfm_reply`): uses `message.context.id`
 
-    **Example:**
+  **Example:**
 
-    ```typescript
-    bot.processor.onMessagePreProcess(async (whatsapp, processed) => {
-        // Works for all message types, including nfm_reply
-        await whatsapp.messages.markAsRead({ messageId: processed.messageId });
-    });
-    ```
+  ```typescript
+  bot.processor.onMessagePreProcess(async (whatsapp, processed) => {
+    // Works for all message types, including nfm_reply
+    await whatsapp.messages.markAsRead({ messageId: processed.messageId });
+  });
+  ```
 
-    ### Flow Response Support
+  ### Flow Response Support
 
-    Add support for WhatsApp Flow responses (`nfm_reply` message type):
-    - New `InteractiveNfmReplyMessage` type for Flow response messages
-    - Proper type definitions for Flow webhook data
+  Add support for WhatsApp Flow responses (`nfm_reply` message type):
+  - New `InteractiveNfmReplyMessage` type for Flow response messages
+  - Proper type definitions for Flow webhook data
 
-    ## Documentation
-    - Update README with comprehensive examples of specialized handlers
-    - Add examples showing messageId usage across different message types
-    - Document TypeScript discriminated union approach for type narrowing
-      )
+  ## Documentation
+  - Update README with comprehensive examples of specialized handlers
+  - Add examples showing messageId usage across different message types
+  - Document TypeScript discriminated union approach for type narrowing
+    )
 
 ## 1.5.0
 
@@ -269,85 +275,85 @@
 
 - 0bf91c0: ## Features
 
-    ### Type-Safe Specialized Handlers
+  ### Type-Safe Specialized Handlers
 
-    Add 13 specialized handler methods for better type safety and developer experience:
-    - `onText()`, `onImage()`, `onVideo()`, `onAudio()`, `onDocument()`, `onSticker()`
-    - `onInteractive()`, `onButton()`, `onLocation()`, `onContacts()`
-    - `onReaction()`, `onOrder()`, `onSystem()`
+  Add 13 specialized handler methods for better type safety and developer experience:
+  - `onText()`, `onImage()`, `onVideo()`, `onAudio()`, `onDocument()`, `onSticker()`
+  - `onInteractive()`, `onButton()`, `onLocation()`, `onContacts()`
+  - `onReaction()`, `onOrder()`, `onSystem()`
 
-    These methods provide automatic type narrowing, eliminating the need for optional chaining.
+  These methods provide automatic type narrowing, eliminating the need for optional chaining.
 
-    **Example:**
+  **Example:**
 
-    ```typescript
-    bot.processor.onText(async (whatsapp, processed) => {
-        const { message } = processed;
-        console.log(message.text.body); // ✅ No optional chaining needed!
-    });
-    ```
+  ```typescript
+  bot.processor.onText(async (whatsapp, processed) => {
+    const { message } = processed;
+    console.log(message.text.body); // ✅ No optional chaining needed!
+  });
+  ```
 
-    ### Consistent Message ID Access
+  ### Consistent Message ID Access
 
-    Add `messageId` property to `ProcessedMessage` type for consistent message ID access across all message types:
-    - Automatically extracts ID from the correct location based on message type
-    - For most messages: uses `message.id`
-    - For interactive/button replies (e.g., `nfm_reply`): uses `message.context.id`
+  Add `messageId` property to `ProcessedMessage` type for consistent message ID access across all message types:
+  - Automatically extracts ID from the correct location based on message type
+  - For most messages: uses `message.id`
+  - For interactive/button replies (e.g., `nfm_reply`): uses `message.context.id`
 
-    **Example:**
+  **Example:**
 
-    ```typescript
-    bot.processor.onMessagePreProcess(async (whatsapp, processed) => {
-        // Works for all message types, including nfm_reply
-        await whatsapp.messages.markAsRead({ messageId: processed.messageId });
-    });
-    ```
+  ```typescript
+  bot.processor.onMessagePreProcess(async (whatsapp, processed) => {
+    // Works for all message types, including nfm_reply
+    await whatsapp.messages.markAsRead({ messageId: processed.messageId });
+  });
+  ```
 
-    ### Flow Response Support
+  ### Flow Response Support
 
-    Add support for WhatsApp Flow responses (`nfm_reply` message type):
-    - New `InteractiveNfmReplyMessage` type for Flow response messages
-    - Proper type definitions for Flow webhook data
+  Add support for WhatsApp Flow responses (`nfm_reply` message type):
+  - New `InteractiveNfmReplyMessage` type for Flow response messages
+  - Proper type definitions for Flow webhook data
 
-    ## Documentation
-    - Update README with comprehensive examples of specialized handlers
-    - Add examples showing messageId usage across different message types
-    - Document TypeScript discriminated union approach for type narrowing
+  ## Documentation
+  - Update README with comprehensive examples of specialized handlers
+  - Add examples showing messageId usage across different message types
+  - Document TypeScript discriminated union approach for type narrowing
 
 ## 1.4.1
 
 ### Patch Changes
 
 - 49d462f: Consolidate encryption utilities and clean up verbose logging
-    - Merge generateEncryption into flowEncryptionUtils for better code organization
-    - Remove duplicate encryption functions from webhookUtils
-    - Remove verbose debug logging from webhook processing
+  - Merge generateEncryption into flowEncryptionUtils for better code organization
+  - Remove duplicate encryption functions from webhookUtils
+  - Remove verbose debug logging from webhook processing
 
 - 49d462f: Add dedicated status handler with improved type system
 
-    **New Feature:**
-    - Add `onStatus(handler)` method to WebhookProcessor for handling status updates
-    - Introduce new types: `ProcessedMessage`, `ProcessedStatus`, `StatusHandler`
+  **New Feature:**
+  - Add `onStatus(handler)` method to WebhookProcessor for handling status updates
+  - Introduce new types: `ProcessedMessage`, `ProcessedStatus`, `StatusHandler`
 
-    **Breaking Change:**
-    - `MessageTypesEnum.Statuses` is now deprecated
-    - Using `onMessage(MessageTypesEnum.Statuses, handler)` will throw an error
-    - Migrate to `onStatus(handler)` for better type safety
+  **Breaking Change:**
+  - `MessageTypesEnum.Statuses` is now deprecated
+  - Using `onMessage(MessageTypesEnum.Statuses, handler)` will throw an error
+  - Migrate to `onStatus(handler)` for better type safety
 
-    **Migration:**
+  **Migration:**
 
-    ```typescript
-    // Before (deprecated)
-    processor.onMessage(MessageTypesEnum.Statuses, (whatsapp, message) => {
-        // handle status
-    });
+  ```typescript
+  // Before (deprecated)
+  processor.onMessage(MessageTypesEnum.Statuses, (whatsapp, message) => {
+    // handle status
+  });
 
-    // After (recommended)
-    processor.onStatus((whatsapp, processed) => {
-        // processed.status: StatusWebhook
-        console.log(processed.status);
-    });
-    ```
+  // After (recommended)
+  processor.onStatus((whatsapp, processed) => {
+    // processed.status: StatusWebhook
+    console.log(processed.status);
+  });
+  ```
 
 ## 1.4.0
 
@@ -355,84 +361,84 @@
 
 - bc8b13d: Add Conversational Automation API support for WhatsApp Business Phone Numbers
 
-    This release adds support for configuring conversational components on WhatsApp Business phone numbers:
-    - **Welcome Messages**: Configure automatic welcome messages for first-time users
-    - **Ice Breakers (Prompts)**: Set up to 4 tappable prompts (max 80 characters each) to help users start conversations
-    - **Commands**: Define up to 30 slash commands (max 32 chars name, 256 chars description) for easy user interactions
+  This release adds support for configuring conversational components on WhatsApp Business phone numbers:
+  - **Welcome Messages**: Configure automatic welcome messages for first-time users
+  - **Ice Breakers (Prompts)**: Set up to 4 tappable prompts (max 80 characters each) to help users start conversations
+  - **Commands**: Define up to 30 slash commands (max 32 chars name, 256 chars description) for easy user interactions
 
-    New API methods:
-    - `phoneNumber.setConversationalAutomation()` - Configure conversational components (POST)
-    - `phoneNumber.getConversationalAutomation()` - Retrieve current configuration (GET)
+  New API methods:
+  - `phoneNumber.setConversationalAutomation()` - Configure conversational components (POST)
+  - `phoneNumber.getConversationalAutomation()` - Retrieve current configuration (GET)
 
-    New TypeScript types:
-    - `ConversationalAutomationRequest` - Request payload for configuration
-    - `ConversationalAutomationResponse` - Response with current settings
-    - `ConversationalCommand` - Command configuration object
-    - `ConversationalPrompt` - Ice breaker prompt string
+  New TypeScript types:
+  - `ConversationalAutomationRequest` - Request payload for configuration
+  - `ConversationalAutomationResponse` - Response with current settings
+  - `ConversationalCommand` - Command configuration object
+  - `ConversationalPrompt` - Ice breaker prompt string
 
-    For more details, see: https://developers.facebook.com/docs/whatsapp/cloud-api/phone-numbers/conversational-components
+  For more details, see: https://developers.facebook.com/docs/whatsapp/cloud-api/phone-numbers/conversational-components
 
 ### Patch Changes
 
 - 34c7fc6: Add getThroughput API for phone number throughput monitoring
-    - Add `getThroughput()` method to PhoneNumberApi class
-    - Returns current throughput level (STANDARD, HIGH, or NOT_APPLICABLE)
-    - Add comprehensive unit tests for throughput API
-    - Add example file demonstrating throughput monitoring and eligibility checking
-    - Support for checking phone number messaging capacity (80 mps default, up to 1,000 mps)
+  - Add `getThroughput()` method to PhoneNumberApi class
+  - Returns current throughput level (STANDARD, HIGH, or NOT_APPLICABLE)
+  - Add comprehensive unit tests for throughput API
+  - Add example file demonstrating throughput monitoring and eligibility checking
+  - Support for checking phone number messaging capacity (80 mps default, up to 1,000 mps)
 
 - 8ccdaa4: Add block user API for managing blocked WhatsApp users
-    - Add `blockUsers` API with block, unblock, and list methods
-    - Support for blocking/unblocking users by phone number or WhatsApp ID
-    - Pagination support for listing blocked users
-    - Comprehensive unit tests and examples included
+  - Add `blockUsers` API with block, unblock, and list methods
+  - Support for blocking/unblocking users by phone number or WhatsApp ID
+  - Pagination support for listing blocked users
+  - Comprehensive unit tests and examples included
 
 - 8144883: Enhanced type exports for improved type inference in onMessage webhook handler
 
-    **Changes:**
-    - Exported all specific message type interfaces (TextMessage, ImageMessage, VideoMessage, etc.) from the main package
-    - Exported discriminated union types for webhook values (MessageWebhookValue, StatusWebhookValue, ErrorWebhookValue)
-    - Exported complete webhook payload types (WebhookValue, StatusWebhook, WebhookPayload)
+  **Changes:**
+  - Exported all specific message type interfaces (TextMessage, ImageMessage, VideoMessage, etc.) from the main package
+  - Exported discriminated union types for webhook values (MessageWebhookValue, StatusWebhookValue, ErrorWebhookValue)
+  - Exported complete webhook payload types (WebhookValue, StatusWebhook, WebhookPayload)
 
-    **Benefits:**
-    - Better TypeScript IntelliSense when working with `onMessage` callback parameters
-    - Proper type narrowing based on message type discriminators
-    - Users can now import and use specific message types for type annotations
-    - Improved developer experience with autocomplete for all message properties
+  **Benefits:**
+  - Better TypeScript IntelliSense when working with `onMessage` callback parameters
+  - Proper type narrowing based on message type discriminators
+  - Users can now import and use specific message types for type annotations
+  - Improved developer experience with autocomplete for all message properties
 
-    **Example:**
+  **Example:**
 
-    ```typescript
-    import { TextMessage, ImageMessage, WhatsAppMessage } from 'meta-cloud-api';
+  ```typescript
+  import { TextMessage, ImageMessage, WhatsAppMessage } from "meta-cloud-api";
 
-    client.onMessage((message: WhatsAppMessage) => {
-        if (message.type === 'text') {
-            // TypeScript now knows this is a TextMessage
-            console.log(message.text.body);
-        } else if (message.type === 'image') {
-            // TypeScript now knows this is an ImageMessage
-            console.log(message.image.id);
-        }
-    });
-    ```
+  client.onMessage((message: WhatsAppMessage) => {
+    if (message.type === "text") {
+      // TypeScript now knows this is a TextMessage
+      console.log(message.text.body);
+    } else if (message.type === "image") {
+      // TypeScript now knows this is an ImageMessage
+      console.log(message.image.id);
+    }
+  });
+  ```
 
-    **Migration:**
-    No breaking changes - existing code continues to work. The new exports simply provide better type support for developers who want explicit type annotations.
+  **Migration:**
+  No breaking changes - existing code continues to work. The new exports simply provide better type support for developers who want explicit type annotations.
 
 - 82665d1: remove builder pattern for ease
 - 0ebca06: Improve webhook types based on WhatsApp official documentation
 
-    **Changes:**
-    - Added discriminated union types for webhook values (MessageWebhookValue, StatusWebhookValue, ErrorWebhookValue)
-    - Added specific message type interfaces for all WhatsApp message types (Text, Image, Video, Audio, Document, Sticker, Interactive, Button, Location, Contacts, Reaction, Order, System, Unsupported)
-    - Added context types for forwarded messages, product inquiries, and interactive replies (ForwardedContext, ProductContext, ReplyContext)
-    - Added Click to WhatsApp ad referral tracking support (ReferralInfo)
-    - Added support for group messages with group_id field
-    - Added Unsupported message type to MessageTypesEnum
-    - Interactive messages now properly discriminated between list_reply and button_reply
+  **Changes:**
+  - Added discriminated union types for webhook values (MessageWebhookValue, StatusWebhookValue, ErrorWebhookValue)
+  - Added specific message type interfaces for all WhatsApp message types (Text, Image, Video, Audio, Document, Sticker, Interactive, Button, Location, Contacts, Reaction, Order, System, Unsupported)
+  - Added context types for forwarded messages, product inquiries, and interactive replies (ForwardedContext, ProductContext, ReplyContext)
+  - Added Click to WhatsApp ad referral tracking support (ReferralInfo)
+  - Added support for group messages with group_id field
+  - Added Unsupported message type to MessageTypesEnum
+  - Interactive messages now properly discriminated between list_reply and button_reply
 
-    **Migration:**
-    No changes required - existing code continues to work as before. The new types provide better IntelliSense and type checking internally.
+  **Migration:**
+  No changes required - existing code continues to work as before. The new types provide better IntelliSense and type checking internally.
 
 ## 1.3.0
 
@@ -440,141 +446,147 @@
 
 - 6c8d8df: # Flow Webhook Handler Enhancements
 
-    ## 🎯 Major Features
+  ## 🎯 Major Features
 
-    ### Flow Type-Specific Handler Registration
+  ### Flow Type-Specific Handler Registration
 
-    Introduced granular Flow webhook handler registration with support for three distinct flow types:
-    - **Ping (Health Check)**: Automatic endpoint health verification from WhatsApp
-    - **Error Notification**: Error notifications from WhatsApp client
-    - **Data Exchange**: Interactive flow data exchanges with end users
+  Introduced granular Flow webhook handler registration with support for three distinct flow types:
+  - **Ping (Health Check)**: Automatic endpoint health verification from WhatsApp
+  - **Error Notification**: Error notifications from WhatsApp client
+  - **Data Exchange**: Interactive flow data exchanges with end users
 
-    Users can now register handlers for specific flow types using `FlowTypeEnum.Ping`, `FlowTypeEnum.Error`, and `FlowTypeEnum.Change`, enabling more organized and maintainable code structure.
+  Users can now register handlers for specific flow types using `FlowTypeEnum.Ping`, `FlowTypeEnum.Error`, and `FlowTypeEnum.Change`, enabling more organized and maintainable code structure.
 
-    ### Automatic Default Handlers for Ping and Error
+  ### Automatic Default Handlers for Ping and Error
 
-    Ping and Error handlers are now **automatically handled by default** if not explicitly registered. This significantly reduces boilerplate code - users only need to register the `FlowTypeEnum.Change` handler for their business logic. The library automatically returns standard-compliant responses for Ping and Error requests, while still allowing custom handlers to be registered when needed.
+  Ping and Error handlers are now **automatically handled by default** if not explicitly registered. This significantly reduces boilerplate code - users only need to register the `FlowTypeEnum.Change` handler for their business logic. The library automatically returns standard-compliant responses for Ping and Error requests, while still allowing custom handlers to be registered when needed.
 
-    ### TypeScript Type Safety Improvements
+  ### TypeScript Type Safety Improvements
 
-    Eliminated all `any` types from webhook handlers, replacing them with explicit `WebhookResponse` return types:
-    - `handleGet`, `handlePost`, and `handleFlow` now return `Promise<WebhookResponse>`
-    - Improved error handling with proper type propagation
-    - Better IntelliSense and compile-time type checking
+  Eliminated all `any` types from webhook handlers, replacing them with explicit `WebhookResponse` return types:
+  - `handleGet`, `handlePost`, and `handleFlow` now return `Promise<WebhookResponse>`
+  - Improved error handling with proper type propagation
+  - Better IntelliSense and compile-time type checking
 
-    ## 🏗️ Breaking Changes
+  ## 🏗️ Breaking Changes
 
-    ### Framework Handler Naming Clarification
+  ### Framework Handler Naming Clarification
 
-    Renamed framework-specific handlers for better clarity:
-    - `nextjsWebhookHandler` → `nextjsPagesWebhookHandler` (Next.js Pages Router)
-    - `nextjsAppWebhookHandler` remains unchanged (Next.js App Router)
-    - `expressWebhookHandler` remains unchanged
+  Renamed framework-specific handlers for better clarity:
+  - `nextjsWebhookHandler` → `nextjsPagesWebhookHandler` (Next.js Pages Router)
+  - `nextjsAppWebhookHandler` remains unchanged (Next.js App Router)
+  - `expressWebhookHandler` remains unchanged
 
-    **Migration:**
+  **Migration:**
 
-    ```typescript
-    // Before
-    import { nextjsWebhookHandler } from 'meta-cloud-api';
+  ```typescript
+  // Before
+  import { nextjsWebhookHandler } from "meta-cloud-api";
 
-    // After
-    import { nextjsPagesWebhookHandler } from 'meta-cloud-api';
-    ```
+  // After
+  import { nextjsPagesWebhookHandler } from "meta-cloud-api";
+  ```
 
-    ### Removed Backward Compatibility Aliases
+  ### Removed Backward Compatibility Aliases
 
-    Removed `webhookHandler` aliases from all framework handlers to prevent confusion. Each framework now has a single, explicit handler name.
+  Removed `webhookHandler` aliases from all framework handlers to prevent confusion. Each framework now has a single, explicit handler name.
 
-    ### Internal-Only Type Guards
+  ### Internal-Only Type Guards
 
-    Removed public exports of flow type guard functions (`isFlowPingRequest`, `isFlowErrorRequest`, `isFlowDataExchangeRequest`). These are now internal implementation details as the library automatically handles flow type detection.
+  Removed public exports of flow type guard functions (`isFlowPingRequest`, `isFlowErrorRequest`, `isFlowDataExchangeRequest`). These are now internal implementation details as the library automatically handles flow type detection.
 
-    ## 🐛 Bug Fixes
+  ## 🐛 Bug Fixes
 
-    ### Next.js API Handler Return Value Fix
+  ### Next.js API Handler Return Value Fix
 
-    Fixed "API handler should not return a value" error in Next.js Pages Router. Handlers now properly send responses without returning values, conforming to Next.js API route specifications.
+  Fixed "API handler should not return a value" error in Next.js Pages Router. Handlers now properly send responses without returning values, conforming to Next.js API route specifications.
 
-    ### Improved Error Handling
+  ### Improved Error Handling
 
-    Enhanced error handling across all webhook handlers:
-    - Properly throw errors instead of returning response objects in catch blocks
-    - Added response sending before throwing to ensure clients receive error responses
-    - Consistent error response format across all frameworks
+  Enhanced error handling across all webhook handlers:
+  - Properly throw errors instead of returning response objects in catch blocks
+  - Added response sending before throwing to ensure clients receive error responses
+  - Consistent error response format across all frameworks
 
-    ## 🧹 Code Quality Improvements
+  ## 🧹 Code Quality Improvements
 
-    ### Removed Debug Logging
+  ### Removed Debug Logging
 
-    Cleaned up all `console.log` statements from production code, reducing noise in production environments while maintaining proper error logging through the Logger utility.
+  Cleaned up all `console.log` statements from production code, reducing noise in production environments while maintaining proper error logging through the Logger utility.
 
-    ### Directory Structure Reorganization
+  ### Directory Structure Reorganization
 
-    Renamed internal directory structure for consistency:
-    - `src/core/webhook/frameworks/nextjs/` → `src/core/webhook/frameworks/nextjs-page/`
-    - Corresponding file renames: `nextjs.ts` → `nextjs-page.ts`
+  Renamed internal directory structure for consistency:
+  - `src/core/webhook/frameworks/nextjs/` → `src/core/webhook/frameworks/nextjs-page/`
+  - Corresponding file renames: `nextjs.ts` → `nextjs-page.ts`
 
-    ## 📝 Developer Experience Improvements
+  ## 📝 Developer Experience Improvements
 
-    ### Simplified Flow Handler Registration
+  ### Simplified Flow Handler Registration
 
-    **Before:**
+  **Before:**
 
-    ```typescript
-    flowHandler.processor.onFlow(FlowTypeEnum.Ping, createFlowPingResponse);
-    flowHandler.processor.onFlow(FlowTypeEnum.Error, createFlowErrorResponse);
-    flowHandler.processor.onFlow(FlowTypeEnum.Change, async (_whatsapp, request) => {
-        // Custom logic
-    });
-    ```
+  ```typescript
+  flowHandler.processor.onFlow(FlowTypeEnum.Ping, createFlowPingResponse);
+  flowHandler.processor.onFlow(FlowTypeEnum.Error, createFlowErrorResponse);
+  flowHandler.processor.onFlow(
+    FlowTypeEnum.Change,
+    async (_whatsapp, request) => {
+      // Custom logic
+    },
+  );
+  ```
 
-    **After:**
+  **After:**
 
-    ```typescript
-    // Ping and Error are automatically handled!
-    flowHandler.processor.onFlow(FlowTypeEnum.Change, async (_whatsapp, request) => {
-        // Only implement your business logic
-    });
-    ```
+  ```typescript
+  // Ping and Error are automatically handled!
+  flowHandler.processor.onFlow(
+    FlowTypeEnum.Change,
+    async (_whatsapp, request) => {
+      // Only implement your business logic
+    },
+  );
+  ```
 
-    ### Cleaner Imports
+  ### Cleaner Imports
 
-    Reduced necessary imports:
+  Reduced necessary imports:
 
-    ```typescript
-    // Before
-    import {
-        createFlowErrorResponse,
-        createFlowPingResponse,
-        isFlowPingRequest,
-        isFlowErrorRequest,
-        nextjsWebhookHandler,
-    } from 'meta-cloud-api';
+  ```typescript
+  // Before
+  import {
+    createFlowErrorResponse,
+    createFlowPingResponse,
+    isFlowPingRequest,
+    isFlowErrorRequest,
+    nextjsWebhookHandler,
+  } from "meta-cloud-api";
 
-    // After
-    import { nextjsPagesWebhookHandler } from 'meta-cloud-api';
-    ```
+  // After
+  import { nextjsPagesWebhookHandler } from "meta-cloud-api";
+  ```
 
-    ## 🔄 Handler Priority Logic
+  ## 🔄 Handler Priority Logic
 
-    Refined handler selection priority for better predictability:
+  Refined handler selection priority for better predictability:
 
-    **For Ping and Error types:**
-    1. Use registered specific handler if available
-    2. Fallback to automatic default handler (does NOT fallback to `All` handler)
+  **For Ping and Error types:**
+  1. Use registered specific handler if available
+  2. Fallback to automatic default handler (does NOT fallback to `All` handler)
 
-    **For Data Exchange (Change) type:**
-    1. Use registered `Change` handler if available
-    2. Fallback to `All` handler
-    3. Return 404 if no handler found
+  **For Data Exchange (Change) type:**
+  1. Use registered `Change` handler if available
+  2. Fallback to `All` handler
+  3. Return 404 if no handler found
 
-    This ensures Ping and Error always receive proper responses while giving developers flexibility for data exchange handling.
+  This ensures Ping and Error always receive proper responses while giving developers flexibility for data exchange handling.
 
-    ## 📦 Internal Improvements
-    - Enhanced type safety throughout the webhook processing pipeline
-    - Improved code organization and readability
-    - Better separation of concerns between framework-specific and core logic
-    - Consistent error handling patterns across all implementations
+  ## 📦 Internal Improvements
+  - Enhanced type safety throughout the webhook processing pipeline
+  - Improved code organization and readability
+  - Better separation of concerns between framework-specific and core logic
+  - Consistent error handling patterns across all implementations
 
 ## 1.2.0
 
