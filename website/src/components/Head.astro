@@ -1,11 +1,15 @@
 ---
 import StarlightHead from '@astrojs/starlight/components/Head.astro';
 import type { Props } from '@astrojs/starlight/props';
+import Analytics from '@vercel/analytics/astro';
+import SpeedInsights from '@vercel/speed-insights/astro';
 
 const gaId = import.meta.env.PUBLIC_GA_ID;
 ---
 
 <StarlightHead {...Astro.props} />
+<Analytics />
+<SpeedInsights />
 
 {/* JetBrains Mono for terminal-style code blocks */}
 <link rel="preconnect" href="https://fonts.googleapis.com" />
