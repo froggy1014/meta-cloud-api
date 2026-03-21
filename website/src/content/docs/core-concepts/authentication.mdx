@@ -1,0 +1,221 @@
+---
+title: "Authentication"
+description: "Setting up access tokens and credentials for the WhatsApp Cloud API"
+---
+
+All requests to the WhatsApp Cloud API require authentication via an access token. This guide covers how to configure credentials, manage tokens securely, and handle token rotation.
+
+## Required Credentials
+
+To use the SDK, you need three pieces of information from the [Meta for Developers](https://developers.facebook.com/) dashboard:
+
+| Credential | Description | Where to find |
+|---|---|---|
+| **Access Token** | Bearer token for API authentication | App Dashboard > WhatsApp > API Setup |
+| **Phone Number ID** | Numeric ID of your WhatsApp business phone number | App Dashboard > WhatsApp > API Setup |
+| **Business Account ID** | Your WhatsApp Business Account (WABA) ID | App Dashboard > WhatsApp > API Setup |
+
+## Basic Configuration
+
+Pass credentials directly when creating the client:
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID!),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID!,
+});
+```
+
+## Environment Variables
+
+The SDK automatically reads from environment variables when constructor arguments are omitted. Set these in your `.env` file:
+
+```bash
+# .env
+CLOUD_API_ACCESS_TOKEN=EAABx...your-token
+WA_PHONE_NUMBER_ID=123456789012345
+WA_BUSINESS_ACCOUNT_ID=987654321098765
+```
+
+Then instantiate without arguments:
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+// Reads from environment variables automatically
+const client = new WhatsApp();
+```
+
+### Full Configuration Options
+
+The SDK supports additional environment variables for advanced use cases:
+
+```bash
+# Required
+CLOUD_API_ACCESS_TOKEN=EAABx...
+WA_PHONE_NUMBER_ID=123456789012345
+WA_BUSINESS_ACCOUNT_ID=987654321098765
+
+# Optional
+CLOUD_API_VERSION=v21.0              # API version (default: latest stable)
+WA_LISTENER_PORT=3000                 # Webhook listener port
+WEBHOOK_ENDPOINT=/webhook             # Webhook endpoint path
+WEBHOOK_VERIFICATION_TOKEN=my-secret  # Webhook verification token
+REQUEST_TIMEOUT=10000                 # Request timeout in ms
+DEBUG=true                            # Enable verbose logging
+```
+
+## Token Types
+
+Meta provides two types of access tokens:
+
+### Temporary Tokens
+
+Generated from the App Dashboard. These are useful for development and testing but **expire after 24 hours**.
+
+```typescript
+const client = new WhatsApp({
+    accessToken: 'EAABx...temporary-token',
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+});
+```
+
+### System User Tokens
+
+For production, create a **System User** in Meta Business Suite and generate a permanent token. These do not expire and are suitable for server-to-server communication.
+
+1. Go to [Meta Business Suite](https://business.facebook.com/settings/system-users)
+2. Create a System User with the **Admin** role
+3. Click **Generate New Token**
+4. Select your app and grant the `whatsapp_business_messaging` and `whatsapp_business_management` permissions
+5. Copy the token and store it securely
+
+## Token Rotation
+
+The SDK supports runtime token updates, which is essential for rotating tokens without restarting your application:
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+});
+
+// Later, rotate the token without creating a new client
+client.updateAccessToken('new-access-token');
+```
+
+### Automated Token Refresh
+
+For temporary tokens, you can implement automatic refresh using Meta's OAuth endpoint:
+
+```typescript
+async function refreshAccessToken(
+    appId: string,
+    appSecret: string,
+    existingToken: string,
+): Promise<string> {
+    const response = await fetch(
+        `https://graph.facebook.com/oauth/access_token` +
+        `?grant_type=fb_exchange_token` +
+        `&client_id=${appId}` +
+        `&client_secret=${appSecret}` +
+        `&fb_exchange_token=${existingToken}`
+    );
+
+    const data = await response.json();
+    return data.access_token;
+}
+
+// Refresh on a schedule
+setInterval(async () => {
+    const newToken = await refreshAccessToken(
+        process.env.APP_ID!,
+        process.env.APP_SECRET!,
+        currentToken,
+    );
+    client.updateAccessToken(newToken);
+    currentToken = newToken;
+}, 60 * 60 * 1000); // Every hour
+```
+
+## Multi-Tenant Setup
+
+If your application manages multiple WhatsApp Business Accounts, you can create separate client instances or switch credentials at runtime:
+
+```typescript
+// Option 1: Separate clients per tenant
+const clients = new Map<string, WhatsApp>();
+
+function getClient(tenantId: string, token: string, phoneNumberId: number) {
+    if (!clients.has(tenantId)) {
+        clients.set(tenantId, new WhatsApp({
+            accessToken: token,
+            phoneNumberId,
+            businessAcctId: tenantId,
+        }));
+    }
+    return clients.get(tenantId)!;
+}
+
+// Option 2: Switch sender on a single client
+client.updateAccessToken(tenantToken);
+client.updateSenderNumberId(tenantPhoneNumberId);
+```
+
+## Security Best Practices
+
+1. **Never commit tokens to source control.** Use `.env` files (added to `.gitignore`) or a secrets manager.
+
+2. **Use System User tokens in production.** Temporary tokens expire and will cause outages.
+
+3. **Restrict token permissions.** Only grant `whatsapp_business_messaging` and `whatsapp_business_management` -- nothing more.
+
+4. **Rotate tokens periodically.** Even permanent tokens should be rotated as part of your security policy.
+
+5. **Use environment-specific tokens.** Separate tokens for development, staging, and production.
+
+6. **Store tokens in a secrets manager.** Use AWS Secrets Manager, GCP Secret Manager, HashiCorp Vault, or similar services instead of plain environment variables in production.
+
+```typescript
+// Example: Loading token from AWS Secrets Manager
+import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
+
+const secretsClient = new SecretsManagerClient({ region: 'us-east-1' });
+
+async function getAccessToken(): Promise<string> {
+    const command = new GetSecretValueCommand({
+        SecretId: 'whatsapp/access-token',
+    });
+    const response = await secretsClient.send(command);
+    return response.SecretString!;
+}
+
+const token = await getAccessToken();
+const client = new WhatsApp({
+    accessToken: token,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+});
+```
+
+## Webhook Verification
+
+In addition to API authentication, webhook endpoints require a separate verification token to confirm ownership:
+
+```typescript
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+    webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN,
+});
+```
+
+This token is used during the webhook subscription handshake. Meta sends a `GET` request with a `hub.verify_token` parameter, and your server must respond with the `hub.challenge` value only if the token matches. See the [Webhooks guide](/guides/webhooks) for full setup details.

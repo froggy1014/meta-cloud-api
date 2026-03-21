@@ -1,3 +1,4 @@
+import react from '@astrojs/react';
 import sitemap from '@astrojs/sitemap';
 import starlight from '@astrojs/starlight';
 import { defineConfig } from 'astro/config';
@@ -6,6 +7,7 @@ import { defineConfig } from 'astro/config';
 export default defineConfig({
     site: 'https://meta-cloud-api.xyz',
     integrations: [
+        react(),
         sitemap(),
         starlight({
             title: 'meta-cloud-api',
@@ -31,8 +33,50 @@ export default defineConfig({
                     ],
                 },
                 {
+                    label: 'Core Concepts',
+                    items: [
+                        { label: 'Architecture', link: '/core-concepts/architecture' },
+                        { label: 'Authentication', link: '/core-concepts/authentication' },
+                        { label: 'Error Handling', link: '/core-concepts/error-handling' },
+                    ],
+                },
+                {
                     label: 'API Reference',
-                    autogenerate: { directory: 'api' },
+                    collapsed: true,
+                    items: [
+                        {
+                            label: 'Messaging',
+                            items: [
+                                { label: 'Messages', link: '/api/messages' },
+                                { label: 'Media', link: '/api/media' },
+                                { label: 'Templates', link: '/api/templates' },
+                                { label: 'Marketing Messages', link: '/api/marketing-messages' },
+                            ],
+                        },
+                        {
+                            label: 'Account',
+                            items: [
+                                { label: 'Phone Numbers', link: '/api/phone-numbers' },
+                                { label: 'Registration', link: '/api/registration' },
+                                { label: 'Two-Step Verification', link: '/api/two-step-verification' },
+                                { label: 'Business Profile', link: '/api/business-profile' },
+                                { label: 'WABA', link: '/api/waba' },
+                            ],
+                        },
+                        {
+                            label: 'Advanced',
+                            items: [
+                                { label: 'Flows', link: '/api/flows' },
+                                { label: 'Groups', link: '/api/groups' },
+                                { label: 'Calling', link: '/api/calling' },
+                                { label: 'QR Codes', link: '/api/qr-codes' },
+                                { label: 'Commerce Settings', link: '/api/commerce-settings' },
+                                { label: 'Payments', link: '/api/payments' },
+                                { label: 'Block Users', link: '/api/block-users' },
+                                { label: 'Encryption', link: '/api/encryption' },
+                            ],
+                        },
+                    ],
                 },
                 {
                     label: 'Webhooks',
@@ -43,6 +87,21 @@ export default defineConfig({
                     autogenerate: { directory: 'guides' },
                 },
                 {
+                    label: 'Use Cases',
+                    items: [
+                        { label: 'Customer Support Bot', link: '/use-cases/customer-support' },
+                        { label: 'E-Commerce', link: '/use-cases/ecommerce' },
+                        { label: 'Marketing Campaigns', link: '/use-cases/marketing' },
+                        { label: 'Appointment Booking', link: '/use-cases/appointment-booking' },
+                    ],
+                },
+                {
+                    label: 'Playground',
+                    items: [
+                        { label: 'Try the SDK', link: '/playground', attrs: { target: '_blank' } },
+                    ],
+                },
+                {
                     label: 'Type Reference',
                     autogenerate: { directory: 'types' },
                 },
@@ -51,8 +110,7 @@ export default defineConfig({
             components: {
                 Head: './src/components/Head.astro',
                 Header: './src/components/Header.astro',
-                ThemeSelect: './src/components/ThemeSelect.astro',
-                ThemeProvider: './src/components/ThemeProvider.astro',
+                Hero: './src/components/Hero.astro',
             },
         }),
     ],

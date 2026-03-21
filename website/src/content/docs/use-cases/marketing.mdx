@@ -1,0 +1,268 @@
+---
+title: "Marketing Campaigns"
+description: "Run targeted marketing campaigns through WhatsApp"
+---
+
+## What You'll Build
+
+A marketing campaign system that sends targeted promotional messages to opted-in customers, manages opt-in/opt-out preferences, tracks delivery metrics, and respects WhatsApp's messaging policies. The system uses template messages for outbound campaigns and webhook processing for engagement tracking.
+
+## Architecture
+
+The data flow works as follows:
+
+1. You create and submit marketing templates for Meta approval via the Templates API.
+2. Once approved, your campaign system selects a target audience from your subscriber list.
+3. Template messages are sent to each opted-in customer with personalized parameters.
+4. Webhook status events track sent, delivered, read, and failed states for each message.
+5. Customers can opt out by replying with a keyword, which your webhook handler processes.
+6. Campaign analytics are collected from delivery and read receipt webhooks.
+
+## Step-by-Step Implementation
+
+### 1. Initialize the SDK
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+import { ComponentTypesEnum, LanguagesEnum, ParametersTypesEnum } from 'meta-cloud-api/enums';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID!,
+});
+```
+
+### 2. Create a Marketing Template
+
+Before sending campaigns, create and submit a template for approval.
+
+```typescript
+async function createCampaignTemplate() {
+    const result = await client.templates.createTemplate({
+        name: 'seasonal_promo',
+        category: 'MARKETING',
+        language: 'en_US',
+        components: [
+            {
+                type: 'HEADER',
+                format: 'IMAGE',
+            },
+            {
+                type: 'BODY',
+                text: 'Hi {{1}}, our {{2}} sale is live! Get up to {{3}} off your favorite items. Shop now before it ends on {{4}}.',
+            },
+            {
+                type: 'FOOTER',
+                text: 'Reply STOP to unsubscribe',
+            },
+            {
+                type: 'BUTTONS',
+                buttons: [
+                    { type: 'URL', text: 'Shop Now', url: 'https://shop.example.com/sale?ref={{1}}' },
+                ],
+            },
+        ],
+    });
+
+    console.log('Template created:', result.id);
+    return result;
+}
+```
+
+### 3. Define Campaign and Subscriber Types
+
+```typescript
+interface Subscriber {
+    phone: string;
+    name: string;
+    optedIn: boolean;
+    language: string;
+}
+
+interface Campaign {
+    id: string;
+    templateName: string;
+    parameters: {
+        saleName: string;
+        discount: string;
+        endDate: string;
+    };
+    imageUrl: string;
+    subscribers: Subscriber[];
+}
+```
+
+### 4. Send Campaign Messages
+
+Send personalized template messages to all opted-in subscribers with rate limiting.
+
+```typescript
+interface CampaignResult {
+    sent: number;
+    failed: number;
+    skipped: number;
+    errors: Array<{ phone: string; error: string }>;
+}
+
+async function sendCampaign(campaign: Campaign): Promise<CampaignResult> {
+    const result: CampaignResult = { sent: 0, failed: 0, skipped: 0, errors: [] };
+
+    const activeSubscribers = campaign.subscribers.filter(s => s.optedIn);
+    result.skipped = campaign.subscribers.length - activeSubscribers.length;
+
+    for (const subscriber of activeSubscribers) {
+        try {
+            await client.messages.template({
+                to: subscriber.phone,
+                template: {
+                    name: campaign.templateName,
+                    language: { code: LanguagesEnum.English_US },
+                    components: [
+                        {
+                            type: ComponentTypesEnum.Header,
+                            parameters: [
+                                { type: 'image', image: { link: campaign.imageUrl } },
+                            ],
+                        },
+                        {
+                            type: ComponentTypesEnum.Body,
+                            parameters: [
+                                { type: ParametersTypesEnum.Text, text: subscriber.name },
+                                { type: ParametersTypesEnum.Text, text: campaign.parameters.saleName },
+                                { type: ParametersTypesEnum.Text, text: campaign.parameters.discount },
+                                { type: ParametersTypesEnum.Text, text: campaign.parameters.endDate },
+                            ],
+                        },
+                    ],
+                },
+            });
+            result.sent++;
+        } catch (error) {
+            result.failed++;
+            result.errors.push({ phone: subscriber.phone, error: String(error) });
+        }
+
+        // Rate limit: pause between messages to avoid throttling
+        await new Promise(resolve => setTimeout(resolve, 100));
+    }
+
+    return result;
+}
+```
+
+### 5. Handle Opt-Out via Webhooks
+
+Process incoming messages to manage subscription preferences.
+
+```typescript
+import express from 'express';
+
+const app = express();
+app.use(express.json());
+
+const OPT_OUT_KEYWORDS = ['stop', 'unsubscribe', 'opt out', 'cancel'];
+const OPT_IN_KEYWORDS = ['start', 'subscribe', 'opt in'];
+
+app.post('/webhook', async (req, res) => {
+    res.sendStatus(200);
+
+    const entry = req.body.entry?.[0];
+    const change = entry?.changes?.[0]?.value;
+    const message = change?.messages?.[0];
+    const status = change?.statuses?.[0];
+
+    // Handle opt-in/opt-out messages
+    if (message?.type === 'text') {
+        const text = message.text.body.toLowerCase().trim();
+        const from = message.from;
+
+        if (OPT_OUT_KEYWORDS.includes(text)) {
+            await unsubscribeUser(from);
+            await client.messages.text({
+                to: from,
+                body: 'You have been unsubscribed from marketing messages. Reply START to re-subscribe anytime.',
+            });
+        } else if (OPT_IN_KEYWORDS.includes(text)) {
+            await subscribeUser(from);
+            await client.messages.text({
+                to: from,
+                body: 'Welcome back! You are now subscribed to our updates and promotions.',
+            });
+        }
+    }
+
+    // Track delivery metrics
+    if (status) {
+        await trackDeliveryStatus(status.id, status.status, status.recipient_id);
+    }
+});
+```
+
+### 6. Track Campaign Delivery Metrics
+
+Collect analytics from status webhooks.
+
+```typescript
+interface DeliveryMetrics {
+    messageId: string;
+    recipient: string;
+    status: 'sent' | 'delivered' | 'read' | 'failed';
+    timestamp: Date;
+}
+
+const metrics: DeliveryMetrics[] = [];
+
+async function trackDeliveryStatus(messageId: string, status: string, recipient: string) {
+    metrics.push({
+        messageId,
+        recipient,
+        status: status as DeliveryMetrics['status'],
+        timestamp: new Date(),
+    });
+}
+
+function getCampaignReport(): { sent: number; delivered: number; read: number; failed: number } {
+    return {
+        sent: metrics.filter(m => m.status === 'sent').length,
+        delivered: metrics.filter(m => m.status === 'delivered').length,
+        read: metrics.filter(m => m.status === 'read').length,
+        failed: metrics.filter(m => m.status === 'failed').length,
+    };
+}
+
+// Placeholder functions for subscriber management
+async function unsubscribeUser(phone: string) {
+    // Update your database: set opted_in = false for this phone number
+    console.log(`Unsubscribed: ${phone}`);
+}
+
+async function subscribeUser(phone: string) {
+    // Update your database: set opted_in = true for this phone number
+    console.log(`Subscribed: ${phone}`);
+}
+
+app.listen(3000, () => console.log('Marketing service running on port 3000'));
+```
+
+## Complete Code Example
+
+The system above provides a full marketing campaign workflow:
+
+1. **Template creation** with header image, personalized body, footer, and CTA button
+2. **Targeted sending** to opted-in subscribers only, with rate limiting
+3. **Opt-in/opt-out management** via keyword detection in webhook messages
+4. **Delivery tracking** using status webhooks for sent, delivered, read, and failed states
+5. **Campaign reporting** with aggregated delivery metrics
+
+Key SDK methods used:
+
+- `client.templates.createTemplate()` for creating marketing templates
+- `client.messages.template()` for sending personalized campaign messages
+- `client.messages.text()` for opt-in/opt-out confirmation replies
+
+## Next Steps
+
+- [Templates API](/api/templates) -- create, manage, and monitor template approval status
+- [Messages API](/api/messages) -- full reference for template message parameters
+- [Webhook Overview](/webhooks/overview) -- understand status events for delivery tracking

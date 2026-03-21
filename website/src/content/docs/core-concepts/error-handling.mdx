@@ -1,0 +1,277 @@
+---
+title: "Error Handling"
+description: "Handling API errors, retries, and edge cases"
+---
+
+Understanding how the WhatsApp Cloud API reports errors is essential for building reliable integrations. This page covers the error response format, common error codes, classification strategies, and retry patterns.
+
+**Official Reference**: [WhatsApp Cloud API Error Codes](https://developers.facebook.com/docs/whatsapp/cloud-api/support/error-codes)
+
+## Error Response Format
+
+All errors from the WhatsApp Cloud API follow a consistent JSON structure:
+
+```json
+{
+    "error": {
+        "message": "Message failed to send because more than 24 hours have passed since the customer last replied.",
+        "type": "OAuthException",
+        "code": 131047,
+        "error_subcode": 2388001,
+        "fbtrace_id": "ABC123XYZ456"
+    }
+}
+```
+
+| Field | Description |
+|---|---|
+| `message` | Human-readable description of the error |
+| `type` | Error type, usually `OAuthException` |
+| `code` | Primary error code |
+| `error_subcode` | More specific sub-code (not always present) |
+| `fbtrace_id` | Trace ID for Meta support requests |
+
+## Common Error Codes
+
+### Authentication Errors
+
+| Code | Description | Resolution |
+|---|---|---|
+| 100 | Invalid parameter / missing access token | Check that the access token is set and valid |
+| 190 | Access token has expired | Refresh or rotate the token (see [Authentication](/core-concepts/authentication)) |
+
+### Rate Limiting
+
+| Code | Description | Resolution |
+|---|---|---|
+| 130429 | Rate limit hit | Back off and retry with exponential delay |
+| 4 | Application-level throttling | Reduce request frequency |
+
+### Message Errors
+
+| Code | Subcode | Description | Resolution |
+|---|---|---|---|
+| 131047 | 2388001 | 24-hour messaging window expired | Send a template message to re-open the window |
+| 131031 | 2388003 | Message failed to send | Verify the recipient phone number |
+| 131053 | -- | Template does not exist | Create the template in Meta Business Suite first |
+| 133016 | 131051 | Unsupported message type | Check API version compatibility |
+
+### Media Errors
+
+| Code | Subcode | Description | Resolution |
+|---|---|---|---|
+| 131026 | 2388082 | Media upload failed | Check file format, size (max 16 MB for most types), and URL accessibility |
+
+### Server Errors
+
+| Code | Description | Resolution |
+|---|---|---|
+| 500+ | Internal server error on Meta's side | Retry with backoff -- these are transient |
+
+## Classifying Errors
+
+Not all errors should be treated the same. Categorizing errors helps you decide whether to retry, alert, or take corrective action:
+
+```typescript
+function classifyError(code: number, subcode?: number) {
+    // Authentication -- do not retry, fix credentials
+    if (code === 100 || code === 190) return 'authentication';
+
+    // Rate limiting -- retry after backoff
+    if (code === 130429 || code === 4) return 'rate_limit';
+
+    // Business policy -- do not retry, change approach
+    if (code === 131047) return 'business_policy';
+
+    // Invalid input -- do not retry, fix the request
+    if (code === 131031 || code === 131051 || code === 131053) return 'invalid_input';
+
+    // Media errors -- may be retryable
+    if (code === 131026) return 'media_error';
+
+    // Server errors -- retry with backoff
+    if (code >= 500) return 'server_error';
+
+    return 'unknown';
+}
+```
+
+The key distinction: **retryable** errors (rate limits, server errors, transient network issues) should trigger automatic retries, while **non-retryable** errors (authentication, invalid input, policy violations) need human or programmatic correction.
+
+## Basic Error Handling
+
+Wrap SDK calls in try/catch and inspect the error response:
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+});
+
+try {
+    const response = await client.messages.text({
+        to: '15551234567',
+        body: 'Hello!',
+    });
+    console.log('Message sent:', response.messages[0].id);
+} catch (error: any) {
+    const apiError = error.response?.data?.error;
+
+    if (apiError) {
+        console.error(`API Error [${apiError.code}]: ${apiError.message}`);
+        console.error(`Trace ID: ${apiError.fbtrace_id}`);
+    } else if (error.request) {
+        // Network error -- no response received
+        console.error('Network error:', error.message);
+    } else {
+        console.error('Unexpected error:', error.message);
+    }
+}
+```
+
+## Retry with Exponential Backoff
+
+For retryable errors, implement exponential backoff to avoid overwhelming the API:
+
+```typescript
+async function withRetry<T>(
+    fn: () => Promise<T>,
+    maxRetries = 3,
+    initialDelay = 1000,
+): Promise<T> {
+    let lastError: any;
+
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+            return await fn();
+        } catch (error: any) {
+            lastError = error;
+            const code = error.response?.data?.error?.code;
+
+            // Do not retry non-retryable errors
+            if (code === 100 || code === 190 || code === 131047) {
+                throw error;
+            }
+
+            if (attempt < maxRetries) {
+                const delay = initialDelay * Math.pow(2, attempt);
+                const jitter = delay * 0.2 * (Math.random() * 2 - 1);
+                await new Promise(r => setTimeout(r, delay + jitter));
+            }
+        }
+    }
+
+    throw lastError;
+}
+
+// Usage
+const response = await withRetry(
+    () => client.messages.text({ to: '15551234567', body: 'Hello!' }),
+    3,     // max retries
+    1000,  // start with 1s delay
+);
+```
+
+## Rate Limit Handling
+
+The WhatsApp Cloud API enforces rate limits per phone number. When you hit a limit (code `130429`), the response may include a `Retry-After` header:
+
+```typescript
+try {
+    await client.messages.text({ to, body });
+} catch (error: any) {
+    const code = error.response?.data?.error?.code;
+
+    if (code === 130429) {
+        const retryAfter = error.response?.headers?.['retry-after'];
+        const waitMs = retryAfter ? Number(retryAfter) * 1000 : 60000;
+
+        console.warn(`Rate limited. Retrying after ${waitMs}ms`);
+        await new Promise(r => setTimeout(r, waitMs));
+
+        // Retry the request
+        await client.messages.text({ to, body });
+    } else {
+        throw error;
+    }
+}
+```
+
+## Handling the 24-Hour Window
+
+WhatsApp enforces a 24-hour customer service window. You can only send free-form messages within 24 hours of the customer's last message. After that, you must use an approved template:
+
+```typescript
+try {
+    await client.messages.text({ to, body: 'Follow-up message' });
+} catch (error: any) {
+    const code = error.response?.data?.error?.code;
+
+    if (code === 131047) {
+        // Window expired -- fall back to a template message
+        await client.messages.template({
+            to,
+            template: {
+                name: 'follow_up',
+                language: { code: 'en' },
+            },
+        });
+    } else {
+        throw error;
+    }
+}
+```
+
+## Webhook Error Handling
+
+When processing inbound webhooks, always wrap your handler to prevent unhandled exceptions from crashing the server:
+
+```typescript
+async function handleWebhookMessage(client: WhatsApp, message: any) {
+    try {
+        // Your message handling logic
+        await processMessage(message);
+    } catch (error) {
+        console.error('Webhook handler error:', error);
+
+        // Optionally notify the user
+        try {
+            await client.messages.text({
+                to: message.from,
+                body: 'Sorry, something went wrong. Please try again.',
+            });
+        } catch {
+            // If even the error notification fails, just log it
+            console.error('Failed to send error notification');
+        }
+    }
+}
+```
+
+Always return a `200` status to Meta's webhook delivery system, even if your processing fails. Returning non-200 codes causes Meta to retry delivery, which can lead to duplicate processing.
+
+## Debugging Tips
+
+1. **Log the `fbtrace_id`** from every error response. Meta support can use this to investigate issues on their end.
+
+2. **Enable SDK debug mode** to see verbose request/response logs:
+
+   ```typescript
+   const client = new WhatsApp({
+       accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+       phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+       businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+       debug: true,
+   });
+   ```
+
+3. **Check the Graph API Explorer** at [developers.facebook.com/tools/explorer](https://developers.facebook.com/tools/explorer/) to test API calls interactively and see raw error responses.
+
+4. **Monitor error rates** over time. A sudden spike in `130429` (rate limit) errors may indicate you need to implement message queuing, while persistent `190` errors signal a token expiry issue.
+
+## Further Reading
+
+For advanced patterns including circuit breakers, structured logging, and error monitoring integration, see the [Error Handling Guide](/guides/error-handling).

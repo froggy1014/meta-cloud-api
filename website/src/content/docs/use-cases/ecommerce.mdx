@@ -1,0 +1,240 @@
+---
+title: "E-Commerce Notifications"
+description: "Send order updates and product catalogs via WhatsApp"
+---
+
+## What You'll Build
+
+An e-commerce notification system that sends order confirmations, shipping updates, and delivery alerts through WhatsApp. Customers can also browse product catalogs using interactive list messages and receive rich media product previews.
+
+## Architecture
+
+The data flow works as follows:
+
+1. A customer places an order on your website or app.
+2. Your order management system triggers a WhatsApp notification via the SDK.
+3. Order confirmation is sent using a pre-approved template message with order details.
+4. As the order progresses, shipping and delivery updates are sent automatically.
+5. Customers can reply to browse your product catalog using interactive messages.
+6. Delivery status webhooks confirm that notifications were received and read.
+
+## Step-by-Step Implementation
+
+### 1. Initialize the SDK
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+import { ComponentTypesEnum, LanguagesEnum, ParametersTypesEnum } from 'meta-cloud-api/enums';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID!,
+});
+```
+
+### 2. Send Order Confirmation
+
+After a customer completes checkout, send a confirmation template with order details.
+
+```typescript
+interface Order {
+    id: string;
+    customerPhone: string;
+    customerName: string;
+    total: string;
+    items: Array<{ name: string; quantity: number }>;
+}
+
+async function sendOrderConfirmation(order: Order) {
+    await client.messages.template({
+        to: order.customerPhone,
+        template: {
+            name: 'order_confirmation',
+            language: { code: LanguagesEnum.English_US },
+            components: [
+                {
+                    type: ComponentTypesEnum.Body,
+                    parameters: [
+                        { type: ParametersTypesEnum.Text, text: order.customerName },
+                        { type: ParametersTypesEnum.Text, text: order.id },
+                        { type: ParametersTypesEnum.Text, text: order.total },
+                    ],
+                },
+            ],
+        },
+    });
+}
+```
+
+### 3. Send Shipping Updates
+
+Notify customers when their order ships with tracking information.
+
+```typescript
+async function sendShippingUpdate(customerPhone: string, orderId: string, trackingUrl: string) {
+    await client.messages.template({
+        to: customerPhone,
+        template: {
+            name: 'shipping_update',
+            language: { code: LanguagesEnum.English_US },
+            components: [
+                {
+                    type: ComponentTypesEnum.Body,
+                    parameters: [
+                        { type: ParametersTypesEnum.Text, text: orderId },
+                        { type: ParametersTypesEnum.Text, text: trackingUrl },
+                    ],
+                },
+            ],
+        },
+    });
+}
+```
+
+### 4. Send Delivery Confirmation with Image
+
+When the order is delivered, send a confirmation with a photo of the package at the door.
+
+```typescript
+async function sendDeliveryConfirmation(customerPhone: string, orderId: string, photoUrl?: string) {
+    if (photoUrl) {
+        await client.messages.image({
+            to: customerPhone,
+            image: {
+                link: photoUrl,
+                caption: `Your order ${orderId} has been delivered! Here is a photo of your package.`,
+            },
+        });
+    }
+
+    await client.messages.interactive({
+        to: customerPhone,
+        type: 'button',
+        body: {
+            text: `Order ${orderId} has been delivered. How was your experience?`,
+        },
+        action: {
+            buttons: [
+                { type: 'reply', reply: { id: `rate_good_${orderId}`, title: 'Great!' } },
+                { type: 'reply', reply: { id: `rate_issue_${orderId}`, title: 'Had an issue' } },
+            ],
+        },
+    });
+}
+```
+
+### 5. Product Catalog Browsing
+
+Let customers browse products through interactive list messages.
+
+```typescript
+async function sendProductCatalog(to: string) {
+    await client.messages.interactive({
+        to,
+        type: 'list',
+        header: { type: 'text', text: 'Our Products' },
+        body: {
+            text: 'Browse our latest collection. Tap a product to learn more.',
+        },
+        action: {
+            button: 'View Products',
+            sections: [
+                {
+                    title: 'New Arrivals',
+                    rows: [
+                        { id: 'prod_wireless_earbuds', title: 'Wireless Earbuds', description: '$49.99 - Noise cancelling' },
+                        { id: 'prod_smart_watch', title: 'Smart Watch Pro', description: '$199.99 - Heart rate & GPS' },
+                        { id: 'prod_phone_case', title: 'Premium Phone Case', description: '$29.99 - Shock resistant' },
+                    ],
+                },
+                {
+                    title: 'Best Sellers',
+                    rows: [
+                        { id: 'prod_charger', title: 'Fast Charger 65W', description: '$34.99 - USB-C compatible' },
+                        { id: 'prod_backpack', title: 'Tech Backpack', description: '$79.99 - Laptop compartment' },
+                    ],
+                },
+            ],
+        },
+    });
+}
+```
+
+### 6. Send Product Details with Image
+
+When a customer selects a product, send a rich preview.
+
+```typescript
+const PRODUCTS: Record<string, { name: string; price: string; imageUrl: string; description: string }> = {
+    prod_wireless_earbuds: { name: 'Wireless Earbuds', price: '$49.99', imageUrl: 'https://shop.example.com/images/earbuds.jpg', description: 'Premium noise-cancelling earbuds with 24-hour battery life and IPX5 water resistance.' },
+    prod_smart_watch: { name: 'Smart Watch Pro', price: '$199.99', imageUrl: 'https://shop.example.com/images/watch.jpg', description: 'Advanced fitness tracking with heart rate, GPS, sleep monitoring, and 5-day battery.' },
+};
+
+async function sendProductDetail(to: string, productId: string) {
+    const product = PRODUCTS[productId];
+    if (!product) return;
+
+    await client.messages.image({
+        to,
+        image: {
+            link: product.imageUrl,
+            caption: `*${product.name}* - ${product.price}\n\n${product.description}`,
+        },
+    });
+
+    await client.messages.interactive({
+        to,
+        type: 'button',
+        body: { text: `Would you like to order ${product.name}?` },
+        action: {
+            buttons: [
+                { type: 'reply', reply: { id: `buy_${productId}`, title: 'Buy Now' } },
+                { type: 'reply', reply: { id: 'browse_more', title: 'Browse More' } },
+            ],
+        },
+    });
+}
+```
+
+### 7. Integrate with Your Order System
+
+Handle order lifecycle events from your backend.
+
+```typescript
+// Call these from your order management system
+async function onOrderCreated(order: Order) {
+    await sendOrderConfirmation(order);
+}
+
+async function onOrderShipped(customerPhone: string, orderId: string, trackingUrl: string) {
+    await sendShippingUpdate(customerPhone, orderId, trackingUrl);
+}
+
+async function onOrderDelivered(customerPhone: string, orderId: string, photoUrl?: string) {
+    await sendDeliveryConfirmation(customerPhone, orderId, photoUrl);
+}
+```
+
+## Complete Code Example
+
+The system above covers the full e-commerce notification lifecycle:
+
+1. **Order confirmation** via template messages with customer name, order ID, and total
+2. **Shipping updates** via templates with tracking URL
+3. **Delivery confirmation** with proof-of-delivery photo and satisfaction rating
+4. **Product catalog** browsing with interactive lists
+5. **Product details** with images and buy/browse buttons
+
+Key SDK methods used:
+
+- `client.messages.template()` for transactional order notifications
+- `client.messages.interactive()` with `type: 'list'` for product catalogs
+- `client.messages.interactive()` with `type: 'button'` for quick actions
+- `client.messages.image()` for product photos and delivery confirmation
+
+## Next Steps
+
+- [Messages API](/api/messages) -- all message types including media and interactive
+- [Templates API](/api/templates) -- create order confirmation and shipping templates
+- [Webhook Overview](/webhooks/overview) -- track delivery status and customer replies

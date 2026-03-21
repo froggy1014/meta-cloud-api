@@ -1,0 +1,235 @@
+---
+title: "Customer Support Bot"
+description: "Build an automated customer support chatbot with WhatsApp"
+---
+
+## What You'll Build
+
+A menu-driven customer support bot that handles common inquiries automatically and escalates complex issues to human agents. The bot uses interactive messages (buttons and lists) to guide customers, responds to FAQs instantly, and hands off conversations when needed.
+
+## Architecture
+
+The data flow works as follows:
+
+1. A customer sends a message to your WhatsApp Business number.
+2. WhatsApp delivers a webhook event to your server.
+3. Your server parses the incoming message using the SDK's webhook processor.
+4. Based on the message content or button/list selection, your bot determines the appropriate response.
+5. The bot replies with interactive messages, FAQ answers, or escalates to a human agent.
+6. Status webhooks track delivery and read receipts for quality monitoring.
+
+## Step-by-Step Implementation
+
+### 1. Initialize the SDK
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+import { ComponentTypesEnum, LanguagesEnum, ParametersTypesEnum } from 'meta-cloud-api/enums';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID!,
+});
+```
+
+### 2. Send a Welcome Menu
+
+When a customer first messages you, greet them with an interactive button menu.
+
+```typescript
+async function sendWelcomeMenu(to: string) {
+    await client.messages.interactive({
+        to,
+        type: 'button',
+        body: {
+            text: 'Welcome to Acme Support! How can we help you today?',
+        },
+        action: {
+            buttons: [
+                {
+                    type: 'reply',
+                    reply: { id: 'faq', title: 'FAQs' },
+                },
+                {
+                    type: 'reply',
+                    reply: { id: 'order_status', title: 'Order Status' },
+                },
+                {
+                    type: 'reply',
+                    reply: { id: 'talk_to_agent', title: 'Talk to Agent' },
+                },
+            ],
+        },
+    });
+}
+```
+
+### 3. Display FAQ Topics with a List
+
+When the customer selects "FAQs", show a detailed list of help topics.
+
+```typescript
+async function sendFAQList(to: string) {
+    await client.messages.interactive({
+        to,
+        type: 'list',
+        body: {
+            text: 'Browse our frequently asked questions below.',
+        },
+        action: {
+            button: 'View Topics',
+            sections: [
+                {
+                    title: 'Account',
+                    rows: [
+                        { id: 'faq_reset_password', title: 'Reset Password', description: 'How to reset your account password' },
+                        { id: 'faq_update_email', title: 'Update Email', description: 'Change your email address' },
+                    ],
+                },
+                {
+                    title: 'Orders',
+                    rows: [
+                        { id: 'faq_return_policy', title: 'Return Policy', description: '30-day return and refund policy' },
+                        { id: 'faq_shipping_times', title: 'Shipping Times', description: 'Estimated delivery windows' },
+                    ],
+                },
+            ],
+        },
+    });
+}
+```
+
+### 4. Respond to FAQ Selections
+
+Provide instant answers when a customer picks a topic.
+
+```typescript
+const FAQ_ANSWERS: Record<string, string> = {
+    faq_reset_password: 'To reset your password, visit https://acme.com/reset and enter your email. You will receive a reset link within 5 minutes.',
+    faq_update_email: 'Go to Settings > Account > Email in your dashboard. Verify the new address via the confirmation email we send.',
+    faq_return_policy: 'We accept returns within 30 days of delivery. Items must be unused and in original packaging. Visit https://acme.com/returns to start.',
+    faq_shipping_times: 'Standard shipping: 5-7 business days. Express: 2-3 business days. Same-day available in select cities.',
+};
+
+async function handleFAQSelection(to: string, selectionId: string) {
+    const answer = FAQ_ANSWERS[selectionId];
+    if (answer) {
+        await client.messages.text({ to, body: answer });
+        await sendFollowUp(to);
+    }
+}
+
+async function sendFollowUp(to: string) {
+    await client.messages.interactive({
+        to,
+        type: 'button',
+        body: { text: 'Was this helpful?' },
+        action: {
+            buttons: [
+                { type: 'reply', reply: { id: 'helpful_yes', title: 'Yes, thanks!' } },
+                { type: 'reply', reply: { id: 'helpful_no', title: 'No, need more help' } },
+            ],
+        },
+    });
+}
+```
+
+### 5. Escalate to a Human Agent
+
+When automated answers are not enough, hand off the conversation.
+
+```typescript
+async function escalateToAgent(to: string) {
+    await client.messages.text({
+        to,
+        body: 'Connecting you with a support agent. Please allow a few minutes for them to join the conversation.',
+    });
+
+    // Send a template to notify the support team
+    await client.messages.template({
+        to: process.env.SUPPORT_TEAM_NUMBER!,
+        template: {
+            name: 'agent_escalation',
+            language: { code: LanguagesEnum.English_US },
+            components: [
+                {
+                    type: ComponentTypesEnum.Body,
+                    parameters: [
+                        { type: ParametersTypesEnum.Text, text: to },
+                    ],
+                },
+            ],
+        },
+    });
+}
+```
+
+### 6. Process Incoming Webhooks
+
+Wire everything together by handling webhook events in your server.
+
+```typescript
+import express from 'express';
+
+const app = express();
+app.use(express.json());
+
+app.post('/webhook', async (req, res) => {
+    res.sendStatus(200);
+
+    const entry = req.body.entry?.[0];
+    const change = entry?.changes?.[0]?.value;
+    const message = change?.messages?.[0];
+    if (!message) return;
+
+    const from = message.from;
+
+    if (message.type === 'text') {
+        await sendWelcomeMenu(from);
+    } else if (message.type === 'interactive') {
+        const id = message.interactive.button_reply?.id
+            || message.interactive.list_reply?.id;
+
+        switch (id) {
+            case 'faq':
+                await sendFAQList(from);
+                break;
+            case 'order_status':
+                await client.messages.text({ to: from, body: 'Please reply with your order number (e.g., ORD-12345).' });
+                break;
+            case 'talk_to_agent':
+            case 'helpful_no':
+                await escalateToAgent(from);
+                break;
+            case 'helpful_yes':
+                await client.messages.text({ to: from, body: 'Glad we could help! Message us anytime.' });
+                break;
+            default:
+                if (id?.startsWith('faq_')) {
+                    await handleFAQSelection(from, id);
+                }
+                break;
+        }
+    }
+});
+
+app.listen(3000, () => console.log('Support bot running on port 3000'));
+```
+
+## Complete Code Example
+
+Combine the snippets above into a single file. The full flow covers: welcome menu, FAQ browsing via interactive lists, instant FAQ responses with follow-up prompts, and human agent escalation using template messages.
+
+The key SDK methods used are:
+
+- `client.messages.text()` for plain text replies
+- `client.messages.interactive()` with `type: 'button'` for quick-reply menus
+- `client.messages.interactive()` with `type: 'list'` for browsable FAQ topics
+- `client.messages.template()` for structured agent escalation notifications
+
+## Next Steps
+
+- [Messages API](/api/messages) -- full reference for all message types
+- [Webhook Overview](/webhooks/overview) -- learn about webhook event types and payload structure
+- [Templates API](/api/templates) -- create and manage template messages for escalation flows

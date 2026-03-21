@@ -11,6 +11,12 @@ meta-cloud-api provides a type-safe, comprehensive, and modular way to integrate
 - [Quick Start](https://meta-cloud-api.xyz/getting-started/quick-start): Send your first message
 - [Configuration](https://meta-cloud-api.xyz/getting-started/configuration): Advanced configuration
 
+## Core Concepts
+
+- [Architecture](https://meta-cloud-api.xyz/core-concepts/architecture): SDK composite pattern and module system
+- [Authentication](https://meta-cloud-api.xyz/core-concepts/authentication): Access tokens and credentials
+- [Error Handling](https://meta-cloud-api.xyz/core-concepts/error-handling): API errors, retries, edge cases
+
 ## API Reference
 
 - [Messages](https://meta-cloud-api.xyz/api/messages): Send text, media, template, interactive messages
@@ -47,6 +53,17 @@ meta-cloud-api provides a type-safe, comprehensive, and modular way to integrate
 - [Testing](https://meta-cloud-api.xyz/guides/testing): Testing guide
 - [Error Handling](https://meta-cloud-api.xyz/guides/error-handling): Error handling strategies
 - [Deployment](https://meta-cloud-api.xyz/guides/deployment): Production deployment
+
+## Use Cases
+
+- [Customer Support Bot](https://meta-cloud-api.xyz/use-cases/customer-support): Automated chatbot with menus and FAQ
+- [E-Commerce](https://meta-cloud-api.xyz/use-cases/ecommerce): Order updates and product catalogs
+- [Marketing Campaigns](https://meta-cloud-api.xyz/use-cases/marketing): Template-based bulk messaging
+- [Appointment Booking](https://meta-cloud-api.xyz/use-cases/appointment-booking): Scheduling via interactive messages
+
+## Playground
+
+- [Try the SDK](https://meta-cloud-api.xyz/playground): Interactive code playground with mock API responses
 
 ## Type Reference
 

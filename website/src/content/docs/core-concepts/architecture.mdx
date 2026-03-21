@@ -1,0 +1,200 @@
+---
+title: "Architecture"
+description: "Understanding the SDK's composite architecture and module system"
+---
+
+The meta-cloud-api SDK uses a **composite architecture** where a single `WhatsApp` class composes 17 domain-specific API modules, each backed by a shared HTTP client and configuration.
+
+## High-Level Overview
+
+```
+WhatsApp (main class)
+  |
+  |-- config (WabaConfigType)
+  |-- requester (Requester - shared HTTP client)
+  |
+  |-- messages (MessageApi)
+  |-- media (MediaApi)
+  |-- templates (TemplateApi)
+  |-- flows (FlowApi)
+  |-- phoneNumbers (PhoneNumberApi)
+  |-- businessProfile (BusinessProfileApi)
+  |-- registration (RegistrationApi)
+  |-- twoStepVerification (TwoStepVerificationApi)
+  |-- encryption (EncryptionApi)
+  |-- qrCode (QrCodeApi)
+  |-- waba (WabaApi)
+  |-- blockUsers (BlockUsersApi)
+  |-- calling (CallingApi)
+  |-- groups (GroupsApi)
+  |-- marketingMessages (MarketingMessagesApi)
+  |-- commerce (CommerceApi)
+  |-- payments (PaymentsApi)
+```
+
+## The Composite Pattern
+
+Rather than exposing a single monolithic class with hundreds of methods, the SDK delegates functionality to specialized API modules. The `WhatsApp` class acts as a facade that instantiates and wires them together:
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+});
+
+// Each property is a fully initialized API module
+await client.messages.text({ to: '15551234567', body: 'Hello!' });
+await client.media.upload({ file: './image.jpg' });
+await client.templates.list();
+await client.businessProfile.get(['about', 'description']);
+```
+
+Under the hood, the constructor creates a shared `Requester` instance and passes it along with the resolved configuration to every API module:
+
+```typescript
+// Simplified view of the WhatsApp constructor
+class WhatsApp {
+    messages: MessageApi;
+    media: MediaApi;
+    // ... 15 more modules
+
+    constructor(config?: WhatsAppConfig) {
+        this.config = importConfig(config);
+
+        // Single HTTP client shared across all modules
+        this.requester = new Requester(
+            this.config.apiVersion,
+            this.config.phoneNumberId,
+            this.config.accessToken,
+            this.config.businessAcctId,
+            this.getUserAgent(),
+        );
+
+        // Each module receives config + requester
+        this.messages = new MessageApi(this.config, this.requester);
+        this.media = new MediaApi(this.config, this.requester);
+        // ...
+    }
+}
+```
+
+## BaseAPI - The Foundation
+
+Every API module extends `BaseAPI`, which provides protected methods for making HTTP requests:
+
+```typescript
+export class BaseAPI {
+    protected config: WabaConfigType;
+    protected client: RequesterClass;
+
+    constructor(config: WabaConfigType, client: RequesterClass) {
+        this.config = config;
+        this.client = client;
+    }
+
+    // JSON request (most API calls)
+    protected sendJson<T>(method, endpoint, timeout, body?): Promise<T>;
+
+    // Multipart form data (file uploads)
+    protected sendFormData<T>(method, endpoint, timeout, body?): Promise<T>;
+
+    // URL-encoded form (registration endpoints)
+    protected sendUrlEncodedForm<T>(method, endpoint, timeout, body?): Promise<T>;
+}
+```
+
+Each API module then builds on this foundation. For example, a simplified `MessageApi` would look like:
+
+```typescript
+class MessageApi extends BaseAPI {
+    async text(params: { to: string; body: string }) {
+        return this.sendJson(
+            HttpMethodsEnum.Post,
+            `/${this.config.phoneNumberId}/messages`,
+            this.config.requestTimeout,
+            {
+                messaging_product: 'whatsapp',
+                to: params.to,
+                type: 'text',
+                text: { body: params.body },
+            },
+        );
+    }
+}
+```
+
+## Request Flow
+
+When you call an SDK method, the request flows through these layers:
+
+1. **Your code** calls `client.messages.text({ to, body })`
+2. **MessageApi** builds the request payload and calls `this.sendJson()`
+3. **BaseAPI** delegates to `this.client.getJson()`
+4. **Requester** adds authentication headers, the base URL (`https://graph.facebook.com/{version}`), and sends the HTTP request
+5. The **response** is typed and returned to your code
+
+## Configuration Resolution
+
+The SDK resolves configuration from multiple sources, in order of priority:
+
+1. **Constructor arguments** -- values passed directly to `new WhatsApp({ ... })`
+2. **Environment variables** -- `CLOUD_API_ACCESS_TOKEN`, `WA_PHONE_NUMBER_ID`, `WA_BUSINESS_ACCOUNT_ID`, etc.
+3. **Defaults** -- API version, timeouts, and other sensible defaults
+
+```typescript
+// Config is fully resolved at construction time
+const client = new WhatsApp({
+    accessToken: 'your-token',
+    phoneNumberId: 123456789,
+    businessAcctId: 'your-waba-id',
+    apiVersion: 'v21.0',        // optional, has default
+    requestTimeout: 20000,       // optional, defaults to 10000ms
+    debug: true,                 // optional, enables verbose logging
+});
+```
+
+## Runtime Updates
+
+The `WhatsApp` class exposes methods to update configuration at runtime without creating a new instance. This is useful for token rotation and multi-tenant setups:
+
+```typescript
+// Rotate an expired access token
+client.updateAccessToken('new-token');
+
+// Switch the sender phone number
+client.updateSenderNumberId(987654321);
+
+// Adjust request timeout
+client.updateTimeout(30000);
+```
+
+These methods update both the internal config and the shared `Requester`, so all API modules immediately use the new values.
+
+## Package Exports
+
+The SDK provides multiple entry points to support tree-shaking and type-only imports:
+
+```typescript
+// Main SDK - the WhatsApp class
+import WhatsApp from 'meta-cloud-api';
+
+// Type definitions only (zero runtime cost)
+import type { MessageRequestBody } from 'meta-cloud-api/types';
+
+// Enums only
+import { MessageTypesEnum } from 'meta-cloud-api/enums';
+
+// Utilities (encryption helpers, etc.)
+import { generateEncryption } from 'meta-cloud-api/utils';
+```
+
+## Design Benefits
+
+- **Single point of configuration** -- one constructor call wires up all 17 modules
+- **Shared HTTP client** -- consistent authentication, timeouts, and user-agent across all requests
+- **Discoverable API** -- `client.` autocomplete reveals every available module
+- **Type safety** -- each module defines its own request/response types with full TypeScript support
+- **Testability** -- modules can be mocked independently since they share a common interface

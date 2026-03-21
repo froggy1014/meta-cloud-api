@@ -1,0 +1,299 @@
+---
+title: "Appointment Booking"
+description: "Build an appointment scheduling system with WhatsApp"
+---
+
+## What You'll Build
+
+An appointment scheduling system where customers can browse available time slots, book appointments, receive confirmations, and get automated reminders -- all through WhatsApp. The system uses interactive list messages for date and time selection, template messages for confirmations and reminders, and webhook processing to handle the conversation flow.
+
+## Architecture
+
+The data flow works as follows:
+
+1. A customer messages your WhatsApp Business number to book an appointment.
+2. Your server responds with available service types via an interactive list.
+3. The customer selects a service, then picks a date and time slot from another list.
+4. The system confirms the booking with a template message containing appointment details.
+5. A scheduled job sends reminder templates 24 hours and 1 hour before the appointment.
+6. Customers can reschedule or cancel by replying to the confirmation message.
+
+## Step-by-Step Implementation
+
+### 1. Initialize the SDK
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+import { ComponentTypesEnum, LanguagesEnum, ParametersTypesEnum } from 'meta-cloud-api/enums';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID!,
+});
+```
+
+### 2. Show Available Services
+
+When a customer initiates a booking, present the service menu.
+
+```typescript
+async function sendServiceMenu(to: string) {
+    await client.messages.interactive({
+        to,
+        type: 'list',
+        header: { type: 'text', text: 'Book an Appointment' },
+        body: {
+            text: 'Select the service you would like to book. We will then show you available dates and times.',
+        },
+        action: {
+            button: 'View Services',
+            sections: [
+                {
+                    title: 'Consultations',
+                    rows: [
+                        { id: 'svc_general', title: 'General Consultation', description: '30 min - $50' },
+                        { id: 'svc_followup', title: 'Follow-Up Visit', description: '15 min - $30' },
+                    ],
+                },
+                {
+                    title: 'Specialized',
+                    rows: [
+                        { id: 'svc_specialist', title: 'Specialist Consultation', description: '45 min - $100' },
+                        { id: 'svc_assessment', title: 'Full Assessment', description: '60 min - $150' },
+                    ],
+                },
+            ],
+        },
+    });
+}
+```
+
+### 3. Show Available Time Slots
+
+After the customer selects a service, display available dates and times. In production, you would query your calendar system for real availability.
+
+```typescript
+function getAvailableSlots(): Array<{ id: string; title: string; description: string }> {
+    // In production, query your calendar/booking system here
+    const slots = [];
+    const today = new Date();
+    for (let day = 1; day <= 3; day++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() + day);
+        const dateStr = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        for (const time of ['9:00 AM', '11:00 AM', '2:00 PM']) {
+            slots.push({
+                id: `slot_${day}_${time.replace(/[: ]/g, '')}`,
+                title: `${dateStr} at ${time}`,
+                description: 'Available',
+            });
+        }
+    }
+    return slots;
+}
+
+async function sendTimeSlots(to: string, serviceId: string) {
+    const slots = getAvailableSlots();
+
+    await client.messages.interactive({
+        to,
+        type: 'list',
+        body: {
+            text: 'Choose your preferred date and time from the available slots below.',
+        },
+        action: {
+            button: 'View Times',
+            sections: [
+                {
+                    title: 'Available Slots',
+                    rows: slots.slice(0, 10), // WhatsApp allows up to 10 rows per section
+                },
+            ],
+        },
+    });
+}
+```
+
+### 4. Confirm the Booking
+
+Once the customer picks a slot, confirm the appointment with a template message.
+
+```typescript
+interface Appointment {
+    id: string;
+    customerPhone: string;
+    customerName: string;
+    service: string;
+    dateTime: string;
+    location: string;
+}
+
+async function confirmBooking(appointment: Appointment) {
+    await client.messages.template({
+        to: appointment.customerPhone,
+        template: {
+            name: 'appointment_confirmation',
+            language: { code: LanguagesEnum.English_US },
+            components: [
+                {
+                    type: ComponentTypesEnum.Body,
+                    parameters: [
+                        { type: ParametersTypesEnum.Text, text: appointment.customerName },
+                        { type: ParametersTypesEnum.Text, text: appointment.service },
+                        { type: ParametersTypesEnum.Text, text: appointment.dateTime },
+                        { type: ParametersTypesEnum.Text, text: appointment.location },
+                    ],
+                },
+            ],
+        },
+    });
+
+    // Follow up with reschedule/cancel options
+    await client.messages.interactive({
+        to: appointment.customerPhone,
+        type: 'button',
+        body: { text: 'Need to make changes to your appointment?' },
+        action: {
+            buttons: [
+                { type: 'reply', reply: { id: `reschedule_${appointment.id}`, title: 'Reschedule' } },
+                { type: 'reply', reply: { id: `cancel_${appointment.id}`, title: 'Cancel' } },
+            ],
+        },
+    });
+}
+```
+
+### 5. Send Appointment Reminders
+
+Use a scheduled job to send reminders before the appointment.
+
+```typescript
+async function sendReminder(appointment: Appointment, hoursUntil: number) {
+    const urgency = hoursUntil <= 1 ? 'starting soon' : `in ${hoursUntil} hours`;
+
+    await client.messages.template({
+        to: appointment.customerPhone,
+        template: {
+            name: 'appointment_reminder',
+            language: { code: LanguagesEnum.English_US },
+            components: [
+                {
+                    type: ComponentTypesEnum.Body,
+                    parameters: [
+                        { type: ParametersTypesEnum.Text, text: appointment.customerName },
+                        { type: ParametersTypesEnum.Text, text: appointment.service },
+                        { type: ParametersTypesEnum.Text, text: urgency },
+                        { type: ParametersTypesEnum.Text, text: appointment.location },
+                    ],
+                },
+            ],
+        },
+    });
+}
+
+// Example: run this on a schedule (e.g., cron job every 15 minutes)
+async function checkAndSendReminders(appointments: Appointment[]) {
+    const now = Date.now();
+    for (const appt of appointments) {
+        const apptTime = new Date(appt.dateTime).getTime();
+        const hoursUntil = (apptTime - now) / (1000 * 60 * 60);
+
+        if (hoursUntil > 23.5 && hoursUntil <= 24.5) {
+            await sendReminder(appt, 24);
+        } else if (hoursUntil > 0.5 && hoursUntil <= 1.5) {
+            await sendReminder(appt, 1);
+        }
+    }
+}
+```
+
+### 6. Handle Webhook Responses
+
+Process customer interactions to manage the booking flow.
+
+```typescript
+import express from 'express';
+
+const app = express();
+app.use(express.json());
+
+// In-memory session store (use a database in production)
+const sessions: Record<string, { step: string; serviceId?: string }> = {};
+
+app.post('/webhook', async (req, res) => {
+    res.sendStatus(200);
+
+    const entry = req.body.entry?.[0];
+    const change = entry?.changes?.[0]?.value;
+    const message = change?.messages?.[0];
+    if (!message) return;
+
+    const from = message.from;
+
+    if (message.type === 'text') {
+        const text = message.text.body.toLowerCase().trim();
+        if (text === 'book' || text === 'appointment' || text === 'schedule') {
+            sessions[from] = { step: 'select_service' };
+            await sendServiceMenu(from);
+        }
+    } else if (message.type === 'interactive') {
+        const id = message.interactive.button_reply?.id
+            || message.interactive.list_reply?.id;
+
+        if (id?.startsWith('svc_')) {
+            sessions[from] = { step: 'select_time', serviceId: id };
+            await sendTimeSlots(from, id);
+        } else if (id?.startsWith('slot_')) {
+            const session = sessions[from];
+            if (session?.serviceId) {
+                const appointment: Appointment = {
+                    id: `appt_${Date.now()}`,
+                    customerPhone: from,
+                    customerName: 'Customer', // Look up from your database
+                    service: session.serviceId.replace('svc_', '').replace('_', ' '),
+                    dateTime: '2026-03-24T09:00:00', // Parse from selected slot
+                    location: '123 Health St, Suite 200',
+                };
+                await confirmBooking(appointment);
+                delete sessions[from];
+            }
+        } else if (id?.startsWith('reschedule_')) {
+            sessions[from] = { step: 'select_service' };
+            await client.messages.text({ to: from, body: 'No problem! Let\'s find a new time.' });
+            await sendServiceMenu(from);
+        } else if (id?.startsWith('cancel_')) {
+            await client.messages.text({
+                to: from,
+                body: 'Your appointment has been cancelled. Reply "book" anytime to schedule a new one.',
+            });
+        }
+    }
+});
+
+app.listen(3000, () => console.log('Booking service running on port 3000'));
+```
+
+## Complete Code Example
+
+The system above provides a complete appointment booking workflow:
+
+1. **Service selection** via interactive list messages
+2. **Time slot browsing** with dynamically generated availability
+3. **Booking confirmation** using template messages with appointment details
+4. **Automated reminders** at 24 hours and 1 hour before the appointment
+5. **Reschedule and cancel** support through interactive button replies
+6. **Conversational flow** managed via session state and webhook processing
+
+Key SDK methods used:
+
+- `client.messages.interactive()` with `type: 'list'` for service and time selection
+- `client.messages.interactive()` with `type: 'button'` for reschedule/cancel options
+- `client.messages.template()` for booking confirmations and reminders
+- `client.messages.text()` for conversational responses
+
+## Next Steps
+
+- [Messages API](/api/messages) -- full reference for interactive and template messages
+- [Templates API](/api/templates) -- create appointment confirmation and reminder templates
+- [Webhook Overview](/webhooks/overview) -- set up webhook processing for your booking server
