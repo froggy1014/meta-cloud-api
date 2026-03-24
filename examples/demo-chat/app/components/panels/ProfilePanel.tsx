@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import SdkCodeViewer from '../SdkCodeViewer';
 
 interface ProfileData {
@@ -20,7 +20,7 @@ export default function ProfilePanel() {
     const [sdkCode, setSdkCode] = useState('');
     const [response, setResponse] = useState('');
 
-    useEffect(() => {
+    const fetchProfile = useCallback(() => {
         setLoading(true);
         setError('');
         fetch('/api/profile')
@@ -37,6 +37,10 @@ export default function ProfilePanel() {
             .catch(() => setError('Network error'))
             .finally(() => setLoading(false));
     }, []);
+
+    useEffect(() => {
+        fetchProfile();
+    }, [fetchProfile]);
 
     return (
         <div className="flex flex-col h-full">

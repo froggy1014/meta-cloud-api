@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import SdkCodeViewer from '../SdkCodeViewer';
 
 interface Template {
@@ -17,7 +17,7 @@ export default function TemplatesPanel() {
     const [sdkCode, setSdkCode] = useState('');
     const [response, setResponse] = useState('');
 
-    useEffect(() => {
+    const fetchTemplates = useCallback(() => {
         setLoading(true);
         setError('');
         fetch('/api/templates')
@@ -34,6 +34,10 @@ export default function TemplatesPanel() {
             .catch(() => setError('Network error'))
             .finally(() => setLoading(false));
     }, []);
+
+    useEffect(() => {
+        fetchTemplates();
+    }, [fetchTemplates]);
 
     const statusColor = (status: string) => {
         switch (status) {
