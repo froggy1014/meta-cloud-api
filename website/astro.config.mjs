@@ -98,7 +98,7 @@ export default defineConfig({
                 {
                     label: 'Playground',
                     items: [
-                        { label: 'Try the SDK', link: '/playground', attrs: { target: '_blank' } },
+                        { label: 'Try the SDK', link: 'https://playground.meta-cloud-api.xyz', attrs: { target: '_blank' } },
                     ],
                 },
                 {
