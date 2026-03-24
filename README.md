@@ -13,9 +13,9 @@
 
 ## Resources
 
-- **[📚 Documentation](https://www.meta-cloud-api.xyz/)** - Complete documentation with guides and examples
-- **[🚀 Getting Started](https://www.meta-cloud-api.xyz/getting-started/installation)** - Quick start guide
-- **[📖 API Reference](https://www.meta-cloud-api.xyz/api/messages)** - Comprehensive API documentation
+- **[📚 Documentation](https://www.meta-cloud-api.site/)** - Complete documentation with guides and examples
+- **[🚀 Getting Started](https://www.meta-cloud-api.site/getting-started/installation)** - Quick start guide
+- **[📖 API Reference](https://www.meta-cloud-api.site/api/messages)** - Comprehensive API documentation
 - **[🔧 Examples](./examples/)** - Production-ready code examples
 
 ## Examples

@@ -52,7 +52,7 @@
 
   ## 🎯 Documentation
 
-  Visit the new documentation site at https://meta-cloud-api.xyz
+  Visit the new documentation site at https://meta-cloud-api.site
 
   ## 📝 Examples
   - `express-simple`: Basic Express.js integration

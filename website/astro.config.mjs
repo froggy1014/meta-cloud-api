@@ -6,7 +6,7 @@ import { defineConfig } from 'astro/config';
 
 // https://astro.build/config
 export default defineConfig({
-    site: 'https://meta-cloud-api.xyz',
+    site: 'https://meta-cloud-api.site',
     integrations: [
         react(),
         sitemap(),
@@ -104,7 +104,7 @@ export default defineConfig({
                 {
                     label: 'Playground',
                     items: [
-                        { label: 'Try the SDK', link: 'https://playground.meta-cloud-api.xyz', attrs: { target: '_blank' } },
+                        { label: 'Try the SDK', link: 'https://playground.meta-cloud-api.site', attrs: { target: '_blank' } },
                     ],
                 },
                 {
