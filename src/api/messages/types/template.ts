@@ -14,7 +14,7 @@ import type { MessageRequestBody } from './common';
 // Template Message Types
 type LanguageObject = {
     policy: 'deterministic';
-    code: LanguagesEnum;
+    code: LanguagesEnum | (string & {});
 };
 
 type ParametersObject<T extends ParametersTypesEnum> = {

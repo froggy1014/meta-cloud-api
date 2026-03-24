@@ -56,5 +56,5 @@ export type ContactObject = {
 };
 
 export type ContactsMessageRequestBody = MessageRequestBody<MessageTypesEnum.Contacts> & {
-    [MessageTypesEnum.Contacts]: [ContactObject];
+    [MessageTypesEnum.Contacts]: ContactObject[];
 };

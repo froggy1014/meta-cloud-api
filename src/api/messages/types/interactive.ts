@@ -78,7 +78,7 @@ type HeaderObject = {
 };
 
 type ButtonInteractiveObject = {
-    type: InteractiveTypesEnum.Button;
+    type: InteractiveTypesEnum.Button | 'button';
     body: SimpleTextObject;
     footer?: SimpleTextObject;
     header?: HeaderObject;
@@ -86,7 +86,7 @@ type ButtonInteractiveObject = {
 };
 
 type ListInteractiveObject = {
-    type: InteractiveTypesEnum.List;
+    type: InteractiveTypesEnum.List | 'list';
     body: SimpleTextObject;
     footer?: SimpleTextObject;
     header?: HeaderObject;
@@ -94,7 +94,7 @@ type ListInteractiveObject = {
 };
 
 type ProductInteractiveObject = {
-    type: InteractiveTypesEnum.Product;
+    type: InteractiveTypesEnum.Product | 'product';
     body?: SimpleTextObject;
     footer?: SimpleTextObject;
     header?: HeaderObject;
@@ -102,7 +102,7 @@ type ProductInteractiveObject = {
 };
 
 type ProductListInteractiveObject = {
-    type: InteractiveTypesEnum.ProductList;
+    type: InteractiveTypesEnum.ProductList | 'product_list';
     body: SimpleTextObject;
     footer?: SimpleTextObject;
     header: HeaderObject;
@@ -120,7 +120,7 @@ type CtaUrlActionObject = {
 };
 
 type CtaUrlInteractiveObject = {
-    type: InteractiveTypesEnum.CtaUrl;
+    type: InteractiveTypesEnum.CtaUrl | 'cta_url';
     body?: SimpleTextObject;
     footer?: SimpleTextObject;
     header?: HeaderObject;
@@ -132,7 +132,7 @@ type LocationRequestActionObject = {
 };
 
 type LocationRequestInteractiveObject = {
-    type: InteractiveTypesEnum.LocationRequest;
+    type: InteractiveTypesEnum.LocationRequest | 'location_request_message';
     body: SimpleTextObject;
     footer?: SimpleTextObject;
     header?: HeaderObject;
@@ -175,7 +175,7 @@ type AddressMessageActionObject = {
 };
 
 type AddressMessageInteractiveObject = {
-    type: InteractiveTypesEnum.AddressMessage;
+    type: InteractiveTypesEnum.AddressMessage | 'address_message';
     body: SimpleTextObject;
     footer?: SimpleTextObject;
     header?: HeaderObject;
@@ -188,8 +188,8 @@ type FlowParameters = {
     flow_name?: string;
     flow_cta: string;
     mode?: 'draft' | 'published';
-    flow_token: string;
-    flow_action: 'navigate' | 'data_exchange';
+    flow_token?: string;
+    flow_action?: 'navigate' | 'data_exchange';
     flow_action_payload?: {
         screen?: string;
         data?: Record<string, string>;
@@ -202,7 +202,7 @@ type FlowActionObject = {
 };
 
 type FlowInteractiveObject = {
-    type: InteractiveTypesEnum.Flow;
+    type: InteractiveTypesEnum.Flow | 'flow';
     body: SimpleTextObject;
     footer?: SimpleTextObject;
     header?: HeaderObject;
@@ -258,7 +258,7 @@ type CarouselActionObject = {
 };
 
 type CarouselInteractiveObject = {
-    type: InteractiveTypesEnum.Carousel;
+    type: InteractiveTypesEnum.Carousel | 'carousel';
     body: SimpleTextObject;
     action: CarouselActionObject;
 };

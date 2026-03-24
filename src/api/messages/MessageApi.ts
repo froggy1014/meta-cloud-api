@@ -23,7 +23,7 @@ import type * as m from './types';
 export type MessagePayloadType<T extends MessageTypesEnum> = T extends MessageTypesEnum.Audio
     ? m.AudioMediaObject
     : T extends MessageTypesEnum.Contacts
-      ? [m.ContactObject]
+      ? m.ContactObject[]
       : T extends MessageTypesEnum.Document
         ? m.DocumentMediaObject
         : T extends MessageTypesEnum.Image
@@ -215,7 +215,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * });
      * ```
      */
-    async contacts(params: m.MessageRequestParams<[m.ContactObject]>): Promise<m.MessagesResponse> {
+    async contacts(params: m.MessageRequestParams<m.ContactObject[]>): Promise<m.MessagesResponse> {
         const { body, to, replyMessageId } = params;
         return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Contacts, body, to, replyMessageId)));
     }
@@ -592,7 +592,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * ```
      */
     async interactiveList(
-        params: m.MessageRequestParams<m.InteractiveObject & { type: InteractiveTypesEnum.List }>,
+        params: m.MessageRequestParams<m.InteractiveObject & { type: InteractiveTypesEnum.List | 'list' }>,
     ): Promise<m.MessagesResponse> {
         return this.interactive(params);
     }
@@ -623,7 +623,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * ```
      */
     async interactiveCtaUrl(
-        params: m.MessageRequestParams<m.InteractiveObject & { type: InteractiveTypesEnum.CtaUrl }>,
+        params: m.MessageRequestParams<m.InteractiveObject & { type: InteractiveTypesEnum.CtaUrl | 'cta_url' }>,
     ): Promise<m.MessagesResponse> {
         return this.interactive(params);
     }
@@ -722,7 +722,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * ```
      */
     async interactiveReplyButtons(
-        params: m.MessageRequestParams<m.InteractiveObject & { type: InteractiveTypesEnum.Button }>,
+        params: m.MessageRequestParams<m.InteractiveObject & { type: InteractiveTypesEnum.Button | 'button' }>,
     ): Promise<m.MessagesResponse> {
         return this.interactive(params);
     }
@@ -758,7 +758,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * ```
      */
     async interactiveFlow(
-        params: m.MessageRequestParams<m.InteractiveObject & { type: InteractiveTypesEnum.Flow }>,
+        params: m.MessageRequestParams<m.InteractiveObject & { type: InteractiveTypesEnum.Flow | 'flow' }>,
     ): Promise<m.MessagesResponse> {
         return this.interactive(params);
     }

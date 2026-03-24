@@ -83,7 +83,7 @@ export declare class MessagesClass extends BaseClass {
     sticker(params: MessageRequestParams<import('./media').StickerMediaObject>): Promise<MessagesResponse>;
 
     // Contact messages
-    contacts(params: MessageRequestParams<[import('./contact').ContactObject]>): Promise<MessagesResponse>;
+    contacts(params: MessageRequestParams<import('./contact').ContactObject[]>): Promise<MessagesResponse>;
 
     // Location messages
     location(params: MessageRequestParams<import('./location').LocationObject>): Promise<MessagesResponse>;

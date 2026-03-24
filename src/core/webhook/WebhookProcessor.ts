@@ -162,13 +162,13 @@ export class WebhookProcessor {
         }
     }
 
-    onMessage(type: MessageTypesEnum, handler: MessageHandler): void {
+    onMessage(type: MessageTypesEnum | string, handler: MessageHandler): void {
         if (type === ('statuses' as MessageTypesEnum)) {
             throw new Error(
                 'MessageTypesEnum.Statuses is deprecated. Use onStatus(handler) instead of onMessage(MessageTypesEnum.Statuses, handler)',
             );
         }
-        this.messageHandlers.set(type, handler);
+        this.messageHandlers.set(type as MessageTypesEnum, handler);
         LOGGER.log(`Registered message handler for ${type}`);
     }
 

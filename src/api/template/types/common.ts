@@ -182,7 +182,7 @@ export type TemplateGetParams = {
 };
 
 export type TemplateDeleteParams = {
-    hsm_id: string;
+    hsm_id?: string;
     name: string;
 };
 

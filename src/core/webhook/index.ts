@@ -19,8 +19,44 @@ export type {
     WebhookValue,
     WhatsAppMessage,
 } from './types';
+// Message utilities
+export { extractMessageText } from './utils/extractMessageText';
 // Utils
 export * from './utils/generateXHub256Sig';
+export type {
+    ContactInfo,
+    InteractiveReply,
+    LocationInfo,
+    MediaInfo,
+    OrderInfo,
+    ReactionInfo,
+} from './utils/messageHelpers';
+export {
+    getContactsInfo,
+    getInteractiveReply,
+    getLocationInfo,
+    // Structured extractors
+    getMediaInfo,
+    getOrderInfo,
+    getReactionInfo,
+    isAudioMessage,
+    isButtonMessage,
+    isButtonReply,
+    isContactsMessage,
+    isDocumentMessage,
+    isImageMessage,
+    isInteractiveMessage,
+    isListReply,
+    isLocationMessage,
+    isNfmReply,
+    isOrderMessage,
+    isReactionMessage,
+    isStickerMessage,
+    isSystemMessage,
+    // Type guards
+    isTextMessage,
+    isVideoMessage,
+} from './utils/messageHelpers';
 export type {
     AudioMessageHandler,
     AudioProcessedMessage,
