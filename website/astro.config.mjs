@@ -1,6 +1,7 @@
 import react from '@astrojs/react';
 import sitemap from '@astrojs/sitemap';
 import starlight from '@astrojs/starlight';
+import starlightLlmsTxt from 'starlight-llms-txt';
 import { defineConfig } from 'astro/config';
 
 // https://astro.build/config
@@ -12,6 +13,11 @@ export default defineConfig({
         starlight({
             title: 'meta-cloud-api',
             description: 'TypeScript SDK wrapper for Meta WhatsApp Cloud API',
+            plugins: [
+                starlightLlmsTxt({
+                    projectName: 'meta-cloud-api',
+                }),
+            ],
             logo: {
                 src: './public/logo.svg',
             },
