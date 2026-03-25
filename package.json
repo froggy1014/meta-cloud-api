@@ -1,7 +1,7 @@
 {
     "name": "meta-cloud-api",
     "version": "2.2.0",
-    "description": "TypeScript wrapper for Meta's Cloud API",
+    "description": "TypeScript SDK for Meta's Cloud API",
     "type": "module",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
@@ -64,7 +64,7 @@
         "node-api-client",
         "meta-cloud",
         "whatsapp-messaging",
-        "api-wrapper",
+        "api-sdk",
         "typescript",
         "nodejs",
         "meta",
