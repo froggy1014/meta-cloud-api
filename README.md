@@ -1,69 +1,88 @@
-# meta-cloud-api
+<div align="center">
+  <img src="public/README.svg" alt="meta-cloud-api" width="120">
+  <h1>meta-cloud-api</h1>
+  <p><strong>WhatsApp TypeScript SDK</strong> — type-safe, modular, and production-ready.</p>
+  <p>The complete SDK for the official <a href="https://developers.facebook.com/docs/whatsapp/cloud-api">WhatsApp Business Platform Cloud API</a>.</p>
 
-<div style="display: flex; align-items: center;">
-  <img src="public/README.svg" alt="meta-cloud-api" style="flex: 1; width: 100px;">
-  <div style="flex: 1; padding-left: 20px;">
-    <p>WhatsApp TypeScript SDK — type-safe, modular, and production-ready.</p>
-  </div>
+  [![npm version](https://img.shields.io/npm/v/meta-cloud-api.svg)](https://www.npmjs.com/package/meta-cloud-api)
+  [![npm downloads](https://img.shields.io/npm/dm/meta-cloud-api.svg)](https://www.npmjs.com/package/meta-cloud-api)
+  [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/froggy1014/meta-cloud-api/blob/main/LICENSE)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue.svg)](https://www.typescriptlang.org/)
+
 </div>
 
-[![npm version](https://img.shields.io/npm/v/meta-cloud-api.svg)](https://www.npmjs.com/package/meta-cloud-api)
-[![npm downloads](https://img.shields.io/npm/dm/meta-cloud-api.svg)](https://www.npmjs.com/package/meta-cloud-api)
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/froggy1014/meta-cloud-api/blob/main/LICENSE)
-
-## Resources
-
-- **[📚 Documentation](https://www.meta-cloud-api.site/)** - Complete documentation with guides and examples
-- **[🚀 Getting Started](https://www.meta-cloud-api.site/getting-started/installation)** - Quick start guide
-- **[📖 API Reference](https://www.meta-cloud-api.site/api/messages)** - Comprehensive API documentation
-- **[🔧 Examples](./examples/)** - Production-ready code examples
-
-## Examples
-
-- **[express-simple](./examples/express-simple/)** - Basic Express.js integration
-- **[express-production](./examples/express-production/)** - Production-ready example with conversation flows, database, and queue processing
-- **[nextjs-app-router-example](./examples/nextjs-app-router-example/)** - Next.js App Router integration
-- **[nextjs-page-router-example](./examples/nextjs-page-router-example/)** - Next.js Pages Router integration
-
-## Local API Docs
-
-- [Messages](./docs/messages.md)
-- [Media](./docs/media.md)
-- [Templates](./docs/templates.md)
-- [Flows](./docs/flows.md)
-- [Phone Numbers](./docs/phone-numbers.md)
-- [Business Profile](./docs/business-profile.md)
-- [Registration](./docs/registration.md)
-- [Two-Step Verification](./docs/two-step-verification.md)
-- [Encryption](./docs/encryption.md)
-- [QR Codes](./docs/qr-codes.md)
-- [WABA](./docs/waba.md)
-- [Block Users](./docs/block-users.md)
-- [Calling](./docs/calling.md)
-- [Groups](./docs/groups.md)
-- [Marketing Messages](./docs/marketing-messages.md)
-- [Commerce Settings](./docs/commerce-settings.md)
-- [Payments](./docs/payments.md)
-
-## Features
-
-- **🔒 Type-Safe Development** - Built with TypeScript strict mode for complete type safety and excellent IntelliSense
-- **📦 Comprehensive Coverage** - Full support for 17+ WhatsApp Business Platform APIs including Messages, Media, Templates, Flows, and more
-- **🏗️ Modular Architecture** - Clean separation with dedicated API classes, tree-shakeable imports, and minimal bundle size
-- **🔌 Framework-Specific Webhooks** - Built-in adapters for Express.js and Next.js (App Router & Pages Router)
-- **⚡ Production Ready** - Battle-tested with error handling, retry logic, rate limiting, and comprehensive logging
-- **🎯 Advanced Features** - Support for Flows, End-to-End Encryption, QR Codes, Two-Step Verification, Groups, and WABA management
-- **📚 Excellent Documentation** - Complete documentation site with guides, API reference, and working examples
-- **🧪 Well Tested** - Comprehensive test coverage with unit, integration, and E2E tests
-
-## Installation
+## Quick Start
 
 ```bash
-npm install meta-cloud-api
-# or
-yarn add meta-cloud-api
-# or
 pnpm add meta-cloud-api
+```
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const wa = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN,
+    phoneNumberId: process.env.WA_PHONE_NUMBER_ID,
+});
+
+// Send a text message
+await wa.messages.text({ to: '1234567890', body: 'Hello from TypeScript!' });
+
+// Send a template message
+await wa.messages.template({
+    to: '1234567890',
+    name: 'hello_world',
+    language: { code: 'en_US' },
+});
+
+// Send an image
+await wa.messages.image({ to: '1234567890', link: 'https://example.com/image.png' });
+```
+
+## Why meta-cloud-api?
+
+| | meta-cloud-api |
+|---|---|
+| **Type Safety** | Full TypeScript strict mode — every request and response is typed |
+| **17 API Modules** | Messages, Media, Templates, Flows, Groups, Calling, Payments, and more |
+| **Webhook Adapters** | Built-in support for Express.js and Next.js (App Router & Pages Router) |
+| **Modular** | Tree-shakeable imports, use only what you need |
+| **Production Ready** | Error handling, typed error classes, rate limit support |
+| **Official API** | Built on the official WhatsApp Business Platform Cloud API |
+
+## API Coverage
+
+```
+wa.messages              // Text, image, video, document, audio, sticker, location, contact, template, interactive, reaction
+wa.media                 // Upload, get, delete media
+wa.templates             // Create, list, delete message templates
+wa.flows                 // WhatsApp Flows management
+wa.groups                // Group management
+wa.calling               // Voice calling
+wa.payments              // Payment processing (India)
+wa.businessProfile       // Business profile management
+wa.phoneNumbers          // Phone number management
+wa.commerce              // Commerce settings
+wa.marketingMessages     // Marketing message management
+wa.qrCode               // QR code generation
+wa.registration          // Phone registration
+wa.twoStepVerification   // 2FA management
+wa.encryption            // End-to-end encryption
+wa.blockUsers            // Block/unblock users
+wa.waba                  // WhatsApp Business Account management
+```
+
+## Webhooks
+
+```typescript
+import { createExpressWebhookHandler } from 'meta-cloud-api/webhooks';
+
+app.post('/webhook', createExpressWebhookHandler({
+    verifyToken: process.env.WEBHOOK_VERIFY_TOKEN,
+    onMessage: (message) => {
+        console.log('Received:', message);
+    },
+}));
 ```
 
 ## Requirements
@@ -71,10 +90,26 @@ pnpm add meta-cloud-api
 - **Node.js** 18 LTS or later
 - **TypeScript** 4.5+ (for TypeScript projects)
 
+## Resources
+
+- **[Documentation](https://meta-cloud-api.site/)** — Guides, API reference, and examples
+- **[Getting Started](https://meta-cloud-api.site/getting-started/installation)** — Setup in 5 minutes
+- **[API Reference](https://meta-cloud-api.site/api/messages)** — Every endpoint documented
+- **[Examples](./examples/)** — Express, Next.js App Router, Pages Router
+
+## Examples
+
+| Example | Description |
+|---|---|
+| [express-simple](./examples/express-simple/) | Basic Express.js integration |
+| [express-production](./examples/express-production/) | Production-ready with conversation flows, DB, and queues |
+| [nextjs-app-router](./examples/nextjs-app-router-example/) | Next.js App Router integration |
+| [nextjs-pages-router](./examples/nextjs-page-router-example/) | Next.js Pages Router integration |
+
 ## Contributing
 
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License - see the [LICENSE](LICENSE) file for details.
