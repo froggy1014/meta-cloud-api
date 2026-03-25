@@ -1,6 +1,6 @@
 # meta-cloud-api
 
-> TypeScript SDK for WhatsApp Cloud API
+> WhatsApp TypeScript SDK
 
 meta-cloud-api provides a type-safe, comprehensive, and modular way to integrate WhatsApp Business Platform into Node.js applications.
 

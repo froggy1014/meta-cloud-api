@@ -3,7 +3,7 @@
 <div style="display: flex; align-items: center;">
   <img src="public/README.svg" alt="meta-cloud-api" style="flex: 1; width: 100px;">
   <div style="flex: 1; padding-left: 20px;">
-    <p>The TypeScript SDK for WhatsApp Cloud API — type-safe, modular, and production-ready.</p>
+    <p>WhatsApp TypeScript SDK — type-safe, modular, and production-ready.</p>
   </div>
 </div>
 

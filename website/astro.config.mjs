@@ -12,7 +12,7 @@ export default defineConfig({
         sitemap(),
         starlight({
             title: 'meta-cloud-api',
-            description: 'TypeScript SDK for WhatsApp Cloud API',
+            description: 'WhatsApp TypeScript SDK',
             plugins: [
                 starlightLlmsTxt({
                     projectName: 'meta-cloud-api',
