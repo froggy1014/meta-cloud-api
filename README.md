@@ -9,6 +9,8 @@
   [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/froggy1014/meta-cloud-api/blob/main/LICENSE)
   [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue.svg)](https://www.typescriptlang.org/)
 
+  <p><a href="https://meta-cloud-api.site/">Docs</a> · <a href="https://playground.meta-cloud-api.site/">Playground</a> · <a href="https://meta-cloud-api.site/getting-started/installation">Getting Started</a></p>
+
 </div>
 
 ## Quick Start
