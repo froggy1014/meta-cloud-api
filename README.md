@@ -1,9 +1,9 @@
-# Meta Cloud API
+# meta-cloud-api
 
 <div style="display: flex; align-items: center;">
-  <img src="public/README.svg" alt="Meta Cloud API" style="flex: 1; width: 100px;">
+  <img src="public/README.svg" alt="meta-cloud-api" style="flex: 1; width: 100px;">
   <div style="flex: 1; padding-left: 20px;">
-    <p>Meta Cloud API - A powerful TypeScript SDK for Meta's Cloud API, providing a clean and type-safe interface for WhatsApp Business Platform integration.</p>
+    <p>The TypeScript SDK for WhatsApp Cloud API — type-safe, modular, and production-ready.</p>
   </div>
 </div>
 

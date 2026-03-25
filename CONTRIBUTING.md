@@ -1,10 +1,10 @@
-# Contributing to Meta Cloud API
+# Contributing to meta-cloud-api
 
-Thank you for your interest in contributing to Meta Cloud API! This document provides guidelines and instructions for contributing to this project.
+Thank you for your interest in contributing to meta-cloud-api! This document provides guidelines and instructions for contributing to this project.
 
 ## Table of Contents
 
-- [Contributing to Meta Cloud API](#contributing-to-meta-cloud-api)
+- [Contributing to meta-cloud-api](#contributing-to-meta-cloud-api)
   - [Table of Contents](#table-of-contents)
   - [Code of Conduct](#code-of-conduct)
   - [Getting Started](#getting-started)
@@ -176,4 +176,4 @@ For feature requests:
 - GitHub Issues: For bug reports and feature discussions
 - Pull Requests: For code review discussions
 
-Thank you for contributing to Meta Cloud API!
+Thank you for contributing to meta-cloud-api!

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-TypeScript SDK for Meta's WhatsApp Cloud API. Published npm package providing type-safe WhatsApp Business Platform integration.
+TypeScript SDK for WhatsApp Cloud API. Published npm package providing type-safe WhatsApp Business Platform integration.
 
 ## Commands
 
