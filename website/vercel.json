@@ -2,5 +2,13 @@
     "buildCommand": "pnpm build",
     "outputDirectory": "dist",
     "framework": "astro",
-    "devCommand": "pnpm dev"
+    "devCommand": "pnpm dev",
+    "redirects": [
+        {
+            "source": "/:path(.*)",
+            "has": [{ "type": "host", "value": "meta-cloud-api.xyz" }],
+            "destination": "https://meta-cloud-api.site/:path",
+            "permanent": true
+        }
+    ]
 }
