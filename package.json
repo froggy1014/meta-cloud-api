@@ -78,7 +78,7 @@
     "author": "froggy1014",
     "license": "MIT",
     "packageManager": "pnpm@10.11.0",
-    "homepage": "https://github.com/froggy1014/meta-cloud-api#readme",
+    "homepage": "https://meta-cloud-api.site",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/froggy1014/meta-cloud-api.git"
