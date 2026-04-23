@@ -17,6 +17,7 @@ import { BaseAPI } from '../../types/base';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
 import type { ResponseSuccess } from '../../types/request';
 import { objectToQueryString } from '../../utils/objectToQueryString';
+import { assertNonEmpty } from '../../utils/validate';
 
 import type * as groups from './types';
 
@@ -232,6 +233,7 @@ export default class GroupsApi extends BaseAPI implements groups.GroupsClass {
      * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/groups/reference/
      */
     async removeParticipants(groupId: string, participants: string[]): Promise<ResponseSuccess> {
+        assertNonEmpty(participants, 'participants');
         const body = {
             messaging_product: 'whatsapp',
             participants: participants.map((user) => ({ user })),

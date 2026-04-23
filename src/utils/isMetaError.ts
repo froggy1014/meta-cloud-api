@@ -228,6 +228,17 @@ export class WhatsAppUnknownError extends WhatsAppError {
 }
 
 /**
+ * Thrown when an API method receives invalid input (e.g., malformed phone number,
+ * empty required array). This error is thrown client-side before any API call is made.
+ */
+export class WhatsAppValidationError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = 'WhatsAppValidationError';
+    }
+}
+
+/**
  * Determines if the error is a Meta API error response
  * @param error Any error object to check
  * @returns Type guard indicating if error is a Meta API error

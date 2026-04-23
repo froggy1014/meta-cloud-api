@@ -65,6 +65,7 @@ export default class WhatsApp {
             this.config[SDKEnums.WabaConfigEnum.AccessToken],
             this.config[SDKEnums.WabaConfigEnum.BusinessAcctId],
             this.getUserAgent(),
+            this.config.retry,
         );
 
         this.blockUsers = new BlockUsersApi(this.config, this.requester);

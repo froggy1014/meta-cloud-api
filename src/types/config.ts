@@ -1,5 +1,40 @@
 import { WabaConfigEnum } from './enums';
 
+/**
+ * Configuration for automatic retry behavior on throttling errors.
+ *
+ * When the WhatsApp API returns a rate limit error (WhatsAppThrottlingError),
+ * the SDK will automatically retry the request using exponential backoff.
+ *
+ * @example
+ * ```typescript
+ * const wa = new WhatsApp({
+ *   accessToken: '...',
+ *   phoneNumberId: 123,
+ *   retry: { maxAttempts: 3, backoff: 'exponential', initialDelayMs: 1000 },
+ * });
+ * ```
+ */
+export interface RetryConfig {
+    /**
+     * Maximum number of attempts (including the initial attempt).
+     * Defaults to 3.
+     */
+    maxAttempts?: number;
+    /**
+     * Backoff strategy.
+     * - 'exponential': delay doubles each attempt (1s → 2s → 4s)
+     * - 'fixed': constant delay between attempts
+     * Defaults to 'exponential'.
+     */
+    backoff?: 'exponential' | 'fixed';
+    /**
+     * Initial delay in milliseconds before the first retry.
+     * Defaults to 1000 (1 second).
+     */
+    initialDelayMs?: number;
+}
+
 export type WhatsAppConfig = {
     accessToken: string;
     appId?: string;
@@ -15,6 +50,8 @@ export type WhatsAppConfig = {
     requestTimeout?: number;
     privatePem?: string;
     passphrase?: string;
+    /** Automatic retry configuration for throttling errors. */
+    retry?: RetryConfig;
 };
 
 export type WabaConfigType = {
@@ -86,4 +123,10 @@ export type WabaConfigType = {
      * The passphrase for the Meta for Developers business.
      */
     [WabaConfigEnum.Passphrase]: string;
+
+    /**
+     * Automatic retry configuration for throttling errors.
+     * Passed through from WhatsAppConfig.
+     */
+    retry?: RetryConfig;
 };

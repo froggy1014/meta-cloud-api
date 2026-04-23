@@ -8,6 +8,7 @@
 import { BaseAPI } from '../../types/base';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
 import { objectToQueryString } from '../../utils/objectToQueryString';
+import { assertNonEmpty } from '../../utils/validate';
 import type * as blockUsers from './types/blockUsers';
 
 /**
@@ -64,9 +65,7 @@ export default class BlockUsersApi extends BaseAPI implements blockUsers.BlockUs
      * ```
      */
     async block(users: string[]): Promise<blockUsers.BlockUsersResponse> {
-        if (!users || users.length === 0) {
-            throw new Error('At least one user must be provided to block');
-        }
+        assertNonEmpty(users, 'users');
 
         const body = this.buildBlockUsersBody(users);
 
@@ -98,9 +97,7 @@ export default class BlockUsersApi extends BaseAPI implements blockUsers.BlockUs
      * ```
      */
     async unblock(users: string[]): Promise<blockUsers.BlockUsersResponse> {
-        if (!users || users.length === 0) {
-            throw new Error('At least one user must be provided to unblock');
-        }
+        assertNonEmpty(users, 'users');
 
         const body = this.buildBlockUsersBody(users);
 

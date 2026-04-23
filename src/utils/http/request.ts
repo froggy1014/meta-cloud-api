@@ -1,3 +1,4 @@
+import type { RetryConfig } from '../../types/config';
 import type { HttpMethodsEnum } from '../../types/enums';
 import type { RequesterClass } from '../../types/request';
 import {
@@ -6,12 +7,20 @@ import {
     normalizeMetaError,
     WhatsAppError,
     WhatsAppNetworkError,
+    WhatsAppThrottlingError,
 } from '../isMetaError';
 import Logger from '../logger';
 import HttpsClient from './httpsClient';
 
 const LIB_NAME = 'REQUESTER';
 const LOGGER = new Logger(LIB_NAME, process.env.DEBUG === 'true');
+
+const DEFAULT_MAX_ATTEMPTS = 3;
+const DEFAULT_INITIAL_DELAY_MS = 1000;
+
+function sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 export default class Requester implements RequesterClass {
     client: Readonly<HttpsClient>;
@@ -22,6 +31,7 @@ export default class Requester implements RequesterClass {
     userAgent: Readonly<string>;
     host: Readonly<string>;
     protocol: Readonly<string> = 'https:';
+    private retryConfig: RetryConfig | undefined;
 
     constructor(
         apiVersion: string,
@@ -29,6 +39,7 @@ export default class Requester implements RequesterClass {
         accessToken: string,
         businessAcctId: string,
         userAgent: string,
+        retryConfig?: RetryConfig,
     ) {
         this.client = new HttpsClient();
         this.host = 'graph.facebook.com';
@@ -37,6 +48,7 @@ export default class Requester implements RequesterClass {
         this.accessToken = accessToken;
         this.businessAcctId = businessAcctId;
         this.userAgent = userAgent;
+        this.retryConfig = retryConfig;
     }
 
     buildHeader(contentType: string, additionalHeaders?: Record<string, string>): HeadersInit {
@@ -68,6 +80,10 @@ export default class Requester implements RequesterClass {
         contentType: string = 'application/json',
         additionalHeaders?: Record<string, string>,
     ) {
+        const maxAttempts = this.retryConfig?.maxAttempts ?? DEFAULT_MAX_ATTEMPTS;
+        const initialDelayMs = this.retryConfig?.initialDelayMs ?? DEFAULT_INITIAL_DELAY_MS;
+        const backoff = this.retryConfig?.backoff ?? 'exponential';
+
         let effectiveContentType = contentType;
 
         if (body instanceof FormData) {
@@ -77,45 +93,61 @@ export default class Requester implements RequesterClass {
         }
 
         const path = `${this.protocol.toLowerCase()}//${this.host}/${this.buildCAPIPath(endpoint)}`;
-
         LOGGER.log(`${method} : ${path} (${effectiveContentType})`);
 
-        try {
-            const shouldSendBody = method === 'POST' || method === 'PUT' || method === 'DELETE';
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                const shouldSendBody = method === 'POST' || method === 'PUT' || method === 'DELETE';
 
-            const response = await this.client.sendRequest(
-                this.host,
-                this.buildCAPIPath(endpoint),
-                method,
-                this.buildHeader(effectiveContentType, additionalHeaders),
-                timeout,
-                shouldSendBody ? body : undefined,
-            );
+                const response = await this.client.sendRequest(
+                    this.host,
+                    this.buildCAPIPath(endpoint),
+                    method,
+                    this.buildHeader(effectiveContentType, additionalHeaders),
+                    timeout,
+                    shouldSendBody ? body : undefined,
+                );
 
-            if (!response.rawResponse().ok) {
-                let errorData: unknown = null;
-                try {
-                    errorData = await response.json();
-                } catch {
-                    errorData = null;
+                if (!response.rawResponse().ok) {
+                    let errorData: unknown = null;
+                    try {
+                        errorData = await response.json();
+                    } catch {
+                        errorData = null;
+                    }
+
+                    const metaError = normalizeMetaError(errorData, response.statusCode());
+                    throw createWhatsAppApiError(metaError.error, response.statusCode());
                 }
 
-                const metaError = normalizeMetaError(errorData, response.statusCode());
-                throw createWhatsAppApiError(metaError.error, response.statusCode());
-            }
+                return response;
+            } catch (error) {
+                if (error instanceof WhatsAppThrottlingError && attempt < maxAttempts) {
+                    const delay = backoff === 'exponential' ? initialDelayMs * 2 ** (attempt - 1) : initialDelayMs;
+                    LOGGER.log(`Throttled (attempt ${attempt}/${maxAttempts}). Retrying in ${delay}ms...`);
+                    await sleep(delay);
+                    continue;
+                }
 
-            return response;
-        } catch (error) {
-            if (error instanceof WhatsAppError) {
-                throw error;
-            }
-            if (isMetaError(error)) {
-                throw createWhatsAppApiError(error.error);
-            }
+                if (error instanceof WhatsAppError) {
+                    throw error;
+                }
+                if (isMetaError(error)) {
+                    throw createWhatsAppApiError(error.error);
+                }
 
-            const message = error instanceof Error ? error.message : 'Network error occurred';
-            throw new WhatsAppNetworkError(message, error);
+                const message = error instanceof Error ? error.message : 'Network error occurred';
+                throw new WhatsAppNetworkError(message, error);
+            }
         }
+
+        // Unreachable in practice — loop always returns or throws.
+        // Required for TypeScript return type inference.
+        throw new WhatsAppThrottlingError(
+            'Max retry attempts exceeded',
+            { message: 'Max retry attempts exceeded', type: 'ThrottlingError', code: 130429, fbtrace_id: '' },
+            429,
+        );
     }
 
     async getJson<T>(
@@ -148,7 +180,6 @@ export default class Requester implements RequesterClass {
     }
 
     updateTimeout(timeout: number): void {
-        // Timeout is passed per-request from config, this is a no-op anchor for interface compliance
         LOGGER.log(`Timeout updated to ${timeout}ms`);
     }
 

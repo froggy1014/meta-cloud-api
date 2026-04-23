@@ -11,7 +11,7 @@ import {
     MessageTypesEnum,
     WabaConfigEnum,
 } from '../../types/enums';
-
+import { assertPhoneNumber } from '../../utils/validate';
 import type * as m from './types';
 
 /**
@@ -122,6 +122,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
         to: string,
         replyMessageId?: string,
     ) {
+        assertPhoneNumber(to);
         const body: m.MessageRequestBody<T> = {
             messaging_product: 'whatsapp',
             recipient_type: 'individual',
