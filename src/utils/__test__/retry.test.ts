@@ -5,6 +5,7 @@ import { WhatsAppNetworkError, WhatsAppThrottlingError } from '../isMetaError';
 
 function makeThrottlingError(): WhatsAppThrottlingError {
     return new WhatsAppThrottlingError(
+        'Rate limit exceeded',
         { message: 'Rate limit exceeded', type: 'OAuthException', code: 130429, fbtrace_id: 'trace123' },
         429,
     );

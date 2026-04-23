@@ -45,6 +45,7 @@ export {
     WhatsAppSendMessageError,
     WhatsAppThrottlingError,
     WhatsAppUnknownError,
+    WhatsAppValidationError,
 } from './isMetaError';
 export { default as Logger } from './logger';
 export { objectToQueryString } from './objectToQueryString';

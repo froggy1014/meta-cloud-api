@@ -22,15 +22,17 @@ export function assertPhoneNumber(phone: string): void {
 
 /**
  * Asserts that an array is non-empty.
+ * Also guards against null/undefined to preserve backward compatibility
+ * with callers that may pass untyped values.
  *
- * @throws WhatsAppValidationError if the array is empty
+ * @throws WhatsAppValidationError if the array is null, undefined, or empty
  *
  * @example
  * assertNonEmpty(['user1'], 'users'); // ok
  * assertNonEmpty([], 'users');        // throws
  */
-export function assertNonEmpty<T>(arr: T[], name: string): void {
-    if (arr.length === 0) {
+export function assertNonEmpty<T>(arr: T[] | null | undefined, name: string): void {
+    if (!arr || arr.length === 0) {
         throw new WhatsAppValidationError(`"${name}" must contain at least one item.`);
     }
 }
