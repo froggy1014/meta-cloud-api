@@ -8,22 +8,35 @@ import { WhatsApp } from '../whatsapp';
 import {
     type AccountAlertsHandler,
     type AccountReviewUpdateHandler,
+    type AccountSettingsUpdateHandler,
     type AccountUpdateHandler,
     type AudioMessageHandler,
+    type AutomaticEventsHandler,
     type BusinessCapabilityUpdateHandler,
+    type BusinessStatusUpdateHandler,
     type ButtonMessageHandler,
+    type CallsHandler,
     type ContactsMessageHandler,
     type DocumentMessageHandler,
     type FlowHandler,
     type FlowsHandler,
+    type GroupLifecycleUpdateHandler,
+    type GroupParticipantsUpdateHandler,
+    type GroupSettingsUpdateHandler,
+    type GroupStatusUpdateHandler,
     type HistoryHandler,
     type ImageMessageHandler,
     type InteractiveMessageHandler,
     type LocationMessageHandler,
+    type MessageEchoesHandler,
     type MessageHandler,
+    type MessageTemplateComponentsUpdateHandler,
     type MessageTemplateQualityUpdateHandler,
     type MessageTemplateStatusUpdateHandler,
+    type MessagingHandoversHandler,
     type OrderMessageHandler,
+    type PartnerSolutionsHandler,
+    type PaymentConfigurationUpdateHandler,
     type PhoneNumberNameUpdateHandler,
     type PhoneNumberQualityUpdateHandler,
     processFlowRequest,
@@ -32,11 +45,15 @@ import {
     type SecurityHandler,
     type SmbAppStateSyncHandler,
     type SmbMessageEchoesHandler,
+    type StandbyHandler,
     type StatusHandler,
     type StickerMessageHandler,
     type SystemMessageHandler,
     type TemplateCategoryUpdateHandler,
+    type TemplateCorrectCategoryDetectionHandler,
     type TextMessageHandler,
+    type TrackingEventsHandler,
+    type UserPreferencesHandler,
     type VideoMessageHandler,
 } from './utils/webhookUtils';
 
@@ -72,6 +89,23 @@ export class WebhookProcessor {
     private historyHandler: HistoryHandler | undefined = undefined;
     private smbMessageEchoesHandler: SmbMessageEchoesHandler | undefined = undefined;
     private smbAppStateSyncHandler: SmbAppStateSyncHandler | undefined = undefined;
+    private accountSettingsUpdateHandler: AccountSettingsUpdateHandler | undefined = undefined;
+    private automaticEventsHandler: AutomaticEventsHandler | undefined = undefined;
+    private businessStatusUpdateHandler: BusinessStatusUpdateHandler | undefined = undefined;
+    private callsHandler: CallsHandler | undefined = undefined;
+    private groupLifecycleUpdateHandler: GroupLifecycleUpdateHandler | undefined = undefined;
+    private groupParticipantsUpdateHandler: GroupParticipantsUpdateHandler | undefined = undefined;
+    private groupSettingsUpdateHandler: GroupSettingsUpdateHandler | undefined = undefined;
+    private groupStatusUpdateHandler: GroupStatusUpdateHandler | undefined = undefined;
+    private messageEchoesHandler: MessageEchoesHandler | undefined = undefined;
+    private messageTemplateComponentsUpdateHandler: MessageTemplateComponentsUpdateHandler | undefined = undefined;
+    private messagingHandoversHandler: MessagingHandoversHandler | undefined = undefined;
+    private partnerSolutionsHandler: PartnerSolutionsHandler | undefined = undefined;
+    private paymentConfigurationUpdateHandler: PaymentConfigurationUpdateHandler | undefined = undefined;
+    private standbyHandler: StandbyHandler | undefined = undefined;
+    private templateCorrectCategoryDetectionHandler: TemplateCorrectCategoryDetectionHandler | undefined = undefined;
+    private trackingEventsHandler: TrackingEventsHandler | undefined = undefined;
+    private userPreferencesHandler: UserPreferencesHandler | undefined = undefined;
 
     constructor(config: WhatsAppConfig) {
         this.config = importConfig(config);
@@ -121,6 +155,23 @@ export class WebhookProcessor {
                 historyHandler: this.historyHandler,
                 smbMessageEchoesHandler: this.smbMessageEchoesHandler,
                 smbAppStateSyncHandler: this.smbAppStateSyncHandler,
+                accountSettingsUpdateHandler: this.accountSettingsUpdateHandler,
+                automaticEventsHandler: this.automaticEventsHandler,
+                businessStatusUpdateHandler: this.businessStatusUpdateHandler,
+                callsHandler: this.callsHandler,
+                groupLifecycleUpdateHandler: this.groupLifecycleUpdateHandler,
+                groupParticipantsUpdateHandler: this.groupParticipantsUpdateHandler,
+                groupSettingsUpdateHandler: this.groupSettingsUpdateHandler,
+                groupStatusUpdateHandler: this.groupStatusUpdateHandler,
+                messageEchoesHandler: this.messageEchoesHandler,
+                messageTemplateComponentsUpdateHandler: this.messageTemplateComponentsUpdateHandler,
+                messagingHandoversHandler: this.messagingHandoversHandler,
+                partnerSolutionsHandler: this.partnerSolutionsHandler,
+                paymentConfigurationUpdateHandler: this.paymentConfigurationUpdateHandler,
+                standbyHandler: this.standbyHandler,
+                templateCorrectCategoryDetectionHandler: this.templateCorrectCategoryDetectionHandler,
+                trackingEventsHandler: this.trackingEventsHandler,
+                userPreferencesHandler: this.userPreferencesHandler,
             });
 
             const body = await webResponse.text();
@@ -442,6 +493,148 @@ export class WebhookProcessor {
     onSmbAppStateSync(handler: SmbAppStateSyncHandler): void {
         this.smbAppStateSyncHandler = handler;
         LOGGER.log('Registered smb_app_state_sync handler');
+    }
+
+    /**
+     * Register a handler for account_settings_update webhook field
+     */
+    onAccountSettingsUpdate(handler: AccountSettingsUpdateHandler): void {
+        this.accountSettingsUpdateHandler = handler;
+        LOGGER.log('Registered account_settings_update handler');
+    }
+
+    /**
+     * Register a handler for automatic_events webhook field
+     */
+    onAutomaticEvents(handler: AutomaticEventsHandler): void {
+        this.automaticEventsHandler = handler;
+        LOGGER.log('Registered automatic_events handler');
+    }
+
+    /**
+     * Register a handler for business_status_update webhook field
+     */
+    onBusinessStatusUpdate(handler: BusinessStatusUpdateHandler): void {
+        this.businessStatusUpdateHandler = handler;
+        LOGGER.log('Registered business_status_update handler');
+    }
+
+    /**
+     * Register a handler for calls webhook field
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/calling/reference/
+     */
+    onCalls(handler: CallsHandler): void {
+        this.callsHandler = handler;
+        LOGGER.log('Registered calls handler');
+    }
+
+    /**
+     * Register a handler for group_lifecycle_update webhook field
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/groups/reference/
+     */
+    onGroupLifecycleUpdate(handler: GroupLifecycleUpdateHandler): void {
+        this.groupLifecycleUpdateHandler = handler;
+        LOGGER.log('Registered group_lifecycle_update handler');
+    }
+
+    /**
+     * Register a handler for group_participants_update webhook field
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/groups/reference/
+     */
+    onGroupParticipantsUpdate(handler: GroupParticipantsUpdateHandler): void {
+        this.groupParticipantsUpdateHandler = handler;
+        LOGGER.log('Registered group_participants_update handler');
+    }
+
+    /**
+     * Register a handler for group_settings_update webhook field
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/groups/reference/
+     */
+    onGroupSettingsUpdate(handler: GroupSettingsUpdateHandler): void {
+        this.groupSettingsUpdateHandler = handler;
+        LOGGER.log('Registered group_settings_update handler');
+    }
+
+    /**
+     * Register a handler for group_status_update webhook field
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/groups/reference/
+     */
+    onGroupStatusUpdate(handler: GroupStatusUpdateHandler): void {
+        this.groupStatusUpdateHandler = handler;
+        LOGGER.log('Registered group_status_update handler');
+    }
+
+    /**
+     * Register a handler for message_echoes webhook field
+     * @see https://developers.facebook.com/docs/graph-api/webhooks/reference/whatsapp-business-account#message_echoes
+     */
+    onMessageEchoes(handler: MessageEchoesHandler): void {
+        this.messageEchoesHandler = handler;
+        LOGGER.log('Registered message_echoes handler');
+    }
+
+    /**
+     * Register a handler for message_template_components_update webhook field
+     */
+    onMessageTemplateComponentsUpdate(handler: MessageTemplateComponentsUpdateHandler): void {
+        this.messageTemplateComponentsUpdateHandler = handler;
+        LOGGER.log('Registered message_template_components_update handler');
+    }
+
+    /**
+     * Register a handler for messaging_handovers webhook field
+     */
+    onMessagingHandovers(handler: MessagingHandoversHandler): void {
+        this.messagingHandoversHandler = handler;
+        LOGGER.log('Registered messaging_handovers handler');
+    }
+
+    /**
+     * Register a handler for partner_solutions webhook field
+     */
+    onPartnerSolutions(handler: PartnerSolutionsHandler): void {
+        this.partnerSolutionsHandler = handler;
+        LOGGER.log('Registered partner_solutions handler');
+    }
+
+    /**
+     * Register a handler for payment_configuration_update webhook field
+     */
+    onPaymentConfigurationUpdate(handler: PaymentConfigurationUpdateHandler): void {
+        this.paymentConfigurationUpdateHandler = handler;
+        LOGGER.log('Registered payment_configuration_update handler');
+    }
+
+    /**
+     * Register a handler for standby webhook field
+     */
+    onStandby(handler: StandbyHandler): void {
+        this.standbyHandler = handler;
+        LOGGER.log('Registered standby handler');
+    }
+
+    /**
+     * Register a handler for template_correct_category_detection webhook field
+     */
+    onTemplateCorrectCategoryDetection(handler: TemplateCorrectCategoryDetectionHandler): void {
+        this.templateCorrectCategoryDetectionHandler = handler;
+        LOGGER.log('Registered template_correct_category_detection handler');
+    }
+
+    /**
+     * Register a handler for tracking_events webhook field
+     */
+    onTrackingEvents(handler: TrackingEventsHandler): void {
+        this.trackingEventsHandler = handler;
+        LOGGER.log('Registered tracking_events handler');
+    }
+
+    /**
+     * Register a handler for user_preferences webhook field
+     */
+    onUserPreferences(handler: UserPreferencesHandler): void {
+        this.userPreferencesHandler = handler;
+        LOGGER.log('Registered user_preferences handler');
     }
 
     getClient(): WhatsApp {

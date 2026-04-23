@@ -3,32 +3,56 @@
 export * from './account';
 export * from './appStateSync';
 export * from './business';
+export * from './calls';
 export * from './common';
 export * from './flows';
+export * from './groups';
 export * from './history';
+export * from './marketing';
 export * from './message';
 export * from './messageEchoes';
+export * from './messaging';
+export * from './partner';
+export * from './payments';
 export * from './phoneNumber';
 export * from './security';
 export * from './status';
 export * from './template';
 
-import type { AccountAlertsWebhookValue, AccountReviewUpdateWebhookValue, AccountUpdateWebhookValue } from './account';
+import type {
+    AccountAlertsWebhookValue,
+    AccountReviewUpdateWebhookValue,
+    AccountSettingsUpdateWebhookValue,
+    AccountUpdateWebhookValue,
+} from './account';
 import type { SmbAppStateSyncWebhookValue } from './appStateSync';
-import type { BusinessCapabilityUpdateWebhookValue } from './business';
+import type { BusinessCapabilityUpdateWebhookValue, BusinessStatusUpdateWebhookValue } from './business';
+import type { CallsWebhookValue } from './calls';
 // Import types needed for WebhookValue
 import type { WebhookContact, WebhookError, WebhookMetadata } from './common';
 import type { FlowsWebhookValue } from './flows';
+import type {
+    GroupLifecycleUpdateWebhookValue,
+    GroupParticipantsUpdateWebhookValue,
+    GroupSettingsUpdateWebhookValue,
+    GroupStatusUpdateWebhookValue,
+} from './groups';
 import type { HistoryWebhookValue } from './history';
+import type { AutomaticEventsWebhookValue, TrackingEventsWebhookValue } from './marketing';
 import type { WhatsAppMessage } from './message';
-import type { SmbMessageEchoesWebhookValue } from './messageEchoes';
+import type { MessageEchoesWebhookValue, SmbMessageEchoesWebhookValue } from './messageEchoes';
+import type { MessagingHandoversWebhookValue, StandbyWebhookValue, UserPreferencesWebhookValue } from './messaging';
+import type { PartnerSolutionsWebhookValue } from './partner';
+import type { PaymentConfigurationUpdateWebhookValue } from './payments';
 import type { PhoneNumberNameUpdateWebhookValue, PhoneNumberQualityUpdateWebhookValue } from './phoneNumber';
 import type { SecurityWebhookValue } from './security';
 import type { StatusWebhook } from './status';
 import type {
+    MessageTemplateComponentsUpdateWebhookValue,
     MessageTemplateQualityUpdateWebhookValue,
     MessageTemplateStatusUpdateWebhookValue,
     TemplateCategoryUpdateWebhookValue,
+    TemplateCorrectCategoryDetectionWebhookValue,
 } from './template';
 
 // ============================================================================
@@ -75,17 +99,34 @@ export type WebhookFieldValue =
     | AccountUpdateWebhookValue
     | AccountReviewUpdateWebhookValue
     | AccountAlertsWebhookValue
+    | AccountSettingsUpdateWebhookValue
+    | AutomaticEventsWebhookValue
     | BusinessCapabilityUpdateWebhookValue
+    | BusinessStatusUpdateWebhookValue
+    | CallsWebhookValue
+    | FlowsWebhookValue
+    | GroupLifecycleUpdateWebhookValue
+    | GroupParticipantsUpdateWebhookValue
+    | GroupSettingsUpdateWebhookValue
+    | GroupStatusUpdateWebhookValue
+    | HistoryWebhookValue
+    | MessageEchoesWebhookValue
+    | MessageTemplateComponentsUpdateWebhookValue
+    | MessageTemplateQualityUpdateWebhookValue
+    | MessageTemplateStatusUpdateWebhookValue
+    | MessagingHandoversWebhookValue
+    | PartnerSolutionsWebhookValue
+    | PaymentConfigurationUpdateWebhookValue
     | PhoneNumberNameUpdateWebhookValue
     | PhoneNumberQualityUpdateWebhookValue
-    | MessageTemplateStatusUpdateWebhookValue
-    | TemplateCategoryUpdateWebhookValue
-    | MessageTemplateQualityUpdateWebhookValue
-    | FlowsWebhookValue
     | SecurityWebhookValue
-    | HistoryWebhookValue
+    | SmbAppStateSyncWebhookValue
     | SmbMessageEchoesWebhookValue
-    | SmbAppStateSyncWebhookValue;
+    | StandbyWebhookValue
+    | TemplateCategoryUpdateWebhookValue
+    | TemplateCorrectCategoryDetectionWebhookValue
+    | TrackingEventsWebhookValue
+    | UserPreferencesWebhookValue;
 
 // ============================================================================
 // Top-Level Webhook Structure
