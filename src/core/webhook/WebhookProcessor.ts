@@ -4,7 +4,7 @@ import type { WabaConfigType, WhatsAppConfig } from '../../types/config';
 import { MessageTypesEnum } from '../../types/enums';
 import Logger from '../../utils/logger';
 import { WhatsApp } from '../whatsapp';
-
+import type { WebhookFieldType } from './types';
 import {
     type AccountAlertsHandler,
     type AccountReviewUpdateHandler,
@@ -41,6 +41,7 @@ import {
     type PhoneNumberQualityUpdateHandler,
     processFlowRequest,
     processWebhookMessages,
+    type RawWebhookHandler,
     type ReactionMessageHandler,
     type SecurityHandler,
     type SmbAppStateSyncHandler,
@@ -72,6 +73,7 @@ export class WebhookProcessor {
     private statusHandler: StatusHandler | undefined = undefined;
     private preProcessHandler: MessageHandler | undefined = undefined;
     private postProcessHandler: MessageHandler | undefined = undefined;
+    private rawHandler: { handler: RawWebhookHandler; fields?: WebhookFieldType[] } | undefined = undefined;
     private flowHandlers: Map<FlowTypeEnum, FlowHandler> = new Map();
 
     // Webhook field handlers
@@ -140,6 +142,8 @@ export class WebhookProcessor {
                 statusHandler: this.statusHandler,
                 preProcessHandler: this.preProcessHandler,
                 postProcessHandler: this.postProcessHandler,
+                rawHandler: this.rawHandler?.handler,
+                rawHandlerFields: this.rawHandler?.fields,
                 // Webhook field handlers
                 accountUpdateHandler: this.accountUpdateHandler,
                 accountReviewUpdateHandler: this.accountReviewUpdateHandler,
@@ -236,6 +240,11 @@ export class WebhookProcessor {
     onMessagePostProcess(handler: MessageHandler): void {
         this.postProcessHandler = handler;
         LOGGER.log('Registered post-process handler');
+    }
+
+    onRaw(handler: RawWebhookHandler, fields?: WebhookFieldType[]): void {
+        this.rawHandler = { handler, fields };
+        LOGGER.log(`Registered raw webhook handler${fields ? ` for fields: ${fields.join(', ')}` : ''}`);
     }
 
     onFlow(type: FlowTypeEnum, handler: FlowHandler): void {

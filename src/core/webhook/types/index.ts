@@ -18,6 +18,7 @@ export * from './phoneNumber';
 export * from './security';
 export * from './status';
 export * from './template';
+export * from './webhookFields';
 
 import type {
     AccountAlertsWebhookValue,

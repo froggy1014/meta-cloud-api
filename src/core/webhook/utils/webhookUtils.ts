@@ -43,6 +43,8 @@ import type {
     TemplateCorrectCategoryDetectionWebhookValue,
     TrackingEventsWebhookValue,
     UserPreferencesWebhookValue,
+    WebhookFieldType,
+    WebhookPayload,
     WebhookValue,
     WhatsAppMessage,
 } from '../types';
@@ -291,6 +293,7 @@ export type SystemProcessedMessage = ProcessedMessage & {
 export type MessageHandler = (whatsapp: WhatsApp, processed: ProcessedMessage) => void | Promise<void>;
 export type StatusHandler = (whatsapp: WhatsApp, processed: ProcessedStatus) => void | Promise<void>;
 export type FlowHandler = (whatsapp: WhatsApp, request: FlowEndpointRequest) => any | Promise<any>;
+export type RawWebhookHandler = (whatsapp: WhatsApp, payload: WebhookPayload) => void | Promise<void>;
 
 // Webhook field handlers
 export type AccountUpdateHandler = (whatsapp: WhatsApp, processed: ProcessedAccountUpdate) => void | Promise<void>;
@@ -411,6 +414,8 @@ export async function processWebhookMessages(
         statusHandler?: StatusHandler;
         preProcessHandler?: MessageHandler;
         postProcessHandler?: MessageHandler;
+        rawHandler?: RawWebhookHandler;
+        rawHandlerFields?: WebhookFieldType[];
         // Webhook field handlers
         accountUpdateHandler?: AccountUpdateHandler;
         accountReviewUpdateHandler?: AccountReviewUpdateHandler;
@@ -447,6 +452,32 @@ export async function processWebhookMessages(
 ): Promise<Response> {
     try {
         const body = await request.json();
+
+        if (handlers.rawHandler) {
+            const { rawHandler, rawHandlerFields } = handlers;
+            let payload = body as WebhookPayload;
+            if (rawHandlerFields && rawHandlerFields.length > 0) {
+                const filtered: WebhookPayload = {
+                    ...payload,
+                    entry: payload.entry
+                        .map((entry) => ({
+                            ...entry,
+                            changes: entry.changes.filter((change) =>
+                                rawHandlerFields.includes(change.field as WebhookFieldType),
+                            ),
+                        }))
+                        .filter((entry) => entry.changes.length > 0),
+                };
+                if (filtered.entry.length === 0) {
+                    payload = null as any;
+                } else {
+                    payload = filtered;
+                }
+            }
+            if (payload) {
+                await rawHandler(whatsapp, payload);
+            }
+        }
 
         // Check this is a WhatsApp Business Account webhook
         if (body.object !== 'whatsapp_business_account') {
