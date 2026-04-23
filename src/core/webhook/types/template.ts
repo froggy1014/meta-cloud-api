@@ -109,3 +109,54 @@ export interface MessageTemplateQualityUpdateWebhookValue {
     field: 'message_template_quality_update';
     value: MessageTemplateQualityUpdateValue;
 }
+
+// ============================================================================
+// message_template_components_update Webhook Types
+// @see https://developers.facebook.com/documentation/business-messaging/whatsapp/webhooks/reference/message_template_components_update
+//
+// Triggered when the components of a message template are updated.
+// ============================================================================
+
+export interface MessageTemplateComponentsUpdateValue {
+    /** Numeric ID of the message template */
+    message_template_id: number;
+    /** Name of the message template */
+    message_template_name: string;
+    /** Language code of the message template (e.g. "en_US") */
+    message_template_language: string;
+    /** Event describing what changed */
+    event: string;
+    [key: string]: unknown;
+}
+
+export interface MessageTemplateComponentsUpdateWebhookValue {
+    field: 'message_template_components_update';
+    value: MessageTemplateComponentsUpdateValue;
+}
+
+// ============================================================================
+// template_correct_category_detection Webhook Types
+// @see https://developers.facebook.com/documentation/business-messaging/whatsapp/templates/template-categorization
+//
+// Triggered when WhatsApp's automatic categorization process determines that
+// an approved template is incorrectly categorized and updates its category.
+// Advance notice is provided before the category change takes effect.
+// ============================================================================
+
+export interface TemplateCorrectCategoryDetectionValue {
+    /** Numeric ID of the affected message template */
+    message_template_id: number;
+    /** Name of the affected message template */
+    message_template_name: string;
+    /** Language code of the affected message template (e.g. "en_US") */
+    message_template_language: string;
+    /** The category WhatsApp determined the template should belong to */
+    suggested_category: TemplateCategory;
+    /** The template's current (approved) category */
+    current_category: TemplateCategory;
+}
+
+export interface TemplateCorrectCategoryDetectionWebhookValue {
+    field: 'template_correct_category_detection';
+    value: TemplateCorrectCategoryDetectionValue;
+}

@@ -17,3 +17,28 @@ export interface BusinessCapabilityUpdateWebhookValue {
     field: 'business_capability_update';
     value: BusinessCapabilityUpdateValue;
 }
+
+// ============================================================================
+// business_status_update Webhook Types
+// @see https://developers.facebook.com/documentation/business-messaging/whatsapp/webhooks/reference/account_update
+//
+// Triggered when a WhatsApp Business Account's operational status changes.
+// ============================================================================
+
+export type BusinessStatusUpdateEvent =
+    | 'ACCOUNT_DELETED'
+    | 'ACCOUNT_RESTRICTION'
+    | 'ACCOUNT_VIOLATION'
+    | 'DISABLED_UPDATE'
+    | string;
+
+export interface BusinessStatusUpdateValue {
+    /** Event type describing the status change */
+    event: BusinessStatusUpdateEvent;
+    [key: string]: unknown;
+}
+
+export interface BusinessStatusUpdateWebhookValue {
+    field: 'business_status_update';
+    value: BusinessStatusUpdateValue;
+}
