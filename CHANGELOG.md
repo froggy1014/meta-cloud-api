@@ -1,5 +1,36 @@
 # meta-cloud-api
 
+## 2.5.0
+
+### Minor Changes
+
+- 0cfa459: feat: add production middleware layer (retry, validation, tests)
+
+  **Retry/Exponential Backoff**
+
+  - New `retry` option in `WhatsAppConfig` for automatic retry on throttling errors
+  - `WhatsAppThrottlingError` triggers retry with exponential backoff (1s → 2s → 4s)
+  - Configurable `maxAttempts` (default: 3), `backoff`, and `initialDelayMs`
+
+  **Input Validation**
+
+  - New `WhatsAppValidationError` for client-side validation errors
+  - `assertPhoneNumber()` validates E.164 format on all `messages.*` calls
+  - `assertNonEmpty()` validates arrays in `blockUsers.block/unblock` and `groups.removeParticipants`
+
+  **Tests**
+
+  - Added unit tests for `blockUsers` module (was the only untested module)
+  - Added tests for `validate.ts` utility functions
+  - Added retry loop integration tests
+
+  **README**
+
+  - Updated webhook example with real API usage and correct export names
+
+- 15f5137: - Add webhook handler context with original request headers, raw body, method, and URL.
+  - Preserve raw webhook request bodies across Express and Next.js Page Router adapters.
+
 ## 2.4.0
 
 ### Minor Changes
