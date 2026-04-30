@@ -106,6 +106,18 @@ processor.onMessageTemplateStatusUpdate((wa, { value }) => {
     console.log(`Template "${value.message_template_name}" is now ${value.event}`);
 });
 
+// Access original webhook request headers/body when forwarding or verifying
+processor.onRaw(async (_wa, _payload, context) => {
+    await fetch(process.env.BYPASS_WEBHOOK_URL!, {
+        method: 'POST',
+        headers: {
+            'Content-Type': context.headers.get('content-type') ?? 'application/json',
+            'X-Hub-Signature-256': context.headers.get('x-hub-signature-256') ?? '',
+        },
+        body: context.rawBody,
+    });
+});
+
 // Mount on Express
 app.get('/webhook', (req, res) => expressWebhookHandler(processor, req, res));
 app.post('/webhook', (req, res) => expressWebhookHandler(processor, req, res));
