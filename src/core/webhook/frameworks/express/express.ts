@@ -58,10 +58,11 @@ class ExpressWebhookHandler extends BaseWebhookHandler<ExpressRequest, ExpressRe
     ): Promise<WebhookResponse> {
         try {
             const fullUrl = this.constructFullUrl(req.headers, req.url);
+            const bodyContent = req.rawBody ?? (req.method === 'POST' ? JSON.stringify(req.body) : undefined);
             const webRequest = new globalThis.Request(fullUrl, {
                 method: req.method,
                 headers: req.headers as HeadersInit,
-                body: JSON.stringify(req.body),
+                body: bodyContent,
             });
 
             const result = await this.processWebhook(webRequest);
@@ -87,7 +88,7 @@ class ExpressWebhookHandler extends BaseWebhookHandler<ExpressRequest, ExpressRe
             const fullUrl = this.constructFullUrl(req.headers, req.url);
 
             // Use raw body if available (for signature verification), otherwise stringify parsed body
-            const bodyContent = req.rawBody || (req.method === 'POST' ? JSON.stringify(req.body) : undefined);
+            const bodyContent = req.rawBody ?? (req.method === 'POST' ? JSON.stringify(req.body) : undefined);
 
             const webRequest = new globalThis.Request(fullUrl, {
                 method: req.method,

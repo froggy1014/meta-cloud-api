@@ -88,7 +88,7 @@ class NextJsWebhookHandler<
     protected async handlePost(req: TRequest, res: TResponse): Promise<WebhookResponse> {
         try {
             // Auto-parse body if needed
-            await this.parseRequestBody(req);
+            await this.parseRequestBody(req, true);
         } catch (error) {
             console.error('Webhook processing error:', error);
 
@@ -112,11 +112,12 @@ class NextJsWebhookHandler<
 
         try {
             const fullUrl = this.constructFullUrl(req.headers, req.url);
+            const bodyContent = req.rawBody ?? (req.method === 'POST' ? JSON.stringify(req.body) : undefined);
 
             const webRequest = new Request(fullUrl, {
                 method: 'POST',
                 headers: req.headers as HeadersInit,
-                body: JSON.stringify(req.body),
+                body: bodyContent,
             });
 
             const result = await this.processWebhook(webRequest);
@@ -163,7 +164,7 @@ class NextJsWebhookHandler<
             const fullUrl = this.constructFullUrl(req.headers, req.url);
 
             // Use raw body if available (for signature verification), otherwise stringify parsed body
-            const bodyContent = req.rawBody || (req.method === 'POST' ? JSON.stringify(req.body) : undefined);
+            const bodyContent = req.rawBody ?? (req.method === 'POST' ? JSON.stringify(req.body) : undefined);
 
             const webRequest = new Request(fullUrl, {
                 method: req.method,

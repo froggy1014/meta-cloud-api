@@ -89,6 +89,7 @@ export type {
     TextProcessedMessage,
     VideoMessageHandler,
     VideoProcessedMessage,
+    WebhookHandlerContext,
 } from './utils/webhookUtils';
 export { constructFullUrl, processFlowRequest, processWebhookMessages } from './utils/webhookUtils';
 export type { WebhookResponse } from './WebhookProcessor';
