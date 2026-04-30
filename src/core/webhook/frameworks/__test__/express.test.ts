@@ -113,6 +113,26 @@ describe('Express Webhook Handler', () => {
             expect(mockNext).not.toHaveBeenCalled();
         });
 
+        it('should preserve raw body when creating the webhook request', async () => {
+            const rawBody = JSON.stringify(webhookProcessingData.webhookPayload);
+            mockReq.method = 'POST';
+            mockReq.body = { parsed: true };
+            mockReq.rawBody = rawBody;
+            mockReq.headers = {
+                host: 'example.com',
+                'content-type': 'application/json',
+            };
+
+            handler.processor.processWebhook = vi.fn().mockResolvedValue(webhookProcessingData.successResponse);
+
+            await handler.webhook(mockReq, mockRes, mockNext);
+
+            const webRequest = (handler.processor.processWebhook as any).mock.calls[0][0] as Request;
+
+            expect(await webRequest.text()).toBe(rawBody);
+            expect(mockNext).not.toHaveBeenCalled();
+        });
+
         it('should handle webhook processing errors by calling next', async () => {
             mockReq.method = 'POST';
             mockReq.body = webhookProcessingData.webhookPayload;
