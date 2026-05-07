@@ -1,0 +1,305 @@
+---
+title: Message Utilities
+description: Type guards, text extraction, and structured data helpers for webhook messages
+sidebar:
+    order: 6
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+The SDK provides utility functions to simplify working with incoming webhook messages. These include type guards for narrowing message types, a universal text extractor, and structured data extractors for common message fields.
+
+## Import
+
+```typescript
+import {
+    // Text extraction
+    extractMessageText,
+
+    // Type guards
+    isTextMessage,
+    isImageMessage,
+    isVideoMessage,
+    isAudioMessage,
+    isDocumentMessage,
+    isStickerMessage,
+    isInteractiveMessage,
+    isButtonMessage,
+    isLocationMessage,
+    isContactsMessage,
+    isReactionMessage,
+    isOrderMessage,
+    isSystemMessage,
+
+    // Interactive sub-type guards
+    isButtonReply,
+    isListReply,
+    isNfmReply,
+
+    // Structured extractors
+    getMediaInfo,
+    getInteractiveReply,
+    getLocationInfo,
+    getContactsInfo,
+    getReactionInfo,
+    getOrderInfo,
+} from 'meta-cloud-api';
+```
+
+## Text Extraction
+
+`extractMessageText` returns a human-readable display string from any incoming message. Useful for logging, notifications, chat previews, and summaries.
+
+```typescript
+processor.onMessage(MessageTypesEnum['*'], async (whatsapp, { message }) => {
+    const text = extractMessageText(message);
+    console.log(`${message.from}: ${text}`);
+});
+```
+
+**Output by message type:**
+
+| Message Type | Output |
+|---|---|
+| Text | `message.text.body` |
+| Image | Caption or `[Image]` |
+| Video | Caption or `[Video]` |
+| Audio | `[Voice Message]` or `[Audio]` |
+| Document | Caption, filename, or `[Document]` |
+| Sticker | `[Animated Sticker]` or `[Sticker]` |
+| Interactive | Button/list title or `[Form Reply]` |
+| Button | `message.button.text` |
+| Location | Name, address, or coordinates |
+| Contacts | `👤 Name` or `👤 N contacts` |
+| Reaction | Emoji or `[Reaction removed]` |
+| Order | `🛒 Order: N items` |
+| System | `message.system.body` |
+
+## Type Guards
+
+Type guards narrow the `WhatsAppMessage` union type to a specific message type, giving you full type safety:
+
+```typescript
+import { isTextMessage, isImageMessage } from 'meta-cloud-api';
+
+function handleMessage(message: WhatsAppMessage) {
+    if (isTextMessage(message)) {
+        // TypeScript knows: message is TextMessage
+        console.log(message.text.body);
+    }
+
+    if (isImageMessage(message)) {
+        // TypeScript knows: message is ImageMessage
+        console.log(message.image.id, message.image.caption);
+    }
+}
+```
+
+### Interactive Sub-Type Guards
+
+For interactive messages, additional guards narrow to the specific reply type:
+
+```typescript
+import { isButtonReply, isListReply, isNfmReply } from 'meta-cloud-api';
+
+processor.onInteractive(async (whatsapp, { message }) => {
+    if (isButtonReply(message)) {
+        console.log('Button:', message.interactive.button_reply.id);
+    }
+    if (isListReply(message)) {
+        console.log('List:', message.interactive.list_reply.id);
+    }
+    if (isNfmReply(message)) {
+        const data = JSON.parse(message.interactive.nfm_reply.response_json);
+        console.log('Flow data:', data);
+    }
+});
+```
+
+### Available Type Guards
+
+| Function | Narrows to |
+|---|---|
+| `isTextMessage` | `TextMessage` |
+| `isImageMessage` | `ImageMessage` |
+| `isVideoMessage` | `VideoMessage` |
+| `isAudioMessage` | `AudioMessage` |
+| `isDocumentMessage` | `DocumentMessage` |
+| `isStickerMessage` | `StickerMessage` |
+| `isInteractiveMessage` | `InteractiveMessage` |
+| `isButtonMessage` | `ButtonMessage` |
+| `isLocationMessage` | `LocationMessage` |
+| `isContactsMessage` | `ContactsMessage` |
+| `isReactionMessage` | `ReactionMessage` |
+| `isOrderMessage` | `OrderMessage` |
+| `isSystemMessage` | `SystemMessage` |
+| `isButtonReply` | `InteractiveButtonReplyMessage` |
+| `isListReply` | `InteractiveListReplyMessage` |
+| `isNfmReply` | `InteractiveNfmReplyMessage` |
+
+## Structured Data Extractors
+
+These functions extract normalized data from specific message types, returning `null` if the message doesn't match.
+
+### getMediaInfo
+
+Extract media metadata from image, video, audio, document, or sticker messages:
+
+```typescript
+import { getMediaInfo } from 'meta-cloud-api';
+import type { MediaInfo } from 'meta-cloud-api';
+
+processor.onMessage(MessageTypesEnum['*'], async (whatsapp, { message }) => {
+    const media = getMediaInfo(message);
+    if (media) {
+        console.log(`Media ID: ${media.id}`);
+        console.log(`MIME: ${media.mimeType}`);
+        console.log(`Caption: ${media.caption}`);
+        console.log(`Filename: ${media.filename}`);   // documents only
+        console.log(`Animated: ${media.animated}`);    // stickers only
+        console.log(`Voice: ${media.voice}`);          // audio only
+
+        // Download the media
+        const url = await whatsapp.media.retrieveMediaUrl({ mediaId: media.id });
+    }
+});
+```
+
+### getInteractiveReply
+
+Extract the user's selection from button, list, or flow replies:
+
+```typescript
+import { getInteractiveReply } from 'meta-cloud-api';
+
+processor.onInteractive(async (whatsapp, { message }) => {
+    const reply = getInteractiveReply(message);
+    if (reply) {
+        console.log(`Type: ${reply.type}`);          // 'button_reply' | 'list_reply' | 'nfm_reply'
+        console.log(`ID: ${reply.id}`);
+        console.log(`Title: ${reply.title}`);
+        console.log(`Description: ${reply.description}`);  // list_reply only
+        console.log(`JSON: ${reply.responseJson}`);         // nfm_reply only
+    }
+});
+```
+
+### getLocationInfo
+
+```typescript
+import { getLocationInfo } from 'meta-cloud-api';
+
+processor.onLocation(async (whatsapp, { message }) => {
+    const loc = getLocationInfo(message);
+    if (loc) {
+        console.log(`${loc.name} - ${loc.address}`);
+        console.log(`Coordinates: ${loc.latitude}, ${loc.longitude}`);
+    }
+});
+```
+
+### getContactsInfo
+
+```typescript
+import { getContactsInfo } from 'meta-cloud-api';
+
+processor.onContacts(async (whatsapp, { message }) => {
+    const contacts = getContactsInfo(message);
+    for (const contact of contacts) {
+        console.log(`Name: ${contact.formattedName}`);
+        console.log(`Phones: ${contact.phones.join(', ')}`);
+        console.log(`Emails: ${contact.emails.join(', ')}`);
+    }
+});
+```
+
+### getReactionInfo
+
+```typescript
+import { getReactionInfo } from 'meta-cloud-api';
+
+processor.onReaction(async (whatsapp, { message }) => {
+    const reaction = getReactionInfo(message);
+    if (reaction) {
+        if (reaction.emoji) {
+            console.log(`Reacted with ${reaction.emoji} to ${reaction.messageId}`);
+        } else {
+            console.log(`Removed reaction from ${reaction.messageId}`);
+        }
+    }
+});
+```
+
+### getOrderInfo
+
+```typescript
+import { getOrderInfo } from 'meta-cloud-api';
+
+processor.onOrder(async (whatsapp, { message }) => {
+    const order = getOrderInfo(message);
+    if (order) {
+        console.log(`Catalog: ${order.catalogId}`);
+        for (const item of order.items) {
+            console.log(`  ${item.productId}: ${item.quantity}x ${item.currency} ${item.price}`);
+        }
+    }
+});
+```
+
+## Practical Example
+
+Combining utilities for a unified message handler:
+
+```typescript
+import {
+    extractMessageText,
+    getMediaInfo,
+    getInteractiveReply,
+    isTextMessage,
+} from 'meta-cloud-api';
+
+processor.onMessage(MessageTypesEnum['*'], async (whatsapp, processed) => {
+    const { message } = processed;
+    const preview = extractMessageText(message);
+
+    // Log all messages
+    await saveToDatabase({
+        from: message.from,
+        type: message.type,
+        preview,
+        timestamp: message.timestamp,
+    });
+
+    // Download media if present
+    const media = getMediaInfo(message);
+    if (media) {
+        const url = await whatsapp.media.retrieveMediaUrl({ mediaId: media.id });
+        await downloadAndStore(url.url, media.mimeType);
+    }
+
+    // Handle interactive replies
+    const reply = getInteractiveReply(message);
+    if (reply) {
+        await handleUserSelection(message.from, reply.id, reply.type);
+        return;
+    }
+
+    // Handle text commands
+    if (isTextMessage(message) && message.text.body.startsWith('/')) {
+        await handleCommand(whatsapp, message);
+        return;
+    }
+
+    // Default echo
+    await whatsapp.messages.text({
+        to: message.from,
+        body: `Received: ${preview}`,
+    });
+});
+```
+
+## Related Resources
+
+- [Webhook Types Reference](/types/webhook-types) - Full type definitions
+- [Webhook Overview](/webhooks/overview) - Webhook setup guide
+- [Express Integration](/webhooks/express) - Express.js webhook handler
