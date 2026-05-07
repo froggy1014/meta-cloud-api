@@ -593,6 +593,31 @@ WHATSAPP_BUSINESS_ACCOUNT_ID=987654321
 WEBHOOK_VERIFICATION_TOKEN=your_production_secret
 ```
 
+## Singleton Caching
+
+Both App Router and Pages Router adapters use singleton caching per `phoneNumberId`. This is especially important in Next.js where API routes can be re-evaluated during HMR in development — without caching, handlers would be registered multiple times.
+
+```typescript
+// Safe to call multiple times — returns the same instance
+const whatsapp = webhookHandler({
+    phoneNumberId: parseInt(process.env.WHATSAPP_PHONE_NUMBER_ID!),
+    // ...
+});
+```
+
+### Destroying Instances
+
+Use `destroy()` to clear the cache and remove all handlers (useful in tests):
+
+```typescript
+const whatsapp = webhookHandler({ /* ... */ });
+whatsapp.processor.onText(async (client, msg) => { /* ... */ });
+
+// Clean up
+whatsapp.destroy();
+// Next call creates a fresh instance
+```
+
 ## Comparison: App Router vs Pages Router
 
 <Tabs>

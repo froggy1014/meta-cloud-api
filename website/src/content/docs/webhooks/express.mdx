@@ -596,6 +596,32 @@ processor.onText(async (whatsapp, message) => {
 });
 ```
 
+## Singleton Caching
+
+The webhook handler factory uses singleton caching per `phoneNumberId`. Calling `webhookHandler()` (or `expressWebhookHandler()`) multiple times with the same config returns the same instance. This prevents duplicate handler registration during HMR re-evaluation in development frameworks like Next.js or Vite.
+
+```typescript
+// Both calls return the same instance
+const handler1 = webhookHandler({ phoneNumberId: 123, /* ... */ });
+const handler2 = webhookHandler({ phoneNumberId: 123, /* ... */ });
+// handler1 === handler2 ✓
+```
+
+### Destroying Instances
+
+Use `destroy()` to clear the cache and remove all handlers. This is useful in tests or when you need to reinitialize:
+
+```typescript
+const whatsapp = webhookHandler({ /* ... */ });
+
+// Register handlers
+whatsapp.processor.onText(async (client, message) => { /* ... */ });
+
+// Later: clean up
+whatsapp.destroy();
+// Next call to webhookHandler() creates a fresh instance
+```
+
 ## Deployment
 
 ### Environment Setup
