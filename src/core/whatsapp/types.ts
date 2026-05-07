@@ -16,7 +16,7 @@ import type {
     TemplateApi,
     TwoStepVerificationApi,
     WabaApi,
-} from 'src/api';
+} from '@api/index';
 import type { WhatsAppConfig } from '../../types/config';
 import type { EncryptionKeyPair } from '../../utils/flowEncryptionUtils';
 
