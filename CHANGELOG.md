@@ -1,5 +1,16 @@
 # meta-cloud-api
 
+## 2.7.0
+
+### Minor Changes
+
+- fa5d09d: Add `as const` object and union type alternatives for all enums
+
+  - Every enum in `enums.ts` now has a matching `as const` object and union type in `constants.ts`
+  - Available via `meta-cloud-api/types` import path
+  - Use whichever style you prefer: `CategoryEnum.Marketing` (enum) or `Category.Marketing` (as const)
+  - Union types available for type narrowing: `CategoryType`, `LanguagesType`, `MessageTypesType`, etc.
+
 ## 2.6.0
 
 ### Minor Changes
