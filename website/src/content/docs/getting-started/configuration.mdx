@@ -33,10 +33,12 @@ const client = new WhatsApp({
 |--------|------|---------|-------------|
 | `businessAcctId` | `string` | `undefined` | Your WhatsApp Business Account ID (required for some APIs) |
 | `apiVersion` | `string` | `'v21.0'` | Meta Graph API version to use |
-| `logLevel` | `'debug' \| 'info' \| 'warn' \| 'error'` | `'info'` | Logging verbosity level |
-| `timeout` | `number` | `30000` | Request timeout in milliseconds |
-| `retries` | `number` | `3` | Number of retry attempts for failed requests |
-| `retryDelay` | `number` | `1000` | Delay between retries in milliseconds |
+| `appId` | `string` | `undefined` | Meta for Developers application ID |
+| `appSecret` | `string` | `undefined` | Meta for Developers application secret |
+| `webhookVerificationToken` | `string` | `undefined` | Token for webhook URL verification |
+| `requestTimeout` | `number` | `undefined` | Request timeout in milliseconds |
+| `retry` | `RetryConfig` | `undefined` | Automatic retry config for throttling errors |
+| `debug` | `boolean` | `false` | Enable debug logging |
 
 ### Full Configuration Example
 
@@ -49,10 +51,13 @@ const client = new WhatsApp({
     // Optional
     businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
     apiVersion: 'v21.0',
-    logLevel: 'debug',
-    timeout: 60000, // 60 seconds
-    retries: 5,
-    retryDelay: 2000, // 2 seconds
+    debug: true,
+    requestTimeout: 60000, // 60 seconds
+    retry: {
+        maxAttempts: 5,
+        backoff: 'exponential',
+        initialDelayMs: 1000,
+    },
 });
 ```
 
@@ -167,22 +172,50 @@ try {
 
 ## Retry Configuration
 
-Configure automatic retries for failed requests:
+Configure automatic retries for throttling errors (rate limits). When the WhatsApp API returns a `WhatsAppThrottlingError`, the SDK automatically retries with backoff:
 
 ```typescript
 const client = new WhatsApp({
     accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
     phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
-    retries: 5,        // Retry up to 5 times
-    retryDelay: 2000,  // Wait 2 seconds between retries
+    retry: {
+        maxAttempts: 3,           // Including initial attempt (default: 3)
+        backoff: 'exponential',   // 'exponential' or 'fixed' (default: 'exponential')
+        initialDelayMs: 1000,     // Delay before first retry (default: 1000)
+    },
 });
 ```
 
-The SDK uses exponential backoff for retries:
-- 1st retry: 2 seconds
-- 2nd retry: 4 seconds
-- 3rd retry: 8 seconds
-- And so on...
+**Backoff strategies:**
+
+| Strategy | Behavior |
+|---|---|
+| `exponential` (default) | Delay doubles each attempt: 1s → 2s → 4s → ... |
+| `fixed` | Constant delay between attempts |
+
+```typescript
+// Aggressive retry for critical messages
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    retry: {
+        maxAttempts: 5,
+        backoff: 'exponential',
+        initialDelayMs: 500,
+    },
+});
+
+// Simple fixed retry
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    retry: {
+        maxAttempts: 3,
+        backoff: 'fixed',
+        initialDelayMs: 2000,
+    },
+});
+```
 
 ## Timeout Configuration
 
