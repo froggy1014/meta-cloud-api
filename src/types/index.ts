@@ -301,6 +301,8 @@ export type { ApiPermissionErrorCode, MetaError, MetaErrorData, WhatsAppErrorCod
 // Base class interface (type-only)
 export type { BaseClass } from './base';
 export type { WabaConfigType, WhatsAppConfig } from './config';
+// As-const alternatives to enums
+export * from './constants';
 // All enums (commonly used on client-side)
 export * from './enums';
 // HTTPS client types
