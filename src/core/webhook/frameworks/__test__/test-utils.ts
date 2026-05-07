@@ -16,6 +16,7 @@ export const createMockWebhookProcessor = () => ({
     processVerification: vi.fn(),
     processWebhook: vi.fn(),
     processFlow: vi.fn(),
+    removeAllHandlers: vi.fn(),
 });
 
 /**

@@ -207,10 +207,37 @@ class NextJsWebhookHandler<
     }
 }
 
+// Singleton cache keyed by phoneNumberId
+const handlerCache = new Map<
+    string,
+    ReturnType<NextJsWebhookHandler<any, any>['getHandlers']> & { destroy: () => void }
+>();
+
+function getCacheKey(config: NextJsWebhookConfig): string {
+    return `nextjs-page:${config.phoneNumberId ?? 'default'}`;
+}
+
 // Next.js Pages Router webhook handler
 export function nextjsPagesWebhookHandler<TRequest extends BaseApiRequest, TResponse extends BaseApiResponse>(
     config: NextJsWebhookConfig,
 ) {
+    const key = getCacheKey(config);
+    const cached = handlerCache.get(key);
+    if (cached) return cached;
+
     const handler = new NextJsWebhookHandler<TRequest, TResponse>(config);
-    return handler.getHandlers();
+    const handlers = {
+        ...handler.getHandlers(),
+        /**
+         * Destroy this handler instance: removes all registered handlers
+         * and clears it from the singleton cache so the next call creates a fresh instance.
+         */
+        destroy: () => {
+            handler.webhookProcessor.removeAllHandlers();
+            handlerCache.delete(key);
+        },
+    };
+
+    handlerCache.set(key, handlers);
+    return handlers;
 }

@@ -15,6 +15,7 @@ vi.mock('../../WebhookProcessor', () => ({
         processVerification: vi.fn(),
         processWebhook: vi.fn(),
         processFlow: vi.fn(),
+        removeAllHandlers: vi.fn(),
     })),
 }));
 
@@ -25,6 +26,8 @@ describe('Next.js App Router Webhook Handler', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
+        // Destroy cached handler to ensure fresh instance per test
+        handler?.destroy?.();
         handler = nextjsAppWebhookHandler(mockConfig);
     });
 
@@ -35,14 +38,44 @@ describe('Next.js App Router Webhook Handler', () => {
             expect(handler).toHaveProperty('webhook');
             expect(handler).toHaveProperty('flow');
             expect(handler).toHaveProperty('processor');
+            expect(handler).toHaveProperty('destroy');
             expect(typeof handler.GET).toBe('function');
             expect(typeof handler.POST).toBe('function');
             expect(typeof handler.webhook).toBe('object');
             expect(typeof handler.flow).toBe('object');
+            expect(typeof handler.destroy).toBe('function');
             expect(handler.webhook).toHaveProperty('GET');
             expect(handler.webhook).toHaveProperty('POST');
             expect(handler.flow).toHaveProperty('GET');
             expect(handler.flow).toHaveProperty('POST');
+        });
+    });
+
+    describe('singleton caching', () => {
+        it('should return the same instance for the same config', () => {
+            const handler2 = nextjsAppWebhookHandler(mockConfig);
+            expect(handler2).toBe(handler);
+        });
+
+        it('should return a different instance for a different phoneNumberId', () => {
+            const differentConfig = { ...mockConfig, phoneNumberId: 999999999 };
+            const handler2 = nextjsAppWebhookHandler(differentConfig);
+            expect(handler2).not.toBe(handler);
+            handler2.destroy();
+        });
+
+        it('should return a fresh instance after destroy()', () => {
+            handler.destroy();
+            const handler2 = nextjsAppWebhookHandler(mockConfig);
+            expect(handler2).not.toBe(handler);
+            handler = handler2;
+        });
+
+        it('should call removeAllHandlers on destroy()', () => {
+            const removeAllHandlers = handler.processor.removeAllHandlers;
+            handler.destroy();
+            expect(removeAllHandlers).toHaveBeenCalled();
+            handler = nextjsAppWebhookHandler(mockConfig);
         });
     });
 

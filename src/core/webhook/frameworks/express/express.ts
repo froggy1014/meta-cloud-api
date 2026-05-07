@@ -128,7 +128,31 @@ class ExpressWebhookHandler extends BaseWebhookHandler<ExpressRequest, ExpressRe
     }
 }
 
+// Singleton cache keyed by phoneNumberId
+const handlerCache = new Map<string, ReturnType<ExpressWebhookHandler['getHandlers']> & { destroy: () => void }>();
+
+function getCacheKey(config: ExpressWebhookConfig): string {
+    return `express:${config.phoneNumberId ?? 'default'}`;
+}
+
 export function expressWebhookHandler(config: ExpressWebhookConfig) {
+    const key = getCacheKey(config);
+    const cached = handlerCache.get(key);
+    if (cached) return cached;
+
     const handler = new ExpressWebhookHandler(config);
-    return handler.getHandlers();
+    const handlers = {
+        ...handler.getHandlers(),
+        /**
+         * Destroy this handler instance: removes all registered handlers
+         * and clears it from the singleton cache so the next call creates a fresh instance.
+         */
+        destroy: () => {
+            handler.webhookProcessor.removeAllHandlers();
+            handlerCache.delete(key);
+        },
+    };
+
+    handlerCache.set(key, handlers);
+    return handlers;
 }

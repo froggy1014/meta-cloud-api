@@ -16,11 +16,23 @@ export interface NextJsAppWebhookConfig extends WhatsAppConfig {
     // App Router specific config (currently none, but interface reserved for future use)
 }
 
+// Singleton cache keyed by phoneNumberId
+// biome-ignore lint/suspicious/noExplicitAny: cache stores the handler return type which is complex and self-referential
+const handlerCache = new Map<string, any>();
+
+function getCacheKey(config: NextJsAppWebhookConfig): string {
+    return `nextjs-app:${config.phoneNumberId ?? 'default'}`;
+}
+
 // Next.js App Router webhook handler
 export function nextjsAppWebhookHandler(config: NextJsAppWebhookConfig) {
+    const key = getCacheKey(config);
+    const cached = handlerCache.get(key);
+    if (cached) return cached;
+
     const processor = new WebhookProcessor(config);
 
-    return {
+    const handlers = {
         // Clean GET/POST handlers following whatsapp-api-js methodology
         GET: async (request: NextRequest) => {
             try {
@@ -132,5 +144,17 @@ export function nextjsAppWebhookHandler(config: NextJsAppWebhookConfig) {
 
         // Expose processor for handler registration
         processor,
+
+        /**
+         * Destroy this handler instance: removes all registered handlers
+         * and clears it from the singleton cache so the next call creates a fresh instance.
+         */
+        destroy: () => {
+            processor.removeAllHandlers();
+            handlerCache.delete(key);
+        },
     };
+
+    handlerCache.set(key, handlers);
+    return handlers;
 }
