@@ -13,12 +13,12 @@ import {
 
 // Mock the WebhookProcessor
 vi.mock('../../WebhookProcessor', () => ({
-    WebhookProcessor: vi.fn().mockImplementation(() => ({
-        processVerification: vi.fn(),
-        processWebhook: vi.fn(),
-        processFlow: vi.fn(),
-        removeAllHandlers: vi.fn(),
-    })),
+    WebhookProcessor: class MockWebhookProcessor {
+        processVerification = vi.fn();
+        processWebhook = vi.fn();
+        processFlow = vi.fn();
+        removeAllHandlers = vi.fn();
+    },
 }));
 
 describe('Next.js Page Router Webhook Handler', () => {

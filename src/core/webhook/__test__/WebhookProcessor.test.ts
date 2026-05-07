@@ -4,7 +4,7 @@ import { WebhookProcessor } from '../WebhookProcessor';
 
 // Mock WhatsApp client to avoid real API calls
 vi.mock('../../whatsapp', () => ({
-    WhatsApp: vi.fn().mockImplementation(() => ({})),
+    WhatsApp: class MockWhatsApp {},
 }));
 
 const createProcessor = () =>
