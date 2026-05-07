@@ -646,6 +646,105 @@ export class WebhookProcessor {
         LOGGER.log('Registered user_preferences handler');
     }
 
+    // ============================================================================
+    // Handler removal methods
+    // ============================================================================
+
+    /**
+     * Remove a registered message handler by type
+     */
+    offMessage(type: MessageTypesEnum | string): void {
+        this.messageHandlers.delete(type as MessageTypesEnum);
+        LOGGER.log(`Removed message handler for ${type}`);
+    }
+
+    /**
+     * Remove the pre-process handler
+     */
+    offMessagePreProcess(): void {
+        this.preProcessHandler = undefined;
+        LOGGER.log('Removed pre-process handler');
+    }
+
+    /**
+     * Remove the post-process handler
+     */
+    offMessagePostProcess(): void {
+        this.postProcessHandler = undefined;
+        LOGGER.log('Removed post-process handler');
+    }
+
+    /**
+     * Remove the status handler
+     */
+    offStatus(): void {
+        this.statusHandler = undefined;
+        LOGGER.log('Removed status handler');
+    }
+
+    /**
+     * Remove the raw webhook handler
+     */
+    offRaw(): void {
+        this.rawHandler = undefined;
+        LOGGER.log('Removed raw webhook handler');
+    }
+
+    /**
+     * Remove a registered flow handler by type
+     */
+    offFlow(type: FlowTypeEnum): void {
+        this.flowHandlers.delete(type);
+        LOGGER.log(`Removed flow handler for ${type}`);
+    }
+
+    /**
+     * Remove all registered handlers
+     */
+    removeAllHandlers(): void {
+        this.messageHandlers.clear();
+        this.statusHandler = undefined;
+        this.preProcessHandler = undefined;
+        this.postProcessHandler = undefined;
+        this.rawHandler = undefined;
+        this.flowHandlers.clear();
+
+        // Webhook field handlers
+        this.accountUpdateHandler = undefined;
+        this.accountReviewUpdateHandler = undefined;
+        this.accountAlertsHandler = undefined;
+        this.businessCapabilityUpdateHandler = undefined;
+        this.phoneNumberNameUpdateHandler = undefined;
+        this.phoneNumberQualityUpdateHandler = undefined;
+        this.messageTemplateStatusUpdateHandler = undefined;
+        this.templateCategoryUpdateHandler = undefined;
+        this.messageTemplateQualityUpdateHandler = undefined;
+        this.flowsHandler = undefined;
+        this.securityHandler = undefined;
+        this.historyHandler = undefined;
+        this.smbMessageEchoesHandler = undefined;
+        this.smbAppStateSyncHandler = undefined;
+        this.accountSettingsUpdateHandler = undefined;
+        this.automaticEventsHandler = undefined;
+        this.businessStatusUpdateHandler = undefined;
+        this.callsHandler = undefined;
+        this.groupLifecycleUpdateHandler = undefined;
+        this.groupParticipantsUpdateHandler = undefined;
+        this.groupSettingsUpdateHandler = undefined;
+        this.groupStatusUpdateHandler = undefined;
+        this.messageEchoesHandler = undefined;
+        this.messageTemplateComponentsUpdateHandler = undefined;
+        this.messagingHandoversHandler = undefined;
+        this.partnerSolutionsHandler = undefined;
+        this.paymentConfigurationUpdateHandler = undefined;
+        this.standbyHandler = undefined;
+        this.templateCorrectCategoryDetectionHandler = undefined;
+        this.trackingEventsHandler = undefined;
+        this.userPreferencesHandler = undefined;
+
+        LOGGER.log('Removed all handlers');
+    }
+
     getClient(): WhatsApp {
         return this.client;
     }
