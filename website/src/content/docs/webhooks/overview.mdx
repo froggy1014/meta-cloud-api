@@ -82,11 +82,51 @@ Received when message templates change:
 - **template_category_update** - Template category changes
 - **message_template_quality_update** - Template quality rating
 
+### Calls Events
+
+Received when voice call lifecycle events occur:
+
+- **calls** - Call connect, status changes, media updates, and termination
+
+### Group Events
+
+Received when group-related events occur:
+
+- **group_lifecycle_update** - Group created or deleted
+- **group_participants_update** - Participants added, removed, or join requests
+- **group_settings_update** - Group subject, description, or profile photo changes
+- **group_status_update** - Group suspended or suspension cleared
+
+### Messaging Handover Events
+
+Received when thread control changes between apps:
+
+- **messaging_handovers** - Thread control passed to another app
+- **standby** - Notification when app is not the current thread owner
+
+### Marketing & Tracking Events
+
+- **automatic_events** - Automatic event notifications
+- **tracking_events** - Marketing tracking event notifications
+- **user_preferences** - User preference changes (e.g., marketing opt-out)
+
+### Partner & Payment Events
+
+- **partner_solutions** - Partner solution webhook events
+- **payment_configuration_update** - Payment configuration changes
+
 ### Other Events
 
 - **flows** - WhatsApp Flows webhook events
 - **security** - Security-related notifications
 - **history** - Message history sync events
+- **account_settings_update** - Account settings changes
+- **business_status_update** - Business status changes
+- **message_echoes** - Message echo events
+- **smb_message_echoes** - SMB message echo events
+- **smb_app_state_sync** - SMB app state sync events
+- **message_template_components_update** - Template component changes
+- **template_correct_category_detection** - Template category detection
 
 ## Webhook Payload Structure
 

@@ -95,29 +95,230 @@ interface WebhookProcessor {
     onMessagePreProcess(handler: MessageHandler): void;
     onMessagePostProcess(handler: MessageHandler): void;
 
+    // Raw webhook handler
+    onRaw(handler: RawWebhookHandler, fields?: WebhookFieldType[]): void;
+
     // Flow handlers
     onFlow(type: FlowTypeEnum, handler: FlowHandler): void;
 
-    // Webhook field handlers
+    // Webhook field handlers — Account & Business
     onAccountUpdate(handler: AccountUpdateHandler): void;
     onAccountReviewUpdate(handler: AccountReviewUpdateHandler): void;
     onAccountAlerts(handler: AccountAlertsHandler): void;
+    onAccountSettingsUpdate(handler: AccountSettingsUpdateHandler): void;
     onBusinessCapabilityUpdate(handler: BusinessCapabilityUpdateHandler): void;
+    onBusinessStatusUpdate(handler: BusinessStatusUpdateHandler): void;
+
+    // Webhook field handlers — Phone Numbers
     onPhoneNumberNameUpdate(handler: PhoneNumberNameUpdateHandler): void;
     onPhoneNumberQualityUpdate(handler: PhoneNumberQualityUpdateHandler): void;
+
+    // Webhook field handlers — Templates
     onMessageTemplateStatusUpdate(handler: MessageTemplateStatusUpdateHandler): void;
     onTemplateCategoryUpdate(handler: TemplateCategoryUpdateHandler): void;
     onMessageTemplateQualityUpdate(handler: MessageTemplateQualityUpdateHandler): void;
+    onMessageTemplateComponentsUpdate(handler: MessageTemplateComponentsUpdateHandler): void;
+    onTemplateCorrectCategoryDetection(handler: TemplateCorrectCategoryDetectionHandler): void;
+
+    // Webhook field handlers — Calls
+    onCalls(handler: CallsHandler): void;
+
+    // Webhook field handlers — Groups
+    onGroupLifecycleUpdate(handler: GroupLifecycleUpdateHandler): void;
+    onGroupParticipantsUpdate(handler: GroupParticipantsUpdateHandler): void;
+    onGroupSettingsUpdate(handler: GroupSettingsUpdateHandler): void;
+    onGroupStatusUpdate(handler: GroupStatusUpdateHandler): void;
+
+    // Webhook field handlers — Messaging
+    onMessagingHandovers(handler: MessagingHandoversHandler): void;
+    onStandby(handler: StandbyHandler): void;
+    onUserPreferences(handler: UserPreferencesHandler): void;
+
+    // Webhook field handlers — Marketing & Tracking
+    onAutomaticEvents(handler: AutomaticEventsHandler): void;
+    onTrackingEvents(handler: TrackingEventsHandler): void;
+
+    // Webhook field handlers — Partner & Payments
+    onPartnerSolutions(handler: PartnerSolutionsHandler): void;
+    onPaymentConfigurationUpdate(handler: PaymentConfigurationUpdateHandler): void;
+
+    // Webhook field handlers — Other
     onFlows(handler: FlowsHandler): void;
     onSecurity(handler: SecurityHandler): void;
     onHistory(handler: HistoryHandler): void;
+    onMessageEchoes(handler: MessageEchoesHandler): void;
     onSmbMessageEchoes(handler: SmbMessageEchoesHandler): void;
     onSmbAppStateSync(handler: SmbAppStateSyncHandler): void;
+
+    // Handler removal
+    offMessage(type: MessageTypesEnum): void;
+    offStatus(): void;
+    offMessagePreProcess(): void;
+    offMessagePostProcess(): void;
+    offRaw(): void;
+    offFlow(type: FlowTypeEnum): void;
+    removeAllHandlers(): void;
 
     // Utilities
     getClient(): WhatsApp;
     getConfig(): WabaConfigType;
 }
+```
+
+### Handler Context
+
+All webhook handlers receive a third `context` parameter with the original HTTP request details. This is useful for signature verification, request forwarding, or logging.
+
+```typescript
+import type { WebhookHandlerContext } from 'meta-cloud-api';
+
+processor.onText(async (whatsapp, processed, context: WebhookHandlerContext) => {
+    // Access original request details
+    console.log('Method:', context.method);
+    console.log('URL:', context.url);
+    console.log('Signature:', context.headers.get('x-hub-signature-256'));
+
+    // The raw body is available for signature verification
+    console.log('Raw body:', context.rawBody);
+
+    await whatsapp.messages.text({
+        to: processed.message.from,
+        body: 'Hello!',
+    });
+});
+```
+
+The `WebhookHandlerContext` type:
+
+```typescript
+type WebhookHandlerContext = {
+    headers: Headers;   // Original request headers
+    rawBody: string;    // Original request body string
+    method: string;     // HTTP method
+    url: string;        // Request URL
+};
+```
+
+### Raw Webhook Handler
+
+Use `onRaw` to receive the full, unprocessed webhook payload. Optionally filter by specific webhook fields:
+
+```typescript
+// Receive all raw webhook payloads
+processor.onRaw(async (whatsapp, payload, context) => {
+    console.log('Raw payload:', JSON.stringify(payload));
+    // Forward to analytics, logging, etc.
+});
+
+// Or filter to specific webhook fields only
+processor.onRaw(async (whatsapp, payload, context) => {
+    console.log('Messages payload:', JSON.stringify(payload));
+}, ['messages', 'account_update']);
+```
+
+### Handler Removal
+
+Remove individual handlers or clear all handlers at once:
+
+```typescript
+import { MessageTypesEnum } from 'meta-cloud-api/enums';
+
+// Remove a specific message handler
+processor.offMessage(MessageTypesEnum.Text);
+
+// Remove status handler
+processor.offStatus();
+
+// Remove pre/post process handlers
+processor.offMessagePreProcess();
+processor.offMessagePostProcess();
+
+// Remove raw handler
+processor.offRaw();
+
+// Remove all handlers at once
+processor.removeAllHandlers();
+```
+
+This is useful for dynamic handler management, testing, or reconfiguring handlers at runtime.
+
+### Calls Handler
+
+```typescript
+processor.onCalls(async (whatsapp, { value }) => {
+    for (const call of value.calls) {
+        switch (call.event) {
+            case 'connect':
+                console.log(`Incoming call from ${call.from}`);
+                break;
+            case 'call_status':
+                console.log(`Call ${call.id}: ${call.call_status}`);
+                break;
+            case 'terminate':
+                console.log(`Call ended: ${call.status}, duration: ${call.duration}s`);
+                break;
+        }
+    }
+});
+```
+
+### Group Handlers
+
+```typescript
+// Group lifecycle (create/delete)
+processor.onGroupLifecycleUpdate(async (whatsapp, { value }) => {
+    for (const group of value.groups) {
+        if (group.type === 'group_create') {
+            console.log(`Group created: ${group.group_id} - ${group.subject}`);
+        } else if (group.type === 'group_delete') {
+            console.log(`Group deleted: ${group.group_id}`);
+        }
+    }
+});
+
+// Participant changes
+processor.onGroupParticipantsUpdate(async (whatsapp, { value }) => {
+    for (const group of value.groups) {
+        if (group.type === 'group_participants_add') {
+            console.log(`Added: ${group.added_participants?.map(p => p.wa_id)}`);
+        }
+    }
+});
+
+// Group suspension
+processor.onGroupStatusUpdate(async (whatsapp, { value }) => {
+    for (const group of value.groups) {
+        if (group.type === 'group_suspend') {
+            console.warn(`Group ${group.group_id} suspended!`);
+        }
+    }
+});
+```
+
+### Messaging Handover Handlers
+
+```typescript
+// Thread control passed to another app
+processor.onMessagingHandovers(async (whatsapp, { value }) => {
+    console.log('Handover from:', value.sender.phone_number);
+    if (value.control_passed) {
+        console.log('Metadata:', value.control_passed.metadata);
+    }
+});
+
+// Standby mode (not the current thread owner)
+processor.onStandby(async (whatsapp, { value }) => {
+    console.log('Standby notification received');
+});
+
+// User preference changes (e.g., marketing opt-out)
+processor.onUserPreferences(async (whatsapp, { value }) => {
+    for (const pref of value.user_preferences) {
+        if (pref.category === 'marketing_messages' && pref.value === 'stop') {
+            console.log(`User ${pref.wa_id} opted out of marketing`);
+        }
+    }
+});
 ```
 
 ## Creating Custom Framework Adapters

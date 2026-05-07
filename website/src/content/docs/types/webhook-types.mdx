@@ -922,6 +922,339 @@ processor.onStatus(async (status) => {
 });
 ```
 
+## Webhook Field Types
+
+These types represent non-message webhook events delivered through different webhook fields.
+
+### Calls Types
+
+```typescript
+type CallEventType = 'connect' | 'call_status' | 'media_update' | 'terminate';
+type CallDirection = 'business_initiated' | 'user_initiated';
+type CallStatusValue = 'ringing' | 'accepted';
+type CallTerminateStatus = 'Completed' | 'Failed';
+
+interface CallEntry {
+    id: string;
+    event: CallEventType;
+    timestamp: number;
+    to?: string;                    // connect event
+    from?: string;                  // connect event
+    call_direction?: CallDirection;  // connect event
+    recipient_id?: string;          // call_status event
+    call_status?: CallStatusValue;  // call_status event
+    session?: CallSession;          // media_update event
+    status?: CallTerminateStatus;   // terminate event
+    start_time?: number;            // terminate event
+    end_time?: number;              // terminate event
+    duration?: number;              // terminate event (seconds)
+}
+
+interface CallsValue {
+    messaging_product: 'whatsapp';
+    metadata: WebhookMetadata;
+    calls: CallEntry[];
+    contacts?: CallContact[];
+}
+```
+
+**Usage Example:**
+
+```typescript
+processor.onCalls(async (whatsapp, { value }) => {
+    for (const call of value.calls) {
+        if (call.event === 'connect') {
+            console.log(`Call from ${call.from}, direction: ${call.call_direction}`);
+        }
+        if (call.event === 'terminate') {
+            console.log(`Call ended: ${call.status}, duration: ${call.duration}s`);
+        }
+    }
+});
+```
+
+### Group Types
+
+```typescript
+// Group lifecycle
+type GroupLifecycleEventType = 'group_create' | 'group_delete';
+
+interface GroupLifecycleEntry {
+    timestamp: string;
+    group_id: string;
+    type: GroupLifecycleEventType;
+    request_id: string;
+    subject?: string;           // group_create
+    description?: string;       // group_create
+    invite_link?: string;       // group_create
+    join_approval_mode?: string; // group_create
+    errors?: GroupWebhookError[];
+}
+
+// Group participants
+type GroupParticipantsEventType =
+    | 'group_participants_add'
+    | 'group_participants_remove'
+    | 'group_join_request_created'
+    | 'group_join_request_revoked';
+
+interface GroupParticipantsEntry {
+    timestamp: string;
+    group_id: string;
+    type: GroupParticipantsEventType;
+    request_id?: string;
+    reason?: 'invite_link' | 'admin_added' | string;
+    added_participants?: Array<{ wa_id: string; input?: string }>;
+    initiated_by?: 'business' | 'participant';
+    removed_participants?: Array<{ input: string }>;
+    failed_participants?: Array<{ input: string; errors: GroupWebhookError[] }>;
+    join_request_id?: string;
+    wa_id?: string;
+    errors?: GroupWebhookError[];
+}
+
+// Group settings
+interface GroupSettingsEntry {
+    timestamp: string;
+    group_id: string;
+    type: 'group_settings_update';
+    request_id?: string;
+    profile_picture?: GroupSettingFieldResult;
+    group_subject?: GroupSettingFieldResult;
+    group_description?: GroupSettingFieldResult;
+    errors?: GroupWebhookError[];
+}
+
+// Group status
+type GroupStatusEventType = 'group_suspend' | 'group_suspend_cleared';
+
+interface GroupStatusEntry {
+    timestamp: string;
+    group_id: string;
+    type: GroupStatusEventType;
+}
+```
+
+### Messaging Handover Types
+
+```typescript
+interface MessagingHandoversValue {
+    messaging_product: 'whatsapp';
+    recipient: {
+        display_phone_number: string;
+        phone_number_id: string;
+    };
+    sender: {
+        phone_number: string;
+    };
+    timestamp: string;
+    control_passed?: {
+        metadata?: string;
+    };
+}
+
+interface StandbyValue {
+    messaging_product: 'whatsapp';
+    [key: string]: unknown;
+}
+```
+
+### User Preferences Types
+
+```typescript
+interface UserPreferenceEntry {
+    wa_id: string;
+    user_id: string;
+    detail: string;
+    category: 'marketing_messages' | string;
+    value: 'stop' | string;
+    timestamp: number;
+    signup_id?: string;
+}
+
+interface UserPreferencesValue {
+    messaging_product: 'whatsapp';
+    metadata: WebhookMetadata;
+    user_preferences: UserPreferenceEntry[];
+    contacts?: UserPreferencesContact[];
+}
+```
+
+**Usage Example:**
+
+```typescript
+processor.onUserPreferences(async (whatsapp, { value }) => {
+    for (const pref of value.user_preferences) {
+        if (pref.category === 'marketing_messages' && pref.value === 'stop') {
+            console.log(`User ${pref.wa_id} opted out of marketing messages`);
+            await updateMarketingConsent(pref.wa_id, false);
+        }
+    }
+});
+```
+
+### Partner Solutions Types
+
+```typescript
+interface PartnerSolutionsValue {
+    event: 'SOLUTION_CREATED' | string;
+    solution_id: string;
+    solution_status: 'INITIATED' | string;
+}
+```
+
+### Payment Configuration Types
+
+```typescript
+interface PaymentConfigurationUpdateValue {
+    configuration_name: string;
+    provider_name: string;       // e.g., "razorpay"
+    provider_mid: string;
+    status: string;              // e.g., "Needs Testing"
+    created_timestamp: number;
+    updated_timestamp: number;
+}
+```
+
+### Marketing & Tracking Types
+
+```typescript
+// Automatic events (lead gen / purchase from CTWA ads)
+interface AutomaticEvent {
+    id: string;                          // WhatsApp message ID
+    event_name: 'LeadSubmitted' | 'Purchase' | string;
+    timestamp: number;
+    ctwa_clid?: string;                  // Click-to-WhatsApp ad click ID
+    custom_data?: {
+        currency: string;                // ISO 4217 (e.g., "USD")
+        value: number;                   // Purchase amount
+    };
+}
+
+interface AutomaticEventsValue {
+    messaging_product: 'whatsapp';
+    metadata: WebhookMetadata;
+    automatic_events: AutomaticEvent[];
+}
+
+// Tracking events (marketing message delivery/click tracking)
+interface TrackingEvent {
+    event_name: string;                  // e.g., "sent"
+    timestamp: number;
+    tracking_data?: {
+        click_id?: string;
+        tracking_token?: string;
+    };
+}
+
+interface TrackingEventsValue {
+    messaging_product: 'whatsapp';
+    metadata: WebhookMetadata;
+    events: TrackingEvent[];
+}
+```
+
+### Account Settings Update Types
+
+```typescript
+interface AccountSettingsUpdateValue {
+    messaging_product: 'whatsapp';
+    timestamp: string;
+    type: 'phone_number_settings' | string;
+    phone_number_settings?: {
+        phone_number_id: string;
+        calling?: {
+            status: 'ENABLED' | 'DISABLED' | string;
+            call_icon_visibility?: string;
+            callback_permission_status?: 'ENABLED' | 'DISABLED' | string;
+            call_hours?: { status: string };
+            sip?: { status: string };
+        };
+    };
+}
+```
+
+### Message Echoes Types
+
+```typescript
+// SMB Message Echoes (WhatsApp Business)
+interface SmbMessageEchoesValue {
+    metadata: WebhookMetadata;
+    errors?: Array<{ message: string; error_data?: { details: string } }>;
+    message_echoes: Array<{
+        from: string;
+        to: string;
+        id: string;
+        timestamp: string;
+        text?: { body: string };
+        // ... other message type fields
+    }>;
+}
+
+// Messenger-style Message Echoes
+interface MessageEchoesValue {
+    messaging: Array<{
+        sender: { id: string };
+        recipient: { id: string };
+        timestamp: number;
+        message: {
+            is_echo: true;
+            app_id: number;
+            metadata?: string;
+            mid: string;
+            text?: string;
+            attachments?: Array<{ type: string; url?: string }>;
+        };
+    }>;
+}
+```
+
+### Handler Context Type
+
+All handlers receive a third `context` parameter:
+
+```typescript
+type WebhookHandlerContext = {
+    headers: Headers;   // Original request headers
+    rawBody: string;    // Original body string before parsing
+    method: string;     // HTTP method
+    url: string;        // Request URL
+};
+
+// Handler signature: (whatsapp, processed, context) => void
+type MessageHandler = (
+    whatsapp: WhatsApp,
+    processed: ProcessedMessage,
+    context: WebhookHandlerContext,
+) => void | Promise<void>;
+```
+
+### ProcessedMessage Type
+
+Message handlers receive a `ProcessedMessage` with metadata:
+
+```typescript
+type ProcessedMessage = {
+    wabaId: string;
+    phoneNumberId: string;
+    displayPhoneNumber: string;
+    profileName: string;
+    message: WhatsAppMessage;
+    messageId: string;
+};
+```
+
+**Usage Example:**
+
+```typescript
+processor.onText(async (whatsapp, processed, context) => {
+    console.log(`From: ${processed.profileName} (${processed.message.from})`);
+    console.log(`Phone Number ID: ${processed.phoneNumberId}`);
+    console.log(`Text: ${processed.message.text.body}`);
+    console.log(`Request URL: ${context.url}`);
+});
+```
+
 ## Related Documentation
 
 - [Enums Reference](/types/enums) - All SDK enums
