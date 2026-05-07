@@ -14,11 +14,11 @@ jobs:
             run:
                 working-directory: website
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
 
-            - uses: pnpm/action-setup@v4
+            - uses: pnpm/action-setup@v6
 
-            - uses: actions/setup-node@v4
+            - uses: actions/setup-node@v5
               with:
                   node-version: '18'
                   cache: 'pnpm'
@@ -33,7 +33,7 @@ jobs:
               run: pnpm build
 
             - name: Upload build artifacts
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v5
               with:
                   name: docs-build
                   path: website/dist
