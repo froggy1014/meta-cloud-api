@@ -78,49 +78,38 @@ wa.waba                  // WhatsApp Business Account management
 
 ```typescript
 import express from 'express';
-import { WebhookProcessor, expressWebhookHandler } from 'meta-cloud-api';
+import { expressWebhookHandler } from 'meta-cloud-api';
 
 const app = express();
 app.use(express.json());
 
-const processor = new WebhookProcessor({
+// Handler is automatically cached per phoneNumberId — safe against HMR re-evaluation
+const Whatsapp = expressWebhookHandler({
     accessToken: process.env.CLOUD_API_ACCESS_TOKEN,
     phoneNumberId: process.env.WA_PHONE_NUMBER_ID,
     webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN,
 });
 
 // Handle incoming text messages — echo back to sender
-processor.onText(async (wa, processed) => {
+Whatsapp.processor.onText(async (wa, processed) => {
     const { message } = processed;
     await wa.messages.text({ to: message.from, body: `Echo: ${message.text.body}` });
 });
 
 // Handle message status updates
-processor.onStatus((wa, processed) => {
+Whatsapp.processor.onStatus((wa, processed) => {
     const { status } = processed;
     console.log(`Message ${status.id}: ${status.status}`);
 });
 
 // Handle template status changes
-processor.onMessageTemplateStatusUpdate((wa, { value }) => {
+Whatsapp.processor.onMessageTemplateStatusUpdate((wa, { value }) => {
     console.log(`Template "${value.message_template_name}" is now ${value.event}`);
 });
 
-// Access original webhook request headers/body when forwarding or verifying
-processor.onRaw(async (_wa, _payload, context) => {
-    await fetch(process.env.BYPASS_WEBHOOK_URL!, {
-        method: 'POST',
-        headers: {
-            'Content-Type': context.headers.get('content-type') ?? 'application/json',
-            'X-Hub-Signature-256': context.headers.get('x-hub-signature-256') ?? '',
-        },
-        body: context.rawBody,
-    });
-});
-
 // Mount on Express
-app.get('/webhook', (req, res) => expressWebhookHandler(processor, req, res));
-app.post('/webhook', (req, res) => expressWebhookHandler(processor, req, res));
+app.get('/webhook', Whatsapp.GET);
+app.post('/webhook', Whatsapp.POST);
 ```
 
 All 30+ webhook field types are supported — messages, statuses, templates, flows, groups, calls, and more. See the [Webhooks documentation](https://meta-cloud-api.site/) for the full list of handlers.

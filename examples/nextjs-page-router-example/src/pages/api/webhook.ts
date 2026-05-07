@@ -24,6 +24,7 @@ const whatsappConfig = {
 };
 
 // 🤖 Create WhatsApp Bot with new clean architecture
+// The handler is automatically cached per phoneNumberId — safe against HMR re-evaluation
 const Whatsapp = nextjsPagesWebhookHandler(whatsappConfig);
 
 // ===================================
