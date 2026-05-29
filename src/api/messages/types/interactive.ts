@@ -63,6 +63,7 @@ type ReplyButtonObject = {
 };
 
 type ActionObject = {
+    button?: string;
     buttons?: ReplyButtonObject[];
     catalog_id?: string;
     product_retailer_id?: string;
@@ -74,6 +75,7 @@ type HeaderObject = {
     document?: DocumentMediaObject;
     image?: ImageMediaObject;
     text?: string;
+    sub_text?: string;
     video?: VideoMediaObject;
 };
 
@@ -107,6 +109,35 @@ type ProductListInteractiveObject = {
     footer?: SimpleTextObject;
     header: HeaderObject;
     action: ActionObject;
+};
+
+type CatalogMessageParameters = {
+    thumbnail_product_retailer_id: string;
+};
+
+type CatalogMessageActionObject = {
+    name: 'catalog_message';
+    parameters?: CatalogMessageParameters;
+};
+
+type CatalogMessageInteractiveObject = {
+    type: InteractiveTypesEnum.CatalogMessage | 'catalog_message';
+    body?: SimpleTextObject;
+    footer?: SimpleTextObject;
+    header?: HeaderObject;
+    action: CatalogMessageActionObject;
+};
+
+type CallPermissionRequestActionObject = {
+    name: 'call_permission_request';
+};
+
+type CallPermissionRequestInteractiveObject = {
+    type: InteractiveTypesEnum.CallPermissionRequest | 'call_permission_request';
+    body?: SimpleTextObject;
+    footer?: SimpleTextObject;
+    header?: HeaderObject;
+    action: CallPermissionRequestActionObject;
 };
 
 type CtaUrlParameters = {
@@ -268,6 +299,8 @@ export type InteractiveObject =
     | ListInteractiveObject
     | ProductInteractiveObject
     | ProductListInteractiveObject
+    | CatalogMessageInteractiveObject
+    | CallPermissionRequestInteractiveObject
     | CtaUrlInteractiveObject
     | CarouselInteractiveObject
     | LocationRequestInteractiveObject

@@ -2,7 +2,7 @@
 
 import type { BaseClass } from '../../../types/base';
 import type { ComponentTypesEnum, InteractiveTypesEnum, MessageTypesEnum } from '../../../types/enums';
-import type { GeneralRequestBody } from '../../../types/request';
+import type { GeneralRequestBody, ResponseSuccess } from '../../../types/request';
 
 export type GeneralMessageBody = GeneralRequestBody & {
     /**
@@ -13,7 +13,7 @@ export type GeneralMessageBody = GeneralRequestBody & {
 };
 
 export type StatusObject = {
-    status: 'read';
+    status: 'read' | 'typing';
     message_id: string;
     typing_indicator?: TypingIndicatorObject;
 };
@@ -23,13 +23,16 @@ export type TypingIndicatorObject = {
 };
 
 export type StatusRequestBody = GeneralMessageBody & StatusObject;
+export type StatusResponse = ResponseSuccess;
 
 type ConTextObject = {
     message_id: string;
 };
 
+export type MessageRecipientType = 'individual' | 'group';
+
 export type MessageRequestBody<T extends MessageTypesEnum> = GeneralMessageBody & {
-    recipient_type?: string;
+    recipient_type?: MessageRecipientType;
     to: string;
     context?: ConTextObject;
     type?: T;
@@ -39,30 +42,26 @@ export type MessageRequestBody<T extends MessageTypesEnum> = GeneralMessageBody 
 export interface MessageRequestParams<T> {
     body: T;
     to: string;
+    recipientType?: MessageRecipientType;
     replyMessageId?: string;
 }
 
 export interface StatusParams {
-    status: string;
+    status: StatusObject['status'];
     messageId: string;
-    typingIndicator?: {
-        type: string;
-    };
+    typingIndicator?: TypingIndicatorObject;
 }
 
 // Response Types
 export type MessagesResponse = GeneralMessageBody & {
-    contacts: [
-        {
-            input: string;
-            wa_id: string;
-        },
-    ];
-    messages: [
-        {
-            id: string;
-        },
-    ];
+    contacts: Array<{
+        input: string;
+        wa_id: string;
+    }>;
+    messages: Array<{
+        id: string;
+        message_status?: 'accepted' | 'held_for_quality_assessment' | 'paused';
+    }>;
 };
 
 // Messages API Class Interface - Complete definition
@@ -138,7 +137,7 @@ export declare class MessagesClass extends BaseClass {
 
     // Reaction and status messages
     reaction(params: import('./reaction').ReactionParams): Promise<MessagesResponse>;
-    markAsRead(params: { messageId: string }): Promise<MessagesResponse>;
-    showTypingIndicator(params: { messageId: string }): Promise<MessagesResponse>;
-    status(params: StatusParams): Promise<MessagesResponse>;
+    markAsRead(params: { messageId: string }): Promise<StatusResponse>;
+    showTypingIndicator(params: { messageId: string }): Promise<StatusResponse>;
+    status(params: StatusParams): Promise<StatusResponse>;
 }

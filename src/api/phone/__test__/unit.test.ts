@@ -60,6 +60,33 @@ describe('PhoneNumber API - Unit Tests', () => {
             expect(body).toBeNull();
         });
 
+        it('should get all phone numbers with list query parameters', async () => {
+            const filtering = [{ field: 'quality_rating', operator: 'EQUAL', value: 'UNKNOWN' }];
+
+            await whatsApp.phoneNumbers.getPhoneNumbers({
+                fields: ['id', 'display_phone_number', 'country_code', 'host_platform'],
+                filtering,
+                sort: 'last_onboarded_time.desc',
+                limit: 25,
+                after: 'cursor_after',
+            });
+
+            expect(mockRequestSend).toHaveBeenCalled();
+            const [method, endpoint, timeout, body] = mockRequestSend.mock.calls[0];
+
+            expect(method).toBe('GET');
+            expect(endpoint).toContain(`${whatsApp.requester.businessAcctId}/phone_numbers?`);
+            expect(endpoint).toContain(
+                `fields=${encodeURIComponent('id,display_phone_number,country_code,host_platform')}`,
+            );
+            expect(endpoint).toContain(`filtering=${encodeURIComponent(JSON.stringify(filtering))}`);
+            expect(endpoint).toContain(`sort=${encodeURIComponent('last_onboarded_time.desc')}`);
+            expect(endpoint).toContain('limit=25');
+            expect(endpoint).toContain('after=cursor_after');
+            expect(timeout).toBeGreaterThan(0);
+            expect(body).toBeNull();
+        });
+
         it('should request verification code with correct endpoint and body', async () => {
             const request = {
                 code_method: 'SMS' as const,

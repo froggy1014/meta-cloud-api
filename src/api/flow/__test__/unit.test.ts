@@ -39,6 +39,9 @@ describe('Flow API - Unit Tests', () => {
         });
 
         it('should create flow with correct payload structure', async () => {
+            const mockSendFormData = vi.spyOn(whatsApp.flows as any, 'sendFormData');
+            mockSendFormData.mockResolvedValue({ id: 'flow_123', success: true });
+
             const wabaId = 'waba_123';
             const flowData = {
                 name: 'Test Flow',
@@ -50,23 +53,29 @@ describe('Flow API - Unit Tests', () => {
 
             await whatsApp.flows.createFlow(wabaId, flowData);
 
-            expect(mockRequestSend).toHaveBeenCalled();
-            const [method, endpoint, timeout, body] = mockRequestSend.mock.calls[0];
+            expect(mockSendFormData).toHaveBeenCalled();
+            const [method, endpoint, timeout, formData] = mockSendFormData.mock.calls[0] as [
+                string,
+                string,
+                number,
+                FormData,
+            ];
 
             expect(method).toBe('POST');
             expect(endpoint).toBe(`/${wabaId}/flows`);
             expect(timeout).toBeGreaterThan(0);
-            expect(body).toBeDefined();
-
-            const parsedBody = JSON.parse(body);
-            expect(parsedBody.name).toBe(flowData.name);
-            expect(parsedBody.categories).toEqual(flowData.categories);
-            expect(parsedBody.endpoint_uri).toBe(flowData.endpoint_uri);
-            expect(parsedBody.flow_json).toBe(flowData.flow_json);
-            expect(parsedBody.publish).toBe(flowData.publish);
+            expect(formData).toBeInstanceOf(FormData);
+            expect(formData.get('name')).toBe(flowData.name);
+            expect(formData.get('categories')).toBe(JSON.stringify(flowData.categories));
+            expect(formData.get('endpoint_uri')).toBe(flowData.endpoint_uri);
+            expect(formData.get('flow_json')).toBe(flowData.flow_json);
+            expect(formData.get('publish')).toBe(String(flowData.publish));
         });
 
         it('should create flow with minimal required data', async () => {
+            const mockSendFormData = vi.spyOn(whatsApp.flows as any, 'sendFormData');
+            mockSendFormData.mockResolvedValue({ id: 'flow_123', success: true });
+
             const wabaId = 'waba_123';
             const flowData = {
                 name: 'Simple Flow',
@@ -74,14 +83,13 @@ describe('Flow API - Unit Tests', () => {
 
             await whatsApp.flows.createFlow(wabaId, flowData);
 
-            expect(mockRequestSend).toHaveBeenCalled();
-            const [_, __, ___, body] = mockRequestSend.mock.calls[0];
+            expect(mockSendFormData).toHaveBeenCalled();
+            const [_, __, ___, formData] = mockSendFormData.mock.calls[0] as [string, string, number, FormData];
 
-            const parsedBody = JSON.parse(body);
-            expect(parsedBody.name).toBe(flowData.name);
-            expect(parsedBody.categories).toBeUndefined();
-            expect(parsedBody.endpoint_uri).toBeUndefined();
-            expect(parsedBody.clone_flow_id).toBeUndefined();
+            expect(formData.get('name')).toBe(flowData.name);
+            expect(formData.get('categories')).toBeNull();
+            expect(formData.get('endpoint_uri')).toBeNull();
+            expect(formData.get('clone_flow_id')).toBeNull();
         });
 
         it('should get flow with correct endpoint', async () => {
@@ -126,6 +134,9 @@ describe('Flow API - Unit Tests', () => {
         });
 
         it('should update flow metadata with correct payload', async () => {
+            const mockSendFormData = vi.spyOn(whatsApp.flows as any, 'sendFormData');
+            mockSendFormData.mockResolvedValue({ success: true });
+
             const flowId = 'flow_123';
             const updateData = {
                 name: 'Updated Flow Name',
@@ -136,18 +147,21 @@ describe('Flow API - Unit Tests', () => {
 
             await whatsApp.flows.updateFlowMetadata(flowId, updateData);
 
-            expect(mockRequestSend).toHaveBeenCalled();
-            const [method, endpoint, timeout, body] = mockRequestSend.mock.calls[0];
+            expect(mockSendFormData).toHaveBeenCalled();
+            const [method, endpoint, timeout, formData] = mockSendFormData.mock.calls[0] as [
+                string,
+                string,
+                number,
+                FormData,
+            ];
 
             expect(method).toBe('POST');
             expect(endpoint).toBe(`/${flowId}`);
             expect(timeout).toBeGreaterThan(0);
-
-            const parsedBody = JSON.parse(body);
-            expect(parsedBody.name).toBe(updateData.name);
-            expect(parsedBody.categories).toEqual(updateData.categories);
-            expect(parsedBody.endpoint_uri).toBe(updateData.endpoint_uri);
-            expect(parsedBody.application_id).toBe(updateData.application_id);
+            expect(formData.get('name')).toBe(updateData.name);
+            expect(formData.get('categories')).toBe(JSON.stringify(updateData.categories));
+            expect(formData.get('endpoint_uri')).toBe(updateData.endpoint_uri);
+            expect(formData.get('application_id')).toBe(updateData.application_id);
         });
 
         it('should delete flow with correct endpoint', async () => {
@@ -343,6 +357,9 @@ describe('Flow API - Unit Tests', () => {
 
     describe('Flow Migration', () => {
         it('should migrate flows with correct payload', async () => {
+            const mockSendFormData = vi.spyOn(whatsApp.flows as any, 'sendFormData');
+            mockSendFormData.mockResolvedValue({ migrated_flows: [], failed_flows: [] });
+
             const destinationWabaId = 'dest_waba_123';
             const migrationData = {
                 source_waba_id: 'source_waba_456',
@@ -351,19 +368,25 @@ describe('Flow API - Unit Tests', () => {
 
             await whatsApp.flows.migrateFlows(destinationWabaId, migrationData);
 
-            expect(mockRequestSend).toHaveBeenCalled();
-            const [method, endpoint, timeout, body] = mockRequestSend.mock.calls[0];
+            expect(mockSendFormData).toHaveBeenCalled();
+            const [method, endpoint, timeout, formData] = mockSendFormData.mock.calls[0] as [
+                string,
+                string,
+                number,
+                FormData,
+            ];
 
             expect(method).toBe('POST');
             expect(endpoint).toBe(`/${destinationWabaId}/migrate_flows`);
             expect(timeout).toBeGreaterThan(0);
-
-            const parsedBody = JSON.parse(body);
-            expect(parsedBody.source_waba_id).toBe(migrationData.source_waba_id);
-            expect(parsedBody.source_flow_names).toEqual(migrationData.source_flow_names);
+            expect(formData.get('source_waba_id')).toBe(migrationData.source_waba_id);
+            expect(formData.get('source_flow_names')).toBe(JSON.stringify(migrationData.source_flow_names));
         });
 
         it('should migrate flows without flow names filter', async () => {
+            const mockSendFormData = vi.spyOn(whatsApp.flows as any, 'sendFormData');
+            mockSendFormData.mockResolvedValue({ migrated_flows: [], failed_flows: [] });
+
             const destinationWabaId = 'dest_waba_123';
             const migrationData = {
                 source_waba_id: 'source_waba_456',
@@ -371,12 +394,11 @@ describe('Flow API - Unit Tests', () => {
 
             await whatsApp.flows.migrateFlows(destinationWabaId, migrationData);
 
-            expect(mockRequestSend).toHaveBeenCalled();
-            const [_, __, ___, body] = mockRequestSend.mock.calls[0];
+            expect(mockSendFormData).toHaveBeenCalled();
+            const [_, __, ___, formData] = mockSendFormData.mock.calls[0] as [string, string, number, FormData];
 
-            const parsedBody = JSON.parse(body);
-            expect(parsedBody.source_waba_id).toBe(migrationData.source_waba_id);
-            expect(parsedBody.source_flow_names).toBeUndefined();
+            expect(formData.get('source_waba_id')).toBe(migrationData.source_waba_id);
+            expect(formData.get('source_flow_names')).toBeNull();
         });
     });
 
@@ -388,7 +410,8 @@ describe('Flow API - Unit Tests', () => {
         });
 
         it('should handle create flow errors', async () => {
-            mockRequestSend.mockRejectedValue(new Error('Create failed: Invalid data'));
+            const mockSendFormData = vi.spyOn(whatsApp.flows as any, 'sendFormData');
+            mockSendFormData.mockRejectedValue(new Error('Create failed: Invalid data'));
 
             const flowData = { name: 'Test Flow' };
             await expect(whatsApp.flows.createFlow('waba_123', flowData)).rejects.toThrow(

@@ -3,11 +3,13 @@
 // 중복 export 제거, 명시적 export만 사용
 export type {
     GeneralMessageBody,
+    MessageRecipientType,
     MessageRequestBody,
     MessageRequestParams,
     MessagesClass,
     MessagesResponse,
     StatusParams,
+    StatusResponse,
 } from './common';
 export type { ContactObject } from './contact';
 export type { InteractiveObject } from './interactive';

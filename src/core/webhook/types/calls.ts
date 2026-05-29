@@ -108,9 +108,13 @@ export interface CallContact {
     profile: {
         /** Display name of the caller */
         name: string;
+        /** Business-scoped username, when Meta includes it */
+        username?: string;
     };
     /** WhatsApp ID of the caller */
     wa_id: string;
+    /** Business-scoped user ID, when Meta includes it */
+    user_id?: string;
 }
 
 export interface CallsValue {

@@ -30,6 +30,7 @@ export default class MarketingMessagesApi extends BaseAPI implements marketing.M
      * @param params.to - The recipient's WhatsApp phone number.
      * @param params.template - The template configuration (name, language, components).
      * @param params.message_activity_sharing - Optional flag to enable message activity sharing.
+     * @param params.product_policy - Optional product policy for marketing messages.
      * @returns The messages response with message ID and status.
      * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/marketing-messages/send-marketing-messages/
      */
@@ -47,10 +48,15 @@ export default class MarketingMessagesApi extends BaseAPI implements marketing.M
             type: 'template';
             template: marketing.MarketingMessageRequest['template'];
             message_activity_sharing?: boolean;
+            product_policy?: marketing.MarketingMessageRequest['product_policy'];
         };
 
         if (params.message_activity_sharing !== undefined) {
             body.message_activity_sharing = params.message_activity_sharing;
+        }
+
+        if (params.product_policy !== undefined) {
+            body.product_policy = params.product_policy;
         }
 
         return this.sendJson(

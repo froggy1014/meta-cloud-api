@@ -22,7 +22,12 @@
 
 ## WhatsApp Business Platform API References
 
-Use these official docs when updating `src/api` endpoints or types:
+Use the vendored OpenAPI snapshot first when updating `src/api` endpoints or types:
+
+- Local OpenAPI snapshot: `docs/reference/business-messaging-api_v23.0.yaml`
+- Snapshot notes: `docs/reference/README.md`
+
+Then cross-check the relevant official docs:
 
 - Overview: https://developers.facebook.com/documentation/business-messaging/whatsapp/overview/
 - Messages: https://developers.facebook.com/documentation/business-messaging/whatsapp/messages/

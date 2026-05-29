@@ -28,6 +28,7 @@ describe('Marketing Messages API - Unit Tests', () => {
                 language: { policy: 'deterministic', code: LanguagesEnum.English_US },
             },
             message_activity_sharing: true,
+            product_policy: 'CLOUD_API_FALLBACK',
         });
 
         const [method, endpoint, _, body] = mockRequestSend.mock.calls[0];
@@ -43,6 +44,7 @@ describe('Marketing Messages API - Unit Tests', () => {
                 language: { policy: 'deterministic', code: 'en_US' },
             },
             message_activity_sharing: true,
+            product_policy: 'CLOUD_API_FALLBACK',
         });
     });
 });

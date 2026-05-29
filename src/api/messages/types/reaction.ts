@@ -1,7 +1,7 @@
 // Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/messages/
 
 import type { MessageTypesEnum } from '../../../types/enums';
-import type { MessageRequestBody } from './common';
+import type { MessageRecipientType, MessageRequestBody } from './common';
 
 // Reaction Message Types
 type ReActionObject = {
@@ -15,4 +15,5 @@ export interface ReactionParams {
     messageId: string;
     emoji: string;
     to: string;
+    recipientType?: MessageRecipientType;
 }

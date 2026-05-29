@@ -4,8 +4,6 @@ import MessagesApi from './MessageApi';
 
 export default MessagesApi;
 
-export { MessagesApi, MessagesApi as MessageApi };
-
 export type {
     AudioMediaObject,
     ContactObject,
@@ -13,13 +11,16 @@ export type {
     ImageMediaObject,
     InteractiveObject,
     LocationObject,
+    MessageRecipientType,
     MessageRequestParams,
     MessagesResponse,
     MessageTemplateObject,
     ReactionParams,
     StatusParams,
+    StatusResponse,
     StickerMediaObject,
     TextMessageParams,
     TextObject,
     VideoMediaObject,
 } from './types';
+export { MessagesApi, MessagesApi as MessageApi };

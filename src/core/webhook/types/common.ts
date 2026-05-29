@@ -7,8 +7,10 @@
  */
 export interface WebhookContact {
     wa_id: string;
+    user_id?: string;
     profile: {
         name: string;
+        username?: string;
     };
     identity_key_hash?: string;
 }

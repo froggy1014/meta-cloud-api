@@ -12,7 +12,7 @@ export const mockWebhookConfig = {
 /**
  * Mock WebhookProcessor factory for consistent mocking across tests
  */
-export const createMockWebhookProcessor = () => ({
+export const createMockWebhookProcessor = (): any => ({
     processVerification: vi.fn(),
     processWebhook: vi.fn(),
     processFlow: vi.fn(),
@@ -109,7 +109,7 @@ export const createMockExpressRequest = (overrides: Partial<any> = {}) => ({
 /**
  * Creates a mock Express response object with chainable methods
  */
-export const createMockExpressResponse = () => ({
+export const createMockExpressResponse = (): any => ({
     status: vi.fn().mockReturnThis(),
     json: vi.fn().mockReturnThis(),
     send: vi.fn().mockReturnThis(),
@@ -131,7 +131,7 @@ export const createMockNextApiRequest = (overrides: Partial<any> = {}) => ({
 /**
  * Creates a mock Next.js API response object
  */
-export const createMockNextApiResponse = () => ({
+export const createMockNextApiResponse = (): any => ({
     status: vi.fn().mockReturnThis(),
     json: vi.fn(),
     send: vi.fn(),

@@ -17,3 +17,8 @@
 - [Marketing Messages](./marketing-messages.md)
 - [Commerce Settings](./commerce-settings.md)
 - [Payments](./payments.md)
+
+## Official Reference Snapshot
+
+- [Meta OpenAPI v23.0](./reference/business-messaging-api_v23.0.yaml)
+- [Reference notes](./reference/README.md)

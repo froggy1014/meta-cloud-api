@@ -41,6 +41,15 @@ import type * as flow from './types';
  * @see {@link https://developers.facebook.com/documentation/business-messaging/whatsapp/flows/ | WhatsApp Flows Documentation}
  */
 export default class FlowApi extends BaseAPI implements flow.FlowClass {
+    private appendFormValue(
+        formData: FormData,
+        key: string,
+        value?: string | boolean | string[] | flow.FlowCategoryEnum[],
+    ) {
+        if (value === undefined) return;
+        formData.append(key, Array.isArray(value) ? JSON.stringify(value) : String(value));
+    }
+
     /**
      * List all flows belonging to a WhatsApp Business Account.
      *
@@ -103,22 +112,19 @@ export default class FlowApi extends BaseAPI implements flow.FlowClass {
             publish?: boolean;
         },
     ): Promise<flow.CreateFlowResponse> {
-        // The API expects application/json for this endpoint based on documentation examples
-        // Let's ensure we send JSON, not FormData, unless specifically required by an endpoint variation.
-        const payload = {
-            name: data.name,
-            categories: data.categories,
-            ...(data.endpoint_uri && { endpoint_uri: data.endpoint_uri }),
-            ...(data.clone_flow_id && { clone_flow_id: data.clone_flow_id }),
-            ...(data.flow_json && { flow_json: data.flow_json }),
-            ...(data.publish !== undefined && { publish: data.publish }),
-        };
+        const formData = new FormData();
+        this.appendFormValue(formData, 'name', data.name);
+        this.appendFormValue(formData, 'categories', data.categories);
+        this.appendFormValue(formData, 'endpoint_uri', data.endpoint_uri);
+        this.appendFormValue(formData, 'clone_flow_id', data.clone_flow_id);
+        this.appendFormValue(formData, 'flow_json', data.flow_json);
+        this.appendFormValue(formData, 'publish', data.publish);
 
-        return this.sendJson(
+        return this.sendFormData(
             HttpMethodsEnum.Post,
             `/${wabaId}/flows`,
             this.config[WabaConfigEnum.RequestTimeout],
-            JSON.stringify(payload), // Send as JSON
+            formData,
         );
     }
 
@@ -221,19 +227,17 @@ export default class FlowApi extends BaseAPI implements flow.FlowClass {
             application_id?: string;
         },
     ): Promise<ResponseSuccess> {
-        // The API expects application/json for this endpoint based on documentation examples
-        const payload = {
-            ...(data.name && { name: data.name }),
-            ...(data.categories && { categories: data.categories }),
-            ...(data.endpoint_uri && { endpoint_uri: data.endpoint_uri }),
-            ...(data.application_id && { application_id: data.application_id }),
-        };
+        const formData = new FormData();
+        this.appendFormValue(formData, 'name', data.name);
+        this.appendFormValue(formData, 'categories', data.categories);
+        this.appendFormValue(formData, 'endpoint_uri', data.endpoint_uri);
+        this.appendFormValue(formData, 'application_id', data.application_id);
 
-        return this.sendJson(
+        return this.sendFormData(
             HttpMethodsEnum.Post,
             `/${flowId}`,
             this.config[WabaConfigEnum.RequestTimeout],
-            JSON.stringify(payload), // Send as JSON
+            formData,
         );
     }
 
@@ -493,19 +497,15 @@ export default class FlowApi extends BaseAPI implements flow.FlowClass {
             source_flow_names?: string[];
         },
     ): Promise<flow.FlowMigrationResponse> {
-        // API documentation suggests this endpoint might expect application/json
-        // Let's double-check or assume JSON based on typical Graph API patterns unless FormData is confirmed.
-        // Assuming JSON for now:
-        const payload = {
-            source_waba_id: data.source_waba_id,
-            ...(data.source_flow_names && { source_flow_names: data.source_flow_names }),
-        };
+        const formData = new FormData();
+        this.appendFormValue(formData, 'source_waba_id', data.source_waba_id);
+        this.appendFormValue(formData, 'source_flow_names', data.source_flow_names);
 
-        return this.sendJson(
+        return this.sendFormData(
             HttpMethodsEnum.Post,
             `/${destinationWabaId}/migrate_flows`,
             this.config[WabaConfigEnum.RequestTimeout],
-            JSON.stringify(payload),
+            formData,
         );
     }
 }

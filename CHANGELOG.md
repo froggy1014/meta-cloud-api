@@ -1,5 +1,22 @@
 # meta-cloud-api
 
+## 3.0.0
+
+### Major Changes
+
+- Correct message status update methods to return `StatusResponse` (`{ success: boolean }`) and tighten read/typing status request typing.
+
+### Minor Changes
+
+- Add message type coverage for group recipients, interactive catalog messages, call permission requests, list action buttons, header `sub_text`, and message status responses.
+- Add Marketing Messages `product_policy` support and expand Phone Number list/query/response types for the latest official fields.
+
+### Patch Changes
+
+- Send Flow create, metadata update, and migration requests as multipart form data according to the official Meta OpenAPI schema.
+- Vendor Meta's official WhatsApp Business Platform OpenAPI v23.0 snapshot under `docs/reference` and document it as the first reference for API updates.
+- Add optional business-scoped user ID and username fields to shared and calling webhook contact types.
+
 ## 2.7.0
 
 ### Minor Changes

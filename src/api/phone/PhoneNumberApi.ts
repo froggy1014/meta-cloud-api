@@ -83,6 +83,7 @@ export default class PhoneNumberApi extends BaseAPI implements phoneNumber.Phone
      * Returns a list of all phone numbers registered under the configured WABA,
      * including their verification status, quality rating, and display information.
      *
+     * @param params - Optional list query parameters such as fields, filtering, sort, and paging.
      * @returns A promise that resolves with the list of phone numbers.
      *
      * @see {@link https://developers.facebook.com/docs/whatsapp/cloud-api/reference/phone-numbers#get-all | List Phone Numbers}
@@ -95,10 +96,21 @@ export default class PhoneNumberApi extends BaseAPI implements phoneNumber.Phone
      * }
      * ```
      */
-    async getPhoneNumbers(): Promise<phoneNumber.PhoneNumbersResponse> {
+    async getPhoneNumbers(params?: phoneNumber.PhoneNumbersListParams): Promise<phoneNumber.PhoneNumbersResponse> {
+        const fields = Array.isArray(params?.fields) ? params.fields.join(',') : params?.fields;
+        const filtering = Array.isArray(params?.filtering) ? JSON.stringify(params.filtering) : params?.filtering;
+        const queryParams = objectToQueryString({
+            fields,
+            filtering,
+            sort: params?.sort,
+            limit: params?.limit,
+            after: params?.after,
+            before: params?.before,
+        });
+
         return this.sendJson(
             HttpMethodsEnum.Get,
-            `${this.config[WabaConfigEnum.BusinessAcctId]}/${this.endpoint}`,
+            `${this.config[WabaConfigEnum.BusinessAcctId]}/${this.endpoint}${queryParams}`,
             this.config[WabaConfigEnum.RequestTimeout],
             null,
         );

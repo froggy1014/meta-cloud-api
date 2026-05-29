@@ -71,6 +71,28 @@ describe('Messages API - Unit Tests', () => {
             });
         });
 
+        it('should send group message with group recipient type', async () => {
+            await whatsApp.messages.text({
+                to: '120363025000000000@g.us',
+                recipientType: 'group',
+                body: 'Hello, group!',
+            });
+
+            expect(mockRequestSend).toHaveBeenCalled();
+            const [_, __, ___, body] = mockRequestSend.mock.calls[0];
+
+            const requestBody = JSON.parse(body);
+
+            expect(requestBody).toMatchObject({
+                recipient_type: 'group',
+                to: '120363025000000000@g.us',
+                type: 'text',
+                text: {
+                    body: 'Hello, group!',
+                },
+            });
+        });
+
         it('should send video message with correct schema', async () => {
             const videoParams = {
                 to: '1234567890',
@@ -465,7 +487,7 @@ describe('Messages API - Unit Tests', () => {
     describe('Message Status Operations', () => {
         it('should mark message as read with correct schema', async () => {
             const statusParams = {
-                status: 'read',
+                status: 'read' as const,
                 messageId: 'msg_test_123',
             };
 

@@ -12,6 +12,7 @@ export type MarketingMessageRequest = {
     to: string;
     template: MessageTemplateObject<ComponentTypesEnum>;
     message_activity_sharing?: boolean;
+    product_policy?: 'CLOUD_API_FALLBACK' | 'STRICT';
 };
 
 export interface MarketingMessagesClass {

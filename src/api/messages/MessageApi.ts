@@ -121,11 +121,12 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
         payload: MessagePayloadType<T>,
         to: string,
         replyMessageId?: string,
+        recipientType: m.MessageRecipientType = 'individual',
     ) {
-        assertPhoneNumber(to);
+        if (recipientType === 'individual') assertPhoneNumber(to);
         const body: m.MessageRequestBody<T> = {
             messaging_product: 'whatsapp',
-            recipient_type: 'individual',
+            recipient_type: recipientType,
             to,
             type,
             [type]: payload,
@@ -147,8 +148,8 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      *
      * @see {@link https://developers.facebook.com/docs/whatsapp/cloud-api/reference/messages | Messages API Reference}
      */
-    private send(body: BodyInit | null): Promise<m.MessagesResponse> {
-        return this.sendJson(
+    private send<T = m.MessagesResponse>(body: BodyInit | null): Promise<T> {
+        return this.sendJson<T>(
             this.commonMethod,
             `${this.config[WabaConfigEnum.PhoneNumberId]}/${this.commonEndpoint}`,
             this.config[WabaConfigEnum.RequestTimeout],
@@ -187,8 +188,10 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * ```
      */
     async audio(params: m.MessageRequestParams<m.AudioMediaObject>): Promise<m.MessagesResponse> {
-        const { body, to, replyMessageId } = params;
-        return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Audio, body, to, replyMessageId)));
+        const { body, to, replyMessageId, recipientType } = params;
+        return this.send(
+            JSON.stringify(this.bodyBuilder(MessageTypesEnum.Audio, body, to, replyMessageId, recipientType)),
+        );
     }
 
     /**
@@ -217,8 +220,10 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * ```
      */
     async contacts(params: m.MessageRequestParams<m.ContactObject[]>): Promise<m.MessagesResponse> {
-        const { body, to, replyMessageId } = params;
-        return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Contacts, body, to, replyMessageId)));
+        const { body, to, replyMessageId, recipientType } = params;
+        return this.send(
+            JSON.stringify(this.bodyBuilder(MessageTypesEnum.Contacts, body, to, replyMessageId, recipientType)),
+        );
     }
 
     /**
@@ -249,8 +254,10 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * ```
      */
     async document(params: m.MessageRequestParams<m.DocumentMediaObject>): Promise<m.MessagesResponse> {
-        const { body, to, replyMessageId } = params;
-        return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Document, body, to, replyMessageId)));
+        const { body, to, replyMessageId, recipientType } = params;
+        return this.send(
+            JSON.stringify(this.bodyBuilder(MessageTypesEnum.Document, body, to, replyMessageId, recipientType)),
+        );
     }
 
     /**
@@ -276,8 +283,10 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * ```
      */
     async image(params: m.MessageRequestParams<m.ImageMediaObject>): Promise<m.MessagesResponse> {
-        const { body, to, replyMessageId } = params;
-        return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Image, body, to, replyMessageId)));
+        const { body, to, replyMessageId, recipientType } = params;
+        return this.send(
+            JSON.stringify(this.bodyBuilder(MessageTypesEnum.Image, body, to, replyMessageId, recipientType)),
+        );
     }
 
     /**
@@ -313,8 +322,10 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * ```
      */
     async interactive(params: m.MessageRequestParams<m.InteractiveObject>): Promise<m.MessagesResponse> {
-        const { body, to, replyMessageId } = params;
-        return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Interactive, body, to, replyMessageId)));
+        const { body, to, replyMessageId, recipientType } = params;
+        return this.send(
+            JSON.stringify(this.bodyBuilder(MessageTypesEnum.Interactive, body, to, replyMessageId, recipientType)),
+        );
     }
 
     /**
@@ -344,8 +355,10 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * ```
      */
     async location(params: m.MessageRequestParams<m.LocationObject>): Promise<m.MessagesResponse> {
-        const { body, to, replyMessageId } = params;
-        return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Location, body, to, replyMessageId)));
+        const { body, to, replyMessageId, recipientType } = params;
+        return this.send(
+            JSON.stringify(this.bodyBuilder(MessageTypesEnum.Location, body, to, replyMessageId, recipientType)),
+        );
     }
 
     /**
@@ -371,8 +384,10 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * ```
      */
     async sticker(params: m.MessageRequestParams<m.StickerMediaObject>): Promise<m.MessagesResponse> {
-        const { body, to, replyMessageId } = params;
-        return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Sticker, body, to, replyMessageId)));
+        const { body, to, replyMessageId, recipientType } = params;
+        return this.send(
+            JSON.stringify(this.bodyBuilder(MessageTypesEnum.Sticker, body, to, replyMessageId, recipientType)),
+        );
     }
 
     /**
@@ -407,8 +422,10 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
     async template(
         params: m.MessageRequestParams<m.MessageTemplateObject<ComponentTypesEnum>>,
     ): Promise<m.MessagesResponse> {
-        const { body, to, replyMessageId } = params;
-        return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Template, body, to, replyMessageId)));
+        const { body, to, replyMessageId, recipientType } = params;
+        return this.send(
+            JSON.stringify(this.bodyBuilder(MessageTypesEnum.Template, body, to, replyMessageId, recipientType)),
+        );
     }
 
     /**
@@ -439,7 +456,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * ```
      */
     async text(params: m.TextMessageParams): Promise<m.MessagesResponse> {
-        const { body, to, replyMessageId, previewUrl } = params;
+        const { body, to, replyMessageId, previewUrl, recipientType } = params;
 
         // Handle both string and TextObject types
         const textPayload: m.TextObject =
@@ -447,7 +464,9 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
                 ? { body, preview_url: previewUrl ?? true }
                 : { ...body, preview_url: previewUrl ?? body.preview_url ?? true };
 
-        return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Text, textPayload, to, replyMessageId)));
+        return this.send(
+            JSON.stringify(this.bodyBuilder(MessageTypesEnum.Text, textPayload, to, replyMessageId, recipientType)),
+        );
     }
 
     /**
@@ -474,8 +493,10 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * ```
      */
     async video(params: m.MessageRequestParams<m.VideoMediaObject>): Promise<m.MessagesResponse> {
-        const { body, to, replyMessageId } = params;
-        return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Video, body, to, replyMessageId)));
+        const { body, to, replyMessageId, recipientType } = params;
+        return this.send(
+            JSON.stringify(this.bodyBuilder(MessageTypesEnum.Video, body, to, replyMessageId, recipientType)),
+        );
     }
 
     /**
@@ -500,7 +521,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * });
      * ```
      */
-    async status(params: m.StatusParams): Promise<m.MessagesResponse> {
+    async status(params: m.StatusParams): Promise<m.StatusResponse> {
         const body = {
             messaging_product: 'whatsapp',
             status: params.status,
@@ -508,7 +529,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
             ...(params.typingIndicator && { typing_indicator: params.typingIndicator }),
         };
 
-        return this.send(JSON.stringify(body));
+        return this.send<m.StatusResponse>(JSON.stringify(body));
     }
 
     /**
@@ -528,7 +549,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * await client.messages.markAsRead({ messageId: 'wamid.ABC123' });
      * ```
      */
-    async markAsRead(params: { messageId: string }): Promise<m.MessagesResponse> {
+    async markAsRead(params: { messageId: string }): Promise<m.StatusResponse> {
         return this.status({
             status: 'read',
             messageId: params.messageId,
@@ -552,7 +573,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * await client.messages.showTypingIndicator({ messageId: 'wamid.ABC123' });
      * ```
      */
-    async showTypingIndicator(params: { messageId: string }): Promise<m.MessagesResponse> {
+    async showTypingIndicator(params: { messageId: string }): Promise<m.StatusResponse> {
         const body = {
             messaging_product: 'whatsapp',
             status: 'typing',
@@ -560,7 +581,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
             typing_indicator: { type: 'text' },
         };
 
-        return this.send(JSON.stringify(body));
+        return this.send<m.StatusResponse>(JSON.stringify(body));
     }
 
     /**
@@ -841,6 +862,16 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
             emoji: params.emoji,
         };
 
-        return this.send(JSON.stringify(this.bodyBuilder(MessageTypesEnum.Reaction, reactionPayload, params.to)));
+        return this.send(
+            JSON.stringify(
+                this.bodyBuilder(
+                    MessageTypesEnum.Reaction,
+                    reactionPayload,
+                    params.to,
+                    undefined,
+                    params.recipientType,
+                ),
+            ),
+        );
     }
 }

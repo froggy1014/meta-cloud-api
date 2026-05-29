@@ -2,7 +2,7 @@
 
 import type { Paging, ResponseSuccess } from '../../../types/request';
 
-export type QualityRating = 'GREEN' | 'YELLOW' | 'RED' | 'NA';
+export type QualityRating = 'GREEN' | 'YELLOW' | 'RED' | 'NA' | 'UNKNOWN';
 
 export type AccountMode = 'LIVE' | 'SANDBOX';
 
@@ -27,6 +27,12 @@ export type MessagingLimitTier = 'TIER_50' | 'TIER_250' | 'TIER_1K' | 'TIER_10K'
 export type PlatformType = 'CLOUD_API' | 'ON_PREMISE' | 'NOT_APPLICABLE';
 
 export type ThroughputLevel = 'STANDARD' | 'HIGH' | 'NOT_APPLICABLE';
+
+export type PhoneNumberStatus = 'PENDING' | 'LINKED' | 'UNLINKED' | 'DELETED' | 'MIGRATED' | 'BANNED' | 'RESTRICTED';
+
+export type UnifiedCertStatus = 'APPROVED' | 'PENDING' | 'REJECTED' | 'EXPIRED' | 'NONE' | string;
+
+export type HostPlatform = 'CLOUD_API' | 'ON_PREMISE' | 'NOT_APPLICABLE' | string;
 
 export type HealthStatusEntity = {
     entity_type: string;
@@ -54,6 +60,8 @@ export type Throughput = {
 };
 
 export type PhoneNumberField =
+    | 'country_code'
+    | 'country_dial_code'
     | 'display_phone_number'
     | 'id'
     | 'quality_rating'
@@ -64,6 +72,7 @@ export type PhoneNumberField =
     | 'conversational_automation'
     | 'eligibility_for_api_business_global_search'
     | 'health_status'
+    | 'host_platform'
     | 'is_official_business_account'
     | 'is_on_biz_app'
     | 'is_pin_enabled'
@@ -77,9 +86,29 @@ export type PhoneNumberField =
     | 'quality_score'
     | 'search_visibility'
     | 'status'
-    | 'throughput';
+    | 'throughput'
+    | 'unified_cert_status'
+    | 'username';
 
 export type PhoneNumberFieldsParam = PhoneNumberField[] | string;
+
+export type PhoneNumberSort =
+    | 'creation_time.asc'
+    | 'creation_time.desc'
+    | 'last_onboarded_time.asc'
+    | 'last_onboarded_time.desc'
+    | (string & {});
+
+export type PhoneNumberFilter = Record<string, unknown>;
+
+export type PhoneNumbersListParams = {
+    fields?: PhoneNumberFieldsParam;
+    filtering?: PhoneNumberFilter[] | string;
+    sort?: PhoneNumberSort;
+    limit?: number;
+    after?: string;
+    before?: string;
+};
 
 export type PhoneNumberResponse = {
     display_phone_number: string;
@@ -90,8 +119,11 @@ export type PhoneNumberResponse = {
     certificate?: string;
     code_verification_status?: CodeVerificationStatus;
     conversational_automation?: Record<string, unknown>;
+    country_code?: string;
+    country_dial_code?: string;
     eligibility_for_api_business_global_search?: string;
     health_status?: HealthStatus;
+    host_platform?: HostPlatform;
     is_official_business_account?: boolean;
     is_on_biz_app?: boolean;
     is_pin_enabled?: boolean;
@@ -104,8 +136,10 @@ export type PhoneNumberResponse = {
     platform_type?: PlatformType;
     quality_score?: QualityScore;
     search_visibility?: string;
-    status?: CodeVerificationStatus;
+    status?: PhoneNumberStatus | CodeVerificationStatus;
     throughput?: Throughput;
+    unified_cert_status?: UnifiedCertStatus;
+    username?: string;
 };
 
 export type Cursors = {
@@ -173,7 +207,7 @@ export type ThroughputResponse = {
 
 export interface PhoneNumberClass {
     getPhoneNumberById(fields?: PhoneNumberFieldsParam): Promise<PhoneNumberResponse>;
-    getPhoneNumbers(): Promise<PhoneNumbersResponse>;
+    getPhoneNumbers(params?: PhoneNumbersListParams): Promise<PhoneNumbersResponse>;
     requestVerificationCode(params: RequestVerificationCodeRequest): Promise<ResponseSuccess>;
     verifyCode(params: VerifyCodeRequest): Promise<ResponseSuccess>;
     setConversationalAutomation(params: ConversationalAutomationRequest): Promise<ResponseSuccess>;
