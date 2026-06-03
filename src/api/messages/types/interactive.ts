@@ -294,6 +294,18 @@ type CarouselInteractiveObject = {
     action: CarouselActionObject;
 };
 
+export type {
+    OrderDetailsInteractiveObjectBr,
+    OrderStatusInteractiveObjectBr,
+} from './orders/orders-br';
+export type {
+    OrderDetailsInteractiveObjectIn,
+    OrderStatusInteractiveObjectIn,
+} from './orders/orders-in';
+
+import type { OrderDetailsInteractiveObjectBr, OrderStatusInteractiveObjectBr } from './orders/orders-br';
+import type { OrderDetailsInteractiveObjectIn, OrderStatusInteractiveObjectIn } from './orders/orders-in';
+
 export type InteractiveObject =
     | ButtonInteractiveObject
     | ListInteractiveObject
@@ -305,7 +317,11 @@ export type InteractiveObject =
     | CarouselInteractiveObject
     | LocationRequestInteractiveObject
     | AddressMessageInteractiveObject
-    | FlowInteractiveObject;
+    | FlowInteractiveObject
+    | OrderDetailsInteractiveObjectBr
+    | OrderStatusInteractiveObjectBr
+    | OrderDetailsInteractiveObjectIn
+    | OrderStatusInteractiveObjectIn;
 
 export type InteractiveMessageRequestBody = MessageRequestBody<MessageTypesEnum.Interactive> & {
     [MessageTypesEnum.Interactive]: InteractiveObject;

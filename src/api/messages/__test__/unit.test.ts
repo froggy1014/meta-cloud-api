@@ -525,4 +525,240 @@ describe('Messages API - Unit Tests', () => {
             });
         });
     });
+
+    describe('Brazil Payments (order_details / order_status)', () => {
+        const sampleOrder = {
+            status: 'pending' as const,
+            items: [
+                {
+                    retailer_id: '1234567',
+                    name: 'Cake',
+                    amount: { value: 50000, offset: 100 },
+                    quantity: 1,
+                },
+            ],
+            subtotal: { value: 50000, offset: 100 },
+            tax: { value: 0, offset: 100 },
+        };
+
+        it('should send Brazil order_details with Pix via helper method', async () => {
+            await whatsApp.messages.interactiveOrderDetailsBrPix({
+                to: '5511999999999',
+                body: 'Complete your payment',
+                pix: {
+                    code: '00020101021226700014br.gov.bcb.pix2548pix.example.com',
+                    merchant_name: 'Example Store',
+                    key: '39580525000189',
+                    key_type: 'CNPJ',
+                },
+                orderDetails: {
+                    reference_id: 'order-001',
+                    type: 'digital-goods',
+                    total_amount: { value: 50000, offset: 100 },
+                    order: sampleOrder,
+                },
+            });
+
+            const [_, __, ___, body] = mockRequestSend.mock.calls[0];
+            const requestBody = JSON.parse(body);
+
+            expect(requestBody).toMatchObject({
+                type: 'interactive',
+                to: '5511999999999',
+                interactive: {
+                    type: 'order_details',
+                    body: { text: 'Complete your payment' },
+                    action: {
+                        name: 'review_and_pay',
+                        parameters: {
+                            reference_id: 'order-001',
+                            type: 'digital-goods',
+                            payment_type: 'br',
+                            currency: 'BRL',
+                            payment_settings: [
+                                {
+                                    type: 'pix_dynamic_code',
+                                    pix_dynamic_code: {
+                                        key_type: 'CNPJ',
+                                    },
+                                },
+                            ],
+                            total_amount: { value: 50000, offset: 100 },
+                        },
+                    },
+                },
+            });
+        });
+
+        it('should send Brazil order_status with payment captured', async () => {
+            await whatsApp.messages.interactiveOrderStatusBr({
+                to: '5511999999999',
+                body: 'Payment received',
+                orderStatus: {
+                    reference_id: 'order-001',
+                    order: { status: 'processing' },
+                    payment: { status: 'captured', timestamp: 1722445231 },
+                },
+            });
+
+            const [_, __, ___, body] = mockRequestSend.mock.calls[0];
+            const requestBody = JSON.parse(body);
+
+            expect(requestBody).toMatchObject({
+                type: 'interactive',
+                interactive: {
+                    type: 'order_status',
+                    action: {
+                        name: 'review_order',
+                        parameters: {
+                            reference_id: 'order-001',
+                            order: { status: 'processing' },
+                            payment: { status: 'captured', timestamp: 1722445231 },
+                        },
+                    },
+                },
+            });
+        });
+    });
+
+    describe('India Payments (order_details / order_status)', () => {
+        it('should send India order_details with UPI configuration', async () => {
+            await whatsApp.messages.interactiveOrderDetailsIn({
+                to: '919876543210',
+                body: 'Review and pay',
+                orderDetails: {
+                    reference_id: 'order-in-001',
+                    type: 'digital-goods',
+                    payment_configuration: 'my-payment-config',
+                    total_amount: { value: 1100, offset: 100 },
+                },
+            });
+
+            const [_, __, ___, body] = mockRequestSend.mock.calls[0];
+            const requestBody = JSON.parse(body);
+
+            expect(requestBody).toMatchObject({
+                interactive: {
+                    type: 'order_details',
+                    action: {
+                        name: 'review_and_pay',
+                        parameters: {
+                            reference_id: 'order-in-001',
+                            payment_type: 'upi',
+                            payment_configuration: 'my-payment-config',
+                            currency: 'INR',
+                        },
+                    },
+                },
+            });
+        });
+    });
+
+    describe('Order details template messages', () => {
+        it('should send Brazil order_details template with Pix button parameters', async () => {
+            await whatsApp.messages.templateOrderDetailsBrPix({
+                to: '5511999999999',
+                template: {
+                    name: 'order_details_cart',
+                    language: { policy: 'deterministic', code: 'pt_BR' },
+                },
+                pix: {
+                    code: '00020101021226700014br.gov.bcb.pix2548pix.example.com',
+                    merchant_name: 'Example Store',
+                    key: '39580525000189',
+                    key_type: 'CNPJ',
+                },
+                orderDetails: {
+                    reference_id: 'tpl-order-001',
+                    type: 'digital-goods',
+                    total_amount: { value: 50000, offset: 100 },
+                    order: {
+                        status: 'pending',
+                        items: [
+                            {
+                                retailer_id: '1234567',
+                                name: 'Cake',
+                                amount: { value: 50000, offset: 100 },
+                                quantity: 1,
+                            },
+                        ],
+                        subtotal: { value: 50000, offset: 100 },
+                        tax: { value: 0, offset: 100 },
+                    },
+                },
+            });
+
+            const [_, __, ___, body] = mockRequestSend.mock.calls[0];
+            const requestBody = JSON.parse(body);
+
+            expect(requestBody).toMatchObject({
+                type: 'template',
+                template: {
+                    name: 'order_details_cart',
+                    components: [
+                        {
+                            type: 'button',
+                            sub_type: 'order_details',
+                            index: 0,
+                            parameters: [
+                                {
+                                    type: 'action',
+                                    action: {
+                                        order_details: {
+                                            reference_id: 'tpl-order-001',
+                                            payment_type: 'br',
+                                            currency: 'BRL',
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                },
+            });
+        });
+    });
+
+    describe('Order status template messages', () => {
+        it('should send order_status template with status parameters', async () => {
+            await whatsApp.messages.templateOrderStatus({
+                to: '5511999999999',
+                template: {
+                    name: 'order_status_shipped',
+                    language: { policy: 'deterministic', code: 'pt_BR' },
+                },
+                orderStatus: {
+                    reference_id: 'order-001',
+                    order: { status: 'shipped', description: 'Expected delivery in 2 days' },
+                },
+            });
+
+            const [_, __, ___, body] = mockRequestSend.mock.calls[0];
+            const requestBody = JSON.parse(body);
+
+            expect(requestBody).toMatchObject({
+                type: 'template',
+                template: {
+                    name: 'order_status_shipped',
+                    components: [
+                        {
+                            type: 'order_status',
+                            parameters: [
+                                {
+                                    type: 'order_status',
+                                    order_status: {
+                                        reference_id: 'order-001',
+                                        order: {
+                                            status: 'shipped',
+                                            description: 'Expected delivery in 2 days',
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                },
+            });
+        });
+    });
 });

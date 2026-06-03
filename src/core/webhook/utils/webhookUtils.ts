@@ -48,6 +48,9 @@ import type {
     WebhookValue,
     WhatsAppMessage,
 } from '../types';
+import type { InteractivePaymentMethodMessage } from '../types/message';
+import type { PaymentTransactionStatusWebhook } from '../types/payments-in';
+import { isPaymentMethodMessage, isPaymentTransactionStatus } from './paymentHelpers';
 
 const LIB_NAME = 'WEBHOOK_UTILS';
 const LOGGER = new Logger(LIB_NAME, process.env.DEBUG === 'true');
@@ -77,6 +80,14 @@ export type ProcessedStatus = {
     phoneNumberId: string;
     displayPhoneNumber: string;
     status: StatusWebhook;
+};
+
+export type ProcessedPaymentStatus = ProcessedStatus & {
+    status: PaymentTransactionStatusWebhook;
+};
+
+export type PaymentMethodProcessedMessage = ProcessedMessage & {
+    message: InteractivePaymentMethodMessage;
 };
 
 /**
@@ -317,6 +328,8 @@ type WebhookHandler<TProcessed, TReturn = void> = (
 
 export type MessageHandler = WebhookHandler<ProcessedMessage>;
 export type StatusHandler = WebhookHandler<ProcessedStatus>;
+export type PaymentStatusHandler = WebhookHandler<ProcessedPaymentStatus>;
+export type PaymentMethodHandler = WebhookHandler<PaymentMethodProcessedMessage>;
 export type FlowHandler = WebhookHandler<FlowEndpointRequest, any>;
 export type RawWebhookHandler = WebhookHandler<WebhookPayload>;
 
@@ -377,6 +390,8 @@ export async function processWebhookMessages(
     handlers: {
         messageHandlers: Map<MessageTypesEnum, MessageHandler>;
         statusHandler?: StatusHandler;
+        paymentStatusHandler?: PaymentStatusHandler;
+        paymentMethodHandler?: PaymentMethodHandler;
         preProcessHandler?: MessageHandler;
         postProcessHandler?: MessageHandler;
         rawHandler?: RawWebhookHandler;
@@ -915,6 +930,8 @@ async function processMessages(
     handlers: {
         messageHandlers: Map<MessageTypesEnum, MessageHandler>;
         statusHandler?: StatusHandler;
+        paymentStatusHandler?: PaymentStatusHandler;
+        paymentMethodHandler?: PaymentMethodHandler;
         preProcessHandler?: MessageHandler;
         postProcessHandler?: MessageHandler;
     },
@@ -935,6 +952,15 @@ async function processMessages(
                 displayPhoneNumber,
                 status,
             };
+
+            if (isPaymentTransactionStatus(status)) {
+                await executePaymentStatusHandler(
+                    handlers.paymentStatusHandler,
+                    whatsapp,
+                    processed as ProcessedPaymentStatus,
+                    context,
+                );
+            }
 
             await executeStatusHandler(handlers.statusHandler, whatsapp, processed, context);
         }
@@ -960,13 +986,24 @@ async function processMessages(
 
             // Execute handlers in sequence
             await executeMessageHandler(handlers.preProcessHandler, whatsapp, processed, context, 'pre-process');
-            await executeMessageHandler(
-                handlers.messageHandlers.get(messageType),
-                whatsapp,
-                processed,
-                context,
-                messageType,
-            );
+
+            if (isPaymentMethodMessage(message)) {
+                await executePaymentMethodHandler(
+                    handlers.paymentMethodHandler,
+                    whatsapp,
+                    processed as PaymentMethodProcessedMessage,
+                    context,
+                );
+            } else {
+                await executeMessageHandler(
+                    handlers.messageHandlers.get(messageType),
+                    whatsapp,
+                    processed,
+                    context,
+                    messageType,
+                );
+            }
+
             await executeMessageHandler(handlers.postProcessHandler, whatsapp, processed, context, 'post-process');
         }
     }
@@ -999,6 +1036,44 @@ async function executeStatusHandler(
             await handler(whatsapp, processed, context);
         } catch (error) {
             LOGGER.error('Error in status handler:', { error, statusId: processed.status.id });
+        }
+    }
+}
+
+async function executePaymentStatusHandler(
+    handler: PaymentStatusHandler | undefined,
+    whatsapp: WhatsApp,
+    processed: ProcessedPaymentStatus,
+    context: WebhookHandlerContext,
+): Promise<void> {
+    if (handler) {
+        try {
+            await handler(whatsapp, processed, context);
+        } catch (error) {
+            LOGGER.error('Error in payment status handler:', {
+                error,
+                statusId: processed.status.id,
+                referenceId: processed.status.payment.reference_id,
+            });
+        }
+    }
+}
+
+async function executePaymentMethodHandler(
+    handler: PaymentMethodHandler | undefined,
+    whatsapp: WhatsApp,
+    processed: PaymentMethodProcessedMessage,
+    context: WebhookHandlerContext,
+): Promise<void> {
+    if (handler) {
+        try {
+            await handler(whatsapp, processed, context);
+        } catch (error) {
+            LOGGER.error('Error in payment method handler:', {
+                error,
+                messageId: processed.messageId,
+                referenceId: processed.message.interactive.payment_method.reference_id,
+            });
         }
     }
 }

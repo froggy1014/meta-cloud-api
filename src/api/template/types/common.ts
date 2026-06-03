@@ -69,6 +69,11 @@ export type CatalogButton = {
     };
 };
 
+export type OrderDetailsButton = {
+    type: 'ORDER_DETAILS';
+    text: string;
+};
+
 export type TemplateButton =
     | PhoneNumberButton
     | URLButton
@@ -78,7 +83,12 @@ export type TemplateButton =
     | MPMButton
     | OTPButton
     | SPMButton
-    | CatalogButton;
+    | CatalogButton
+    | OrderDetailsButton;
+
+export type TemplateDisplayFormat = 'ORDER_DETAILS';
+
+export type TemplateSubCategory = 'ORDER_STATUS';
 
 export type TemplateHeaderExample = {
     header_text?: string[];
@@ -161,6 +171,8 @@ export type TemplateRequestBody = GeneralRequestBody & {
     name: string;
     language: LanguagesEnum;
     category?: CategoryEnum;
+    display_format?: TemplateDisplayFormat;
+    sub_category?: TemplateSubCategory;
     components?: ComponentTypes[];
 };
 

@@ -21,6 +21,22 @@ export type {
     StickerMediaObject,
     VideoMediaObject,
 } from './media';
+export type {
+    OrderDetailsTemplateBrMessageParams,
+    OrderDetailsTemplateInMessageParams,
+    OrderDetailsTemplatePixBrMessageParams,
+} from './order-details-template-messages';
+export type {
+    OrderDetailsBrMessageParams,
+    OrderDetailsInMessageParams,
+    OrderDetailsPixBrMessageParams,
+    OrderStatusBrMessageParams,
+    OrderStatusInMessageParams,
+} from './order-messages';
+export type { OrderStatusTemplateMessageParams } from './order-status-template-messages';
+export type * from './orders';
 export type { ReactionParams } from './reaction';
 export * from './template';
+export type * from './template-order-details';
+export type * from './template-order-status';
 export type { TextMessageParams, TextObject } from './text';

@@ -34,7 +34,8 @@ meta-cloud-api provides a type-safe, comprehensive, and modular way to integrate
 - [Calling](https://meta-cloud-api.xyz/api/calling): Voice calling configuration
 - [Commerce Settings](https://meta-cloud-api.xyz/api/commerce-settings): Cart and catalog settings
 - [Marketing Messages](https://meta-cloud-api.xyz/api/marketing-messages): Marketing endpoint
-- [Payments](https://meta-cloud-api.xyz/api/payments): Payment configurations (India)
+- [Payments (India)](https://meta-cloud-api.xyz/api/payments): Payment configurations (India)
+- [Payments (Brazil)](https://meta-cloud-api.xyz/api/payments-brazil): Order details and Pix payments (Brazil)
 - [Block Users](https://meta-cloud-api.xyz/api/block-users): Block/unblock users
 
 ## Webhooks

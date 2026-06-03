@@ -47,6 +47,7 @@ Then cross-check the relevant official docs:
 - Marketing Messages: https://developers.facebook.com/documentation/business-messaging/whatsapp/marketing-messages/send-marketing-messages/
 - Commerce Settings: https://developers.facebook.com/documentation/business-messaging/whatsapp/catalogs/sell-products-and-services/set-commerce-settings/
 - Payments (India): https://developers.facebook.com/documentation/business-messaging/whatsapp/payments/payments-in/onboarding-apis/
+- Payments (Brazil): https://developers.facebook.com/documentation/business-messaging/whatsapp/payments/payments-br/overview/
 
 ## Coding Style & Naming Conventions
 
