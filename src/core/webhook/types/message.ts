@@ -136,10 +136,26 @@ export interface InteractiveNfmReplyMessage extends BaseMessage {
     };
 }
 
+export interface InteractivePaymentMethodMessage extends BaseMessage {
+    type: MessageTypesEnum.Interactive;
+    from_logical_id?: string;
+    interactive: {
+        type: 'payment_method';
+        payment_method: {
+            payment_method: string;
+            payment_timestamp: number;
+            reference_id: string;
+            last_four_digits?: string;
+            credential_id: string;
+        };
+    };
+}
+
 export type InteractiveMessage =
     | InteractiveListReplyMessage
     | InteractiveButtonReplyMessage
-    | InteractiveNfmReplyMessage;
+    | InteractiveNfmReplyMessage
+    | InteractivePaymentMethodMessage;
 
 // ============================================================================
 // Message Types - Button (Quick Reply)

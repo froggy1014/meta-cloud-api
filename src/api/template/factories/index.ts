@@ -14,6 +14,8 @@ import type {
     MediaCardCarouselTemplateOptions,
     MediaCarouselCard,
     MPMTemplateOptions,
+    OrderDetailsTemplateOptions,
+    OrderStatusTemplateOptions,
     OTPTemplateOptions,
     ProductCardCarouselTemplateOptions,
     ProductCarouselCard,
@@ -131,6 +133,13 @@ function createButtons(options: ButtonOptions): ComponentTypes[] {
 
     if (options.spm) {
         buttons.push({ type: 'SPM' });
+    }
+
+    if (options.order_details) {
+        buttons.push({
+            type: 'ORDER_DETAILS',
+            text: options.order_details.text,
+        });
     }
 
     return buttons.length > 0
@@ -563,6 +572,56 @@ export function createSPMTemplate(options: SPMTemplateOptions): TemplateRequestB
         name: options.name,
         language: options.language,
         category: CategoryEnum.Marketing,
+        components,
+    };
+}
+
+// Order Details Template Factory (Payments API Brazil / India)
+export function createOrderDetailsTemplate(options: OrderDetailsTemplateOptions): TemplateRequestBody {
+    const components: ComponentTypes[] = [];
+
+    if (options.header) {
+        components.push(createHeader(options.header));
+    }
+
+    components.push(createBody(options.body));
+
+    if (options.footer) {
+        components.push(createFooter(options.footer));
+    }
+
+    components.push({
+        type: 'BUTTONS',
+        buttons: [
+            {
+                type: 'ORDER_DETAILS',
+                text: options.order_details_button.text,
+            },
+        ],
+    });
+
+    return {
+        name: options.name,
+        language: options.language,
+        category: options.category,
+        display_format: 'ORDER_DETAILS',
+        components,
+    };
+}
+
+// Order Status Template Factory (Payments API Brazil / India)
+export function createOrderStatusTemplate(options: OrderStatusTemplateOptions): TemplateRequestBody {
+    const components: ComponentTypes[] = [createBody(options.body)];
+
+    if (options.footer) {
+        components.push(createFooter(options.footer));
+    }
+
+    return {
+        name: options.name,
+        language: options.language,
+        category: options.category ?? CategoryEnum.Utility,
+        sub_category: 'ORDER_STATUS',
         components,
     };
 }

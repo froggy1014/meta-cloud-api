@@ -1108,13 +1108,63 @@ interface PartnerSolutionsValue {
 ```typescript
 interface PaymentConfigurationUpdateValue {
     configuration_name: string;
-    provider_name: string;       // e.g., "razorpay"
+    provider_name: string;       // e.g., "razorpay" (India) or Brazil PSP names
     provider_mid: string;
     status: string;              // e.g., "Needs Testing"
     created_timestamp: number;
     updated_timestamp: number;
 }
 ```
+
+### Payment Transaction Status (India PG)
+
+Delivered on the `messages` webhook field as `statuses[]` with `type: "payment"`:
+
+```typescript
+interface PaymentTransactionStatusWebhook {
+    type: 'payment';
+    id: string;
+    status: string;              // e.g., "captured"
+    timestamp: string;
+    recipient_id: string;
+    payment: {
+        reference_id: string;
+        currency: string;
+        amount: { value: number; offset: number };
+        transaction?: {
+            id: string;
+            type: string;        // razorpay, payu, etc.
+            status: string;
+        };
+    };
+}
+```
+
+Use `webhook.onPaymentStatus()` or `isPaymentTransactionStatus()` from the SDK.
+
+### Brazil Payment Method Selection (One-click)
+
+Inbound `messages` webhook with `interactive.type: "payment_method"`:
+
+```typescript
+interface InteractivePaymentMethodMessage {
+    type: 'interactive';
+    interactive: {
+        type: 'payment_method';
+        payment_method: {
+            payment_method: string;      // e.g., "offsite_card_pay"
+            payment_timestamp: number;
+            reference_id: string;
+            credential_id: string;
+            last_four_digits?: string;
+        };
+    };
+}
+```
+
+Use `webhook.onPaymentMethod()` or `getPaymentMethodSelection()`.
+
+Order details template taps send `button` messages with `payload: "ORDER_DETAILS_CLICKED"`. Use `isOrderDetailsButtonClick()`.
 
 ### Marketing & Tracking Types
 

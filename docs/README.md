@@ -16,7 +16,8 @@
 - [Groups](./groups.md)
 - [Marketing Messages](./marketing-messages.md)
 - [Commerce Settings](./commerce-settings.md)
-- [Payments](./payments.md)
+- [Payments (India)](./payments.md)
+- [Payments (Brazil)](./payments-br.md)
 
 ## Official Reference Snapshot
 

@@ -100,7 +100,12 @@ type PayloadParametersObject = ParametersObject<ParametersTypesEnum.Payload> & {
 export type MessageTemplateObject<T extends ComponentTypesEnum> = {
     name: string;
     language: LanguageObject;
-    components?: (ComponentObject<T> | ButtonComponentObject)[];
+    components?: (
+        | ComponentObject<T>
+        | ButtonComponentObject
+        | import('./template-order-details').OrderDetailsTemplateComponent
+        | import('./template-order-status').OrderStatusTemplateComponent
+    )[];
 };
 
 export type MessageTemplateRequestBody<T extends ComponentTypesEnum> = MessageRequestBody<MessageTypesEnum.Template> &

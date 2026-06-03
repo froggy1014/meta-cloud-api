@@ -134,6 +134,29 @@ export declare class MessagesClass extends BaseClass {
             }
         >,
     ): Promise<MessagesResponse>;
+    interactiveOrderDetailsBr(
+        params: import('./order-messages').OrderDetailsBrMessageParams,
+    ): Promise<MessagesResponse>;
+    interactiveOrderDetailsBrPix(
+        params: import('./order-messages').OrderDetailsPixBrMessageParams,
+    ): Promise<MessagesResponse>;
+    interactiveOrderStatusBr(params: import('./order-messages').OrderStatusBrMessageParams): Promise<MessagesResponse>;
+    interactiveOrderDetailsIn(
+        params: import('./order-messages').OrderDetailsInMessageParams,
+    ): Promise<MessagesResponse>;
+    interactiveOrderStatusIn(params: import('./order-messages').OrderStatusInMessageParams): Promise<MessagesResponse>;
+    templateOrderDetailsBr(
+        params: import('./order-details-template-messages').OrderDetailsTemplateBrMessageParams,
+    ): Promise<MessagesResponse>;
+    templateOrderDetailsBrPix(
+        params: import('./order-details-template-messages').OrderDetailsTemplatePixBrMessageParams,
+    ): Promise<MessagesResponse>;
+    templateOrderDetailsIn(
+        params: import('./order-details-template-messages').OrderDetailsTemplateInMessageParams,
+    ): Promise<MessagesResponse>;
+    templateOrderStatus(
+        params: import('./order-status-template-messages').OrderStatusTemplateMessageParams,
+    ): Promise<MessagesResponse>;
 
     // Reaction and status messages
     reaction(params: import('./reaction').ReactionParams): Promise<MessagesResponse>;

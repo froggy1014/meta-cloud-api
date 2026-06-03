@@ -73,6 +73,8 @@ export enum InteractiveTypesEnum {
     LocationRequest = 'location_request_message',
     AddressMessage = 'address_message',
     Flow = 'flow',
+    OrderDetails = 'order_details',
+    OrderStatus = 'order_status',
 }
 
 export enum ButtonPositionEnum {

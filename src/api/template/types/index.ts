@@ -6,6 +6,7 @@ export type {
     CopyCodeButton,
     FlowButton,
     MPMButton,
+    OrderDetailsButton,
     OTPButton,
     PhoneNumberButton,
     QuickReplyButton,
@@ -24,6 +25,7 @@ export type {
     TemplateLimitedTimeOffer,
     TemplateRequestBody,
     TemplateResponse,
+    TemplateSubCategory,
     URLButton,
 } from './common';
 export * from './common';
@@ -46,6 +48,8 @@ export type {
     MediaCardCarouselTemplateOptions,
     MediaParameter,
     MPMTemplateOptions,
+    OrderDetailsTemplateOptions,
+    OrderStatusTemplateOptions,
     OTPTemplateOptions,
     ProductCardCarouselTemplateOptions,
     ProductParameter,

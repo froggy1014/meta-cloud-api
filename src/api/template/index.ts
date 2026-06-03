@@ -7,6 +7,8 @@ export {
     createLimitedTimeOfferTemplate,
     createMediaCardCarouselTemplate,
     createMPMTemplate,
+    createOrderDetailsTemplate,
+    createOrderStatusTemplate,
     createOTPTemplate,
     createProductCardCarouselTemplate,
     createSPMTemplate,

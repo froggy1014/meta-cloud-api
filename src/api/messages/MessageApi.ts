@@ -12,6 +12,18 @@ import {
     WabaConfigEnum,
 } from '../../types/enums';
 import { assertPhoneNumber } from '../../utils/validate';
+import {
+    buildOrderDetailsInteractiveBr,
+    buildOrderDetailsInteractiveIn,
+    buildOrderDetailsPixInteractiveBr,
+    buildOrderDetailsTemplateButtonBr,
+    buildOrderDetailsTemplateButtonBrPix,
+    buildOrderDetailsTemplateButtonIn,
+    buildOrderStatusInteractiveBr,
+    buildOrderStatusInteractiveIn,
+    buildOrderStatusTemplateComponent,
+    toOrderSimpleText,
+} from './helpers';
 import type * as m from './types';
 
 /**
@@ -70,6 +82,15 @@ export type MessagePayloadType<T extends MessageTypesEnum> = T extends MessageTy
  * - {@link MessagesApi.interactiveReplyButtons | interactiveReplyButtons} - Send reply button interactive messages
  * - {@link MessagesApi.interactiveFlow | interactiveFlow} - Send flow interactive messages
  * - {@link MessagesApi.interactiveCarousel | interactiveCarousel} - Send carousel interactive messages
+ * - {@link MessagesApi.interactiveOrderDetailsBr | interactiveOrderDetailsBr} - Send Brazil order_details messages
+ * - {@link MessagesApi.interactiveOrderDetailsBrPix | interactiveOrderDetailsBrPix} - Send Brazil Pix order_details
+ * - {@link MessagesApi.interactiveOrderStatusBr | interactiveOrderStatusBr} - Send Brazil order_status messages
+ * - {@link MessagesApi.interactiveOrderDetailsIn | interactiveOrderDetailsIn} - Send India order_details messages
+ * - {@link MessagesApi.interactiveOrderStatusIn | interactiveOrderStatusIn} - Send India order_status messages
+ * - {@link MessagesApi.templateOrderDetailsBr | templateOrderDetailsBr} - Send Brazil order_details template
+ * - {@link MessagesApi.templateOrderDetailsBrPix | templateOrderDetailsBrPix} - Send Brazil Pix order_details template
+ * - {@link MessagesApi.templateOrderDetailsIn | templateOrderDetailsIn} - Send India order_details template
+ * - {@link MessagesApi.templateOrderStatus | templateOrderStatus} - Send order_status template (Brazil / India)
  * - {@link MessagesApi.reaction | reaction} - Send reaction emoji to a message
  * - {@link MessagesApi.status | status} - Update message status (read, typing)
  * - {@link MessagesApi.markAsRead | markAsRead} - Mark a message as read
@@ -823,6 +844,187 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
         params: m.MessageRequestParams<m.InteractiveObject & { type: InteractiveTypesEnum.Carousel }>,
     ): Promise<m.MessagesResponse> {
         return this.interactive(params);
+    }
+
+    /**
+     * Sends a Brazil order_details interactive message (Payments API Brazil).
+     *
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/payments/payments-br/orders/
+     */
+    async interactiveOrderDetailsBr(params: m.OrderDetailsBrMessageParams): Promise<m.MessagesResponse> {
+        const { to, recipientType, replyMessageId, body, footer, header, orderDetails } = params;
+        return this.interactive({
+            to,
+            recipientType,
+            replyMessageId,
+            body: buildOrderDetailsInteractiveBr({
+                body: toOrderSimpleText(body),
+                footer,
+                header,
+                parameters: orderDetails,
+            }),
+        });
+    }
+
+    /**
+     * Sends a Brazil order_details message with Pix dynamic code payment settings.
+     *
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/payments/payments-br/offsite-pix/
+     */
+    async interactiveOrderDetailsBrPix(params: m.OrderDetailsPixBrMessageParams): Promise<m.MessagesResponse> {
+        const { to, recipientType, replyMessageId, body, footer, header, pix, orderDetails } = params;
+        return this.interactive({
+            to,
+            recipientType,
+            replyMessageId,
+            body: buildOrderDetailsPixInteractiveBr({
+                body: toOrderSimpleText(body),
+                footer,
+                header,
+                pix,
+                parameters: orderDetails,
+            }),
+        });
+    }
+
+    /**
+     * Sends a Brazil order_status interactive message (Payments API Brazil).
+     *
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/payments/payments-br/orders/
+     */
+    async interactiveOrderStatusBr(params: m.OrderStatusBrMessageParams): Promise<m.MessagesResponse> {
+        const { to, recipientType, replyMessageId, body, footer, header, orderStatus } = params;
+        return this.interactive({
+            to,
+            recipientType,
+            replyMessageId,
+            body: buildOrderStatusInteractiveBr({
+                body: toOrderSimpleText(body),
+                footer,
+                header,
+                parameters: orderStatus,
+            }),
+        });
+    }
+
+    /**
+     * Sends an India order_details interactive message (Payments API India).
+     *
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/payments/payments-in/pg/
+     */
+    async interactiveOrderDetailsIn(params: m.OrderDetailsInMessageParams): Promise<m.MessagesResponse> {
+        const { to, recipientType, replyMessageId, body, footer, header, orderDetails } = params;
+        return this.interactive({
+            to,
+            recipientType,
+            replyMessageId,
+            body: buildOrderDetailsInteractiveIn({
+                body: toOrderSimpleText(body),
+                footer,
+                header,
+                parameters: orderDetails,
+            }),
+        });
+    }
+
+    /**
+     * Sends an India order_status interactive message (Payments API India).
+     *
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/payments/payments-in/pg/
+     */
+    async interactiveOrderStatusIn(params: m.OrderStatusInMessageParams): Promise<m.MessagesResponse> {
+        const { to, recipientType, replyMessageId, body, footer, header, orderStatus } = params;
+        return this.interactive({
+            to,
+            recipientType,
+            replyMessageId,
+            body: buildOrderStatusInteractiveIn({
+                body: toOrderSimpleText(body),
+                footer,
+                header,
+                parameters: orderStatus,
+            }),
+        });
+    }
+
+    /**
+     * Sends a Brazil order_details template message (Payments API Brazil).
+     *
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/payments/payments-br/orderdetailstemplate/
+     */
+    async templateOrderDetailsBr(params: m.OrderDetailsTemplateBrMessageParams): Promise<m.MessagesResponse> {
+        const { to, recipientType, replyMessageId, template, orderDetails, buttonIndex = 0 } = params;
+        const button = buildOrderDetailsTemplateButtonBr(orderDetails, buttonIndex);
+        return this.template({
+            to,
+            recipientType,
+            replyMessageId,
+            body: {
+                name: template.name,
+                language: template.language,
+                components: [...(template.components ?? []), button],
+            },
+        });
+    }
+
+    /**
+     * Sends a Brazil order_details template message with Pix payment settings.
+     *
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/payments/payments-br/orderdetailstemplate/
+     */
+    async templateOrderDetailsBrPix(params: m.OrderDetailsTemplatePixBrMessageParams): Promise<m.MessagesResponse> {
+        const { to, recipientType, replyMessageId, template, orderDetails, pix, buttonIndex = 0 } = params;
+        const button = buildOrderDetailsTemplateButtonBrPix(orderDetails, pix, buttonIndex);
+        return this.template({
+            to,
+            recipientType,
+            replyMessageId,
+            body: {
+                name: template.name,
+                language: template.language,
+                components: [...(template.components ?? []), button],
+            },
+        });
+    }
+
+    /**
+     * Sends an India order_details template message (Payments API India).
+     *
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/payments/payments-in/pg/
+     */
+    async templateOrderDetailsIn(params: m.OrderDetailsTemplateInMessageParams): Promise<m.MessagesResponse> {
+        const { to, recipientType, replyMessageId, template, orderDetails, buttonIndex = 0 } = params;
+        const button = buildOrderDetailsTemplateButtonIn(orderDetails, buttonIndex);
+        return this.template({
+            to,
+            recipientType,
+            replyMessageId,
+            body: {
+                name: template.name,
+                language: template.language,
+                components: [...(template.components ?? []), button],
+            },
+        });
+    }
+
+    /**
+     * Sends an order_status template message (Payments API Brazil / India).
+     *
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/payments/payments-in/orderstatustemplate/
+     */
+    async templateOrderStatus(params: m.OrderStatusTemplateMessageParams): Promise<m.MessagesResponse> {
+        const { to, recipientType, replyMessageId, template, orderStatus } = params;
+        const component = buildOrderStatusTemplateComponent(orderStatus);
+        return this.template({
+            to,
+            recipientType,
+            replyMessageId,
+            body: {
+                name: template.name,
+                language: template.language,
+                components: [...(template.components ?? []), component],
+            },
+        });
     }
 
     /**

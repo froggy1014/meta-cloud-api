@@ -57,6 +57,15 @@ export {
     isTextMessage,
     isVideoMessage,
 } from './utils/messageHelpers';
+export type { PaymentMethodSelection, PaymentTransactionInfo } from './utils/paymentHelpers';
+export {
+    getPaymentMethodSelection,
+    getPaymentTransactionInfo,
+    isOrderDetailsButtonClick,
+    isPaymentMethodMessage,
+    isPaymentTransactionStatus,
+    ORDER_DETAILS_CLICKED_PAYLOAD,
+} from './utils/paymentHelpers';
 export type {
     AudioMessageHandler,
     AudioProcessedMessage,
@@ -76,7 +85,11 @@ export type {
     MessageHandler,
     OrderMessageHandler,
     OrderProcessedMessage,
+    PaymentMethodHandler,
+    PaymentMethodProcessedMessage,
+    PaymentStatusHandler,
     ProcessedMessage,
+    ProcessedPaymentStatus,
     ProcessedStatus,
     ReactionMessageHandler,
     ReactionProcessedMessage,

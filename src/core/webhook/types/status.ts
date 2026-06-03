@@ -1,10 +1,11 @@
 import type { WebhookError } from './common';
+import type { PaymentTransactionStatusWebhook } from './payments-in';
 
 // ============================================================================
 // Status Webhook Types
 // ============================================================================
 
-export interface StatusWebhook {
+export interface MessageDeliveryStatusWebhook {
     id: string;
     status: 'sent' | 'delivered' | 'read' | 'failed';
     timestamp: string;
@@ -42,6 +43,8 @@ export interface StatusWebhook {
     };
     errors?: Array<WebhookError>;
 }
+
+export type StatusWebhook = MessageDeliveryStatusWebhook | PaymentTransactionStatusWebhook;
 
 /**
  * Message status enum

@@ -1,6 +1,7 @@
 import { WhatsApp } from '@core/whatsapp';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CategoryEnum, LanguagesEnum, TemplateStatusEnum } from '../../../types/enums';
+import { createOrderDetailsTemplate, createOrderStatusTemplate } from '../factories';
 import type { TemplateDeleteParams, TemplateGetParams, TemplateRequestBody } from '../types';
 
 describe('Template API - Unit Tests', () => {
@@ -400,6 +401,64 @@ describe('Template API - Unit Tests', () => {
             expect(endpoint).not.toContain('name=');
             expect(endpoint).not.toContain('language=');
             expect(endpoint).not.toContain('category=');
+        });
+    });
+
+    describe('Order details template factory', () => {
+        it('should create order details template with ORDER_DETAILS display format', async () => {
+            const template = createOrderDetailsTemplate({
+                name: 'order_details_cart',
+                language: LanguagesEnum.Portuguese_BR,
+                category: CategoryEnum.Utility,
+                body: { text: 'Your order total is {{1}}' },
+                footer: { text: 'Pay within 15 minutes' },
+                order_details_button: { text: 'Copy Pix code' },
+            });
+
+            await whatsApp.templates.createTemplate(template);
+
+            const [_, __, ___, body] = mockRequestSend.mock.calls[0];
+            const parsedBody = JSON.parse(body);
+
+            expect(parsedBody).toMatchObject({
+                name: 'order_details_cart',
+                display_format: 'ORDER_DETAILS',
+                category: CategoryEnum.Utility,
+                components: [
+                    { type: 'BODY', text: 'Your order total is {{1}}' },
+                    { type: 'FOOTER', text: 'Pay within 15 minutes' },
+                    {
+                        type: 'BUTTONS',
+                        buttons: [{ type: 'ORDER_DETAILS', text: 'Copy Pix code' }],
+                    },
+                ],
+            });
+        });
+    });
+
+    describe('Order status template factory', () => {
+        it('should create order status template with ORDER_STATUS sub category', async () => {
+            const template = createOrderStatusTemplate({
+                name: 'order_status_shipped',
+                language: LanguagesEnum.Portuguese_BR,
+                body: { text: 'Your order {{1}} has shipped.' },
+                footer: { text: 'Track at example.com' },
+            });
+
+            await whatsApp.templates.createTemplate(template);
+
+            const [_, __, ___, body] = mockRequestSend.mock.calls[0];
+            const parsedBody = JSON.parse(body);
+
+            expect(parsedBody).toMatchObject({
+                name: 'order_status_shipped',
+                sub_category: 'ORDER_STATUS',
+                category: CategoryEnum.Utility,
+                components: [
+                    { type: 'BODY', text: 'Your order {{1}} has shipped.' },
+                    { type: 'FOOTER', text: 'Track at example.com' },
+                ],
+            });
         });
     });
 });

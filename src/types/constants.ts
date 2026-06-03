@@ -90,6 +90,8 @@ export const InteractiveTypes = {
     LocationRequest: 'location_request_message',
     AddressMessage: 'address_message',
     Flow: 'flow',
+    OrderDetails: 'order_details',
+    OrderStatus: 'order_status',
 } as const;
 export type InteractiveTypesType = (typeof InteractiveTypes)[keyof typeof InteractiveTypes];
 
