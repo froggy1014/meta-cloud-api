@@ -85,6 +85,8 @@ Use these official docs when updating `src/api` endpoints or types:
 - Path aliases: `@core/*`, `@api/*`, `@shared/*`
 - API files include top-level doc link: `// Docs: <url>`
 - Request payloads as plain objects (not builders)
+- Internal `build*` helpers assemble payloads for `MessagesApi` only — never re-export from package entry points
+- Brazil/India payment modules stay separate (`payments-br.ts`, `payments-in.ts`); duplicate shared shapes intentionally so regions can diverge
 - Conventional Commits: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `test:`
 
 ## Testing

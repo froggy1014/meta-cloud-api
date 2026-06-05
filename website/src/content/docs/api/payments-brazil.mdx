@@ -107,6 +107,7 @@ await client.templates.createTemplate(
 );
 
 await client.messages.templateOrderStatus({
+    region: 'br',
     to: '5511999999999',
     template: {
         name: 'order_status_shipped',
@@ -119,24 +120,55 @@ await client.messages.templateOrderStatus({
 });
 ```
 
-## Helpers
+Use `region: 'in'` for India order status templates.
 
-Build payloads manually when needed:
+## Payment Request CTA templates
+
+Simpler payment requests without full order_details integration. Supports Pix, Boleto, and Payment Link (up to 3 buttons).
 
 ```typescript
-import {
-    buildOrderDetailsPixInteractiveBr,
-    buildPixPaymentSetting,
-} from 'meta-cloud-api';
+import { createPaymentRequestTemplate } from 'meta-cloud-api';
+import { LanguagesEnum } from 'meta-cloud-api/enums';
 
-const interactive = buildOrderDetailsPixInteractiveBr({
-    body: { text: 'Review and pay' },
-    pix: { /* ... */ },
-    parameters: { reference_id: 'order-001', type: 'digital-goods', total_amount: { value: 50000, offset: 100 } },
+await client.templates.createTemplate(
+    createPaymentRequestTemplate({
+        name: 'payment_request_pix',
+        language: LanguagesEnum.Portuguese_BR,
+        body: { text: 'Your payment is ready' },
+        payment_request_buttons: [
+            {
+                text: 'Copy Pix code',
+                payment_setting: {
+                    type: 'pix_dynamic_code',
+                    pix_dynamic_code: {
+                        code: '00020101021226700014br.gov.bcb.pix2548pix.example.com...',
+                    },
+                },
+            },
+        ],
+    }),
+);
+
+await client.messages.templatePaymentRequestBr({
+    to: '5511999999999',
+    template: {
+        name: 'payment_request_pix',
+        language: { code: 'pt_BR' },
+    },
+    paymentRequests: [
+        {
+            paymentSetting: {
+                type: 'pix_dynamic_code',
+                pix_dynamic_code: {
+                    code: '00020101021226700014br.gov.bcb.pix2548pix.example.com...',
+                },
+            },
+        },
+    ],
 });
-
-await client.messages.interactive({ to: '5511999999999', body: interactive });
 ```
+
+Payment Request CTA Pix uses `{ code }` only — unlike order_details Pix which requires `merchant_name`, `key`, and `key_type`.
 
 ## Webhooks
 

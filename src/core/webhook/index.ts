@@ -57,15 +57,15 @@ export {
     isTextMessage,
     isVideoMessage,
 } from './utils/messageHelpers';
-export type { PaymentMethodSelection, PaymentTransactionInfo } from './utils/paymentHelpers';
+export type { PaymentMethodSelection } from './utils/paymentHelpers-br';
 export {
     getPaymentMethodSelection,
-    getPaymentTransactionInfo,
     isOrderDetailsButtonClick,
     isPaymentMethodMessage,
-    isPaymentTransactionStatus,
     ORDER_DETAILS_CLICKED_PAYLOAD,
-} from './utils/paymentHelpers';
+} from './utils/paymentHelpers-br';
+export type { PaymentTransactionInfo } from './utils/paymentHelpers-in';
+export { getPaymentTransactionInfo, isPaymentTransactionStatus } from './utils/paymentHelpers-in';
 export type {
     AudioMessageHandler,
     AudioProcessedMessage,

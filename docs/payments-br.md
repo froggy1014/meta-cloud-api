@@ -116,6 +116,7 @@ Send:
 
 ```ts
 await client.messages.templateOrderStatus({
+    region: 'br',
     to: '5511999999999',
     template: {
         name: 'order_status_shipped',
@@ -127,6 +128,62 @@ await client.messages.templateOrderStatus({
     },
 });
 ```
+
+Use `region: 'in'` for India order status templates.
+
+## Payment Request CTA templates
+
+Simpler payment requests without full order_details integration. Supports Pix, Boleto, and Payment Link buttons (up to 3 per template).
+
+Create:
+
+```ts
+import { createPaymentRequestTemplate } from 'meta-cloud-api';
+import { LanguagesEnum } from 'meta-cloud-api/enums';
+
+await client.templates.createTemplate(
+    createPaymentRequestTemplate({
+        name: 'payment_request_pix',
+        language: LanguagesEnum.Portuguese_BR,
+        body: { text: 'Your payment is ready' },
+        payment_request_buttons: [
+            {
+                text: 'Copy Pix code',
+                payment_setting: {
+                    type: 'pix_dynamic_code',
+                    pix_dynamic_code: {
+                        code: '00020101021226700014br.gov.bcb.pix2548pix.example.com...',
+                    },
+                },
+            },
+        ],
+    }),
+);
+```
+
+Send:
+
+```ts
+await client.messages.templatePaymentRequestBr({
+    to: '5511999999999',
+    template: {
+        name: 'payment_request_pix',
+        language: { code: 'pt_BR' },
+    },
+    paymentRequests: [
+        {
+            paymentSetting: {
+                type: 'pix_dynamic_code',
+                pix_dynamic_code: {
+                    code: '00020101021226700014br.gov.bcb.pix2548pix.example.com...',
+                },
+            },
+        },
+    ],
+});
+```
+
+Note: Payment Request CTA uses a simpler Pix shape (`{ code }` only) than order_details messages.
 
 Invalid status transitions return webhook error `2046`. Canceling a paid order returns error `2047`.
 
@@ -156,14 +213,15 @@ webhook.onButton((_client, event) => {
 });
 ```
 
-## Helpers
+## Webhook helpers
 
-Exported from `meta-cloud-api`:
+Exported from `meta-cloud-api` (parsers, not payload builders):
 
-- `buildOrderDetailsInteractiveBr`, `buildOrderDetailsPixInteractiveBr`, `buildOrderStatusInteractiveBr`
-- `buildOrderDetailsTemplateButtonBr`, `buildOrderDetailsTemplateButtonBrPix`
-- `buildOrderStatusTemplateComponent`
-- `buildPixPaymentSetting`, `buildBoletoPaymentSetting`, `buildPaymentLinkSetting`
+- `getPaymentMethodSelection`, `isPaymentMethodMessage` — Brazil one-click
+- `isOrderDetailsButtonClick`, `ORDER_DETAILS_CLICKED_PAYLOAD` — order details template taps
+- `getPaymentTransactionInfo`, `isPaymentTransactionStatus` — India PG payment status
+
+Use `MessagesApi` methods (`interactiveOrderDetailsBr`, `templatePaymentRequestBr`, etc.) to send messages — builders are internal.
 
 ## Related docs
 

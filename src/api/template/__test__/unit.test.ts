@@ -1,7 +1,7 @@
 import { WhatsApp } from '@core/whatsapp';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CategoryEnum, LanguagesEnum, TemplateStatusEnum } from '../../../types/enums';
-import { createOrderDetailsTemplate, createOrderStatusTemplate } from '../factories';
+import { createOrderDetailsTemplate, createOrderStatusTemplate, createPaymentRequestTemplate } from '../factories';
 import type { TemplateDeleteParams, TemplateGetParams, TemplateRequestBody } from '../types';
 
 describe('Template API - Unit Tests', () => {
@@ -457,6 +457,70 @@ describe('Template API - Unit Tests', () => {
                 components: [
                     { type: 'BODY', text: 'Your order {{1}} has shipped.' },
                     { type: 'FOOTER', text: 'Track at example.com' },
+                ],
+            });
+        });
+    });
+
+    describe('Payment request template factory', () => {
+        it('should create payment request template with PAYMENT_REQUEST buttons', async () => {
+            const template = createPaymentRequestTemplate({
+                name: 'payment_request_multi',
+                language: LanguagesEnum.Portuguese_BR,
+                body: { text: 'Complete your payment' },
+                footer: { text: 'Thank you' },
+                payment_request_buttons: [
+                    {
+                        text: 'Copy Pix code',
+                        payment_setting: {
+                            type: 'pix_dynamic_code',
+                            pix_dynamic_code: {
+                                code: '00020101021226700014br.gov.bcb.pix2548pix.example.com',
+                            },
+                        },
+                    },
+                    {
+                        text: 'Copy Boleto code',
+                        payment_setting: {
+                            type: 'boleto',
+                            boleto: {
+                                digitable_line: '03399026944140000002628346101018898510000008848',
+                            },
+                        },
+                    },
+                ],
+            });
+
+            await whatsApp.templates.createTemplate(template);
+
+            const [_, __, ___, body] = mockRequestSend.mock.calls[0];
+            const parsedBody = JSON.parse(body);
+
+            expect(parsedBody).toMatchObject({
+                name: 'payment_request_multi',
+                category: CategoryEnum.Utility,
+                components: [
+                    { type: 'BODY', text: 'Complete your payment' },
+                    { type: 'FOOTER', text: 'Thank you' },
+                    {
+                        type: 'BUTTONS',
+                        buttons: [
+                            {
+                                type: 'PAYMENT_REQUEST',
+                                text: 'Copy Pix code',
+                                payment_setting: {
+                                    type: 'pix_dynamic_code',
+                                },
+                            },
+                            {
+                                type: 'PAYMENT_REQUEST',
+                                text: 'Copy Boleto code',
+                                payment_setting: {
+                                    type: 'boleto',
+                                },
+                            },
+                        ],
+                    },
                 ],
             });
         });

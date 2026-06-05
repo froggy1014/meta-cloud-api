@@ -50,7 +50,8 @@ import type {
 } from '../types';
 import type { InteractivePaymentMethodMessage } from '../types/message';
 import type { PaymentTransactionStatusWebhook } from '../types/payments-in';
-import { isPaymentMethodMessage, isPaymentTransactionStatus } from './paymentHelpers';
+import { isPaymentMethodMessage } from './paymentHelpers-br';
+import { isPaymentTransactionStatus } from './paymentHelpers-in';
 
 const LIB_NAME = 'WEBHOOK_UTILS';
 const LOGGER = new Logger(LIB_NAME, process.env.DEBUG === 'true');

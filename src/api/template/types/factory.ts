@@ -112,6 +112,10 @@ export interface ButtonOptions {
     order_details?: {
         text: string;
     };
+    payment_request?: Array<{
+        text: string;
+        payment_setting: import('./common').PaymentRequestTemplateSetting;
+    }>;
 }
 
 // Carousel options
@@ -260,4 +264,16 @@ export interface OrderStatusTemplateOptions {
     category?: CategoryEnum;
     body: BodyOptions;
     footer?: FooterOptions;
+}
+
+export interface PaymentRequestTemplateOptions {
+    name: string;
+    language: LanguagesEnum;
+    header?: HeaderOptions;
+    body: BodyOptions;
+    footer?: FooterOptions;
+    payment_request_buttons: Array<{
+        text: string;
+        payment_setting: import('./common').PaymentRequestTemplateSetting;
+    }>;
 }

@@ -10,6 +10,7 @@ export {
     createOrderDetailsTemplate,
     createOrderStatusTemplate,
     createOTPTemplate,
+    createPaymentRequestTemplate,
     createProductCardCarouselTemplate,
     createSPMTemplate,
     createTemplate,

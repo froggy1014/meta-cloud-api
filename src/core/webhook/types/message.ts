@@ -1,5 +1,6 @@
 import type { MessageTypesEnum } from '../../../types/enums';
 import type { ForwardedContext, ProductContext, ReferralInfo, ReplyContext, WebhookError } from './common';
+import type { InteractivePaymentMethodMessageInteractive } from './payments-br';
 
 // ============================================================================
 // Message Types - Base
@@ -139,16 +140,7 @@ export interface InteractiveNfmReplyMessage extends BaseMessage {
 export interface InteractivePaymentMethodMessage extends BaseMessage {
     type: MessageTypesEnum.Interactive;
     from_logical_id?: string;
-    interactive: {
-        type: 'payment_method';
-        payment_method: {
-            payment_method: string;
-            payment_timestamp: number;
-            reference_id: string;
-            last_four_digits?: string;
-            credential_id: string;
-        };
-    };
+    interactive: InteractivePaymentMethodMessageInteractive;
 }
 
 export type InteractiveMessage =

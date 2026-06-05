@@ -722,6 +722,7 @@ describe('Messages API - Unit Tests', () => {
     describe('Order status template messages', () => {
         it('should send order_status template with status parameters', async () => {
             await whatsApp.messages.templateOrderStatus({
+                region: 'br',
                 to: '5511999999999',
                 template: {
                     name: 'order_status_shipped',
@@ -751,6 +752,61 @@ describe('Messages API - Unit Tests', () => {
                                         order: {
                                             status: 'shipped',
                                             description: 'Expected delivery in 2 days',
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                },
+            });
+        });
+    });
+
+    describe('Payment request template messages', () => {
+        it('should send Brazil payment_request template with Pix button parameters', async () => {
+            await whatsApp.messages.templatePaymentRequestBr({
+                to: '5511999999999',
+                template: {
+                    name: 'payment_request_pix',
+                    language: { code: 'pt_BR' },
+                },
+                paymentRequests: [
+                    {
+                        paymentSetting: {
+                            type: 'pix_dynamic_code',
+                            pix_dynamic_code: {
+                                code: '00020101021226700014br.gov.bcb.pix2548pix.example.com',
+                            },
+                        },
+                    },
+                ],
+            });
+
+            const [_, __, ___, body] = mockRequestSend.mock.calls[0];
+            const requestBody = JSON.parse(body);
+
+            expect(requestBody).toMatchObject({
+                type: 'template',
+                template: {
+                    name: 'payment_request_pix',
+                    language: { code: 'pt_BR' },
+                    components: [
+                        {
+                            type: 'button',
+                            sub_type: 'payment_request',
+                            index: 0,
+                            parameters: [
+                                {
+                                    type: 'action',
+                                    action: {
+                                        payment_request: {
+                                            payment_setting: {
+                                                type: 'pix_dynamic_code',
+                                                pix_dynamic_code: {
+                                                    code: '00020101021226700014br.gov.bcb.pix2548pix.example.com',
+                                                },
+                                            },
                                         },
                                     },
                                 },

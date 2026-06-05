@@ -4,22 +4,6 @@ import MessagesApi from './MessageApi';
 
 export default MessagesApi;
 
-export {
-    buildBoletoPaymentSetting,
-    buildOffsiteCardPaySetting,
-    buildOrderDetailsInteractiveBr,
-    buildOrderDetailsInteractiveIn,
-    buildOrderDetailsPixInteractiveBr,
-    buildOrderDetailsTemplateButtonBr,
-    buildOrderDetailsTemplateButtonBrPix,
-    buildOrderDetailsTemplateButtonIn,
-    buildOrderStatusInteractiveBr,
-    buildOrderStatusInteractiveIn,
-    buildOrderStatusTemplateComponent,
-    buildPaymentLinkSetting,
-    buildPixPaymentSetting,
-    toOrderSimpleText,
-} from './helpers';
 export type {
     AudioMediaObject,
     ContactObject,
