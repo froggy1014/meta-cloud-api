@@ -1,31 +1,33 @@
 // Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/payments/payments-br/orders/
+//
+// Internal helpers for MessagesApi — not re-exported from package entry points.
 
 export type {
     BuildOrderDetailsBrOptions,
     BuildOrderStatusBrOptions,
-} from './orders-br';
+} from './payments-br';
 export {
     buildBoletoPaymentSetting,
     buildOffsiteCardPaySetting,
     buildOrderDetailsInteractiveBr,
     buildOrderDetailsPixInteractiveBr,
+    buildOrderDetailsTemplateButtonBr,
+    buildOrderDetailsTemplateButtonBrPix,
     buildOrderStatusInteractiveBr,
+    buildOrderStatusTemplateComponentBr,
     buildPaymentLinkSetting,
+    buildPaymentRequestTemplateButtonBr,
     buildPixPaymentSetting,
-    toOrderSimpleText,
-} from './orders-br';
+    toBrazilOrderSimpleText,
+} from './payments-br';
 export type {
     BuildOrderDetailsInOptions,
     BuildOrderStatusInOptions,
-} from './orders-in';
+} from './payments-in';
 export {
     buildOrderDetailsInteractiveIn,
-    buildOrderStatusInteractiveIn,
-} from './orders-in';
-
-export {
-    buildOrderDetailsTemplateButtonBr,
-    buildOrderDetailsTemplateButtonBrPix,
     buildOrderDetailsTemplateButtonIn,
-} from './template-order-details';
-export { buildOrderStatusTemplateComponent } from './template-order-status';
+    buildOrderStatusInteractiveIn,
+    buildOrderStatusTemplateComponentIn,
+    toIndiaOrderSimpleText,
+} from './payments-in';

@@ -297,14 +297,14 @@ type CarouselInteractiveObject = {
 export type {
     OrderDetailsInteractiveObjectBr,
     OrderStatusInteractiveObjectBr,
-} from './orders/orders-br';
+} from './payments-br';
 export type {
     OrderDetailsInteractiveObjectIn,
     OrderStatusInteractiveObjectIn,
-} from './orders/orders-in';
+} from './payments-in';
 
-import type { OrderDetailsInteractiveObjectBr, OrderStatusInteractiveObjectBr } from './orders/orders-br';
-import type { OrderDetailsInteractiveObjectIn, OrderStatusInteractiveObjectIn } from './orders/orders-in';
+import type { OrderDetailsInteractiveObjectBr, OrderStatusInteractiveObjectBr } from './payments-br';
+import type { OrderDetailsInteractiveObjectIn, OrderStatusInteractiveObjectIn } from './payments-in';
 
 export type InteractiveObject =
     | ButtonInteractiveObject

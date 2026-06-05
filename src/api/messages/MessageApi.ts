@@ -21,8 +21,11 @@ import {
     buildOrderDetailsTemplateButtonIn,
     buildOrderStatusInteractiveBr,
     buildOrderStatusInteractiveIn,
-    buildOrderStatusTemplateComponent,
-    toOrderSimpleText,
+    buildOrderStatusTemplateComponentBr,
+    buildOrderStatusTemplateComponentIn,
+    buildPaymentRequestTemplateButtonBr,
+    toBrazilOrderSimpleText,
+    toIndiaOrderSimpleText,
 } from './helpers';
 import type * as m from './types';
 
@@ -89,6 +92,7 @@ export type MessagePayloadType<T extends MessageTypesEnum> = T extends MessageTy
  * - {@link MessagesApi.interactiveOrderStatusIn | interactiveOrderStatusIn} - Send India order_status messages
  * - {@link MessagesApi.templateOrderDetailsBr | templateOrderDetailsBr} - Send Brazil order_details template
  * - {@link MessagesApi.templateOrderDetailsBrPix | templateOrderDetailsBrPix} - Send Brazil Pix order_details template
+ * - {@link MessagesApi.templatePaymentRequestBr | templatePaymentRequestBr} - Send Brazil payment request CTA template
  * - {@link MessagesApi.templateOrderDetailsIn | templateOrderDetailsIn} - Send India order_details template
  * - {@link MessagesApi.templateOrderStatus | templateOrderStatus} - Send order_status template (Brazil / India)
  * - {@link MessagesApi.reaction | reaction} - Send reaction emoji to a message
@@ -858,7 +862,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
             recipientType,
             replyMessageId,
             body: buildOrderDetailsInteractiveBr({
-                body: toOrderSimpleText(body),
+                body: toBrazilOrderSimpleText(body),
                 footer,
                 header,
                 parameters: orderDetails,
@@ -878,7 +882,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
             recipientType,
             replyMessageId,
             body: buildOrderDetailsPixInteractiveBr({
-                body: toOrderSimpleText(body),
+                body: toBrazilOrderSimpleText(body),
                 footer,
                 header,
                 pix,
@@ -899,7 +903,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
             recipientType,
             replyMessageId,
             body: buildOrderStatusInteractiveBr({
-                body: toOrderSimpleText(body),
+                body: toBrazilOrderSimpleText(body),
                 footer,
                 header,
                 parameters: orderStatus,
@@ -919,7 +923,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
             recipientType,
             replyMessageId,
             body: buildOrderDetailsInteractiveIn({
-                body: toOrderSimpleText(body),
+                body: toIndiaOrderSimpleText(body),
                 footer,
                 header,
                 parameters: orderDetails,
@@ -939,7 +943,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
             recipientType,
             replyMessageId,
             body: buildOrderStatusInteractiveIn({
-                body: toOrderSimpleText(body),
+                body: toIndiaOrderSimpleText(body),
                 footer,
                 header,
                 parameters: orderStatus,
@@ -1013,8 +1017,11 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/payments/payments-in/orderstatustemplate/
      */
     async templateOrderStatus(params: m.OrderStatusTemplateMessageParams): Promise<m.MessagesResponse> {
-        const { to, recipientType, replyMessageId, template, orderStatus } = params;
-        const component = buildOrderStatusTemplateComponent(orderStatus);
+        const { to, recipientType, replyMessageId, template, orderStatus, region } = params;
+        const component =
+            region === 'br'
+                ? buildOrderStatusTemplateComponentBr(orderStatus)
+                : buildOrderStatusTemplateComponentIn(orderStatus);
         return this.template({
             to,
             recipientType,
@@ -1023,6 +1030,28 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
                 name: template.name,
                 language: template.language,
                 components: [...(template.components ?? []), component],
+            },
+        });
+    }
+
+    /**
+     * Sends a Brazil payment request CTA template message (Payments API Brazil).
+     *
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/payments/payments-br/payment-request-cta/
+     */
+    async templatePaymentRequestBr(params: m.PaymentRequestTemplateBrMessageParams): Promise<m.MessagesResponse> {
+        const { to, recipientType, replyMessageId, template, paymentRequests } = params;
+        const buttons = paymentRequests.map((request, defaultIndex) =>
+            buildPaymentRequestTemplateButtonBr(request.paymentSetting, request.index ?? defaultIndex),
+        );
+        return this.template({
+            to,
+            recipientType,
+            replyMessageId,
+            body: {
+                name: template.name,
+                language: template.language,
+                components: [...(template.components ?? []), ...buttons],
             },
         });
     }

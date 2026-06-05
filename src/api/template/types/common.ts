@@ -74,6 +74,29 @@ export type OrderDetailsButton = {
     text: string;
 };
 
+export type PaymentRequestTemplatePixCode = {
+    code: string;
+};
+
+export type PaymentRequestTemplateBoleto = {
+    digitable_line: string;
+};
+
+export type PaymentRequestTemplatePaymentLink = {
+    uri: string;
+};
+
+export type PaymentRequestTemplateSetting =
+    | { type: 'pix_dynamic_code'; pix_dynamic_code: PaymentRequestTemplatePixCode }
+    | { type: 'boleto'; boleto: PaymentRequestTemplateBoleto }
+    | { type: 'payment_link'; payment_link: PaymentRequestTemplatePaymentLink };
+
+export type PaymentRequestButton = {
+    type: 'PAYMENT_REQUEST';
+    text: string;
+    payment_setting: PaymentRequestTemplateSetting;
+};
+
 export type TemplateButton =
     | PhoneNumberButton
     | URLButton
@@ -84,7 +107,8 @@ export type TemplateButton =
     | OTPButton
     | SPMButton
     | CatalogButton
-    | OrderDetailsButton;
+    | OrderDetailsButton
+    | PaymentRequestButton;
 
 export type TemplateDisplayFormat = 'ORDER_DETAILS';
 

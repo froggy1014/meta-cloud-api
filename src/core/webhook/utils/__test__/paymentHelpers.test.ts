@@ -4,12 +4,11 @@ import type { InteractivePaymentMethodMessage } from '../../types/message';
 import type { PaymentTransactionStatusWebhook } from '../../types/payments-in';
 import {
     getPaymentMethodSelection,
-    getPaymentTransactionInfo,
     isOrderDetailsButtonClick,
     isPaymentMethodMessage,
-    isPaymentTransactionStatus,
     ORDER_DETAILS_CLICKED_PAYLOAD,
-} from '../paymentHelpers';
+} from '../paymentHelpers-br';
+import { getPaymentTransactionInfo, isPaymentTransactionStatus } from '../paymentHelpers-in';
 
 describe('paymentHelpers', () => {
     it('detects Brazil payment_method interactive messages', () => {

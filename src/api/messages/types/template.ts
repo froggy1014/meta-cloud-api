@@ -13,7 +13,7 @@ import type { MessageRequestBody } from './common';
 
 // Template Message Types
 type LanguageObject = {
-    policy: 'deterministic';
+    policy?: 'deterministic';
     code: LanguagesEnum | (string & {});
 };
 
@@ -103,8 +103,11 @@ export type MessageTemplateObject<T extends ComponentTypesEnum> = {
     components?: (
         | ComponentObject<T>
         | ButtonComponentObject
-        | import('./template-order-details').OrderDetailsTemplateComponent
-        | import('./template-order-status').OrderStatusTemplateComponent
+        | import('./payments-br').OrderDetailsTemplateButtonComponentBr
+        | import('./payments-br').OrderStatusTemplateComponentBr
+        | import('./payments-br').PaymentRequestTemplateButtonComponentBr
+        | import('./payments-in').OrderDetailsTemplateButtonComponentIn
+        | import('./payments-in').OrderStatusTemplateComponentIn
     )[];
 };
 

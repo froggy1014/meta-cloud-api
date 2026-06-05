@@ -17,6 +17,7 @@ import type {
     OrderDetailsTemplateOptions,
     OrderStatusTemplateOptions,
     OTPTemplateOptions,
+    PaymentRequestTemplateOptions,
     ProductCardCarouselTemplateOptions,
     ProductCarouselCard,
     SPMTemplateOptions,
@@ -139,6 +140,16 @@ function createButtons(options: ButtonOptions): ComponentTypes[] {
         buttons.push({
             type: 'ORDER_DETAILS',
             text: options.order_details.text,
+        });
+    }
+
+    if (options.payment_request) {
+        options.payment_request.forEach((paymentRequest) => {
+            buttons.push({
+                type: 'PAYMENT_REQUEST',
+                text: paymentRequest.text,
+                payment_setting: paymentRequest.payment_setting,
+            });
         });
     }
 
@@ -622,6 +633,37 @@ export function createOrderStatusTemplate(options: OrderStatusTemplateOptions): 
         language: options.language,
         category: options.category ?? CategoryEnum.Utility,
         sub_category: 'ORDER_STATUS',
+        components,
+    };
+}
+
+// Payment Request CTA Template Factory (Payments API Brazil)
+export function createPaymentRequestTemplate(options: PaymentRequestTemplateOptions): TemplateRequestBody {
+    const components: ComponentTypes[] = [];
+
+    if (options.header) {
+        components.push(createHeader(options.header));
+    }
+
+    components.push(createBody(options.body));
+
+    if (options.footer) {
+        components.push(createFooter(options.footer));
+    }
+
+    components.push({
+        type: 'BUTTONS',
+        buttons: options.payment_request_buttons.map((button) => ({
+            type: 'PAYMENT_REQUEST',
+            text: button.text,
+            payment_setting: button.payment_setting,
+        })),
+    });
+
+    return {
+        name: options.name,
+        language: options.language,
+        category: CategoryEnum.Utility,
         components,
     };
 }

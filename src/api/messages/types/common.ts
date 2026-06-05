@@ -134,28 +134,26 @@ export declare class MessagesClass extends BaseClass {
             }
         >,
     ): Promise<MessagesResponse>;
-    interactiveOrderDetailsBr(
-        params: import('./order-messages').OrderDetailsBrMessageParams,
-    ): Promise<MessagesResponse>;
+    interactiveOrderDetailsBr(params: import('./payments-br').OrderDetailsBrMessageParams): Promise<MessagesResponse>;
     interactiveOrderDetailsBrPix(
-        params: import('./order-messages').OrderDetailsPixBrMessageParams,
+        params: import('./payments-br').OrderDetailsPixBrMessageParams,
     ): Promise<MessagesResponse>;
-    interactiveOrderStatusBr(params: import('./order-messages').OrderStatusBrMessageParams): Promise<MessagesResponse>;
-    interactiveOrderDetailsIn(
-        params: import('./order-messages').OrderDetailsInMessageParams,
-    ): Promise<MessagesResponse>;
-    interactiveOrderStatusIn(params: import('./order-messages').OrderStatusInMessageParams): Promise<MessagesResponse>;
+    interactiveOrderStatusBr(params: import('./payments-br').OrderStatusBrMessageParams): Promise<MessagesResponse>;
+    interactiveOrderDetailsIn(params: import('./payments-in').OrderDetailsInMessageParams): Promise<MessagesResponse>;
+    interactiveOrderStatusIn(params: import('./payments-in').OrderStatusInMessageParams): Promise<MessagesResponse>;
     templateOrderDetailsBr(
-        params: import('./order-details-template-messages').OrderDetailsTemplateBrMessageParams,
+        params: import('./payments-br').OrderDetailsTemplateBrMessageParams,
     ): Promise<MessagesResponse>;
     templateOrderDetailsBrPix(
-        params: import('./order-details-template-messages').OrderDetailsTemplatePixBrMessageParams,
+        params: import('./payments-br').OrderDetailsTemplatePixBrMessageParams,
     ): Promise<MessagesResponse>;
     templateOrderDetailsIn(
-        params: import('./order-details-template-messages').OrderDetailsTemplateInMessageParams,
+        params: import('./payments-in').OrderDetailsTemplateInMessageParams,
     ): Promise<MessagesResponse>;
-    templateOrderStatus(
-        params: import('./order-status-template-messages').OrderStatusTemplateMessageParams,
+    templateOrderStatus(params: import('./payments-br').OrderStatusTemplateBrMessageParams): Promise<MessagesResponse>;
+    templateOrderStatus(params: import('./payments-in').OrderStatusTemplateInMessageParams): Promise<MessagesResponse>;
+    templatePaymentRequestBr(
+        params: import('./payments-br').PaymentRequestTemplateBrMessageParams,
     ): Promise<MessagesResponse>;
 
     // Reaction and status messages
