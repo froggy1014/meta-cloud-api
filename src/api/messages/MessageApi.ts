@@ -2,7 +2,9 @@
 
 // Endpoints:
 // - POST /{PHONE_NUMBER_ID}/messages
+// - POST /{PHONE_NUMBER_ID}/messages_encrypted
 
+import { WHATSAPP_MESSAGING_PRODUCT } from '../../config/defaults';
 import { BaseAPI } from '../../types/base';
 import {
     type ComponentTypesEnum,
@@ -125,7 +127,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
     ) {
         if (recipientType === 'individual') assertPhoneNumber(to);
         const body: m.MessageRequestBody<T> = {
-            messaging_product: 'whatsapp',
+            messaging_product: WHATSAPP_MESSAGING_PRODUCT,
             recipient_type: recipientType,
             to,
             type,
@@ -152,6 +154,15 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
         return this.sendJson<T>(
             this.commonMethod,
             `${this.config[WabaConfigEnum.PhoneNumberId]}/${this.commonEndpoint}`,
+            this.config[WabaConfigEnum.RequestTimeout],
+            body,
+        );
+    }
+
+    private sendEncrypted<T = m.EncryptedMessagesResponse>(body: BodyInit | null): Promise<T> {
+        return this.sendJson<T>(
+            this.commonMethod,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}/messages_encrypted`,
             this.config[WabaConfigEnum.RequestTimeout],
             body,
         );
@@ -523,7 +534,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      */
     async status(params: m.StatusParams): Promise<m.StatusResponse> {
         const body = {
-            messaging_product: 'whatsapp',
+            messaging_product: WHATSAPP_MESSAGING_PRODUCT,
             status: params.status,
             message_id: params.messageId,
             ...(params.typingIndicator && { typing_indicator: params.typingIndicator }),
@@ -575,7 +586,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      */
     async showTypingIndicator(params: { messageId: string }): Promise<m.StatusResponse> {
         const body = {
-            messaging_product: 'whatsapp',
+            messaging_product: WHATSAPP_MESSAGING_PRODUCT,
             status: 'typing',
             message_id: params.messageId,
             typing_indicator: { type: 'text' },
@@ -873,5 +884,15 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
                 ),
             ),
         );
+    }
+
+    /**
+     * Send a message through the encrypted messages endpoint.
+     *
+     * The encrypted endpoint payload varies by encryption setup, so this method accepts
+     * the Graph API payload shape directly while preserving the endpoint and response type.
+     */
+    async encrypted(params: m.EncryptedMessageRequest): Promise<m.EncryptedMessagesResponse> {
+        return this.sendEncrypted(JSON.stringify(params));
     }
 }

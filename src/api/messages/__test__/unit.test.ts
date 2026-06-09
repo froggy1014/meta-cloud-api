@@ -525,4 +525,25 @@ describe('Messages API - Unit Tests', () => {
             });
         });
     });
+
+    describe('Encrypted Messages', () => {
+        it('should send encrypted payload to messages_encrypted endpoint', async () => {
+            await whatsApp.messages.encrypted({
+                messaging_product: 'whatsapp',
+                to: '1234567890',
+                type: 'text',
+                jwe: 'encrypted-token',
+            });
+
+            const [method, endpoint, _, body] = mockRequestSend.mock.calls[0];
+            expect(method).toBe('POST');
+            expect(endpoint).toBe(`${whatsApp.requester.phoneNumberId}/messages_encrypted`);
+            expect(JSON.parse(body)).toEqual({
+                messaging_product: 'whatsapp',
+                to: '1234567890',
+                type: 'text',
+                jwe: 'encrypted-token',
+            });
+        });
+    });
 });

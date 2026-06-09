@@ -64,6 +64,16 @@ export type MessagesResponse = GeneralMessageBody & {
     }>;
 };
 
+export type EncryptedMessageRequest = GeneralMessageBody & {
+    to: string;
+    type?: string;
+    encrypted?: Record<string, unknown>;
+    jwe?: string;
+    [key: string]: unknown;
+};
+
+export type EncryptedMessagesResponse = MessagesResponse;
+
 // Messages API Class Interface - Complete definition
 export declare class MessagesClass extends BaseClass {
     // Text messages
@@ -137,6 +147,7 @@ export declare class MessagesClass extends BaseClass {
 
     // Reaction and status messages
     reaction(params: import('./reaction').ReactionParams): Promise<MessagesResponse>;
+    encrypted(params: EncryptedMessageRequest): Promise<EncryptedMessagesResponse>;
     markAsRead(params: { messageId: string }): Promise<StatusResponse>;
     showTypingIndicator(params: { messageId: string }): Promise<StatusResponse>;
     status(params: StatusParams): Promise<StatusResponse>;

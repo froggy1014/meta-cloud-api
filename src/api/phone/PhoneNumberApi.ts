@@ -2,12 +2,20 @@
 
 // Endpoints:
 // - GET /{PHONE_NUMBER_ID}?fields
+// - POST /{PHONE_NUMBER_ID}
 // - GET /{WABA_ID}/phone_numbers
+// - POST /{WABA_ID}/phone_numbers
 // - POST /{PHONE_NUMBER_ID}/request_code
 // - POST /{PHONE_NUMBER_ID}/verify_code
+// - GET /{PHONE_NUMBER_ID}/settings
+// - POST /{PHONE_NUMBER_ID}/settings
 // - POST /{PHONE_NUMBER_ID}/conversational_automation
 // - GET /{PHONE_NUMBER_ID}?fields=conversational_automation
 // - GET /{PHONE_NUMBER_ID}?fields=throughput
+// - GET /{PHONE_NUMBER_ID}/official_business_account
+// - POST /{PHONE_NUMBER_ID}/official_business_account
+// - GET /{PHONE_NUMBER_ID}/business_compliance_info
+// - POST /{PHONE_NUMBER_ID}/business_compliance_info
 
 import { BaseAPI } from '../../types/base';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
@@ -117,6 +125,36 @@ export default class PhoneNumberApi extends BaseAPI implements phoneNumber.Phone
     }
 
     /**
+     * Create a phone number under a WABA.
+     *
+     * @param request - Phone number creation payload from the Graph API.
+     * @param wabaId - Optional WABA ID. Defaults to the configured business account ID.
+     */
+    async createPhoneNumber(
+        request: phoneNumber.CreatePhoneNumberRequest,
+        wabaId: string = this.config[WabaConfigEnum.BusinessAcctId],
+    ): Promise<phoneNumber.CreatePhoneNumberResponse> {
+        return this.sendJson(
+            HttpMethodsEnum.Post,
+            `${wabaId}/${this.endpoint}`,
+            this.config[WabaConfigEnum.RequestTimeout],
+            JSON.stringify(request),
+        );
+    }
+
+    /**
+     * Update phone number status or configuration on the phone number node.
+     */
+    async updatePhoneNumberStatus(request: phoneNumber.UpdatePhoneNumberStatusRequest): Promise<ResponseSuccess> {
+        return this.sendJson(
+            HttpMethodsEnum.Post,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}`,
+            this.config[WabaConfigEnum.RequestTimeout],
+            JSON.stringify(request),
+        );
+    }
+
+    /**
      * Request a verification code for the phone number.
      *
      * Sends a verification code to the configured phone number via SMS or voice call.
@@ -171,6 +209,42 @@ export default class PhoneNumberApi extends BaseAPI implements phoneNumber.Phone
             `${this.config[WabaConfigEnum.PhoneNumberId]}/verify_code`,
             this.config[WabaConfigEnum.RequestTimeout],
             JSON.stringify(request),
+        );
+    }
+
+    /**
+     * Get general phone number settings.
+     *
+     * Calling-specific settings can also be accessed through `calling.getCallingSettings()`.
+     */
+    async getPhoneNumberSettings(
+        params?: phoneNumber.PhoneNumberSettingsParams,
+    ): Promise<phoneNumber.PhoneNumberSettingsResponse> {
+        const fieldsValue = Array.isArray(params?.fields) ? params.fields.join(',') : params?.fields;
+        const queryParams = objectToQueryString({
+            ...(fieldsValue ? { fields: fieldsValue } : {}),
+            ...(params?.include_sip_credentials !== undefined
+                ? { include_sip_credentials: params.include_sip_credentials }
+                : {}),
+        });
+
+        return this.sendJson(
+            HttpMethodsEnum.Get,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}/settings${queryParams}`,
+            this.config[WabaConfigEnum.RequestTimeout],
+            null,
+        );
+    }
+
+    /**
+     * Update general phone number settings.
+     */
+    async updatePhoneNumberSettings(params: phoneNumber.UpdatePhoneNumberSettingsRequest): Promise<ResponseSuccess> {
+        return this.sendJson(
+            HttpMethodsEnum.Post,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}/settings`,
+            this.config[WabaConfigEnum.RequestTimeout],
+            JSON.stringify(params),
         );
     }
 
@@ -273,6 +347,46 @@ export default class PhoneNumberApi extends BaseAPI implements phoneNumber.Phone
             `${this.config[WabaConfigEnum.PhoneNumberId]}${queryParams}`,
             this.config[WabaConfigEnum.RequestTimeout],
             null,
+        );
+    }
+
+    async getOfficialBusinessAccountStatus(): Promise<phoneNumber.OfficialBusinessAccountStatusResponse> {
+        return this.sendJson(
+            HttpMethodsEnum.Get,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}/official_business_account`,
+            this.config[WabaConfigEnum.RequestTimeout],
+            null,
+        );
+    }
+
+    async updateOfficialBusinessAccountStatus(
+        params: phoneNumber.UpdateOfficialBusinessAccountStatusRequest,
+    ): Promise<ResponseSuccess> {
+        return this.sendJson(
+            HttpMethodsEnum.Post,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}/official_business_account`,
+            this.config[WabaConfigEnum.RequestTimeout],
+            JSON.stringify(params),
+        );
+    }
+
+    async getBusinessComplianceInfo(): Promise<phoneNumber.BusinessComplianceInfoResponse> {
+        return this.sendJson(
+            HttpMethodsEnum.Get,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}/business_compliance_info`,
+            this.config[WabaConfigEnum.RequestTimeout],
+            null,
+        );
+    }
+
+    async updateBusinessComplianceInfo(
+        params: phoneNumber.UpdateBusinessComplianceInfoRequest,
+    ): Promise<ResponseSuccess> {
+        return this.sendJson(
+            HttpMethodsEnum.Post,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}/business_compliance_info`,
+            this.config[WabaConfigEnum.RequestTimeout],
+            JSON.stringify(params),
         );
     }
 }

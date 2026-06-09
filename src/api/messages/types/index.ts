@@ -1,7 +1,9 @@
 // Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/messages/
 
-// Remove duplicate exports, use explicit exports only
+// 중복 export 제거, 명시적 export만 사용
 export type {
+    EncryptedMessageRequest,
+    EncryptedMessagesResponse,
     GeneralMessageBody,
     MessageRecipientType,
     MessageRequestBody,
