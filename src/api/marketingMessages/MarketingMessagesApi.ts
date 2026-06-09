@@ -3,6 +3,7 @@
 // Endpoints:
 // - POST /{PHONE_NUMBER_ID}/marketing_messages
 
+import { WHATSAPP_MESSAGING_PRODUCT } from '../../config/defaults';
 import { BaseAPI } from '../../types/base';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
 
@@ -36,7 +37,7 @@ export default class MarketingMessagesApi extends BaseAPI implements marketing.M
      */
     async sendTemplateMessage(params: marketing.MarketingMessageRequest): Promise<MessagesResponse> {
         const body = {
-            messaging_product: 'whatsapp',
+            messaging_product: WHATSAPP_MESSAGING_PRODUCT,
             recipient_type: 'individual',
             to: params.to,
             type: 'template',

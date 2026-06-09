@@ -5,6 +5,7 @@
 // - DELETE /{PHONE_NUMBER_ID}/block_users
 // - GET /{PHONE_NUMBER_ID}/block_users?limit&after&before
 
+import { WHATSAPP_MESSAGING_PRODUCT } from '../../config/defaults';
 import { BaseAPI } from '../../types/base';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
 import { objectToQueryString } from '../../utils/objectToQueryString';
@@ -39,7 +40,7 @@ export default class BlockUsersApi extends BaseAPI implements blockUsers.BlockUs
      */
     private buildBlockUsersBody(users: string[]): blockUsers.BlockUsersRequest {
         return {
-            messaging_product: 'whatsapp',
+            messaging_product: WHATSAPP_MESSAGING_PRODUCT,
             block_users: users.map((user) => ({ user })),
         };
     }

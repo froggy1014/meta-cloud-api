@@ -4,6 +4,7 @@
 // - POST /{PHONE_NUMBER_ID}/register
 // - POST /{PHONE_NUMBER_ID}/deregister
 
+import { WHATSAPP_MESSAGING_PRODUCT } from '../../config/defaults';
 import { BaseAPI } from '../../types/base';
 import { type DataLocalizationRegionEnum, HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
 import type { ResponseSuccess } from '../../types/request';
@@ -37,7 +38,7 @@ export default class RegistrationApi extends BaseAPI implements registration.Reg
      */
     async register(pin: string, dataLocalizationRegion?: DataLocalizationRegionEnum): Promise<ResponseSuccess> {
         const body: registration.RegistrationRequest = {
-            messaging_product: 'whatsapp',
+            messaging_product: WHATSAPP_MESSAGING_PRODUCT,
             pin,
             ...(dataLocalizationRegion && { data_localization_region: dataLocalizationRegion }),
         };
