@@ -1,5 +1,5 @@
 export function printLogo() {
-    // 테스트 환경에서는 로고를 출력하지 않음
+    // Skip logo output in test environment
     if (
         process.env.NODE_ENV === 'test' ||
         process.env.VITEST === 'true' ||
