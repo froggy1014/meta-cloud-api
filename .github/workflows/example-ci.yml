@@ -1,4 +1,4 @@
-name: Examples CI
+name: Example CI
 
 on:
     pull_request:
@@ -6,10 +6,11 @@ on:
         paths:
             - 'examples/**'
             - 'src/**'
-            - '.github/workflows/examples-ci.yml'
+            - '.github/workflows/example-ci.yml'
 
 jobs:
     test-examples:
+        name: ${{ matrix.example }}
         runs-on: ubuntu-latest
         strategy:
             matrix:

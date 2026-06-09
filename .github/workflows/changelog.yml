@@ -1,4 +1,4 @@
-name: Changelog Tracker
+name: Changelog
 
 on:
   schedule:
@@ -16,6 +16,7 @@ concurrency:
 
 jobs:
   check-changelog:
+    name: Sync
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
