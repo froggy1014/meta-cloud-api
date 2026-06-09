@@ -1,0 +1,70 @@
+name: Changelog Tracker
+
+on:
+  schedule:
+    # Every day at 09:00 UTC
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  check-changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Fetch RSS and update changelog
+        run: node scripts/crawl-changelog.mjs
+
+      - name: Check for changes
+        id: diff
+        run: |
+          if git diff --quiet CLOUD_API_CHANGELOG.md; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            # Build PR body from git diff (new unchecked lines)
+            git diff CLOUD_API_CHANGELOG.md | grep '^+- \[ \]' | sed 's/^+//' > /tmp/new-items.txt
+            COUNT=$(wc -l < /tmp/new-items.txt | tr -d ' ')
+            {
+              echo "## New WhatsApp API Changelog Entries"
+              echo ""
+              echo "The RSS feed has **${COUNT}** new entries that may need SDK updates."
+              echo ""
+              cat /tmp/new-items.txt
+              echo ""
+              echo "---"
+              echo "See \`CLOUD_API_CHANGELOG.md\` for the full list."
+            } > /tmp/pr-body.md
+          fi
+
+      - name: Create PR with updated changelog
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="chore/changelog-update-$(date +%Y%m%d)"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add CLOUD_API_CHANGELOG.md
+          git commit -m "chore: update Cloud API changelog from RSS feed"
+          git push origin "$BRANCH"
+
+          EXISTING_PR=$(gh pr list --label "changelog" --state open --json number --jq '.[0].number // empty')
+          if [ -n "$EXISTING_PR" ]; then
+            gh pr comment "$EXISTING_PR" --body-file /tmp/pr-body.md
+          else
+            gh pr create \
+              --title "chore: new WhatsApp API changelog entries detected" \
+              --body-file /tmp/pr-body.md \
+              --label "changelog" \
+              --base main
+          fi
