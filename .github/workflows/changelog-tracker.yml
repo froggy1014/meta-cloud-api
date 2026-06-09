@@ -34,8 +34,10 @@ jobs:
           EXISTING_BRANCH=$(gh pr list --label "changelog" --state open --json headRefName --jq '.[0].headRefName // empty')
           if [ -n "$EXISTING_BRANCH" ]; then
             BRANCH="$EXISTING_BRANCH"
+            REUSE_BRANCH=true
           else
             BRANCH="chore/changelog-update"
+            REUSE_BRANCH=false
           fi
 
           echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
@@ -44,7 +46,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git fetch origin main
 
-          if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
+          if [ "$REUSE_BRANCH" = "true" ] && git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
             git fetch origin "$BRANCH"
             git checkout -B "$BRANCH" "origin/$BRANCH"
             git rebase origin/main
@@ -54,26 +56,23 @@ jobs:
 
       - name: Fetch RSS and update changelog
         env:
-          CHANGELOG_NEW_ITEMS_FILE: /tmp/new-changelog-items.json
+          CHANGELOG_PR_BODY_FILE: ${{ runner.temp }}/pr-body.md
         run: node scripts/crawl-changelog.mjs
 
       - name: Check for changes
         id: diff
-        env:
-          CHANGELOG_NEW_ITEMS_FILE: /tmp/new-changelog-items.json
-          CHANGELOG_PR_BODY_FILE: /tmp/pr-body.md
         run: |
           if git diff --quiet CLOUD_API_CHANGELOG.md; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
-            node scripts/build-changelog-pr-body.mjs
           fi
 
       - name: Create PR with updated changelog
         if: steps.diff.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CHANGELOG_PR_BODY_FILE: ${{ runner.temp }}/pr-body.md
         run: |
           BRANCH="${{ steps.branch.outputs.branch }}"
           git add CLOUD_API_CHANGELOG.md
@@ -82,11 +81,11 @@ jobs:
 
           EXISTING_PR=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')
           if [ -n "$EXISTING_PR" ]; then
-            gh pr comment "$EXISTING_PR" --body-file /tmp/pr-body.md
+            gh pr comment "$EXISTING_PR" --body-file "$CHANGELOG_PR_BODY_FILE"
           else
             gh pr create \
               --title "chore: new WhatsApp API changelog entries detected" \
-              --body-file /tmp/pr-body.md \
+              --body-file "$CHANGELOG_PR_BODY_FILE" \
               --label "changelog" \
               --head "$BRANCH" \
               --base main

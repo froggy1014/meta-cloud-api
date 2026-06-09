@@ -6,7 +6,38 @@ import { resolve } from 'node:path';
 
 const FILE = resolve(import.meta.dirname, '..', 'CLOUD_API_CHANGELOG.md');
 const RSS = 'https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog/rss/';
-const NEW_ITEMS_FILE = process.env.CHANGELOG_NEW_ITEMS_FILE;
+const CHANGELOG_URL = 'https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog/';
+const PR_BODY_FILE = process.env.CHANGELOG_PR_BODY_FILE;
+
+const escapeCell = (value) => String(value || '').replace(/\|/g, '\\|').replace(/\s+/g, ' ').trim();
+
+const buildPrBody = (newLines) => {
+  const count = newLines.length;
+  const entryLabel = count === 1 ? 'entry' : 'entries';
+  const rows = newLines.map((item) => {
+    const source = item.link ? `[Open](${item.link})` : `[Open](${CHANGELOG_URL})`;
+
+    return `| #${item.id} | ${escapeCell(item.date)} | ${escapeCell(item.desc)} | ${source} |`;
+  });
+
+  return [
+    '## WhatsApp Business Platform Changelog',
+    '',
+    `Meta published **${count}** new changelog ${entryLabel}. Review the entries below and update the SDK if any API behavior, endpoint, payload, or webhook contract changed.`,
+    '',
+    '### Sources',
+    '',
+    `- [Official changelog](${CHANGELOG_URL})`,
+    `- [RSS feed](${RSS})`,
+    '',
+    '### New Entries',
+    '',
+    '| ID | Date | Summary | Source |',
+    '| --- | --- | --- | --- |',
+    ...rows,
+    '',
+  ].join('\n');
+};
 
 // Fetch and parse RSS
 const res = await fetch(RSS);
@@ -51,14 +82,8 @@ const newLines = newItems.map((e, i) => ({
 }));
 newLines.reverse();
 
-if (NEW_ITEMS_FILE) {
-  writeFileSync(
-    NEW_ITEMS_FILE,
-    `${JSON.stringify({
-      source: RSS,
-      items: newLines.map(({ id, date, desc, link }) => ({ id, date, desc, link })),
-    }, null, 2)}\n`,
-  );
+if (PR_BODY_FILE) {
+  writeFileSync(PR_BODY_FILE, buildPrBody(newLines));
 }
 
 // Prepend new entries grouped by date
