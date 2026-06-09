@@ -1,5 +1,17 @@
 # meta-cloud-api
 
+## 3.1.0
+
+### Minor Changes
+
+- 6c7aacf: Expand groups and WABA API with v23 endpoints (user management, assigned users, message templates, phone numbers)
+- 28d3742: Add business, solutions, and message history API modules with WhatsApp class registration
+- 4781f3c: Add phone number v23 endpoints (health status, name certificate, compliance info) and message status update API
+
+### Patch Changes
+
+- cc1869d: Extract shared config defaults, normalize API version format, and support absolute media URLs in request routing
+
 ## 3.0.0
 
 ### Major Changes
