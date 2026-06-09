@@ -1,0 +1,201 @@
+---
+title: Payments API (Brazil)
+description: Send order_details and order_status messages for Pix, boleto, and payment links in Brazil
+---
+
+Collect payments from Brazilian customers via WhatsApp interactive messages and order details templates.
+
+**Official Documentation**: [Payments API — Brazil](https://developers.facebook.com/documentation/business-messaging/whatsapp/payments/payments-br/overview/)
+
+:::caution[Brazil only]
+Both your WABA and the customer must use Brazilian phone numbers. Meta does not reconcile payments — confirm via your PSP using the `reference_id`.
+:::
+
+## Flow
+
+1. Send `order_details` (interactive or template) with Pix/boleto/link/card settings
+2. Customer pays outside WhatsApp (Pix copy-paste, link, etc.) or via one-click card flow
+3. Your PSP notifies your backend
+4. Send `order_status` to update the customer (`processing`, `captured`, etc.)
+
+## Send Pix order_details
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID!,
+});
+
+await client.messages.interactiveOrderDetailsBrPix({
+    to: '5511999999999',
+    body: 'Complete your Pix payment within 15 minutes.',
+    pix: {
+        code: '00020101021226700014br.gov.bcb.pix2548pix.example.com...',
+        merchant_name: 'My Store',
+        key: '39580525000189',
+        key_type: 'CNPJ',
+    },
+    orderDetails: {
+        reference_id: 'order-001',
+        type: 'digital-goods',
+        total_amount: { value: 50000, offset: 100 },
+        order: {
+            status: 'pending',
+            items: [{
+                retailer_id: '1234567',
+                name: 'Cake',
+                amount: { value: 50000, offset: 100 },
+                quantity: 1,
+            }],
+            subtotal: { value: 50000, offset: 100 },
+            tax: { value: 0, offset: 100 },
+        },
+    },
+});
+```
+
+## Update order status
+
+```typescript
+await client.messages.interactiveOrderStatusBr({
+    to: '5511999999999',
+    body: 'Payment received!',
+    orderStatus: {
+        reference_id: 'order-001',
+        order: { status: 'processing' },
+        payment: { status: 'captured', timestamp: Math.floor(Date.now() / 1000) },
+    },
+});
+```
+
+## Order details template
+
+Create with `createOrderDetailsTemplate`, then send via `templateOrderDetailsBr` or `templateOrderDetailsBrPix`.
+
+```typescript
+import { createOrderDetailsTemplate } from 'meta-cloud-api';
+import { CategoryEnum, LanguagesEnum } from 'meta-cloud-api/enums';
+
+await client.templates.createTemplate(
+    createOrderDetailsTemplate({
+        name: 'order_details_cart',
+        language: LanguagesEnum.Portuguese_BR,
+        category: CategoryEnum.Utility,
+        body: { text: 'Your total is {{1}}' },
+        order_details_button: { text: 'Copy Pix code' },
+    }),
+);
+```
+
+## Order status template
+
+Create with `createOrderStatusTemplate`, then send via `templateOrderStatus`. Works for Brazil and India (utility category, `sub_category: ORDER_STATUS`).
+
+```typescript
+import { createOrderStatusTemplate } from 'meta-cloud-api';
+import { LanguagesEnum } from 'meta-cloud-api/enums';
+
+await client.templates.createTemplate(
+    createOrderStatusTemplate({
+        name: 'order_status_shipped',
+        language: LanguagesEnum.Portuguese_BR,
+        body: { text: 'Your order {{1}} has shipped.' },
+    }),
+);
+
+await client.messages.templateOrderStatus({
+    region: 'br',
+    to: '5511999999999',
+    template: {
+        name: 'order_status_shipped',
+        language: { policy: 'deterministic', code: 'pt_BR' },
+    },
+    orderStatus: {
+        reference_id: 'order-001',
+        order: { status: 'shipped' },
+    },
+});
+```
+
+Use `region: 'in'` for India order status templates.
+
+## Payment Request CTA templates
+
+Simpler payment requests without full order_details integration. Supports Pix, Boleto, and Payment Link (up to 3 buttons).
+
+```typescript
+import { createPaymentRequestTemplate } from 'meta-cloud-api';
+import { LanguagesEnum } from 'meta-cloud-api/enums';
+
+await client.templates.createTemplate(
+    createPaymentRequestTemplate({
+        name: 'payment_request_pix',
+        language: LanguagesEnum.Portuguese_BR,
+        body: { text: 'Your payment is ready' },
+        payment_request_buttons: [
+            {
+                text: 'Copy Pix code',
+                payment_setting: {
+                    type: 'pix_dynamic_code',
+                    pix_dynamic_code: {
+                        code: '00020101021226700014br.gov.bcb.pix2548pix.example.com...',
+                    },
+                },
+            },
+        ],
+    }),
+);
+
+await client.messages.templatePaymentRequestBr({
+    to: '5511999999999',
+    template: {
+        name: 'payment_request_pix',
+        language: { code: 'pt_BR' },
+    },
+    paymentRequests: [
+        {
+            paymentSetting: {
+                type: 'pix_dynamic_code',
+                pix_dynamic_code: {
+                    code: '00020101021226700014br.gov.bcb.pix2548pix.example.com...',
+                },
+            },
+        },
+    ],
+});
+```
+
+Payment Request CTA Pix uses `{ code }` only — unlike order_details Pix which requires `merchant_name`, `key`, and `key_type`.
+
+## Webhooks
+
+```typescript
+import {
+    WebhookProcessor,
+    getPaymentMethodSelection,
+    isOrderDetailsButtonClick,
+} from 'meta-cloud-api';
+
+const webhook = new WebhookProcessor({ /* ... */ });
+
+// Brazil one-click: user confirmed payment method
+webhook.onPaymentMethod((_client, event) => {
+    const selection = getPaymentMethodSelection(event.message);
+});
+
+// Order details template button tap
+webhook.onButton((_client, event) => {
+    if (isOrderDetailsButtonClick(event.message)) {
+        // user opened order details UI
+    }
+});
+```
+
+## Related
+
+- [Payments (India)](/api/payments) — WABA payment configuration API
+- [Messages API](/api/messages) — underlying send endpoint
+- [Templates API](/api/templates) — create order details templates

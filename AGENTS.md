@@ -47,6 +47,7 @@ Then cross-check the relevant official docs:
 - Marketing Messages: https://developers.facebook.com/documentation/business-messaging/whatsapp/marketing-messages/send-marketing-messages/
 - Commerce Settings: https://developers.facebook.com/documentation/business-messaging/whatsapp/catalogs/sell-products-and-services/set-commerce-settings/
 - Payments (India): https://developers.facebook.com/documentation/business-messaging/whatsapp/payments/payments-in/onboarding-apis/
+- Payments (Brazil): https://developers.facebook.com/documentation/business-messaging/whatsapp/payments/payments-br/overview/
 
 ## Coding Style & Naming Conventions
 
@@ -54,6 +55,8 @@ Then cross-check the relevant official docs:
 - Enforced by Biome (linting and formatting).
 - API classes use PascalCase (`MessageApi.ts`), folders are lower-case (`src/api/messages`).
 - Keep request payloads as plain objects (avoid functional-style builders).
+- Internal `build*` helpers assemble payloads for `MessagesApi` methods only — do not re-export them from package entry points (`src/api/messages/index.ts`, `meta-cloud-api/types`).
+- Brazil and India payment message modules are kept fully separate (`payments-br.ts` / `payments-in.ts` under `types/` and `helpers/`). Duplicate structures even when identical so each region can diverge without shared coupling.
 - API files keep a top-level doc link comment: `// Docs: <url>`.
 
 ## Testing Guidelines

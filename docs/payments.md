@@ -3,6 +3,8 @@
 ## Overview
 Manage payment configurations for WhatsApp Payments (India).
 
+For Brazil payments (`order_details` / `order_status` messages), see [payments-br.md](./payments-br.md).
+
 ## Endpoints
 - GET /{WABA_ID}/payment_configurations
 - GET /{WABA_ID}/payment_configuration/{CONFIGURATION_NAME}

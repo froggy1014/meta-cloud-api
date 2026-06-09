@@ -69,6 +69,34 @@ export type CatalogButton = {
     };
 };
 
+export type OrderDetailsButton = {
+    type: 'ORDER_DETAILS';
+    text: string;
+};
+
+export type PaymentRequestTemplatePixCode = {
+    code: string;
+};
+
+export type PaymentRequestTemplateBoleto = {
+    digitable_line: string;
+};
+
+export type PaymentRequestTemplatePaymentLink = {
+    uri: string;
+};
+
+export type PaymentRequestTemplateSetting =
+    | { type: 'pix_dynamic_code'; pix_dynamic_code: PaymentRequestTemplatePixCode }
+    | { type: 'boleto'; boleto: PaymentRequestTemplateBoleto }
+    | { type: 'payment_link'; payment_link: PaymentRequestTemplatePaymentLink };
+
+export type PaymentRequestButton = {
+    type: 'PAYMENT_REQUEST';
+    text: string;
+    payment_setting: PaymentRequestTemplateSetting;
+};
+
 export type TemplateButton =
     | PhoneNumberButton
     | URLButton
@@ -78,7 +106,13 @@ export type TemplateButton =
     | MPMButton
     | OTPButton
     | SPMButton
-    | CatalogButton;
+    | CatalogButton
+    | OrderDetailsButton
+    | PaymentRequestButton;
+
+export type TemplateDisplayFormat = 'ORDER_DETAILS';
+
+export type TemplateSubCategory = 'ORDER_STATUS';
 
 export type TemplateHeaderExample = {
     header_text?: string[];
@@ -161,6 +195,8 @@ export type TemplateRequestBody = GeneralRequestBody & {
     name: string;
     language: LanguagesEnum;
     category?: CategoryEnum;
+    display_format?: TemplateDisplayFormat;
+    sub_category?: TemplateSubCategory;
     components?: ComponentTypes[];
 };
 

@@ -134,6 +134,27 @@ export declare class MessagesClass extends BaseClass {
             }
         >,
     ): Promise<MessagesResponse>;
+    interactiveOrderDetailsBr(params: import('./payments-br').OrderDetailsBrMessageParams): Promise<MessagesResponse>;
+    interactiveOrderDetailsBrPix(
+        params: import('./payments-br').OrderDetailsPixBrMessageParams,
+    ): Promise<MessagesResponse>;
+    interactiveOrderStatusBr(params: import('./payments-br').OrderStatusBrMessageParams): Promise<MessagesResponse>;
+    interactiveOrderDetailsIn(params: import('./payments-in').OrderDetailsInMessageParams): Promise<MessagesResponse>;
+    interactiveOrderStatusIn(params: import('./payments-in').OrderStatusInMessageParams): Promise<MessagesResponse>;
+    templateOrderDetailsBr(
+        params: import('./payments-br').OrderDetailsTemplateBrMessageParams,
+    ): Promise<MessagesResponse>;
+    templateOrderDetailsBrPix(
+        params: import('./payments-br').OrderDetailsTemplatePixBrMessageParams,
+    ): Promise<MessagesResponse>;
+    templateOrderDetailsIn(
+        params: import('./payments-in').OrderDetailsTemplateInMessageParams,
+    ): Promise<MessagesResponse>;
+    templateOrderStatus(params: import('./payments-br').OrderStatusTemplateBrMessageParams): Promise<MessagesResponse>;
+    templateOrderStatus(params: import('./payments-in').OrderStatusTemplateInMessageParams): Promise<MessagesResponse>;
+    templatePaymentRequestBr(
+        params: import('./payments-br').PaymentRequestTemplateBrMessageParams,
+    ): Promise<MessagesResponse>;
 
     // Reaction and status messages
     reaction(params: import('./reaction').ReactionParams): Promise<MessagesResponse>;

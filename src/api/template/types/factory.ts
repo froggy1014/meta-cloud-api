@@ -109,6 +109,13 @@ export interface ButtonOptions {
     mpm?: boolean;
     otp?: boolean;
     spm?: boolean;
+    order_details?: {
+        text: string;
+    };
+    payment_request?: Array<{
+        text: string;
+        payment_setting: import('./common').PaymentRequestTemplateSetting;
+    }>;
 }
 
 // Carousel options
@@ -237,4 +244,36 @@ export interface SPMTemplateOptions {
     body: BodyOptions;
     footer?: FooterOptions;
     product_retailer_id: string;
+}
+
+export interface OrderDetailsTemplateOptions {
+    name: string;
+    language: LanguagesEnum;
+    category: CategoryEnum;
+    header?: HeaderOptions;
+    body: BodyOptions;
+    footer?: FooterOptions;
+    order_details_button: {
+        text: string;
+    };
+}
+
+export interface OrderStatusTemplateOptions {
+    name: string;
+    language: LanguagesEnum;
+    category?: CategoryEnum;
+    body: BodyOptions;
+    footer?: FooterOptions;
+}
+
+export interface PaymentRequestTemplateOptions {
+    name: string;
+    language: LanguagesEnum;
+    header?: HeaderOptions;
+    body: BodyOptions;
+    footer?: FooterOptions;
+    payment_request_buttons: Array<{
+        text: string;
+        payment_setting: import('./common').PaymentRequestTemplateSetting;
+    }>;
 }

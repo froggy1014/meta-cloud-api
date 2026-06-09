@@ -113,10 +113,35 @@ export * from '../api/media/types';
 // Messages types (commonly used on client-side)
 export type {
     AudioMediaObject,
+    BrazilBoleto,
+    BrazilOffsiteCardPay,
+    BrazilOrder,
+    BrazilOrderAmount,
+    BrazilOrderGoodsType,
+    BrazilOrderHeader,
+    BrazilOrderSimpleText,
+    BrazilOrderStatusOrder,
+    BrazilOrderStatusPayment,
+    BrazilOrderStatusValue,
+    BrazilPaymentLink,
+    BrazilPaymentRequestSetting,
+    BrazilPaymentSetting,
+    BrazilPaymentStatusValue,
+    BrazilPixDynamicCode,
+    BrazilPixKeyType,
     ContactObject,
     DocumentMediaObject,
     GeneralMessageBody,
     ImageMediaObject,
+    IndiaOrder,
+    IndiaOrderAmount,
+    IndiaOrderGoodsType,
+    IndiaOrderHeader,
+    IndiaOrderSimpleText,
+    IndiaOrderStatusOrder,
+    IndiaOrderStatusPayment,
+    IndiaOrderStatusValue,
+    IndiaPaymentStatusValue,
     InteractiveObject,
     LocationObject,
     MessageRecipientType,
@@ -125,6 +150,32 @@ export type {
     MessagesClass,
     MessagesResponse,
     MessageTemplateObject,
+    OrderDetailsBrInput,
+    OrderDetailsBrMessageParams,
+    OrderDetailsInInput,
+    OrderDetailsInMessageParams,
+    OrderDetailsInteractiveObjectBr,
+    OrderDetailsInteractiveObjectIn,
+    OrderDetailsPixBrMessageParams,
+    OrderDetailsTemplateBrMessageParams,
+    OrderDetailsTemplateButtonComponentBr,
+    OrderDetailsTemplateButtonComponentIn,
+    OrderDetailsTemplateInMessageParams,
+    OrderDetailsTemplatePixBrMessageParams,
+    OrderStatusBrInput,
+    OrderStatusBrMessageParams,
+    OrderStatusInInput,
+    OrderStatusInMessageParams,
+    OrderStatusInteractiveObjectBr,
+    OrderStatusInteractiveObjectIn,
+    OrderStatusTemplateBrMessageParams,
+    OrderStatusTemplateComponentBr,
+    OrderStatusTemplateComponentIn,
+    OrderStatusTemplateInMessageParams,
+    OrderStatusTemplateInputBr,
+    OrderStatusTemplateInputIn,
+    PaymentRequestTemplateBrMessageParams,
+    PaymentRequestTemplateButtonComponentBr,
     ReactionParams,
     StatusParams,
     StatusResponse,
@@ -133,7 +184,7 @@ export type {
     TextObject,
     VideoMediaObject,
 } from '../api/messages/types';
-// Payments types
+// Payments types (India configuration)
 export type {
     PaymentConfiguration,
     PaymentConfigurationCode,
@@ -286,10 +337,14 @@ export type {
     InteractiveButtonReplyMessage,
     InteractiveListReplyMessage,
     InteractiveMessage,
+    InteractivePaymentMethodMessage,
     LocationMessage,
+    MessageDeliveryStatusWebhook,
     // Webhook value types
     MessageWebhookValue,
     OrderMessage,
+    PaymentConfigurationUpdateValue,
+    PaymentTransactionStatusWebhook,
     ReactionMessage,
     StatusWebhook,
     StatusWebhookValue,
@@ -306,6 +361,15 @@ export type {
     WebhookValue,
     WhatsAppMessage,
 } from '../core/webhook/types';
+export { ORDER_DETAILS_CLICKED_PAYLOAD } from '../core/webhook/types/payments-br';
+export type { PaymentMethodSelection } from '../core/webhook/utils/paymentHelpers-br';
+export {
+    getPaymentMethodSelection,
+    isOrderDetailsButtonClick,
+    isPaymentMethodMessage,
+} from '../core/webhook/utils/paymentHelpers-br';
+export type { PaymentTransactionInfo } from '../core/webhook/utils/paymentHelpers-in';
+export { getPaymentTransactionInfo, isPaymentTransactionStatus } from '../core/webhook/utils/paymentHelpers-in';
 // Utility types
 export type { ApiPermissionErrorCode, MetaError, MetaErrorData, WhatsAppErrorCode } from '../utils/isMetaError';
 // Base class interface (type-only)

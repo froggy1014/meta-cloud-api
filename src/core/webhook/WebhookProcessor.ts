@@ -37,6 +37,8 @@ import {
     type OrderMessageHandler,
     type PartnerSolutionsHandler,
     type PaymentConfigurationUpdateHandler,
+    type PaymentMethodHandler,
+    type PaymentStatusHandler,
     type PhoneNumberNameUpdateHandler,
     type PhoneNumberQualityUpdateHandler,
     processFlowRequest,
@@ -71,6 +73,8 @@ export class WebhookProcessor {
     private client: WhatsApp;
     private messageHandlers: Map<MessageTypesEnum, MessageHandler> = new Map();
     private statusHandler: StatusHandler | undefined = undefined;
+    private paymentStatusHandler: PaymentStatusHandler | undefined = undefined;
+    private paymentMethodHandler: PaymentMethodHandler | undefined = undefined;
     private preProcessHandler: MessageHandler | undefined = undefined;
     private postProcessHandler: MessageHandler | undefined = undefined;
     private rawHandler: { handler: RawWebhookHandler; fields?: WebhookFieldType[] } | undefined = undefined;
@@ -140,6 +144,8 @@ export class WebhookProcessor {
             const webResponse = await processWebhookMessages(request, this.client, {
                 messageHandlers: this.messageHandlers,
                 statusHandler: this.statusHandler,
+                paymentStatusHandler: this.paymentStatusHandler,
+                paymentMethodHandler: this.paymentMethodHandler,
                 preProcessHandler: this.preProcessHandler,
                 postProcessHandler: this.postProcessHandler,
                 rawHandler: this.rawHandler?.handler,
@@ -230,6 +236,26 @@ export class WebhookProcessor {
     onStatus(handler: StatusHandler): void {
         this.statusHandler = handler;
         LOGGER.log('Registered status handler');
+    }
+
+    /**
+     * Register a handler for payment transaction status webhooks (India PG / gateway flows).
+     *
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/payments/payments-in/pg/
+     */
+    onPaymentStatus(handler: PaymentStatusHandler): void {
+        this.paymentStatusHandler = handler;
+        LOGGER.log('Registered payment status handler');
+    }
+
+    /**
+     * Register a handler for Brazil one-click payment method selection webhooks.
+     *
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/payments/payments-br/one-click-payments/
+     */
+    onPaymentMethod(handler: PaymentMethodHandler): void {
+        this.paymentMethodHandler = handler;
+        LOGGER.log('Registered payment method handler');
     }
 
     onMessagePreProcess(handler: MessageHandler): void {
@@ -704,6 +730,8 @@ export class WebhookProcessor {
     removeAllHandlers(): void {
         this.messageHandlers.clear();
         this.statusHandler = undefined;
+        this.paymentStatusHandler = undefined;
+        this.paymentMethodHandler = undefined;
         this.preProcessHandler = undefined;
         this.postProcessHandler = undefined;
         this.rawHandler = undefined;

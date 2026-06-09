@@ -1,3 +1,5 @@
 // Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/payments/payments-in/onboarding-apis/
 
-export * from './payments';
+/** @deprecated Import from `./payments-in` instead. */
+export type * from './payments';
+export type * from './payments-in';
