@@ -770,12 +770,12 @@ describe('PhoneNumber API - Unit Tests', () => {
         });
 
         it('should update phone number status on the phone number node', async () => {
-            await whatsApp.phoneNumbers.updatePhoneNumberStatus({ status: 'CONNECTED' });
+            await whatsApp.phoneNumbers.updatePhoneNumberStatus({ connection_status: 'CONNECTED' });
 
             const [method, endpoint, _, body] = mockRequestSend.mock.calls[0];
             expect(method).toBe('POST');
             expect(endpoint).toBe(`${whatsApp.requester.phoneNumberId}`);
-            expect(JSON.parse(body)).toEqual({ status: 'CONNECTED' });
+            expect(JSON.parse(body)).toEqual({ connection_status: 'CONNECTED' });
         });
 
         it('should get and update phone number settings', async () => {

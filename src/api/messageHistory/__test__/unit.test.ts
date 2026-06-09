@@ -26,11 +26,11 @@ describe('Message History API - Unit Tests', () => {
     });
 
     it('gets message history events', async () => {
-        await whatsApp.messageHistory.getMessageHistoryEvents('history_123', { delivery_status: 'delivered' });
+        await whatsApp.messageHistory.getMessageHistoryEvents('history_123', { status_filter: 'DELIVERED' });
 
         const [method, endpoint, _, body] = mockGetJson.mock.calls[0];
         expect(method).toBe('GET');
-        expect(endpoint).toBe('history_123/events?delivery_status=delivered');
+        expect(endpoint).toBe('history_123/events?status_filter=DELIVERED');
         expect(body).toBeNull();
     });
 });

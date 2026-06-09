@@ -64,15 +64,14 @@ export type MessagesResponse = GeneralMessageBody & {
     }>;
 };
 
-export type EncryptedMessageRequest = GeneralMessageBody & {
-    to: string;
-    type?: string;
-    encrypted?: Record<string, unknown>;
-    jwe?: string;
-    [key: string]: unknown;
+export type EncryptedMessageRequest = {
+    messaging_product: 'whatsapp';
+    encrypted_contents: string;
 };
 
-export type EncryptedMessagesResponse = MessagesResponse;
+export type EncryptedMessagesResponse = {
+    encrypted_contents: string;
+};
 
 // Messages API Class Interface - Complete definition
 export declare class MessagesClass extends BaseClass {

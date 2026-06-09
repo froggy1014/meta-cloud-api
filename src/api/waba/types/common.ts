@@ -180,10 +180,13 @@ export type UpdateWabaAccountRequest = {
     [key: string]: unknown;
 };
 
+export type AssignedUsersListParams = WabaListParams & {
+    business: string;
+};
+
 export type AssignedUserRequest = {
     user: string;
-    tasks?: string[];
-    [key: string]: unknown;
+    tasks: string[];
 };
 
 export type RemoveAssignedUserRequest = {
@@ -220,7 +223,7 @@ export interface WABAClass {
     getAllWabaSubscriptions(): Promise<WabaSubscriptions>;
     updateWabaSubscription(params: UpdateWabaSubscription): Promise<ResponseSuccess>;
     unsubscribeFromWaba(): Promise<ResponseSuccess>;
-    getAssignedUsers(params?: WabaListParams, wabaId?: string): Promise<WabaListResponse>;
+    getAssignedUsers(params: AssignedUsersListParams, wabaId?: string): Promise<WabaListResponse>;
     addAssignedUser(params: AssignedUserRequest, wabaId?: string): Promise<ResponseSuccess>;
     removeAssignedUser(params: RemoveAssignedUserRequest, wabaId?: string): Promise<ResponseSuccess>;
     getInProgressOnBehalfRequests(params?: WabaListParams, wabaId?: string): Promise<WabaListResponse>;

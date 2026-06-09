@@ -178,7 +178,7 @@ export default class WabaApi extends BaseAPI implements waba.WABAClass {
     }
 
     async getAssignedUsers(
-        params?: waba.WabaListParams,
+        params: waba.AssignedUsersListParams,
         wabaId: string = this.config[WabaConfigEnum.BusinessAcctId],
     ): Promise<waba.WabaListResponse> {
         return this.sendJson(
@@ -195,7 +195,7 @@ export default class WabaApi extends BaseAPI implements waba.WABAClass {
     ): Promise<ResponseSuccess> {
         const body = {
             user: params.user,
-            ...(params.tasks ? { tasks: params.tasks } : {}),
+            tasks: params.tasks,
         };
 
         return this.sendUrlEncodedForm(

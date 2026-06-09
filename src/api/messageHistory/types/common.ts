@@ -14,8 +14,12 @@ export type MessageHistoryListParams = {
     before?: string;
 };
 
-export type MessageHistoryEventListParams = MessageHistoryListParams & {
-    delivery_status?: string;
+export type MessageHistoryEventListParams = {
+    status_filter?: 'SENT' | 'DELIVERED' | 'READ' | 'FAILED' | (string & {});
+    fields?: MessageHistoryFieldsParam;
+    limit?: number;
+    after?: string;
+    before?: string;
 };
 
 export type MessageHistoryItem = Record<string, unknown>;

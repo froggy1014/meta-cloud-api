@@ -11,28 +11,28 @@ import { objectToQueryString } from '../../utils/objectToQueryString';
 import type * as messageHistory from './types';
 
 export default class MessageHistoryApi extends BaseAPI implements messageHistory.MessageHistoryClass {
-    private toQuery(params?: messageHistory.MessageHistoryEventListParams): string {
-        if (!params) return '';
-
-        const fields = Array.isArray(params.fields) ? params.fields.join(',') : params.fields;
-        return objectToQueryString({
-            fields,
-            message_id: params.message_id,
-            start_time: params.start_time,
-            end_time: params.end_time,
-            delivery_status: params.delivery_status,
-            limit: params.limit,
-            after: params.after,
-            before: params.before,
-        });
+    private resolveFields(fields?: messageHistory.MessageHistoryFieldsParam): string | undefined {
+        return Array.isArray(fields) ? fields.join(',') : fields;
     }
 
     async getMessageHistory(
         params?: messageHistory.MessageHistoryListParams,
     ): Promise<messageHistory.MessageHistoryResponse> {
+        const query = params
+            ? objectToQueryString({
+                  fields: this.resolveFields(params.fields),
+                  message_id: params.message_id,
+                  start_time: params.start_time,
+                  end_time: params.end_time,
+                  limit: params.limit,
+                  after: params.after,
+                  before: params.before,
+              })
+            : '';
+
         return this.sendJson(
             HttpMethodsEnum.Get,
-            `${this.config[WabaConfigEnum.PhoneNumberId]}/message_history${this.toQuery(params)}`,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}/message_history${query}`,
             this.config[WabaConfigEnum.RequestTimeout],
             null,
         );
@@ -42,9 +42,19 @@ export default class MessageHistoryApi extends BaseAPI implements messageHistory
         messageHistoryId: string,
         params?: messageHistory.MessageHistoryEventListParams,
     ): Promise<messageHistory.MessageHistoryResponse> {
+        const query = params
+            ? objectToQueryString({
+                  fields: this.resolveFields(params.fields),
+                  status_filter: params.status_filter,
+                  limit: params.limit,
+                  after: params.after,
+                  before: params.before,
+              })
+            : '';
+
         return this.sendJson(
             HttpMethodsEnum.Get,
-            `${messageHistoryId}/events${this.toQuery(params)}`,
+            `${messageHistoryId}/events${query}`,
             this.config[WabaConfigEnum.RequestTimeout],
             null,
         );

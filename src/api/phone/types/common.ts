@@ -134,9 +134,10 @@ export type CreatePhoneNumberResponse = {
 };
 
 export type UpdatePhoneNumberStatusRequest = {
-    status?: string;
-    account_mode?: AccountMode;
-    [key: string]: unknown;
+    connection_status?: 'CONNECTED' | 'DISCONNECTED' | (string & {});
+    webhook_url?: string;
+    whatsapp_business_api_data?: Record<string, unknown>;
+    pin?: string;
 };
 
 export type PhoneNumberSettingsFieldsParam = string[] | string;

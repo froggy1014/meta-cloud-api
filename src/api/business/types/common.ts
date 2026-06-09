@@ -31,9 +31,8 @@ export type AddPhoneNumbersRequest = {
 };
 
 export type SharePreVerifiedPhoneNumberRequest = {
-    preverified_phone_number_id: string;
+    preverified_id: string;
     partner_business_id: string;
-    [key: string]: unknown;
 };
 
 export type OnboardPartnersToMMLiteRequest = {

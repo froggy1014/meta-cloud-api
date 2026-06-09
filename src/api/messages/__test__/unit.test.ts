@@ -530,9 +530,7 @@ describe('Messages API - Unit Tests', () => {
         it('should send encrypted payload to messages_encrypted endpoint', async () => {
             await whatsApp.messages.encrypted({
                 messaging_product: 'whatsapp',
-                to: '1234567890',
-                type: 'text',
-                jwe: 'encrypted-token',
+                encrypted_contents: 'eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkExMjhDQkMtSFMyNTYifQ...',
             });
 
             const [method, endpoint, _, body] = mockRequestSend.mock.calls[0];
@@ -540,9 +538,7 @@ describe('Messages API - Unit Tests', () => {
             expect(endpoint).toBe(`${whatsApp.requester.phoneNumberId}/messages_encrypted`);
             expect(JSON.parse(body)).toEqual({
                 messaging_product: 'whatsapp',
-                to: '1234567890',
-                type: 'text',
-                jwe: 'encrypted-token',
+                encrypted_contents: 'eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkExMjhDQkMtSFMyNTYifQ...',
             });
         });
     });

@@ -44,10 +44,18 @@ export type SolutionDeactivationRequest = {
     [key: string]: unknown;
 };
 
+export type SolutionMigrationIntent =
+    | 'INITIATE_MIGRATION'
+    | 'CANCEL_MIGRATION'
+    | 'CONFIRM_MIGRATION'
+    | 'SCHEDULE_MIGRATION';
+
 export type SetSolutionMigrationIntentRequest = {
-    solution_id?: string;
-    intent?: string;
-    [key: string]: unknown;
+    solution_id: string;
+    migration_intent: SolutionMigrationIntent;
+    target_solution_id?: string;
+    migration_reason?: string;
+    scheduled_migration_time?: string;
 };
 
 export interface SolutionsClass {
