@@ -5,7 +5,7 @@ export declare class BaseClass {
 }
 
 import type { HttpMethodsEnum } from './enums';
-import type { RequesterClass } from './request';
+import type { RequesterClass, UrlEncodedFormBody } from './request';
 
 export class BaseAPI implements BaseClass {
     protected config: WabaConfigType;
@@ -28,7 +28,7 @@ export class BaseAPI implements BaseClass {
         method: HttpMethodsEnum,
         endpoint: string,
         timeout: number,
-        body?: any,
+        body: UrlEncodedFormBody,
     ): Promise<T> {
         return this.client.sendUrlEncodedForm<T>(method, endpoint, timeout, body);
     }
