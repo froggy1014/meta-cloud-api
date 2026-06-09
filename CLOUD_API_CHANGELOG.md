@@ -6,7 +6,7 @@
 
 ## June 4, 2026
 
-- [ ] **#410** Clarified that deleting a business phone number is not supported via the API; use WhatsApp Manager.
+- [x] **#410** Clarified that deleting a business phone number is not supported via the API; use WhatsApp Manager.
 
 ## June 3, 2026
 
