@@ -1,0 +1,78 @@
+name: Changelog Tracker
+
+on:
+  schedule:
+    # Every Monday at 09:00 UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  check-changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Fetch RSS and update changelog
+        run: node .claude/skills/changelog-tracker/crawl-changelog.mjs
+
+      - name: Check for new entries
+        id: diff
+        run: |
+          if git diff --quiet CLOUD_API_CHANGELOG.md; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            # Extract new unchecked items for the issue body
+            NEW_ITEMS=$(node .claude/skills/changelog-tracker/crawl-changelog.mjs --new-only)
+            COUNT=$(echo "$NEW_ITEMS" | node -e "const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf-8')); console.log(d.length)")
+            echo "count=$COUNT" >> "$GITHUB_OUTPUT"
+
+            # Write issue body to a temp file (avoids shell escaping issues)
+            node -e "
+              const items = JSON.parse(require('fs').readFileSync('/dev/stdin', 'utf-8'));
+              const newest = items.slice(-20);
+              let body = '## New WhatsApp API Changelog Entries\n\n';
+              body += 'The RSS feed has new entries that may need SDK updates.\n\n';
+              for (const item of newest) {
+                body += '- [ ] **#' + item.id + '** ' + (item.tags ? '[' + item.tags + '] ' : '') + item.description + '\n';
+              }
+              if (items.length > 20) {
+                body += '\n_...and ' + (items.length - 20) + ' more. See CLOUD_API_CHANGELOG.md for the full list._\n';
+              }
+              body += '\n---\n\nRun \`node .claude/skills/changelog-tracker/crawl-changelog.mjs --show --filter \"2026\"\` to see all entries.';
+              require('fs').writeFileSync('/tmp/issue-body.md', body);
+            " <<< "$NEW_ITEMS"
+          fi
+
+      - name: Create PR with updated changelog
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="chore/changelog-update-$(date +%Y%m%d)"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add CLOUD_API_CHANGELOG.md
+          git commit -m "chore: update Cloud API changelog from RSS feed"
+          git push origin "$BRANCH"
+
+          # Check if a PR already exists for changelog updates
+          EXISTING_PR=$(gh pr list --label "changelog" --state open --json number --jq '.[0].number // empty')
+          if [ -n "$EXISTING_PR" ]; then
+            gh pr comment "$EXISTING_PR" --body-file /tmp/issue-body.md
+          else
+            gh pr create \
+              --title "chore: new WhatsApp API changelog entries detected" \
+              --body-file /tmp/issue-body.md \
+              --label "changelog" \
+              --base main
+          fi
