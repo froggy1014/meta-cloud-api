@@ -4,6 +4,10 @@
 > Updated: 2026-06-09T06:43:10.860Z
 
 
+## June 4, 2026
+
+- [ ] **#410** Clarified that deleting a business phone number is not supported via the API; use WhatsApp Manager.
+
 ## June 3, 2026
 
 - [x] **#409** [In-App Signup] Added In-App Signup, a new guide for creating opt-in deep links that WhatsApp users click to subscribe to your messages. The guide covers creating, retrieving, listing, updating, and disabling signups, error codes, and messaging customer base management.
@@ -1031,4 +1035,4 @@
 
 ---
 
-**Progress: 411/411 (100%)**
+**Progress: 410/411 (100%)**
