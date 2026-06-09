@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Fetch Meta WhatsApp API changelog via RSS and merge new entries into CLOUD_API_CHANGELOG.md.
+// Fetch Meta Cloud API changelog via RSS and merge new entries into CLOUD_API_CHANGELOG.md.
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -21,7 +21,7 @@ const buildPrBody = (newLines) => {
   });
 
   return [
-    '## WhatsApp Business Platform Changelog',
+    '## Cloud API Changelog',
     '',
     `Meta published **${count}** new changelog ${entryLabel}. Review the entries below and update the SDK if any API behavior, endpoint, payload, or webhook contract changed.`,
     '',

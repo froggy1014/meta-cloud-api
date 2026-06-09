@@ -84,7 +84,7 @@ jobs:
             gh pr comment "$EXISTING_PR" --body-file "$CHANGELOG_PR_BODY_FILE"
           else
             gh pr create \
-              --title "chore: new WhatsApp API changelog entries detected" \
+              --title "chore: new Cloud API changelog entries detected" \
               --body-file "$CHANGELOG_PR_BODY_FILE" \
               --label "changelog" \
               --head "$BRANCH" \
