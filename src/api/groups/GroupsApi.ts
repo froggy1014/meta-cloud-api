@@ -7,12 +7,15 @@
 // - GET /{PHONE_NUMBER_ID}/groups?limit&after&before
 // - GET /{GROUP_ID}/invite_link
 // - POST /{GROUP_ID}/invite_link
+// - DELETE /{GROUP_ID}/invite_link
 // - GET /{GROUP_ID}/join_requests
 // - POST /{GROUP_ID}/join_requests
 // - DELETE /{GROUP_ID}/join_requests
+// - POST /{GROUP_ID}/participants
 // - DELETE /{GROUP_ID}/participants
 // - POST /{GROUP_ID}
 
+import { WHATSAPP_MESSAGING_PRODUCT } from '../../config/defaults';
 import { BaseAPI } from '../../types/base';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
 import type { ResponseSuccess } from '../../types/request';
@@ -60,7 +63,7 @@ export default class GroupsApi extends BaseAPI implements groups.GroupsClass {
      */
     async createGroup(params: groups.GroupCreateRequest): Promise<groups.GroupCreateResponse> {
         const body = {
-            messaging_product: 'whatsapp',
+            messaging_product: WHATSAPP_MESSAGING_PRODUCT,
             subject: params.subject,
         } as { messaging_product: 'whatsapp'; subject: string; description?: string; join_approval_mode?: string };
 
@@ -83,7 +86,7 @@ export default class GroupsApi extends BaseAPI implements groups.GroupsClass {
      * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/groups/reference/
      */
     async deleteGroup(groupId: string): Promise<ResponseSuccess> {
-        return this.sendJson(HttpMethodsEnum.Delete, `/${groupId}`, this.config[WabaConfigEnum.RequestTimeout], null);
+        return this.sendJson(HttpMethodsEnum.Delete, groupId, this.config[WabaConfigEnum.RequestTimeout], null);
     }
 
     /**
@@ -99,7 +102,7 @@ export default class GroupsApi extends BaseAPI implements groups.GroupsClass {
         const queryParams = fieldValue ? objectToQueryString({ fields: fieldValue }) : '';
         return this.sendJson(
             HttpMethodsEnum.Get,
-            `/${groupId}${queryParams}`,
+            `${groupId}${queryParams}`,
             this.config[WabaConfigEnum.RequestTimeout],
             null,
         );
@@ -135,9 +138,28 @@ export default class GroupsApi extends BaseAPI implements groups.GroupsClass {
     async getGroupInviteLink(groupId: string): Promise<groups.GroupInviteLinkResponse> {
         return this.sendJson(
             HttpMethodsEnum.Get,
-            `/${groupId}/invite_link`,
+            `${groupId}/invite_link`,
             this.config[WabaConfigEnum.RequestTimeout],
             null,
+        );
+    }
+
+    /**
+     * Create a group invite link.
+     *
+     * @param groupId - The ID of the group.
+     * @returns The group invite link.
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/groups/reference/
+     */
+    async createGroupInviteLink(groupId: string): Promise<groups.GroupInviteLinkResponse> {
+        const body = {
+            messaging_product: WHATSAPP_MESSAGING_PRODUCT,
+        };
+        return this.sendJson(
+            HttpMethodsEnum.Post,
+            `${groupId}/invite_link`,
+            this.config[WabaConfigEnum.RequestTimeout],
+            JSON.stringify(body),
         );
     }
 
@@ -150,11 +172,30 @@ export default class GroupsApi extends BaseAPI implements groups.GroupsClass {
      */
     async resetGroupInviteLink(groupId: string): Promise<groups.GroupInviteLinkResponse> {
         const body = {
-            messaging_product: 'whatsapp',
+            messaging_product: WHATSAPP_MESSAGING_PRODUCT,
         };
         return this.sendJson(
             HttpMethodsEnum.Post,
-            `/${groupId}/invite_link`,
+            `${groupId}/invite_link`,
+            this.config[WabaConfigEnum.RequestTimeout],
+            JSON.stringify(body),
+        );
+    }
+
+    /**
+     * Delete the current invite link for a group.
+     *
+     * @param groupId - The ID of the group.
+     * @returns A success response confirming deletion.
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/groups/reference/
+     */
+    async deleteGroupInviteLink(groupId: string): Promise<ResponseSuccess> {
+        const body = {
+            messaging_product: WHATSAPP_MESSAGING_PRODUCT,
+        };
+        return this.sendJson(
+            HttpMethodsEnum.Delete,
+            `${groupId}/invite_link`,
             this.config[WabaConfigEnum.RequestTimeout],
             JSON.stringify(body),
         );
@@ -170,7 +211,7 @@ export default class GroupsApi extends BaseAPI implements groups.GroupsClass {
     async getJoinRequests(groupId: string): Promise<groups.GroupJoinRequestsResponse> {
         return this.sendJson(
             HttpMethodsEnum.Get,
-            `/${groupId}/join_requests`,
+            `${groupId}/join_requests`,
             this.config[WabaConfigEnum.RequestTimeout],
             null,
         );
@@ -189,12 +230,12 @@ export default class GroupsApi extends BaseAPI implements groups.GroupsClass {
         joinRequestIds: string[],
     ): Promise<groups.GroupJoinRequestsActionResponse> {
         const body = {
-            messaging_product: 'whatsapp',
+            messaging_product: WHATSAPP_MESSAGING_PRODUCT,
             join_requests: joinRequestIds,
         };
         return this.sendJson(
             HttpMethodsEnum.Post,
-            `/${groupId}/join_requests`,
+            `${groupId}/join_requests`,
             this.config[WabaConfigEnum.RequestTimeout],
             JSON.stringify(body),
         );
@@ -213,12 +254,34 @@ export default class GroupsApi extends BaseAPI implements groups.GroupsClass {
         joinRequestIds: string[],
     ): Promise<groups.GroupJoinRequestsActionResponse> {
         const body = {
-            messaging_product: 'whatsapp',
+            messaging_product: WHATSAPP_MESSAGING_PRODUCT,
             join_requests: joinRequestIds,
         };
         return this.sendJson(
             HttpMethodsEnum.Delete,
-            `/${groupId}/join_requests`,
+            `${groupId}/join_requests`,
+            this.config[WabaConfigEnum.RequestTimeout],
+            JSON.stringify(body),
+        );
+    }
+
+    /**
+     * Add one or more participants to a group.
+     *
+     * @param groupId - The ID of the group.
+     * @param participants - Array of user WhatsApp IDs to add to the group.
+     * @returns A success response confirming the addition.
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/groups/reference/
+     */
+    async addParticipants(groupId: string, participants: string[]): Promise<ResponseSuccess> {
+        assertNonEmpty(participants, 'participants');
+        const body = {
+            messaging_product: WHATSAPP_MESSAGING_PRODUCT,
+            participants: participants.map((user) => ({ user })),
+        };
+        return this.sendJson(
+            HttpMethodsEnum.Post,
+            `${groupId}/participants`,
             this.config[WabaConfigEnum.RequestTimeout],
             JSON.stringify(body),
         );
@@ -235,12 +298,12 @@ export default class GroupsApi extends BaseAPI implements groups.GroupsClass {
     async removeParticipants(groupId: string, participants: string[]): Promise<ResponseSuccess> {
         assertNonEmpty(participants, 'participants');
         const body = {
-            messaging_product: 'whatsapp',
+            messaging_product: WHATSAPP_MESSAGING_PRODUCT,
             participants: participants.map((user) => ({ user })),
         };
         return this.sendJson(
             HttpMethodsEnum.Delete,
-            `/${groupId}/participants`,
+            `${groupId}/participants`,
             this.config[WabaConfigEnum.RequestTimeout],
             JSON.stringify(body),
         );
@@ -263,7 +326,7 @@ export default class GroupsApi extends BaseAPI implements groups.GroupsClass {
     ): Promise<groups.GroupSettingsResponse> {
         if (params.profilePictureFile) {
             const formData = new FormData();
-            formData.append('messaging_product', 'whatsapp');
+            formData.append('messaging_product', WHATSAPP_MESSAGING_PRODUCT);
             if (params.subject) formData.append('subject', params.subject);
             if (params.description) formData.append('description', params.description);
 
@@ -280,14 +343,14 @@ export default class GroupsApi extends BaseAPI implements groups.GroupsClass {
 
             return this.sendFormData(
                 HttpMethodsEnum.Post,
-                `/${groupId}`,
+                groupId,
                 this.config[WabaConfigEnum.RequestTimeout],
                 formData,
             );
         }
 
         const body = {
-            messaging_product: 'whatsapp',
+            messaging_product: WHATSAPP_MESSAGING_PRODUCT,
         } as { messaging_product: 'whatsapp'; subject?: string; description?: string };
 
         if (params.subject) body.subject = params.subject;
@@ -295,7 +358,7 @@ export default class GroupsApi extends BaseAPI implements groups.GroupsClass {
 
         return this.sendJson(
             HttpMethodsEnum.Post,
-            `/${groupId}`,
+            groupId,
             this.config[WabaConfigEnum.RequestTimeout],
             JSON.stringify(body),
         );

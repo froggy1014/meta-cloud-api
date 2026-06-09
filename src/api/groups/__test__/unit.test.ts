@@ -50,15 +50,24 @@ describe('Groups API - Unit Tests', () => {
 
         const [method, endpoint] = mockRequestSend.mock.calls[0];
         expect(method).toBe('GET');
-        expect(endpoint).toBe('/group_id?fields=subject%2Cdescription');
+        expect(endpoint).toBe('group_id?fields=subject%2Cdescription');
     });
 
-    it('resets invite link with correct endpoint', async () => {
-        await whatsApp.groups.resetGroupInviteLink('group_id');
+    it('creates invite link with correct endpoint', async () => {
+        await whatsApp.groups.createGroupInviteLink('group_id');
 
         const [method, endpoint, _, body] = mockRequestSend.mock.calls[0];
         expect(method).toBe('POST');
-        expect(endpoint).toBe('/group_id/invite_link');
+        expect(endpoint).toBe('group_id/invite_link');
+        expect(JSON.parse(body)).toEqual({ messaging_product: 'whatsapp' });
+    });
+
+    it('deletes invite link with correct endpoint', async () => {
+        await whatsApp.groups.deleteGroupInviteLink('group_id');
+
+        const [method, endpoint, _, body] = mockRequestSend.mock.calls[0];
+        expect(method).toBe('DELETE');
+        expect(endpoint).toBe('group_id/invite_link');
         expect(JSON.parse(body)).toEqual({ messaging_product: 'whatsapp' });
     });
 
@@ -67,10 +76,22 @@ describe('Groups API - Unit Tests', () => {
 
         const [method, endpoint, _, body] = mockRequestSend.mock.calls[0];
         expect(method).toBe('POST');
-        expect(endpoint).toBe('/group_id/join_requests');
+        expect(endpoint).toBe('group_id/join_requests');
         expect(JSON.parse(body)).toEqual({
             messaging_product: 'whatsapp',
             join_requests: ['req_1', 'req_2'],
+        });
+    });
+
+    it('adds group participants with correct endpoint', async () => {
+        await whatsApp.groups.addParticipants('group_id', ['+123', '+456']);
+
+        const [method, endpoint, _, body] = mockRequestSend.mock.calls[0];
+        expect(method).toBe('POST');
+        expect(endpoint).toBe('group_id/participants');
+        expect(JSON.parse(body)).toEqual({
+            messaging_product: 'whatsapp',
+            participants: [{ user: '+123' }, { user: '+456' }],
         });
     });
 
@@ -79,7 +100,7 @@ describe('Groups API - Unit Tests', () => {
 
         const [method, endpoint, _, body] = mockRequestSend.mock.calls[0];
         expect(method).toBe('DELETE');
-        expect(endpoint).toBe('/group_id/participants');
+        expect(endpoint).toBe('group_id/participants');
         expect(JSON.parse(body)).toEqual({
             messaging_product: 'whatsapp',
             participants: [{ user: '+123' }, { user: '+456' }],

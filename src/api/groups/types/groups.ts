@@ -127,10 +127,13 @@ export interface GroupsClass {
     getGroupInfo(groupId: string, fields?: GroupInfoFieldsParam): Promise<GroupInfoResponse>;
     getActiveGroups(params?: GroupListParams): Promise<GroupListResponse>;
     getGroupInviteLink(groupId: string): Promise<GroupInviteLinkResponse>;
+    createGroupInviteLink(groupId: string): Promise<GroupInviteLinkResponse>;
     resetGroupInviteLink(groupId: string): Promise<GroupInviteLinkResponse>;
+    deleteGroupInviteLink(groupId: string): Promise<ResponseSuccess>;
     getJoinRequests(groupId: string): Promise<GroupJoinRequestsResponse>;
     approveJoinRequests(groupId: string, joinRequestIds: string[]): Promise<GroupJoinRequestsActionResponse>;
     rejectJoinRequests(groupId: string, joinRequestIds: string[]): Promise<GroupJoinRequestsActionResponse>;
+    addParticipants(groupId: string, participants: string[]): Promise<ResponseSuccess>;
     removeParticipants(groupId: string, participants: string[]): Promise<ResponseSuccess>;
     updateGroupSettings(groupId: string, params: UpdateGroupSettingsRequest): Promise<GroupSettingsResponse>;
 }

@@ -4,8 +4,6 @@ import GroupsApi from './GroupsApi';
 
 export default GroupsApi;
 
-export { GroupsApi };
-
 export type {
     GroupCreateRequest,
     GroupCreateResponse,
@@ -22,7 +20,10 @@ export type {
     GroupListParams,
     GroupListResponse,
     GroupParticipant,
+    GroupParticipantInput,
+    GroupParticipantsRequest,
     GroupSettingsResponse,
     GroupsClass,
     UpdateGroupSettingsRequest,
 } from './types';
+export { GroupsApi };

@@ -4,6 +4,5 @@ import WabaApi from './WabaApi';
 
 export default WabaApi;
 
+export * from './types';
 export { WabaApi };
-
-export type { UpdateWabaSubscription, WABAClass, WabaAccount, WabaSubscriptions } from './types';
