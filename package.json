@@ -1,6 +1,6 @@
 {
     "name": "meta-cloud-api",
-    "version": "3.0.0",
+    "version": "3.1.0",
     "description": "WhatsApp TypeScript SDK",
     "type": "module",
     "main": "./dist/index.mjs",
