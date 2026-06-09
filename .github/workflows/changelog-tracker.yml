@@ -10,15 +10,47 @@ permissions:
   contents: write
   pull-requests: write
 
+concurrency:
+  group: changelog-tracker
+  cancel-in-progress: false
+
 jobs:
   check-changelog:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+
+      - name: Prepare changelog branch
+        id: branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          EXISTING_BRANCH=$(gh pr list --label "changelog" --state open --json headRefName --jq '.[0].headRefName // empty')
+          if [ -n "$EXISTING_BRANCH" ]; then
+            BRANCH="$EXISTING_BRANCH"
+          else
+            BRANCH="chore/changelog-update"
+          fi
+
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+
+          if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
+            git fetch origin "$BRANCH"
+            git checkout -B "$BRANCH" "origin/$BRANCH"
+            git rebase origin/main
+          else
+            git checkout -B "$BRANCH" origin/main
+          fi
 
       - name: Fetch RSS and update changelog
         run: node scripts/crawl-changelog.mjs
@@ -50,15 +82,12 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          BRANCH="chore/changelog-update-$(date +%Y%m%d)"
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -b "$BRANCH"
+          BRANCH="${{ steps.branch.outputs.branch }}"
           git add CLOUD_API_CHANGELOG.md
           git commit -m "chore: update Cloud API changelog from RSS feed"
-          git push origin "$BRANCH"
+          git push --force-with-lease --set-upstream origin "$BRANCH"
 
-          EXISTING_PR=$(gh pr list --label "changelog" --state open --json number --jq '.[0].number // empty')
+          EXISTING_PR=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')
           if [ -n "$EXISTING_PR" ]; then
             gh pr comment "$EXISTING_PR" --body-file /tmp/pr-body.md
           else
@@ -66,5 +95,6 @@ jobs:
               --title "chore: new WhatsApp API changelog entries detected" \
               --body-file /tmp/pr-body.md \
               --label "changelog" \
+              --head "$BRANCH" \
               --base main
           fi
