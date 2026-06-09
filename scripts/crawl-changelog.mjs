@@ -6,6 +6,7 @@ import { resolve } from 'node:path';
 
 const FILE = resolve(import.meta.dirname, '..', 'CLOUD_API_CHANGELOG.md');
 const RSS = 'https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog/rss/';
+const NEW_ITEMS_FILE = process.env.CHANGELOG_NEW_ITEMS_FILE;
 
 // Fetch and parse RSS
 const res = await fetch(RSS);
@@ -14,7 +15,11 @@ const xml = await res.text();
 
 const tag = (src, name) => src.match(new RegExp(`<${name}>([\\s\\S]*?)</${name}>`))?.[1]?.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/, '$1').trim();
 const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)]
-  .map((m) => ({ date: tag(m[1], 'title'), desc: tag(m[1], 'description')?.trim() }))
+  .map((m) => ({
+    date: tag(m[1], 'title'),
+    desc: tag(m[1], 'description')?.trim(),
+    link: tag(m[1], 'link'),
+  }))
   .filter((e) => e.date && e.desc);
 
 console.log(`Fetched ${items.length} RSS entries`);
@@ -40,9 +45,21 @@ newItems.sort((a, b) => new Date(a.date) - new Date(b.date));
 const newLines = newItems.map((e, i) => ({
   id: maxId + 1 + i,
   date: e.date,
+  desc: e.desc,
+  link: e.link,
   line: `- [ ] **#${maxId + 1 + i}** ${e.desc.length > 500 ? e.desc.slice(0, 500) + '...' : e.desc}`,
 }));
 newLines.reverse();
+
+if (NEW_ITEMS_FILE) {
+  writeFileSync(
+    NEW_ITEMS_FILE,
+    `${JSON.stringify({
+      source: RSS,
+      items: newLines.map(({ id, date, desc, link }) => ({ id, date, desc, link })),
+    }, null, 2)}\n`,
+  );
+}
 
 // Prepend new entries grouped by date
 let insert = '';
