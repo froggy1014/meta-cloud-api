@@ -17,8 +17,8 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
-const SKILL_DIR = resolve(import.meta.dirname);
-const PROJECT_ROOT = resolve(SKILL_DIR, '..', '..', '..');
+const SCRIPTS_DIR = resolve(import.meta.dirname);
+const PROJECT_ROOT = resolve(SCRIPTS_DIR, '..');
 const CHANGELOG_MD = join(PROJECT_ROOT, 'CLOUD_API_CHANGELOG.md');
 const RSS_URL =
   'https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog/rss/';

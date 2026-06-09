@@ -21,7 +21,7 @@ jobs:
           node-version: '22'
 
       - name: Fetch RSS and update changelog
-        run: node .claude/skills/changelog-tracker/crawl-changelog.mjs
+        run: node scripts/crawl-changelog.mjs
 
       - name: Check for new entries
         id: diff
@@ -31,7 +31,7 @@ jobs:
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
             # Extract new unchecked items for the issue body
-            NEW_ITEMS=$(node .claude/skills/changelog-tracker/crawl-changelog.mjs --new-only)
+            NEW_ITEMS=$(node scripts/crawl-changelog.mjs --new-only)
             COUNT=$(echo "$NEW_ITEMS" | node -e "const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf-8')); console.log(d.length)")
             echo "count=$COUNT" >> "$GITHUB_OUTPUT"
 
@@ -47,7 +47,7 @@ jobs:
               if (items.length > 20) {
                 body += '\n_...and ' + (items.length - 20) + ' more. See CLOUD_API_CHANGELOG.md for the full list._\n';
               }
-              body += '\n---\n\nRun \`node .claude/skills/changelog-tracker/crawl-changelog.mjs --show --filter \"2026\"\` to see all entries.';
+              body += '\n---\n\nRun \`node scripts/crawl-changelog.mjs --show --filter \"2026\"\` to see all entries.';
               require('fs').writeFileSync('/tmp/issue-body.md', body);
             " <<< "$NEW_ITEMS"
           fi
