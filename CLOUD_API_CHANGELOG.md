@@ -2,7 +2,6 @@
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
 > Updated: 2026-06-09T06:43:10.860Z
-> Mode: playwright (full)
 
 
 ## June 4, 2026

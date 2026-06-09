@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 /**
  * crawl-changelog.mjs — Track Meta WhatsApp Business Platform Changelog
- * and maintain implementation status in CHANGELOG.md.
+ * and maintain implementation status in CLOUD_API_CHANGELOG.md.
  *
- * Modes:
- *   node crawl-changelog.mjs                    # Fetch RSS (recent ~20 entries, no deps)
- *   node crawl-changelog.mjs --full             # Full crawl via Playwright (all entries)
+ * Usage:
+ *   node crawl-changelog.mjs                    # Fetch RSS and merge new entries
  *   node crawl-changelog.mjs --show             # Show current checklist
  *   node crawl-changelog.mjs --show --filter X  # Filter by keyword
  *   node crawl-changelog.mjs --mark "3"         # Mark item #3 as done
@@ -28,7 +27,6 @@ const CHANGELOG_URL =
 // ── CLI args ──
 const args = process.argv.slice(2);
 const showOnly = args.includes('--show');
-const fullCrawl = args.includes('--full');
 const newOnly = args.includes('--new-only');
 const markIdx = args.indexOf('--mark');
 const unmarkIdx = args.indexOf('--unmark');
@@ -37,7 +35,7 @@ const markTarget = markIdx !== -1 ? args[markIdx + 1] : null;
 const unmarkTarget = unmarkIdx !== -1 ? args[unmarkIdx + 1] : null;
 const filterKeyword = filterIdx !== -1 ? args[filterIdx + 1] : null;
 
-// ── 1. RSS fetch (default, no dependencies) ──
+// ── 1. RSS fetch ──
 
 async function fetchRSS() {
   console.log('Fetching WhatsApp API Changelog RSS...');
@@ -56,12 +54,10 @@ function parseRSS(xml) {
     const itemXml = match[1];
     const title = extractTag(itemXml, 'title');
     const description = extractTag(itemXml, 'description');
-    const link = extractTag(itemXml, 'link');
-    const pubDate = extractTag(itemXml, 'pubDate');
 
     if (!title || !description) continue;
 
-    entries.push({ date: title, description: description.trim(), link, pubDate });
+    entries.push({ date: title, description: description.trim() });
   }
 
   return entries;
@@ -72,110 +68,7 @@ function extractTag(xml, tag) {
   return match ? match[1].replace(/<!\[CDATA\[([\s\S]*?)\]\]>/, '$1').trim() : null;
 }
 
-// ── 2. Full Playwright crawl (optional, --full flag) ──
-
-async function fullPlaywrightCrawl() {
-  const { chromium } = await import('playwright');
-
-  async function launchBrowser() {
-    const cachedPaths = [
-      join(process.env.HOME, 'Library/Caches/ms-playwright/chromium-1217/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing'),
-      join(process.env.HOME, 'Library/Caches/ms-playwright/chromium-1208/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing'),
-    ];
-    const executablePath = cachedPaths.find((p) => existsSync(p));
-    return chromium.launch({ headless: true, ...(executablePath ? { executablePath } : {}) });
-  }
-
-  console.log('Launching Playwright for full changelog crawl...');
-  const browser = await launchBrowser();
-  const page = await (await browser.newContext({
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-  })).newPage();
-
-  await page.goto(CHANGELOG_URL, { waitUntil: 'networkidle', timeout: 30000 });
-  await page.waitForTimeout(3000);
-
-  // Auto-scroll
-  await page.evaluate(async () => {
-    await new Promise((resolve) => {
-      let total = 0;
-      const timer = setInterval(() => {
-        window.scrollBy(0, 1000);
-        total += 1000;
-        if (total >= document.body.scrollHeight || total > 50000) { clearInterval(timer); resolve(); }
-      }, 200);
-    });
-  });
-  await page.waitForTimeout(1000);
-
-  const rawText = await page.evaluate(() => (document.querySelector('main') || document.body)?.innerText || '');
-  await browser.close();
-
-  return parseRawChangelog(rawText);
-}
-
-const DATE_REGEX = /^(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}$/;
-
-function parseRawChangelog(rawText) {
-  const lines = rawText.split('\n').map((l) => l.trim()).filter(Boolean);
-  const entries = [];
-  let startIdx = lines.findIndex((l) => DATE_REGEX.test(l));
-  if (startIdx === -1) return entries;
-
-  let currentDate = null;
-  let i = startIdx;
-
-  while (i < lines.length) {
-    const line = lines[i];
-    if (DATE_REGEX.test(line)) { currentDate = line; i++; continue; }
-
-    if (currentDate && isCategoryTag(line)) {
-      const tags = line;
-      i++;
-      let description = '';
-      while (i < lines.length) {
-        const next = lines[i];
-        if (DATE_REGEX.test(next)) break;
-        if (isCategoryTag(next) && description.length > 0) break;
-        if (isFooterContent(next)) break;
-        if (description.length > 0) description += '\n';
-        description += next;
-        i++;
-      }
-      if (description.length > 0) {
-        entries.push({ date: currentDate, tags, description: description.trim() });
-      }
-      continue;
-    }
-    i++;
-  }
-  return entries;
-}
-
-function isCategoryTag(line) {
-  if (line.length > 100 || line.length < 3) return false;
-  const knownTags = [
-    'cloud api', 'business management api', 'webhooks', 'message templates',
-    'embedded signup', 'in-app signup', 'flows', 'marketing messages',
-    'mm lite', 'pricing', 'groups api', 'calling', 'conversational components',
-    'conversational automation', 'whatsapp business account',
-    'solution migration', 'multi-partner solutions', 'catalog',
-    'whatsapp business account users', 'payments', 'commerce',
-    'data, privacy, & policy', 'support', 'analytics',
-  ];
-  const lower = line.toLowerCase();
-  if (knownTags.some((tag) => lower.includes(tag))) return true;
-  if (/^[A-Z][\w\s&,-]+$/.test(line) && line.length < 60 && !line.includes('.')) return true;
-  return false;
-}
-
-function isFooterContent(line) {
-  const lower = line.toLowerCase();
-  return lower.includes('build with us') || lower.includes('developer centers') ||
-    lower.includes('privacy policy') || lower === 'login' || lower === 'docs';
-}
-
-// ── 3. CHANGELOG.md management ──
+// ── 2. CHANGELOG.md management ──
 
 function parseChangelogMdFull() {
   if (!existsSync(CHANGELOG_MD)) return { entries: [], maxId: -1 };
@@ -205,17 +98,28 @@ function parseChangelogMdFull() {
   return { entries, maxId };
 }
 
-function writeChangelogMd(newEntries, source) {
+function parseDate(dateStr) {
+  const d = new Date(dateStr);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function writeChangelogMd(newEntries) {
   const { entries: existing, maxId } = parseChangelogMdFull();
 
-  // Build a set of existing description prefixes to detect duplicates
-  const existingKeys = new Set(existing.map((e) => e.description.substring(0, 100)));
+  // Find the newest date in existing entries
+  let newestExisting = null;
+  for (const e of existing) {
+    const d = parseDate(e.date);
+    if (d && (!newestExisting || d > newestExisting)) newestExisting = d;
+  }
 
-  // Filter to only truly new entries
-  const brandNew = newEntries.filter((e) => {
-    const key = (e.description || '').substring(0, 100);
-    return !existingKeys.has(key);
-  });
+  // Filter to entries strictly newer than the newest existing date
+  const brandNew = newestExisting
+    ? newEntries.filter((e) => {
+        const d = parseDate(e.date);
+        return d && d > newestExisting;
+      })
+    : [];
 
   if (brandNew.length === 0 && existing.length > 0) {
     console.log('No new entries to add.');
@@ -224,13 +128,10 @@ function writeChangelogMd(newEntries, source) {
     return { totalItems: total, checkedItems: done, pct: Math.round((done / total) * 100) };
   }
 
-  // If no existing file, do a full write (first-time or --full mode)
-  if (existing.length === 0) {
-    return writeChangelogMdFull(newEntries, source);
-  }
-
   // Assign new IDs starting after the current max
   let nextId = maxId + 1;
+  // Sort new entries oldest-first for stable ID assignment
+  brandNew.sort((a, b) => parseDate(a.date) - parseDate(b.date));
   const newTracked = brandNew.map((entry) => ({
     id: nextId++,
     date: entry.date,
@@ -239,33 +140,17 @@ function writeChangelogMd(newEntries, source) {
     implemented: false,
   }));
 
-  // Merge: new entries + existing entries, newest-first
+  // Merge: new entries (newest-first) + existing entries
+  newTracked.reverse();
   const all = [...newTracked, ...existing];
 
-  return renderChangelogMd(all, source);
+  return renderChangelogMd(all);
 }
 
-function writeChangelogMdFull(entries, source) {
-  // Reverse so oldest entries get the lowest IDs (stable numbering)
-  const reversed = [...entries].reverse();
-  const tracked = reversed.map((entry, idx) => ({
-    id: idx,
-    date: entry.date,
-    tags: entry.tags || null,
-    description: entry.description,
-    implemented: false,
-  }));
-  // Reverse back to newest-first for display
-  tracked.reverse();
-
-  return renderChangelogMd(tracked, source);
-}
-
-function renderChangelogMd(tracked, source) {
+function renderChangelogMd(tracked) {
   let md = '# WhatsApp Business Platform API — Changelog Tracker\n\n';
   md += `> Source: ${CHANGELOG_URL}\n`;
-  md += `> Updated: ${new Date().toISOString()}\n`;
-  md += `> Mode: ${source}\n\n`;
+  md += `> Updated: ${new Date().toISOString()}\n\n`;
 
   let currentDate = null;
   let totalItems = 0;
@@ -296,11 +181,11 @@ function renderChangelogMd(tracked, source) {
   return { totalItems, checkedItems, pct };
 }
 
-// ── 4. Display ──
+// ── 3. Display ──
 
 function showTracker(keyword) {
   if (!existsSync(CHANGELOG_MD)) {
-    console.error('No CHANGELOG.md found. Run crawl first.');
+    console.error('No CLOUD_API_CHANGELOG.md found. Run crawl first.');
     process.exit(1);
   }
 
@@ -337,7 +222,7 @@ function showTracker(keyword) {
   console.log(content);
 }
 
-// ── 5. Show new items as JSON (for CI) ──
+// ── 4. Show new items as JSON (for CI) ──
 
 function showNewItems() {
   if (!existsSync(CHANGELOG_MD)) {
@@ -358,11 +243,11 @@ function showNewItems() {
   console.log(JSON.stringify(items, null, 2));
 }
 
-// ── 6. Mark/unmark ──
+// ── 5. Mark/unmark ──
 
 function markItem(target, value) {
   if (!existsSync(CHANGELOG_MD)) {
-    console.error('No CHANGELOG.md found. Run crawl first.');
+    console.error('No CLOUD_API_CHANGELOG.md found. Run crawl first.');
     process.exit(1);
   }
 
@@ -409,19 +294,9 @@ async function main() {
   if (showOnly) { showTracker(filterKeyword); return; }
   if (newOnly) { showNewItems(); return; }
 
-  let entries;
-  let source;
-
-  if (fullCrawl) {
-    entries = await fullPlaywrightCrawl();
-    source = 'playwright (full)';
-  } else {
-    entries = await fetchRSS();
-    source = 'rss (recent)';
-  }
-
+  const entries = await fetchRSS();
   console.log(`Parsed ${entries.length} entries`);
-  const stats = writeChangelogMd(entries, source);
+  const stats = writeChangelogMd(entries);
   console.log(`CHANGELOG.md saved (${stats.totalItems} entries, ${stats.checkedItems} done, ${stats.pct}%)`);
 
   console.log('\n' + '='.repeat(70));
