@@ -1,13 +1,16 @@
 import type { WabaConfigType, WhatsAppConfig } from '../types/config';
 import { WabaConfigEnum } from '../types/enums';
 import Logger from '../utils/logger';
+import {
+    DEFAULT_CLOUD_API_VERSION,
+    DEFAULT_LISTENER_PORT,
+    DEFAULT_MAX_RETRIES_AFTER_WAIT,
+    DEFAULT_REQUEST_TIMEOUT,
+} from './defaults';
 
 const LIB_NAME = 'UTILS';
 const LOG_LOCAL = false;
 const LOGGER = new Logger(LIB_NAME, process.env.DEBUG === 'true' || LOG_LOCAL);
-const DEFAULT_LISTENER_PORT = 3000;
-const DEFAULT_MAX_RETRIES_AFTER_WAIT = 30;
-const DEFAULT_REQUEST_TIMEOUT = 20000;
 
 const emptyConfigChecker = (config: WhatsAppConfig | undefined) => {
     if (!process.env[WabaConfigEnum.AccessToken] && !config?.accessToken) {
@@ -25,7 +28,8 @@ export const importConfig = (inputConfig?: WhatsAppConfig) => {
         [WabaConfigEnum.PhoneNumberId]:
             inputConfig?.phoneNumberId || (process.env.WA_PHONE_NUMBER_ID ? Number(process.env.WA_PHONE_NUMBER_ID) : 0),
         [WabaConfigEnum.BusinessAcctId]: inputConfig?.businessAcctId || process.env.WA_BUSINESS_ACCOUNT_ID || '',
-        [WabaConfigEnum.APIVersion]: inputConfig?.apiVersion || process.env.CLOUD_API_VERSION || '',
+        [WabaConfigEnum.APIVersion]:
+            inputConfig?.apiVersion || process.env.CLOUD_API_VERSION || DEFAULT_CLOUD_API_VERSION,
         [WabaConfigEnum.AccessToken]: inputConfig?.accessToken || process.env.CLOUD_API_ACCESS_TOKEN || '',
         [WabaConfigEnum.WebhookEndpoint]: inputConfig?.webhookEndpoint || process.env.WEBHOOK_ENDPOINT || '',
         [WabaConfigEnum.WebhookVerificationToken]:

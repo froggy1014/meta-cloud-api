@@ -2,6 +2,8 @@
 
 // 중복 export 제거, 명시적 export만 사용
 export type {
+    EncryptedMessageRequest,
+    EncryptedMessagesResponse,
     GeneralMessageBody,
     MessageRecipientType,
     MessageRequestBody,

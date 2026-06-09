@@ -6,6 +6,7 @@
 // - GET /{PHONE_NUMBER_ID}/call_permissions?user_wa_id
 // - POST /{PHONE_NUMBER_ID}/calls
 
+import { WHATSAPP_MESSAGING_PRODUCT } from '../../config/defaults';
 import { BaseAPI } from '../../types/base';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
 import type { ResponseSuccess } from '../../types/request';
@@ -105,7 +106,7 @@ export default class CallingApi extends BaseAPI implements calling.CallingClass 
      */
     async initiateCall(params: calling.InitiateCallRequest): Promise<calling.InitiateCallResponse> {
         const body = {
-            messaging_product: 'whatsapp',
+            messaging_product: WHATSAPP_MESSAGING_PRODUCT,
             to: params.to,
             action: 'connect',
             session: params.session,
@@ -140,7 +141,7 @@ export default class CallingApi extends BaseAPI implements calling.CallingClass 
      */
     async preAcceptCall(params: calling.PreAcceptCallRequest): Promise<calling.CallActionResponse> {
         const body = {
-            messaging_product: 'whatsapp',
+            messaging_product: WHATSAPP_MESSAGING_PRODUCT,
             call_id: params.call_id,
             action: 'pre_accept',
         } as {
@@ -172,7 +173,7 @@ export default class CallingApi extends BaseAPI implements calling.CallingClass 
      */
     async acceptCall(params: calling.AcceptCallRequest): Promise<calling.CallActionResponse> {
         const body = {
-            messaging_product: 'whatsapp',
+            messaging_product: WHATSAPP_MESSAGING_PRODUCT,
             call_id: params.call_id,
             action: 'accept',
         } as {
@@ -206,7 +207,7 @@ export default class CallingApi extends BaseAPI implements calling.CallingClass 
      */
     async rejectCall(params: calling.RejectCallRequest): Promise<calling.CallActionResponse> {
         const body = {
-            messaging_product: 'whatsapp',
+            messaging_product: WHATSAPP_MESSAGING_PRODUCT,
             call_id: params.call_id,
             action: 'reject',
         };
@@ -229,7 +230,7 @@ export default class CallingApi extends BaseAPI implements calling.CallingClass 
      */
     async terminateCall(params: calling.TerminateCallRequest): Promise<calling.CallActionResponse> {
         const body = {
-            messaging_product: 'whatsapp',
+            messaging_product: WHATSAPP_MESSAGING_PRODUCT,
             call_id: params.call_id,
             action: 'terminate',
         };

@@ -1,6 +1,14 @@
+import {
+    DEFAULT_CLOUD_API_VERSION,
+    DEFAULT_RETRY_BACKOFF,
+    DEFAULT_RETRY_INITIAL_DELAY_MS,
+    DEFAULT_RETRY_MAX_ATTEMPTS,
+    GRAPH_API_HOST,
+    GRAPH_API_PROTOCOL,
+} from '../../config/defaults';
 import type { RetryConfig } from '../../types/config';
 import type { HttpMethodsEnum } from '../../types/enums';
-import type { RequesterClass } from '../../types/request';
+import type { RequesterClass, UrlEncodedFormBody } from '../../types/request';
 import {
     createWhatsAppApiError,
     isMetaError,
@@ -15,9 +23,6 @@ import HttpsClient from './httpsClient';
 const LIB_NAME = 'REQUESTER';
 const LOGGER = new Logger(LIB_NAME, process.env.DEBUG === 'true');
 
-const DEFAULT_MAX_ATTEMPTS = 3;
-const DEFAULT_INITIAL_DELAY_MS = 1000;
-
 function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -30,7 +35,7 @@ export default class Requester implements RequesterClass {
     apiVersion: Readonly<string>;
     userAgent: Readonly<string>;
     host: Readonly<string>;
-    protocol: Readonly<string> = 'https:';
+    protocol: Readonly<string> = GRAPH_API_PROTOCOL;
     private retryConfig: RetryConfig | undefined;
 
     constructor(
@@ -42,8 +47,8 @@ export default class Requester implements RequesterClass {
         retryConfig?: RetryConfig,
     ) {
         this.client = new HttpsClient();
-        this.host = 'graph.facebook.com';
-        this.apiVersion = apiVersion || '22';
+        this.host = GRAPH_API_HOST;
+        this.apiVersion = this.normalizeApiVersion(apiVersion);
         this.phoneNumberId = phoneNumberId;
         this.accessToken = accessToken;
         this.businessAcctId = businessAcctId;
@@ -69,7 +74,38 @@ export default class Requester implements RequesterClass {
     }
 
     buildCAPIPath(endpoint: string): string {
-        return `v${this.apiVersion}.0/${endpoint}`;
+        return `${this.apiVersion}/${endpoint}`;
+    }
+
+    private normalizeApiVersion(apiVersion?: string): string {
+        if (!apiVersion) return DEFAULT_CLOUD_API_VERSION;
+
+        const trimmed = apiVersion.trim();
+        if (/^v\d+\.\d+$/.test(trimmed)) return trimmed;
+        if (/^\d+\.\d+$/.test(trimmed)) return `v${trimmed}`;
+        if (/^v\d+$/.test(trimmed)) return `${trimmed}.0`;
+        if (/^\d+$/.test(trimmed)) return `v${trimmed}.0`;
+
+        return trimmed;
+    }
+
+    private buildRequestTarget(endpoint: string): { host: string; path: string; displayUrl: string } {
+        if (/^https?:\/\//.test(endpoint)) {
+            const url = new URL(endpoint);
+            const path = `${url.pathname}${url.search}`.replace(/^\//, '');
+            return {
+                host: url.host,
+                path,
+                displayUrl: url.toString(),
+            };
+        }
+
+        const path = this.buildCAPIPath(endpoint.replace(/^\//, ''));
+        return {
+            host: this.host,
+            path,
+            displayUrl: `${this.protocol.toLowerCase()}//${this.host}/${path}`,
+        };
     }
 
     async sendRequest(
@@ -80,9 +116,9 @@ export default class Requester implements RequesterClass {
         contentType: string = 'application/json',
         additionalHeaders?: Record<string, string>,
     ) {
-        const maxAttempts = this.retryConfig?.maxAttempts ?? DEFAULT_MAX_ATTEMPTS;
-        const initialDelayMs = this.retryConfig?.initialDelayMs ?? DEFAULT_INITIAL_DELAY_MS;
-        const backoff = this.retryConfig?.backoff ?? 'exponential';
+        const maxAttempts = this.retryConfig?.maxAttempts ?? DEFAULT_RETRY_MAX_ATTEMPTS;
+        const initialDelayMs = this.retryConfig?.initialDelayMs ?? DEFAULT_RETRY_INITIAL_DELAY_MS;
+        const backoff = this.retryConfig?.backoff ?? DEFAULT_RETRY_BACKOFF;
 
         let effectiveContentType = contentType;
 
@@ -92,16 +128,16 @@ export default class Requester implements RequesterClass {
             effectiveContentType = 'application/xml';
         }
 
-        const path = `${this.protocol.toLowerCase()}//${this.host}/${this.buildCAPIPath(endpoint)}`;
-        LOGGER.log(`${method} : ${path} (${effectiveContentType})`);
+        const requestTarget = this.buildRequestTarget(endpoint);
+        LOGGER.log(`${method} : ${requestTarget.displayUrl} (${effectiveContentType})`);
 
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
             try {
                 const shouldSendBody = method === 'POST' || method === 'PUT' || method === 'DELETE';
 
                 const response = await this.client.sendRequest(
-                    this.host,
-                    this.buildCAPIPath(endpoint),
+                    requestTarget.host,
+                    requestTarget.path,
                     method,
                     this.buildHeader(effectiveContentType, additionalHeaders),
                     timeout,
@@ -192,10 +228,21 @@ export default class Requester implements RequesterClass {
         method: HttpMethodsEnum,
         endpoint: string,
         timeout: number,
-        formData: Record<string, string>,
+        formData: UrlEncodedFormBody,
         additionalHeaders?: Record<string, string>,
     ): Promise<T> {
-        const urlEncodedBody = new URLSearchParams(formData).toString();
+        const urlParams = new URLSearchParams();
+        for (const [key, value] of Object.entries(formData)) {
+            if (Array.isArray(value)) {
+                for (const item of value) {
+                    urlParams.append(key, item);
+                }
+            } else {
+                urlParams.append(key, value);
+            }
+        }
+
+        const urlEncodedBody = urlParams.toString();
         const res = await this.sendRequest(
             method,
             endpoint,

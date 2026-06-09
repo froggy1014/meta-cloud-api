@@ -2,6 +2,8 @@ import type { HttpMethodsEnum } from './enums';
 
 export type GeneralRequestBody = Record<string, unknown>;
 
+export type UrlEncodedFormBody = Record<string, string | string[]>;
+
 export interface GeneralHeaderInterface {
     /**
      * Authorization token. This is required for all HTTP requests made to the graph API.
@@ -98,7 +100,7 @@ export declare class RequesterClass {
         method: HttpMethodsEnum,
         endpoint: string,
         timeout: number,
-        formData: Record<string, string>,
+        formData: UrlEncodedFormBody,
         additionalHeaders?: Record<string, string>,
     ): Promise<T>;
 

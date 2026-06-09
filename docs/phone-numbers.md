@@ -5,15 +5,25 @@ Retrieve phone number details, request verification codes, configure conversatio
 
 ## Endpoints
 - GET /{PHONE_NUMBER_ID}?fields
+- POST /{PHONE_NUMBER_ID}
 - GET /{WABA_ID}/phone_numbers
+- POST /{WABA_ID}/phone_numbers
 - POST /{PHONE_NUMBER_ID}/request_code
 - POST /{PHONE_NUMBER_ID}/verify_code
+- GET /{PHONE_NUMBER_ID}/settings
+- POST /{PHONE_NUMBER_ID}/settings
 - POST /{PHONE_NUMBER_ID}/conversational_automation
 - GET /{PHONE_NUMBER_ID}?fields=conversational_automation
 - GET /{PHONE_NUMBER_ID}?fields=throughput
+- GET /{PHONE_NUMBER_ID}/official_business_account
+- POST /{PHONE_NUMBER_ID}/official_business_account
+- GET /{PHONE_NUMBER_ID}/business_compliance_info
+- POST /{PHONE_NUMBER_ID}/business_compliance_info
 
 ## Notes
 - Fields can be a comma-separated string or string array.
+- `messaging_limit_tier` is typed as known Meta tiers plus future string values, because Meta has changed tier names over time.
+- Official Business Account application payloads support the website fields Meta publishes in the OpenAPI examples and schema: `website_url` and `business_website_url`.
 - Verification `code_method` is `SMS` or `VOICE`.
 - Conversational automation supports welcome messages, prompts, and commands.
 

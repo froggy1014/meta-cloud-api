@@ -43,6 +43,47 @@ describe('Requester — retry behavior', () => {
         expect(spy).toHaveBeenCalledTimes(1);
     });
 
+    it('routes absolute media URLs without prefixing the Graph API version', async () => {
+        const spy = vi.spyOn(requester.client, 'sendRequest').mockImplementation(async () => makeOkResponse() as any);
+
+        await requester.sendRequest(HttpMethodsEnum.Get, 'https://lookaside.fbsbx.com/whatsapp/media?id=123', 5000);
+
+        expect(spy).toHaveBeenCalledWith(
+            'lookaside.fbsbx.com',
+            'whatsapp/media?id=123',
+            'GET',
+            expect.any(Object),
+            5000,
+            undefined,
+        );
+    });
+
+    it('normalizes Graph API versions when building paths', () => {
+        expect(new Requester('23', 123456789, 'test_token', 'biz_id', 'test-agent').buildCAPIPath('me')).toBe(
+            'v23.0/me',
+        );
+        expect(new Requester('23.0', 123456789, 'test_token', 'biz_id', 'test-agent').buildCAPIPath('me')).toBe(
+            'v23.0/me',
+        );
+        expect(new Requester('v23', 123456789, 'test_token', 'biz_id', 'test-agent').buildCAPIPath('me')).toBe(
+            'v23.0/me',
+        );
+        expect(new Requester('v23.0', 123456789, 'test_token', 'biz_id', 'test-agent').buildCAPIPath('me')).toBe(
+            'v23.0/me',
+        );
+    });
+
+    it('encodes repeated form fields for url-encoded array values', async () => {
+        const spy = vi.spyOn(requester.client, 'sendRequest').mockImplementation(async () => makeOkResponse() as any);
+
+        await requester.sendUrlEncodedForm(HttpMethodsEnum.Post, 'waba_123/assigned_users', 5000, {
+            user: 'user_123',
+            tasks: ['MANAGE', 'VIEW_INSIGHTS'],
+        });
+
+        expect(spy.mock.calls[0]?.[5]).toBe('user=user_123&tasks=MANAGE&tasks=VIEW_INSIGHTS');
+    });
+
     it('retries on WhatsAppThrottlingError and succeeds on second attempt', async () => {
         let callCount = 0;
         const spy = vi.spyOn(requester.client, 'sendRequest').mockImplementation(async () => {

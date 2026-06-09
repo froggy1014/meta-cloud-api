@@ -1,8 +1,8 @@
 // Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/whatsapp-business-accounts/
 
-import WabaApi from './WabaApi';
+import SolutionsApi from './SolutionsApi';
 
-export default WabaApi;
+export default SolutionsApi;
 
 export * from './types';
-export { WabaApi };
+export { SolutionsApi };

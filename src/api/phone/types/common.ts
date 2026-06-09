@@ -22,7 +22,15 @@ export type CodeVerificationStatus =
     | 'UNKNOWN'
     | 'UNVERIFIED';
 
-export type MessagingLimitTier = 'TIER_50' | 'TIER_250' | 'TIER_1K' | 'TIER_10K' | 'TIER_100K' | 'TIER_UNLIMITED';
+export type MessagingLimitTier =
+    | 'TIER_50'
+    | 'TIER_250'
+    | 'TIER_1K'
+    | 'TIER_2K'
+    | 'TIER_10K'
+    | 'TIER_100K'
+    | 'TIER_UNLIMITED'
+    | (string & {});
 
 export type PlatformType = 'CLOUD_API' | 'ON_PREMISE' | 'NOT_APPLICABLE';
 
@@ -108,6 +116,75 @@ export type PhoneNumbersListParams = {
     limit?: number;
     after?: string;
     before?: string;
+};
+
+export type GraphObject = Record<string, unknown>;
+
+export type CreatePhoneNumberRequest = {
+    cc?: string;
+    phone_number?: string;
+    verified_name?: string;
+    preverified_id?: string;
+    [key: string]: unknown;
+};
+
+export type CreatePhoneNumberResponse = {
+    id: string;
+    [key: string]: unknown;
+};
+
+export type UpdatePhoneNumberStatusRequest = {
+    status?: string;
+    account_mode?: AccountMode;
+    [key: string]: unknown;
+};
+
+export type PhoneNumberSettingsFieldsParam = string[] | string;
+
+export type PhoneNumberSettingsParams = {
+    fields?: PhoneNumberSettingsFieldsParam;
+    include_sip_credentials?: boolean;
+};
+
+export type PhoneNumberSettingsResponse = GraphObject;
+
+export type UpdatePhoneNumberSettingsRequest = {
+    calling?: GraphObject;
+    [key: string]: unknown;
+};
+
+export type OfficialBusinessAccountStatusResponse = GraphObject;
+
+export type OfficialBusinessAccountAction = 'SUBMIT_APPLICATION' | 'WITHDRAW_APPLICATION' | 'RESUBMIT_APPLICATION';
+
+export type OfficialBusinessAccountApplicationData = {
+    business_name?: string;
+    business_description?: string;
+    /**
+     * OBA examples use `website_url`, while the schema also exposes `business_website_url`.
+     * Both are accepted to track Meta's published OpenAPI variants.
+     */
+    website_url?: string;
+    business_website_url?: string;
+    contact_email?: string;
+    primary_country_of_operation?: string;
+    primary_language?: string;
+    parent_business_or_brand?: string;
+    [key: string]: unknown;
+};
+
+export type UpdateOfficialBusinessAccountStatusRequest = {
+    action?: OfficialBusinessAccountAction | (string & {});
+    application_data?: OfficialBusinessAccountApplicationData;
+    business_website_url?: string;
+    primary_country_of_operation?: string;
+    [key: string]: unknown;
+};
+
+export type BusinessComplianceInfoResponse = GraphObject;
+
+export type UpdateBusinessComplianceInfoRequest = {
+    [key: string]: unknown;
 };
 
 export type PhoneNumberResponse = {
@@ -208,9 +285,17 @@ export type ThroughputResponse = {
 export interface PhoneNumberClass {
     getPhoneNumberById(fields?: PhoneNumberFieldsParam): Promise<PhoneNumberResponse>;
     getPhoneNumbers(params?: PhoneNumbersListParams): Promise<PhoneNumbersResponse>;
+    createPhoneNumber(request: CreatePhoneNumberRequest, wabaId?: string): Promise<CreatePhoneNumberResponse>;
+    updatePhoneNumberStatus(request: UpdatePhoneNumberStatusRequest): Promise<ResponseSuccess>;
     requestVerificationCode(params: RequestVerificationCodeRequest): Promise<ResponseSuccess>;
     verifyCode(params: VerifyCodeRequest): Promise<ResponseSuccess>;
+    getPhoneNumberSettings(params?: PhoneNumberSettingsParams): Promise<PhoneNumberSettingsResponse>;
+    updatePhoneNumberSettings(params: UpdatePhoneNumberSettingsRequest): Promise<ResponseSuccess>;
     setConversationalAutomation(params: ConversationalAutomationRequest): Promise<ResponseSuccess>;
     getConversationalAutomation(): Promise<ConversationalAutomationResponse>;
     getThroughput(): Promise<ThroughputResponse>;
+    getOfficialBusinessAccountStatus(): Promise<OfficialBusinessAccountStatusResponse>;
+    updateOfficialBusinessAccountStatus(params: UpdateOfficialBusinessAccountStatusRequest): Promise<ResponseSuccess>;
+    getBusinessComplianceInfo(): Promise<BusinessComplianceInfoResponse>;
+    updateBusinessComplianceInfo(params: UpdateBusinessComplianceInfoRequest): Promise<ResponseSuccess>;
 }

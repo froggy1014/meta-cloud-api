@@ -758,4 +758,53 @@ describe('PhoneNumber API - Unit Tests', () => {
             });
         });
     });
+
+    describe('Additional v23 Phone Number Endpoints', () => {
+        it('should create phone number with correct WABA endpoint', async () => {
+            await whatsApp.phoneNumbers.createPhoneNumber({ phone_number: '+15551234567' });
+
+            const [method, endpoint, _, body] = mockRequestSend.mock.calls[0];
+            expect(method).toBe('POST');
+            expect(endpoint).toBe(`${whatsApp.requester.businessAcctId}/phone_numbers`);
+            expect(JSON.parse(body)).toEqual({ phone_number: '+15551234567' });
+        });
+
+        it('should update phone number status on the phone number node', async () => {
+            await whatsApp.phoneNumbers.updatePhoneNumberStatus({ status: 'CONNECTED' });
+
+            const [method, endpoint, _, body] = mockRequestSend.mock.calls[0];
+            expect(method).toBe('POST');
+            expect(endpoint).toBe(`${whatsApp.requester.phoneNumberId}`);
+            expect(JSON.parse(body)).toEqual({ status: 'CONNECTED' });
+        });
+
+        it('should get and update phone number settings', async () => {
+            await whatsApp.phoneNumbers.getPhoneNumberSettings({ fields: ['calling'], include_sip_credentials: true });
+
+            expect(mockRequestSend.mock.calls[0][0]).toBe('GET');
+            expect(mockRequestSend.mock.calls[0][1]).toBe(
+                `${whatsApp.requester.phoneNumberId}/settings?fields=calling&include_sip_credentials=true`,
+            );
+
+            mockRequestSend.mockClear();
+            await whatsApp.phoneNumbers.updatePhoneNumberSettings({ calling: { status: 'ENABLED' } });
+
+            expect(mockRequestSend.mock.calls[0][0]).toBe('POST');
+            expect(mockRequestSend.mock.calls[0][1]).toBe(`${whatsApp.requester.phoneNumberId}/settings`);
+        });
+
+        it('should call official business account and compliance endpoints', async () => {
+            await whatsApp.phoneNumbers.getOfficialBusinessAccountStatus();
+            expect(mockRequestSend.mock.calls[0][1]).toBe(
+                `${whatsApp.requester.phoneNumberId}/official_business_account`,
+            );
+
+            mockRequestSend.mockClear();
+            await whatsApp.phoneNumbers.updateBusinessComplianceInfo({ entity_name: 'Example Inc.' });
+            expect(mockRequestSend.mock.calls[0][0]).toBe('POST');
+            expect(mockRequestSend.mock.calls[0][1]).toBe(
+                `${whatsApp.requester.phoneNumberId}/business_compliance_info`,
+            );
+        });
+    });
 });

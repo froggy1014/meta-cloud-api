@@ -1,5 +1,6 @@
 import {
     BlockUsersApi,
+    BusinessApi,
     BusinessProfileApi,
     CallingApi,
     CommerceApi,
@@ -9,10 +10,12 @@ import {
     MarketingMessagesApi,
     MediaApi,
     MessageApi,
+    MessageHistoryApi,
     PaymentsApi,
     PhoneNumberApi,
     QrCodeApi,
     RegistrationApi,
+    SolutionsApi,
     TemplateApi,
     TwoStepVerificationApi,
     WabaApi,
@@ -38,14 +41,17 @@ export default class WhatsApp {
     config: WabaConfigType;
     requester: Readonly<Requester>;
     blockUsers: BlockUsersApi;
+    business: BusinessApi;
     calling: CallingApi;
     commerce: CommerceApi;
     groups: GroupsApi;
     marketingMessages: MarketingMessagesApi;
+    messageHistory: MessageHistoryApi;
     messages: MessageApi;
     media: MediaApi;
     payments: PaymentsApi;
     phoneNumbers: PhoneNumberApi;
+    solutions: SolutionsApi;
     twoStepVerification: TwoStepVerificationApi;
     flows: FlowApi;
     businessProfile: BusinessProfileApi;
@@ -69,14 +75,17 @@ export default class WhatsApp {
         );
 
         this.blockUsers = new BlockUsersApi(this.config, this.requester);
+        this.business = new BusinessApi(this.config, this.requester);
         this.calling = new CallingApi(this.config, this.requester);
         this.commerce = new CommerceApi(this.config, this.requester);
         this.groups = new GroupsApi(this.config, this.requester);
         this.marketingMessages = new MarketingMessagesApi(this.config, this.requester);
+        this.messageHistory = new MessageHistoryApi(this.config, this.requester);
         this.messages = new MessageApi(this.config, this.requester);
         this.media = new MediaApi(this.config, this.requester);
         this.payments = new PaymentsApi(this.config, this.requester);
         this.phoneNumbers = new PhoneNumberApi(this.config, this.requester);
+        this.solutions = new SolutionsApi(this.config, this.requester);
         this.twoStepVerification = new TwoStepVerificationApi(this.config, this.requester);
         this.flows = new FlowApi(this.config, this.requester);
         this.businessProfile = new BusinessProfileApi(this.config, this.requester);

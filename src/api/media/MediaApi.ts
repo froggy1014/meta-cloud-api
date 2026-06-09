@@ -6,6 +6,7 @@
 // - DELETE /{MEDIA_ID}
 // - GET {MEDIA_URL}
 
+import { WHATSAPP_MESSAGING_PRODUCT } from '../../config/defaults';
 import { BaseAPI } from '../../types/base';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
 import type { ResponseSuccess } from '../../types/request';
@@ -98,7 +99,10 @@ export default class MediaApi extends BaseAPI implements media.MediaClass {
      * await client.messages.image({ body: { id }, to: '1234567890' });
      * ```
      */
-    async uploadMedia(file: File, messagingProduct: string = 'whatsapp'): Promise<media.UploadMediaResponse> {
+    async uploadMedia(
+        file: File,
+        messagingProduct: string = WHATSAPP_MESSAGING_PRODUCT,
+    ): Promise<media.UploadMediaResponse> {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('messaging_product', messagingProduct);

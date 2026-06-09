@@ -2,6 +2,7 @@
 
 This directory vendors Meta's official WhatsApp Business Platform OpenAPI snapshot so SDK changes can be checked without relying on a live browser session.
 
+- OpenAPI repo: `https://github.com/facebook/openapi`
 - Source: `https://raw.githubusercontent.com/facebook/openapi/main/business-messaging-api_v23.0.yaml`
 - Local snapshot: `docs/reference/business-messaging-api_v23.0.yaml`
 - Captured: 2026-05-29

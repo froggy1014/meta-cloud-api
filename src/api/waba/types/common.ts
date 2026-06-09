@@ -1,6 +1,6 @@
 // Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/whatsapp-business-accounts/
 
-import type { ResponseSuccess } from '../../../types/request';
+import type { Paging, ResponseSuccess } from '../../../types/request';
 
 /**
  * WhatsApp Business Account subscription configuration
@@ -155,12 +155,84 @@ export type WabaAccountFields =
  */
 export type WabaAccountFieldsParam = WabaAccountFields[];
 
+export type WabaGraphObject = Record<string, unknown>;
+
+export type WabaFieldsParam = string[] | string;
+
+export type WabaListParams = {
+    fields?: WabaFieldsParam;
+    filtering?: WabaGraphObject[] | string;
+    sort?: string;
+    limit?: number;
+    after?: string;
+    before?: string;
+};
+
+export type WabaListResponse<T = WabaGraphObject> = {
+    data: T[];
+    paging?: Paging;
+    summary?: WabaGraphObject;
+};
+
+export type UpdateWabaAccountRequest = {
+    name?: string;
+    timezone_id?: string;
+    [key: string]: unknown;
+};
+
+export type AssignedUserRequest = {
+    user: string;
+    tasks?: string[];
+    [key: string]: unknown;
+};
+
+export type RemoveAssignedUserRequest = {
+    user: string;
+    [key: string]: unknown;
+};
+
+export type CreateOBOMobilityIntentRequest = {
+    intent?: string;
+    [key: string]: unknown;
+};
+
+export type SetOBOMobilityIntentRequest = {
+    [key: string]: unknown;
+};
+
+export type CreateScheduleRequest = {
+    name?: string;
+    schedule_type?: string;
+    [key: string]: unknown;
+};
+
+export type UpdateWhatsAppBusinessProfileRequest = {
+    [key: string]: unknown;
+};
+
 /**
  * Interface defining all WABA API methods
  */
 export interface WABAClass {
     getWabaAccount(fields?: WabaAccountFieldsParam): Promise<WabaAccount>;
+    updateWabaAccount(params: UpdateWabaAccountRequest): Promise<ResponseSuccess>;
+    getWabaActivities(params?: WabaListParams): Promise<WabaListResponse>;
     getAllWabaSubscriptions(): Promise<WabaSubscriptions>;
     updateWabaSubscription(params: UpdateWabaSubscription): Promise<ResponseSuccess>;
     unsubscribeFromWaba(): Promise<ResponseSuccess>;
+    getAssignedUsers(params?: WabaListParams, wabaId?: string): Promise<WabaListResponse>;
+    addAssignedUser(params: AssignedUserRequest, wabaId?: string): Promise<ResponseSuccess>;
+    removeAssignedUser(params: RemoveAssignedUserRequest, wabaId?: string): Promise<ResponseSuccess>;
+    getInProgressOnBehalfRequests(params?: WabaListParams, wabaId?: string): Promise<WabaListResponse>;
+    getOBOMobilityIntent(oboMobilityIntentId: string, fields?: WabaFieldsParam): Promise<WabaGraphObject>;
+    createOBOMobilityIntent(params: CreateOBOMobilityIntentRequest, wabaId?: string): Promise<WabaGraphObject>;
+    setOBOMobilityIntent(params: SetOBOMobilityIntentRequest, wabaId?: string): Promise<WabaGraphObject>;
+    getWabaSchedules(params?: WabaListParams, wabaId?: string): Promise<WabaListResponse>;
+    createWabaSchedule(params: CreateScheduleRequest, wabaId?: string): Promise<WabaGraphObject>;
+    getWhatsAppBusinessBotDetails(botId: string, fields?: WabaFieldsParam): Promise<WabaGraphObject>;
+    getWhatsAppBusinessProfileDetails(profileId: string, fields?: WabaFieldsParam): Promise<WabaGraphObject>;
+    updateWhatsAppBusinessProfile(
+        profileId: string,
+        params: UpdateWhatsAppBusinessProfileRequest,
+    ): Promise<ResponseSuccess>;
 }

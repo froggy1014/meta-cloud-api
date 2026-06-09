@@ -5,6 +5,7 @@ import type { WabaAccountFields } from '../types';
 describe('WABA API - Unit Tests', () => {
     let whatsApp: WhatsApp;
     let mockRequestSend: any;
+    let mockUrlEncodedSend: any;
 
     beforeEach(() => {
         whatsApp = new WhatsApp({
@@ -14,6 +15,7 @@ describe('WABA API - Unit Tests', () => {
         });
 
         mockRequestSend = vi.spyOn(whatsApp.requester, 'getJson');
+        mockUrlEncodedSend = vi.spyOn(whatsApp.requester, 'sendUrlEncodedForm');
         mockRequestSend.mockResolvedValue({
             id: 'test_business_id',
             name: 'Test Business',
@@ -21,6 +23,7 @@ describe('WABA API - Unit Tests', () => {
             status: 'ACTIVE',
             business_verification_status: 'verified',
         });
+        mockUrlEncodedSend.mockResolvedValue({ success: true });
     });
 
     describe('WABA Account Operations', () => {
@@ -271,6 +274,49 @@ describe('WABA API - Unit Tests', () => {
             const unsubscribeResult = await whatsApp.waba.unsubscribeFromWaba();
 
             expect(unsubscribeResult).toEqual(mockResponse);
+        });
+    });
+
+    describe('Additional v23 WABA Endpoints', () => {
+        it('should update WABA account and get activities', async () => {
+            await whatsApp.waba.updateWabaAccount({ name: 'New Name' });
+
+            expect(mockRequestSend.mock.calls[0][0]).toBe('POST');
+            expect(mockRequestSend.mock.calls[0][1]).toBe(whatsApp.requester.businessAcctId);
+
+            mockRequestSend.mockClear();
+            await whatsApp.waba.getWabaActivities({ limit: 5 });
+
+            expect(mockRequestSend.mock.calls[0][0]).toBe('GET');
+            expect(mockRequestSend.mock.calls[0][1]).toBe(`${whatsApp.requester.businessAcctId}/activities?limit=5`);
+        });
+
+        it('should manage assigned users', async () => {
+            await whatsApp.waba.addAssignedUser({ user: 'user_123', tasks: ['MANAGE'] });
+
+            expect(mockUrlEncodedSend.mock.calls[0][0]).toBe('POST');
+            expect(mockUrlEncodedSend.mock.calls[0][1]).toBe(`${whatsApp.requester.businessAcctId}/assigned_users`);
+            expect(mockUrlEncodedSend.mock.calls[0][3]).toEqual({ user: 'user_123', tasks: ['MANAGE'] });
+
+            mockUrlEncodedSend.mockClear();
+            await whatsApp.waba.removeAssignedUser({ user: 'user_123' });
+
+            expect(mockUrlEncodedSend.mock.calls[0][0]).toBe('DELETE');
+            expect(mockUrlEncodedSend.mock.calls[0][1]).toBe(`${whatsApp.requester.businessAcctId}/assigned_users`);
+            expect(mockUrlEncodedSend.mock.calls[0][3]).toEqual({ user: 'user_123' });
+        });
+
+        it('should call OBO mobility and schedule endpoints', async () => {
+            await whatsApp.waba.createOBOMobilityIntent({ intent: 'TRANSFER' });
+
+            expect(mockRequestSend.mock.calls[0][0]).toBe('POST');
+            expect(mockRequestSend.mock.calls[0][1]).toBe(`${whatsApp.requester.businessAcctId}/obo_mobility_intent`);
+
+            mockRequestSend.mockClear();
+            await whatsApp.waba.createWabaSchedule({ name: 'Business Hours' });
+
+            expect(mockRequestSend.mock.calls[0][0]).toBe('POST');
+            expect(mockRequestSend.mock.calls[0][1]).toBe(`${whatsApp.requester.businessAcctId}/schedules`);
         });
     });
 });
