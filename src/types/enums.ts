@@ -89,6 +89,7 @@ export enum SubTypeEnum {
     Flow = 'FLOW',
     Mpm = 'MPM',
     OrderDetails = 'ORDER_DETAILS',
+    PhoneNumber = 'PHONE_NUMBER',
     QuickReply = 'QUICK_REPLY',
     Reminder = 'REMINDER',
     Url = 'URL',
