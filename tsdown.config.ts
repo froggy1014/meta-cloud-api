@@ -17,7 +17,9 @@ export default defineConfig([
         target: 'es2022',
         platform: 'node',
         hash: false,
-        external: ['node:*', 'crypto', 'fs', 'path', 'url', 'util'],
+        deps: {
+            neverBundle: ['node:*', 'crypto', 'fs', 'path', 'url', 'util'],
+        },
         plugins: [
             {
                 name: 'alias-resolver',
