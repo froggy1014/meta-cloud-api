@@ -4,6 +4,10 @@
 > Updated: 2026-06-09T06:43:10.860Z
 
 
+## June 10, 2026
+
+- [ ] **#411** Documented the optional transfer_action request parameter and the new 147005 error code for the WhatsApp Business Username API.
+
 ## June 4, 2026
 
 - [x] **#410** Clarified that deleting a business phone number is not supported via the API; use WhatsApp Manager.
@@ -1035,4 +1039,4 @@
 
 ---
 
-**Progress: 410/411 (100%)**
+**Progress: 411/412 (100%)**
