@@ -4,6 +4,10 @@
 > Updated: 2026-06-09T06:43:10.860Z
 
 
+## June 11, 2026
+
+- [ ] **#412** Corrected the Terms of Service URL required in the In-App Signup API policy.tos field. Removed the United Kingdom from the unsupported regions for template analytics and template group analytics.
+
 ## June 10, 2026
 
 - [ ] **#411** Documented the optional transfer_action request parameter and the new 147005 error code for the WhatsApp Business Username API.
@@ -1039,4 +1043,4 @@
 
 ---
 
-**Progress: 411/412 (100%)**
+**Progress: 411/413 (100%)**
