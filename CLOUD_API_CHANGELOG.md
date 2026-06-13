@@ -4,6 +4,10 @@
 > Updated: 2026-06-09T06:43:10.860Z
 
 
+## June 12, 2026
+
+- [ ] **#413** Documented business-side message edits and revokes in the coexistence edit and revoke messages webhooks for business-scoped user IDs.
+
 ## June 11, 2026
 
 - [ ] **#412** Corrected the Terms of Service URL required in the In-App Signup API policy.tos field. Removed the United Kingdom from the unsupported regions for template analytics and template group analytics.
@@ -1043,4 +1047,4 @@
 
 ---
 
-**Progress: 411/413 (100%)**
+**Progress: 411/414 (99%)**
