@@ -4,6 +4,14 @@
 > Updated: 2026-06-09T06:43:10.860Z
 
 
+## June 26, 2026
+
+- [ ] **#415** Added SIP call webhooks support with call_created and terminate events for SIP-enabled numbers.
+
+## June 25, 2026
+
+- [ ] **#414** WhatsApp Cloud API Calling voicemail is now generally available.
+
 ## June 12, 2026
 
 - [ ] **#413** Documented business-side message edits and revokes in the coexistence edit and revoke messages webhooks for business-scoped user IDs.
@@ -1047,4 +1055,4 @@
 
 ---
 
-**Progress: 411/414 (99%)**
+**Progress: 411/416 (99%)**
