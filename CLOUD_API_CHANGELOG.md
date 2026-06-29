@@ -4,6 +4,10 @@
 > Updated: 2026-06-09T06:43:10.860Z
 
 
+## June 29, 2026
+
+- [ ] **#416** Username reservation and adoption go live June 29, 2026; BSUID message-send support and the contact-request button move to July 2026.
+
 ## June 26, 2026
 
 - [ ] **#415** Added SIP call webhooks support with call_created and terminate events for SIP-enabled numbers.
@@ -1055,4 +1059,4 @@
 
 ---
 
-**Progress: 411/416 (99%)**
+**Progress: 411/417 (99%)**
