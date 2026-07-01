@@ -4,6 +4,10 @@
 > Updated: 2026-06-09T06:43:10.860Z
 
 
+## June 30, 2026
+
+- [ ] **#417** Added call recording and transcription for the WhatsApp Business Calling API.
+
 ## June 29, 2026
 
 - [ ] **#416** Username reservation and adoption go live June 29, 2026; BSUID message-send support and the contact-request button move to July 2026.
@@ -1059,4 +1063,4 @@
 
 ---
 
-**Progress: 411/417 (99%)**
+**Progress: 411/418 (98%)**
