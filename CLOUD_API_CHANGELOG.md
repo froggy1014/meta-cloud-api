@@ -4,6 +4,10 @@
 > Updated: 2026-06-09T06:43:10.860Z
 
 
+## July 3, 2026
+
+- [ ] **#418** Documented geographic availability for the In-App Signup API, including the regions where it is not available.
+
 ## June 30, 2026
 
 - [ ] **#417** Added call recording and transcription for the WhatsApp Business Calling API.
@@ -1063,4 +1067,4 @@
 
 ---
 
-**Progress: 411/418 (98%)**
+**Progress: 411/419 (98%)**
