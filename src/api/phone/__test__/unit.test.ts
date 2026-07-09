@@ -793,6 +793,35 @@ describe('PhoneNumber API - Unit Tests', () => {
             expect(mockRequestSend.mock.calls[0][1]).toBe(`${whatsApp.requester.phoneNumberId}/settings`);
         });
 
+        it('should get, update, and delete the username', async () => {
+            await whatsApp.phoneNumbers.getUsername();
+            expect(mockRequestSend.mock.calls[0][0]).toBe('GET');
+            expect(mockRequestSend.mock.calls[0][1]).toBe(`${whatsApp.requester.phoneNumberId}/username`);
+
+            mockRequestSend.mockClear();
+            await whatsApp.phoneNumbers.updateUsername({
+                username: 'jaspersmarket',
+                transfer_action: 'force_transfer',
+            });
+            expect(mockRequestSend.mock.calls[0][0]).toBe('POST');
+            expect(mockRequestSend.mock.calls[0][1]).toBe(`${whatsApp.requester.phoneNumberId}/username`);
+            expect(JSON.parse(mockRequestSend.mock.calls[0][3])).toEqual({
+                username: 'jaspersmarket',
+                transfer_action: 'force_transfer',
+            });
+
+            mockRequestSend.mockClear();
+            await whatsApp.phoneNumbers.deleteUsername();
+            expect(mockRequestSend.mock.calls[0][0]).toBe('DELETE');
+            expect(mockRequestSend.mock.calls[0][1]).toBe(`${whatsApp.requester.phoneNumberId}/username`);
+        });
+
+        it('should get username suggestions', async () => {
+            await whatsApp.phoneNumbers.getUsernameSuggestions();
+            expect(mockRequestSend.mock.calls[0][0]).toBe('GET');
+            expect(mockRequestSend.mock.calls[0][1]).toBe(`${whatsApp.requester.phoneNumberId}/username_suggestions`);
+        });
+
         it('should call official business account and compliance endpoints', async () => {
             await whatsApp.phoneNumbers.getOfficialBusinessAccountStatus();
             expect(mockRequestSend.mock.calls[0][1]).toBe(

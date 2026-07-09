@@ -101,6 +101,8 @@ export default class CallingApi extends BaseAPI implements calling.CallingClass 
      * @param params.to - The recipient's WhatsApp phone number.
      * @param params.session - The call session configuration.
      * @param params.biz_opaque_callback_data - Optional opaque data passed back in webhooks.
+     * @param params.recording - Optional per-call recording configuration.
+     * @param params.transcription - Optional per-call transcription configuration.
      * @returns The initiated call response with call ID and status.
      * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/calling/reference/
      */
@@ -116,11 +118,15 @@ export default class CallingApi extends BaseAPI implements calling.CallingClass 
             action: calling.CallAction;
             session: calling.CallSession;
             biz_opaque_callback_data?: string;
+            recording?: calling.CallRecordingConfig;
+            transcription?: calling.CallTranscriptionConfig;
         };
 
         if (params.biz_opaque_callback_data) {
             body.biz_opaque_callback_data = params.biz_opaque_callback_data;
         }
+        if (params.recording) body.recording = params.recording;
+        if (params.transcription) body.transcription = params.transcription;
 
         return this.sendJson(
             HttpMethodsEnum.Post,
@@ -168,6 +174,8 @@ export default class CallingApi extends BaseAPI implements calling.CallingClass 
      * @param params.call_id - The ID of the call to accept.
      * @param params.session - Optional session configuration for the call.
      * @param params.biz_opaque_callback_data - Optional opaque data passed back in webhooks.
+     * @param params.recording - Optional per-call recording configuration.
+     * @param params.transcription - Optional per-call transcription configuration.
      * @returns The call action response confirming acceptance.
      * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/calling/reference/
      */
@@ -182,12 +190,16 @@ export default class CallingApi extends BaseAPI implements calling.CallingClass 
             action: calling.CallAction;
             session?: calling.CallSession;
             biz_opaque_callback_data?: string;
+            recording?: calling.CallRecordingConfig;
+            transcription?: calling.CallTranscriptionConfig;
         };
 
         if (params.session) body.session = params.session;
         if (params.biz_opaque_callback_data) {
             body.biz_opaque_callback_data = params.biz_opaque_callback_data;
         }
+        if (params.recording) body.recording = params.recording;
+        if (params.transcription) body.transcription = params.transcription;
 
         return this.sendJson(
             HttpMethodsEnum.Post,

@@ -4,6 +4,38 @@
 > Updated: 2026-06-09T06:43:10.860Z
 
 
+## July 3, 2026
+
+- [x] **#418** Documented geographic availability for the In-App Signup API, including the regions where it is not available.
+
+## June 30, 2026
+
+- [x] **#417** Added call recording and transcription for the WhatsApp Business Calling API.
+
+## June 29, 2026
+
+- [x] **#416** Username reservation and adoption go live June 29, 2026; BSUID message-send support and the contact-request button move to July 2026.
+
+## June 26, 2026
+
+- [x] **#415** Added SIP call webhooks support with call_created and terminate events for SIP-enabled numbers.
+
+## June 25, 2026
+
+- [x] **#414** WhatsApp Cloud API Calling voicemail is now generally available.
+
+## June 12, 2026
+
+- [x] **#413** Documented business-side message edits and revokes in the coexistence edit and revoke messages webhooks for business-scoped user IDs.
+
+## June 11, 2026
+
+- [x] **#412** Corrected the Terms of Service URL required in the In-App Signup API policy.tos field. Removed the United Kingdom from the unsupported regions for template analytics and template group analytics.
+
+## June 10, 2026
+
+- [x] **#411** Documented the optional transfer_action request parameter and the new 147005 error code for the WhatsApp Business Username API.
+
 ## June 4, 2026
 
 - [x] **#410** Clarified that deleting a business phone number is not supported via the API; use WhatsApp Manager.
@@ -1035,4 +1067,4 @@
 
 ---
 
-**Progress: 410/411 (100%)**
+**Progress: 419/419 (100%)**

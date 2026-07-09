@@ -4,13 +4,13 @@ import CallingApi from './CallingApi';
 
 export default CallingApi;
 
-export { CallingApi };
-
 export type {
     AcceptCallRequest,
     CallAction,
     CallActionResponse,
+    CallAnnouncementLanguage,
     CallbackPermissionStatus,
+    CallCaptureStatus,
     CallHours,
     CallHoursDay,
     CallHoursStatus,
@@ -23,8 +23,10 @@ export type {
     CallPermissionAction,
     CallPermissionLimit,
     CallPermissionsResponse,
+    CallRecordingConfig,
     CallSdpType,
     CallSession,
+    CallTranscriptionConfig,
     HolidaySchedule,
     InitiateCallRequest,
     InitiateCallResponse,
@@ -37,3 +39,4 @@ export type {
     UpdateCallingSettingsRequest,
     WeeklyOperatingHours,
 } from './types';
+export { CallingApi };

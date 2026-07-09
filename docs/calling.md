@@ -13,6 +13,8 @@ Configure calling, check permissions, and control call sessions.
 - Call actions use `action` values: `connect`, `pre_accept`, `accept`, `reject`, `terminate`.
 - `session` must include `sdp_type` and `sdp`.
 - `biz_opaque_callback_data` is optional for tracking.
+- `initiateCall` and `acceptCall` accept optional per-call `recording` and `transcription` configs (`status`, `purpose`, `announcement_language`). Results arrive via the `call_recording_available` / `call_transcription_available` webhook events on the `calls` field.
+- SIP-enabled numbers receive `call_created` and `terminate` call webhooks; SIP webhooks omit the `session` object since signaling is handled via SIP.
 
 ## Example
 ```ts

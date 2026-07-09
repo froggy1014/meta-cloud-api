@@ -96,10 +96,65 @@ export type CallSession = {
 
 export type CallAction = 'connect' | 'pre_accept' | 'accept' | 'reject' | 'terminate';
 
+export type CallCaptureStatus = 'ENABLED' | 'DISABLED';
+
+/**
+ * Supported announcement locales for call recording / transcription.
+ * The announcement is played to both participants before capture starts.
+ */
+export type CallAnnouncementLanguage =
+    | 'en'
+    | 'en_US'
+    | 'en_AU'
+    | 'en_CA'
+    | 'en_GB'
+    | 'en_IN'
+    | 'en_NZ'
+    | 'nl'
+    | 'fr'
+    | 'de'
+    | 'hi'
+    | 'it'
+    | 'kn'
+    | 'pt'
+    | 'es'
+    | 'es_ES'
+    | 'te'
+    | 'vi'
+    | (string & {});
+
+/**
+ * Per-call recording configuration. When status is ENABLED, `purpose` and
+ * `announcement_language` are required; the recording arrives via the
+ * `call_recording_available` webhook event.
+ */
+export type CallRecordingConfig = {
+    status: CallCaptureStatus;
+    /** Reason for recording, max 250 characters — required when status is ENABLED */
+    purpose?: string;
+    /** Locale of the pre-recording announcement — required when status is ENABLED */
+    announcement_language?: CallAnnouncementLanguage;
+};
+
+/**
+ * Per-call transcription configuration. When status is ENABLED, `purpose` and
+ * `announcement_language` are required; the transcript arrives via the
+ * `call_transcription_available` webhook event.
+ */
+export type CallTranscriptionConfig = {
+    status: CallCaptureStatus;
+    /** Reason for transcription, max 250 characters — required when status is ENABLED */
+    purpose?: string;
+    /** Locale of the pre-transcription announcement — required when status is ENABLED */
+    announcement_language?: CallAnnouncementLanguage;
+};
+
 export type InitiateCallRequest = {
     to: string;
     session: CallSession;
     biz_opaque_callback_data?: string;
+    recording?: CallRecordingConfig;
+    transcription?: CallTranscriptionConfig;
 };
 
 export type PreAcceptCallRequest = {
@@ -111,6 +166,8 @@ export type AcceptCallRequest = {
     call_id: string;
     session?: CallSession;
     biz_opaque_callback_data?: string;
+    recording?: CallRecordingConfig;
+    transcription?: CallTranscriptionConfig;
 };
 
 export type RejectCallRequest = {

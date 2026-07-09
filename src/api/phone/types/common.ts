@@ -230,6 +230,40 @@ export type PhoneNumbersResponse = {
     paging: Paging;
 };
 
+/**
+ * Username status.
+ *
+ * - "approved" — Username has been approved and will be visible when the feature is available
+ * - "reserved" — Username is reserved and approved, but not yet visible to users
+ */
+export type UsernameStatus = 'approved' | 'reserved' | (string & {});
+
+/**
+ * Behavior when the desired username is already in use by another phone number
+ * in the same portfolio.
+ *
+ * - "none"           — Default; do not transfer a username already in use elsewhere
+ * - "force_transfer" — Move the username from another phone number in the portfolio.
+ *   If the API returns error code 147005, retry the request with "force_transfer".
+ */
+export type UsernameTransferAction = 'none' | 'force_transfer';
+
+export type UpdateUsernameRequest = {
+    username: string;
+    /** Optional. Defaults to "none". */
+    transfer_action?: UsernameTransferAction;
+};
+
+export type UsernameResponse = {
+    username?: string;
+    status?: UsernameStatus;
+    [key: string]: unknown;
+};
+
+export type UsernameSuggestionsResponse = {
+    [key: string]: unknown;
+};
+
 export type RequestVerificationCodeRequest = {
     code_method: 'SMS' | 'VOICE';
     language: string;
@@ -299,4 +333,8 @@ export interface PhoneNumberClass {
     updateOfficialBusinessAccountStatus(params: UpdateOfficialBusinessAccountStatusRequest): Promise<ResponseSuccess>;
     getBusinessComplianceInfo(): Promise<BusinessComplianceInfoResponse>;
     updateBusinessComplianceInfo(params: UpdateBusinessComplianceInfoRequest): Promise<ResponseSuccess>;
+    getUsername(): Promise<UsernameResponse>;
+    updateUsername(params: UpdateUsernameRequest): Promise<ResponseSuccess>;
+    deleteUsername(): Promise<ResponseSuccess>;
+    getUsernameSuggestions(): Promise<UsernameSuggestionsResponse>;
 }

@@ -19,9 +19,15 @@ Retrieve phone number details, request verification codes, configure conversatio
 - POST /{PHONE_NUMBER_ID}/official_business_account
 - GET /{PHONE_NUMBER_ID}/business_compliance_info
 - POST /{PHONE_NUMBER_ID}/business_compliance_info
+- GET /{PHONE_NUMBER_ID}/username
+- POST /{PHONE_NUMBER_ID}/username
+- DELETE /{PHONE_NUMBER_ID}/username
+- GET /{PHONE_NUMBER_ID}/username_suggestions
 
 ## Notes
 - Fields can be a comma-separated string or string array.
+- Usernames support an optional `transfer_action` (`none` or `force_transfer`). If the API returns error code `147005`, the username is in use by another number in your portfolio — retry with `force_transfer`.
+- Username `status` is `approved` (visible when the feature is available) or `reserved` (approved but not yet visible).
 - `messaging_limit_tier` is typed as known Meta tiers plus future string values, because Meta has changed tier names over time.
 - Official Business Account application payloads support the website fields Meta publishes in the OpenAPI examples and schema: `website_url` and `business_website_url`.
 - Verification `code_method` is `SMS` or `VOICE`.
@@ -55,6 +61,13 @@ await client.phoneNumbers.setConversationalAutomation({
 });
 
 const throughput = await client.phoneNumbers.getThroughput();
+
+const { username, status } = await client.phoneNumbers.getUsername();
+
+await client.phoneNumbers.updateUsername({
+  username: 'jaspersmarket',
+  transfer_action: 'none',
+});
 ```
 
 ## Example Details
@@ -63,3 +76,4 @@ const throughput = await client.phoneNumbers.getThroughput();
 - `requestVerificationCode` uses `code_method` and `language` to deliver the code.
 - `setConversationalAutomation` toggles `enable_welcome_message` and sets user-facing `prompts`.
 - `getThroughput` reads throughput info for the phone number.
+- `getUsername` / `updateUsername` / `deleteUsername` / `getUsernameSuggestions` manage the phone number's username.
