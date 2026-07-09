@@ -261,6 +261,50 @@ export interface SystemMessage extends BaseMessage {
 }
 
 // ============================================================================
+// Message Types - Edit / Revoke (Coexistence)
+// ============================================================================
+
+/**
+ * Message edit webhook — only available for WhatsApp Business app users (Coexistence).
+ * Business-side edits made in the WhatsApp Business app are identified by
+ * business-scoped user IDs when present.
+ */
+export interface EditMessage extends BaseMessage {
+    type: MessageTypesEnum.Edit;
+    /** Business-scoped user ID of the sender, when the edit originated business-side */
+    from_user_id?: string;
+    /** Parent business-scoped user ID of the sender, when the edit originated business-side */
+    from_parent_user_id?: string;
+    edit: {
+        original_message_id: string;
+        /** The edited message content (text, media with caption, etc.) */
+        message: {
+            context?: {
+                id: string;
+            };
+            type: MessageTypesEnum | string;
+            [key: string]: unknown;
+        };
+    };
+}
+
+/**
+ * Message revoke (delete) webhook — only available for WhatsApp Business app users (Coexistence).
+ * Business-side revokes made in the WhatsApp Business app are identified by
+ * business-scoped user IDs when present.
+ */
+export interface RevokeMessage extends BaseMessage {
+    type: MessageTypesEnum.Revoke;
+    /** Business-scoped user ID of the sender, when the revoke originated business-side */
+    from_user_id?: string;
+    /** Parent business-scoped user ID of the sender, when the revoke originated business-side */
+    from_parent_user_id?: string;
+    revoke: {
+        original_message_id: string;
+    };
+}
+
+// ============================================================================
 // Message Types - Unsupported
 // ============================================================================
 
@@ -295,5 +339,7 @@ export type WhatsAppMessage =
     | ReactionMessage
     | OrderMessage
     | SystemMessage
+    | EditMessage
+    | RevokeMessage
     | UnsupportedMessage
     | GroupMessage;

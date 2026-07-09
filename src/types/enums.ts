@@ -32,6 +32,8 @@ export enum MessageTypesEnum {
     Button = 'button',
     Order = 'order',
     System = 'system',
+    Edit = 'edit',
+    Revoke = 'revoke',
     Unsupported = 'unsupported',
     Unknown = 'unknown',
     /**

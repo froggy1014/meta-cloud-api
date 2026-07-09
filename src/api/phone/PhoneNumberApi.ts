@@ -16,6 +16,10 @@
 // - POST /{PHONE_NUMBER_ID}/official_business_account
 // - GET /{PHONE_NUMBER_ID}/business_compliance_info
 // - POST /{PHONE_NUMBER_ID}/business_compliance_info
+// - GET /{PHONE_NUMBER_ID}/username
+// - POST /{PHONE_NUMBER_ID}/username
+// - DELETE /{PHONE_NUMBER_ID}/username
+// - GET /{PHONE_NUMBER_ID}/username_suggestions
 
 import { BaseAPI } from '../../types/base';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
@@ -387,6 +391,82 @@ export default class PhoneNumberApi extends BaseAPI implements phoneNumber.Phone
             `${this.config[WabaConfigEnum.PhoneNumberId]}/business_compliance_info`,
             this.config[WabaConfigEnum.RequestTimeout],
             JSON.stringify(params),
+        );
+    }
+
+    /**
+     * Get the username currently associated with the business phone number.
+     *
+     * @returns A promise that resolves with the username and its status
+     *   (`'approved'` or `'reserved'`).
+     *
+     * @see {@link https://developers.facebook.com/documentation/business-messaging/whatsapp/business-phone-numbers/usernames/ | Usernames}
+     */
+    async getUsername(): Promise<phoneNumber.UsernameResponse> {
+        return this.sendJson(
+            HttpMethodsEnum.Get,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}/username`,
+            this.config[WabaConfigEnum.RequestTimeout],
+            null,
+        );
+    }
+
+    /**
+     * Adopt or change the username for the business phone number.
+     *
+     * If the desired username is already in use by another phone number in your
+     * portfolio, the API responds with error code `147005`; retry with
+     * `transfer_action: 'force_transfer'` to move the username to this number.
+     *
+     * @param params - The username request.
+     * @param params.username - The desired username.
+     * @param params.transfer_action - Optional. `'none'` (default) or `'force_transfer'`.
+     * @returns A promise that resolves with a success indicator.
+     *
+     * @see {@link https://developers.facebook.com/documentation/business-messaging/whatsapp/business-phone-numbers/usernames/ | Usernames}
+     *
+     * @example
+     * ```ts
+     * await whatsappClient.phoneNumbers.updateUsername({
+     *     username: 'jaspersmarket',
+     *     transfer_action: 'force_transfer',
+     * });
+     * ```
+     */
+    async updateUsername(params: phoneNumber.UpdateUsernameRequest): Promise<ResponseSuccess> {
+        return this.sendJson(
+            HttpMethodsEnum.Post,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}/username`,
+            this.config[WabaConfigEnum.RequestTimeout],
+            JSON.stringify(params),
+        );
+    }
+
+    /**
+     * Delete the username associated with the business phone number.
+     *
+     * @see {@link https://developers.facebook.com/documentation/business-messaging/whatsapp/business-phone-numbers/usernames/ | Usernames}
+     */
+    async deleteUsername(): Promise<ResponseSuccess> {
+        return this.sendJson(
+            HttpMethodsEnum.Delete,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}/username`,
+            this.config[WabaConfigEnum.RequestTimeout],
+            null,
+        );
+    }
+
+    /**
+     * Get username suggestions for the business phone number.
+     *
+     * @see {@link https://developers.facebook.com/documentation/business-messaging/whatsapp/business-phone-numbers/usernames/ | Usernames}
+     */
+    async getUsernameSuggestions(): Promise<phoneNumber.UsernameSuggestionsResponse> {
+        return this.sendJson(
+            HttpMethodsEnum.Get,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}/username_suggestions`,
+            this.config[WabaConfigEnum.RequestTimeout],
+            null,
         );
     }
 }

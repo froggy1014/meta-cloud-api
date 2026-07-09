@@ -61,4 +61,44 @@ describe('Calling API - Unit Tests', () => {
             session: { sdp_type: 'offer', sdp: 'v=0' },
         });
     });
+
+    it('initiates a call with recording and transcription', async () => {
+        await whatsApp.calling.initiateCall({
+            to: '14085551234',
+            session: { sdp_type: 'offer', sdp: 'v=0' },
+            recording: { status: 'ENABLED', purpose: 'Quality assurance', announcement_language: 'en_US' },
+            transcription: { status: 'ENABLED', purpose: 'Quality assurance', announcement_language: 'en_US' },
+        });
+
+        const [method, endpoint, _, body] = mockRequestSend.mock.calls[0];
+        expect(method).toBe('POST');
+        expect(endpoint).toBe(`${whatsApp.requester.phoneNumberId}/calls`);
+        expect(JSON.parse(body)).toEqual({
+            messaging_product: 'whatsapp',
+            to: '14085551234',
+            action: 'connect',
+            session: { sdp_type: 'offer', sdp: 'v=0' },
+            recording: { status: 'ENABLED', purpose: 'Quality assurance', announcement_language: 'en_US' },
+            transcription: { status: 'ENABLED', purpose: 'Quality assurance', announcement_language: 'en_US' },
+        });
+    });
+
+    it('accepts a call with recording configuration', async () => {
+        await whatsApp.calling.acceptCall({
+            call_id: 'wacid.123',
+            session: { sdp_type: 'answer', sdp: 'v=0' },
+            recording: { status: 'ENABLED', purpose: 'Quality assurance', announcement_language: 'en' },
+        });
+
+        const [method, endpoint, _, body] = mockRequestSend.mock.calls[0];
+        expect(method).toBe('POST');
+        expect(endpoint).toBe(`${whatsApp.requester.phoneNumberId}/calls`);
+        expect(JSON.parse(body)).toEqual({
+            messaging_product: 'whatsapp',
+            call_id: 'wacid.123',
+            action: 'accept',
+            session: { sdp_type: 'answer', sdp: 'v=0' },
+            recording: { status: 'ENABLED', purpose: 'Quality assurance', announcement_language: 'en' },
+        });
+    });
 });
