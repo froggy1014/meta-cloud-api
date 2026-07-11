@@ -1,7 +1,7 @@
 {
     "name": "meta-cloud-api",
     "version": "3.1.1",
-    "description": "WhatsApp TypeScript SDK",
+    "description": "TypeScript SDK for the official WhatsApp Cloud API — the maintained alternative to Meta's archived Node.js SDK",
     "type": "module",
     "main": "./dist/index.mjs",
     "types": "./dist/index.d.mts",
@@ -73,7 +73,11 @@
         "business-messaging",
         "chatbot",
         "meta",
-        "waba"
+        "waba",
+        "whatsapp-nodejs-sdk-alternative",
+        "whatsapp-business-platform",
+        "whatsapp-cloud-api-sdk",
+        "meta-business-messaging"
     ],
     "author": "froggy1014",
     "license": "MIT",
