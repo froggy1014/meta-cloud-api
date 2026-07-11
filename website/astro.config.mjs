@@ -33,6 +33,7 @@ export default defineConfig({
                     label: 'Getting Started',
                     items: [
                         { label: 'Introduction', link: '/getting-started/introduction' },
+                        { label: 'Why meta-cloud-api?', link: '/getting-started/why-meta-cloud-api' },
                         { label: 'Installation', link: '/getting-started/installation' },
                         { label: 'Quick Start', link: '/getting-started/quick-start' },
                         { label: 'Configuration', link: '/getting-started/configuration' },

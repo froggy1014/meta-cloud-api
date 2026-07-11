@@ -1,8 +1,8 @@
 <div align="center">
   <img src="public/README.svg" alt="meta-cloud-api" width="120">
   <h1>meta-cloud-api</h1>
-  <p><strong>WhatsApp TypeScript SDK</strong> — type-safe, modular, and production-ready.</p>
-  <p>The complete SDK for the official <a href="https://developers.facebook.com/docs/whatsapp/cloud-api">WhatsApp Business Platform Cloud API</a>.</p>
+  <p><strong>The actively maintained TypeScript SDK for the official WhatsApp Cloud API.</strong></p>
+  <p>Meta <a href="https://github.com/WhatsApp/WhatsApp-Nodejs-SDK">archived their own Node.js SDK</a> in 2023. This one kept going.</p>
 
   [![npm version](https://img.shields.io/npm/v/meta-cloud-api.svg)](https://www.npmjs.com/package/meta-cloud-api)
   [![npm downloads](https://img.shields.io/npm/dm/meta-cloud-api.svg)](https://www.npmjs.com/package/meta-cloud-api)
@@ -43,14 +43,18 @@ await wa.messages.image({ to: '1234567890', link: 'https://example.com/image.png
 
 ## Why meta-cloud-api?
 
-| | meta-cloud-api |
-|---|---|
-| **Type Safety** | Full TypeScript strict mode — every request and response is typed |
-| **17 API Modules** | Messages, Media, Templates, Flows, Groups, Calling, Payments, and more |
-| **Webhook Adapters** | Built-in support for Express.js and Next.js (App Router & Pages Router) |
-| **Modular** | Tree-shakeable imports, use only what you need |
-| **Production Ready** | Error handling, typed error classes, rate limit support |
-| **Official API** | Built on the official WhatsApp Business Platform Cloud API |
+> **Meta's own WhatsApp Node.js SDK has been [archived since June 2023](https://github.com/WhatsApp/WhatsApp-Nodejs-SDK)** — no fixes, no updates, no OpenAPI v23 support. meta-cloud-api is a maintained, type-safe alternative built on the same official Cloud API.
+
+| | meta-cloud-api | Official SDK | Unofficial libraries (whatsapp-web.js, Baileys) |
+|---|---|---|---|
+| API basis | Official Cloud API | Official Cloud API | Reverse-engineered, unofficial |
+| Account ban risk | None | None | Yes — violates WhatsApp ToS |
+| Maintenance | Active (tracks OpenAPI v23) | **Archived since 2023** | Varies |
+| TypeScript | Strict, full request/response types | Partial | Varies |
+| API coverage | 20 modules (Messages, Flows, Calling, Payments, and more) | Messaging-focused | Personal-account features |
+| Webhook adapters | Built-in Express.js + Next.js | Manual | Custom event system |
+
+If you're building on the official Cloud API and don't want to bet on an unmaintained SDK, this is what the archived one would look like if Meta had kept shipping it.
 
 ## API Coverage
 

@@ -1,0 +1,45 @@
+---
+title: Why meta-cloud-api?
+description: How meta-cloud-api compares to Meta's archived Node.js SDK and unofficial WhatsApp libraries
+---
+
+## Comparison
+
+| | meta-cloud-api | Official SDK | Unofficial libraries (whatsapp-web.js, Baileys) |
+|---|---|---|---|
+| API basis | Official Cloud API | Official Cloud API | Reverse-engineered, unofficial |
+| Account ban risk | None | None | Yes — violates WhatsApp ToS |
+| Maintenance | Active (tracks OpenAPI v23) | **Archived since 2023** | Varies |
+| TypeScript | Strict, full request/response types | Partial | Varies |
+| API coverage | 20 modules (Messages, Flows, Calling, Payments, and more) | Messaging-focused | Personal-account features |
+| Webhook adapters | Built-in Express.js + Next.js | Manual | Custom event system |
+
+## The official SDK is archived — what happened?
+
+Meta shipped an official [`WhatsApp-Nodejs-SDK`](https://github.com/WhatsApp/WhatsApp-Nodejs-SDK) for the Cloud API, then stopped maintaining it — the repository has been archived since June 2023, with no updates for new API versions, no bug fixes, no OpenAPI v23 support.
+
+meta-cloud-api is built on the same official Cloud API, tracks the current OpenAPI spec, and ships regular releases. It isn't affiliated with Meta — it's a maintained, type-safe alternative for teams who don't want to depend on unmaintained infrastructure.
+
+## Cloud API vs. unofficial libraries
+
+Libraries like whatsapp-web.js and Baileys automate a personal WhatsApp account by reverse-engineering the WhatsApp Web protocol. They're not built on the official Cloud API, which means Meta can break them at any time, and using them can violate WhatsApp's Terms of Service and risk account bans. The official Cloud API — what meta-cloud-api is built on — has none of that risk, but it's built for business-to-customer messaging (WABA-registered numbers, approved templates, a 24-hour customer service window), not automating a personal account.
+
+If you're building a product or business integration, the official Cloud API is the only path that doesn't carry ban risk. meta-cloud-api exists to make that path as easy to use as the unofficial libraries feel.
+
+## Migrating from the official SDK
+
+The core send-message shape is similar. A minimal migration:
+
+```typescript
+// Official SDK (archived, package name "whatsapp")
+import WhatsApp from 'whatsapp';
+const wa = new WhatsApp(senderPhoneNumber);
+await wa.messages.text({ body: 'Hello!' }, recipientNumber);
+
+// meta-cloud-api
+import WhatsApp from 'meta-cloud-api';
+const wa = new WhatsApp({ accessToken, phoneNumberId });
+await wa.messages.text({ to: recipientNumber, body: 'Hello!' });
+```
+
+See the [Quick Start](/getting-started/quick-start) guide for full setup, or the [API Reference](/api/messages) for every endpoint.
