@@ -4,6 +4,10 @@
 > Updated: 2026-06-09T06:43:10.860Z
 
 
+## July 15, 2026
+
+- [ ] **#419** Added the Phone Number First flow to a subset of business customers in the default Embedded Signup flow.
+
 ## July 3, 2026
 
 - [x] **#418** Documented geographic availability for the In-App Signup API, including the regions where it is not available.
@@ -1067,4 +1071,4 @@
 
 ---
 
-**Progress: 419/419 (100%)**
+**Progress: 419/420 (100%)**
