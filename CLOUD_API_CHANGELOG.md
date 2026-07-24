@@ -4,6 +4,10 @@
 > Updated: 2026-06-09T06:43:10.860Z
 
 
+## July 20, 2026
+
+- [ ] **#420** Added instructions for requesting a review of a Direct Send template flagged as marketing.
+
 ## July 15, 2026
 
 - [ ] **#419** Added the Phone Number First flow to a subset of business customers in the default Embedded Signup flow.
@@ -1071,4 +1075,4 @@
 
 ---
 
-**Progress: 419/420 (100%)**
+**Progress: 419/421 (100%)**
