@@ -1,8 +1,16 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-06-09T06:43:10.860Z
+> Updated: 2026-07-27T00:00:00.000Z
 
+
+## July 20, 2026
+
+- [x] **#420** Added instructions for requesting a review of a Direct Send template flagged as marketing.
+
+## July 15, 2026
+
+- [x] **#419** Added the Phone Number First flow to a subset of business customers in the default Embedded Signup flow.
 
 ## July 3, 2026
 
@@ -1067,4 +1075,4 @@
 
 ---
 
-**Progress: 419/419 (100%)**
+**Progress: 421/421 (100%)**
