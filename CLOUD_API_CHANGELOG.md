@@ -4,6 +4,14 @@
 > Updated: 2026-07-27T00:00:00.000Z
 
 
+## July 31, 2026
+
+- [ ] **#422** WhatsApp Direct Send utility messaging is now generally available.
+
+## July 30, 2026
+
+- [ ] **#421** Documented the Call on WhatsApp (voice call) button for Direct Send.
+
 ## July 20, 2026
 
 - [x] **#420** Added instructions for requesting a review of a Direct Send template flagged as marketing.
@@ -1075,4 +1083,4 @@
 
 ---
 
-**Progress: 421/421 (100%)**
+**Progress: 421/423 (100%)**
