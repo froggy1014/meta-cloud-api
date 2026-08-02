@@ -16,6 +16,14 @@ export const Category = {
 } as const;
 export type CategoryType = (typeof Category)[keyof typeof Category];
 
+// ---- MessageCategory (Direct Send) ----
+export const MessageCategory = {
+    Authentication: 'authentication',
+    Service: 'service',
+    Utility: 'utility',
+} as const;
+export type MessageCategoryType = (typeof MessageCategory)[keyof typeof MessageCategory];
+
 // ---- TemplateStatus ----
 export const TemplateStatus = {
     Approved: 'APPROVED',
@@ -90,6 +98,7 @@ export const InteractiveTypes = {
     LocationRequest: 'location_request_message',
     AddressMessage: 'address_message',
     Flow: 'flow',
+    VoiceCall: 'voice_call',
 } as const;
 export type InteractiveTypesType = (typeof InteractiveTypes)[keyof typeof InteractiveTypes];
 

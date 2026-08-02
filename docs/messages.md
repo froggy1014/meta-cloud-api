@@ -11,6 +11,7 @@ Send text, media, template, interactive, and reaction messages through the Cloud
 - `to` must be an E.164 formatted number string.
 - `type` must match the body key (e.g., `type: "text"` with a `text` object).
 - Use `context.message_id` to reply to a specific message.
+- Add `category: 'utility' | 'authentication'` to send business-initiated messages without a pre-approved template. See [Direct Send](./direct-send.md).
 
 ## Example
 ```ts

@@ -55,6 +55,7 @@ export default defineConfig({
                             label: 'Messaging',
                             items: [
                                 { label: 'Messages', link: '/api/messages' },
+                                { label: 'Direct Send', link: '/api/direct-send' },
                                 { label: 'Media', link: '/api/media' },
                                 { label: 'Templates', link: '/api/templates' },
                                 { label: 'Marketing Messages', link: '/api/marketing-messages' },

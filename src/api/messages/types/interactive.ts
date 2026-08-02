@@ -140,6 +140,36 @@ type CallPermissionRequestInteractiveObject = {
     action: CallPermissionRequestActionObject;
 };
 
+type VoiceCallParameters = {
+    /** Button label. Maximum 20 characters. Defaults to "Call on WhatsApp" when omitted. */
+    display_text?: string;
+    /** Active duration in minutes, 1 to 43200 (30 days). Defaults to 10080 (7 days). */
+    ttl_minutes?: number;
+};
+
+type VoiceCallActionObject = {
+    name: 'voice_call';
+    parameters?: VoiceCallParameters;
+};
+
+/**
+ * "Call on WhatsApp" voice call button, a Direct Send interactive type.
+ *
+ * Send it on its own with a top-level `category: 'utility'`; it cannot be combined
+ * with CTA URL or reply buttons, and footers are not allowed. Calling must be
+ * enabled on the business phone number first, otherwise the send fails with
+ * error `138000`.
+ *
+ * @see {@link https://developers.facebook.com/documentation/business-messaging/whatsapp/direct-send/supported-message-types | Direct Send supported message types}
+ */
+type VoiceCallInteractiveObject = {
+    type: InteractiveTypesEnum.VoiceCall | 'voice_call';
+    body: SimpleTextObject;
+    /** Text header only, maximum 60 characters. */
+    header?: HeaderObject & { type: 'text' };
+    action: VoiceCallActionObject;
+};
+
 type CtaUrlParameters = {
     display_text: string;
     url: string;
@@ -302,6 +332,7 @@ export type InteractiveObject =
     | CatalogMessageInteractiveObject
     | CallPermissionRequestInteractiveObject
     | CtaUrlInteractiveObject
+    | VoiceCallInteractiveObject
     | CarouselInteractiveObject
     | LocationRequestInteractiveObject
     | AddressMessageInteractiveObject

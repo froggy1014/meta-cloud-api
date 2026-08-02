@@ -13,6 +13,13 @@ export interface StatusWebhook {
     recipient_participant_id?: string;
     recipient_identity_key_hash?: string;
     biz_opaque_callback_data?: string;
+    /**
+     * ID of the template used to send a Direct Send message.
+     * Present only on statuses for messages sent with a `category` field.
+     *
+     * @see {@link https://developers.facebook.com/documentation/business-messaging/whatsapp/direct-send/supported-message-types | Direct Send}
+     */
+    template_id?: string;
     conversation?: {
         id: string;
         expiration_timestamp?: string;
