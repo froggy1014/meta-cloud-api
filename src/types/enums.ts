@@ -4,6 +4,21 @@ export enum CategoryEnum {
     Utility = 'UTILITY',
 }
 
+/**
+ * Direct Send message categories, sent as the top-level `category` field on
+ * `POST /{PHONE_NUMBER_ID}/messages`.
+ *
+ * Omitting the field is equivalent to `Service` and keeps the existing
+ * free-form send behavior (outside Direct Send).
+ *
+ * @see {@link https://developers.facebook.com/documentation/business-messaging/whatsapp/direct-send/send-utility-and-authentication-messages | Direct Send}
+ */
+export enum MessageCategoryEnum {
+    Authentication = 'authentication',
+    Service = 'service',
+    Utility = 'utility',
+}
+
 export enum TemplateStatusEnum {
     Approved = 'APPROVED',
     Pending = 'PENDING',
@@ -75,6 +90,7 @@ export enum InteractiveTypesEnum {
     LocationRequest = 'location_request_message',
     AddressMessage = 'address_message',
     Flow = 'flow',
+    VoiceCall = 'voice_call',
 }
 
 export enum ButtonPositionEnum {

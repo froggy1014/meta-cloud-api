@@ -1,6 +1,7 @@
 # API Examples Index
 
 - [Messages](./messages.md)
+- [Direct Send](./direct-send.md)
 - [Media](./media.md)
 - [Templates](./templates.md)
 - [Flows](./flows.md)

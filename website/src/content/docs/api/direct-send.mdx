@@ -1,0 +1,123 @@
+---
+title: Direct Send
+description: Send business-initiated utility and authentication messages without pre-creating a template
+---
+
+Send business-initiated utility and authentication messages through the standard messages endpoint — Meta generates and matches the template behind the scenes.
+
+**Official Documentation**: [WhatsApp Direct Send](https://developers.facebook.com/documentation/business-messaging/whatsapp/direct-send/)
+
+## Overview
+
+Direct Send removes the pre-approved template step from business-initiated messaging. Add a top-level `category` to any supported message and the Cloud API creates or matches a template for you:
+
+- **Utility messages**: Generally available since July 31, 2026
+- **Authentication messages**: Access restricted, text only
+- **Business-named templates**: Pin attribution with `direct_send_config.template_name`
+- **Call on WhatsApp**: Voice call button that lets users tap to call your business
+
+## Endpoints
+
+```
+POST /{PHONE_NUMBER_ID}/messages
+```
+
+## Important Notes
+
+:::caution[Category Values]
+`category` accepts `'utility'`, `'authentication'`, or `'service'`. Omitting it is equivalent to `'service'` and keeps the existing free-form send behavior. Any other value (for example `marketing`) returns error `100`.
+:::
+
+:::note[Unsupported Formats]
+Marketing messages, PSTN phone number buttons, address, audio, contacts, location, sticker, and reaction messages are not supported. `preview_url` is ignored — Direct Send messages do not render a URL preview.
+:::
+
+## Quick Start
+
+```typescript
+import WhatsApp, { MessageCategoryEnum } from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+});
+
+await client.messages.text({
+    to: '15551234567',
+    body: 'Hi Jane, your order #12345 has shipped and arrives on March 20.',
+    category: MessageCategoryEnum.Utility,
+});
+```
+
+## Business-Named Templates
+
+Supply `directSendConfig.template_name` to control which template a message is attributed to. Direct Send creates or reuses a template with that exact name instead of auto-matching.
+
+```typescript
+await client.messages.text({
+    to: '15551234567',
+    body: 'Your order has shipped.',
+    category: 'utility',
+    directSendConfig: { template_name: 'order_shipment_update' },
+});
+```
+
+:::caution[Naming Rules]
+Names must match `^[a-z0-9_]+$`, be at most 512 characters, and be unique within the WABA. Utility category only — authentication is not supported. Reusing a name that belongs to a manually created template returns error `132021` on the error webhook.
+:::
+
+## Call on WhatsApp (Voice Call) Button
+
+The voice call button lets a WhatsApp user tap to start a voice call to your business phone number. `interactiveVoiceCall` sends it with `category: 'utility'` automatically.
+
+```typescript
+import { InteractiveTypesEnum } from 'meta-cloud-api';
+
+await client.messages.interactiveVoiceCall({
+    to: '15551234567',
+    body: {
+        type: InteractiveTypesEnum.VoiceCall,
+        body: { text: 'Call our support team for help with your order.' },
+        action: {
+            name: 'voice_call',
+            parameters: { display_text: 'Call Support', ttl_minutes: 1440 },
+        },
+    },
+});
+```
+
+| Parameter | Required | Description |
+| --- | --- | --- |
+| `interactive.type` | Yes | Must be `voice_call` |
+| `interactive.body.text` | Yes | Message body, max 1024 characters |
+| `interactive.header` | No | Text header only, max 60 characters. Footers are not allowed |
+| `action.name` | Yes | Must be `voice_call` |
+| `action.parameters.display_text` | No | Button label, max 20 characters. Defaults to "Call on WhatsApp" |
+| `action.parameters.ttl_minutes` | No | 1 to 43200. Defaults to 10080 (7 days) |
+
+:::caution[Prerequisites]
+Enable calling on the phone number with `client.calling.updateCallingSettings({ calling: { status: 'ENABLED' } })` and subscribe the app to the `calls` webhook field. Otherwise the send fails with error `138000`.
+:::
+
+Exactly one voice call button is allowed per message and it cannot be combined with CTA URL or reply buttons.
+
+## Status Webhooks
+
+Direct Send adds a `template_id` field to the message status webhook, identifying the template used to send the message.
+
+```typescript
+{
+    id: 'wamid.ABC123',
+    status: 'delivered',
+    timestamp: '1754000000',
+    recipient_id: '15551234567',
+    template_id: '1234567890',
+}
+```
+
+## Related
+
+- [Messages API](/api/messages) - Send standard Cloud API messages
+- [Calling API](/api/calling) - Enable calling and handle call webhooks
+- [Marketing Messages API](/api/marketing-messages) - Send marketing templates

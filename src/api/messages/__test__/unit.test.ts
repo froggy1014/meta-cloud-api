@@ -1,6 +1,11 @@
 import { WhatsApp } from '@core/whatsapp';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { type ComponentTypesEnum, InteractiveTypesEnum, LanguagesEnum } from '../../../types/enums';
+import {
+    type ComponentTypesEnum,
+    InteractiveTypesEnum,
+    LanguagesEnum,
+    MessageCategoryEnum,
+} from '../../../types/enums';
 import type { ContactObject, InteractiveObject, MessageRequestParams, MessageTemplateObject } from '../types';
 
 describe('Messages API - Unit Tests', () => {
@@ -522,6 +527,86 @@ describe('Messages API - Unit Tests', () => {
                 status: 'typing',
                 message_id: 'msg_test_123',
                 typing_indicator: { type: 'text' },
+            });
+        });
+    });
+
+    describe('Direct Send', () => {
+        it('should send a utility text message with the category field', async () => {
+            await whatsApp.messages.text({
+                to: '1234567890',
+                body: 'Hi Jane, your order #12345 has been shipped.',
+                category: MessageCategoryEnum.Utility,
+            });
+
+            const [_, __, ___, body] = mockRequestSend.mock.calls[0];
+
+            expect(JSON.parse(body)).toMatchObject({
+                messaging_product: 'whatsapp',
+                recipient_type: 'individual',
+                to: '1234567890',
+                type: 'text',
+                text: { body: 'Hi Jane, your order #12345 has been shipped.' },
+                category: 'utility',
+            });
+        });
+
+        it('should send direct_send_config with a business-named template', async () => {
+            await whatsApp.messages.text({
+                to: '1234567890',
+                body: 'Your order has shipped.',
+                category: 'utility',
+                directSendConfig: { template_name: 'order_shipment_update' },
+            });
+
+            const [_, __, ___, body] = mockRequestSend.mock.calls[0];
+
+            expect(JSON.parse(body)).toMatchObject({
+                category: 'utility',
+                direct_send_config: { template_name: 'order_shipment_update' },
+            });
+        });
+
+        it('should omit category and direct_send_config when not requested', async () => {
+            await whatsApp.messages.text({
+                to: '1234567890',
+                body: 'Hello, World!',
+            });
+
+            const [_, __, ___, body] = mockRequestSend.mock.calls[0];
+            const requestBody = JSON.parse(body);
+
+            expect(requestBody).not.toHaveProperty('category');
+            expect(requestBody).not.toHaveProperty('direct_send_config');
+        });
+
+        it('should send a voice call button message with utility category by default', async () => {
+            await whatsApp.messages.interactiveVoiceCall({
+                to: '1234567890',
+                body: {
+                    type: InteractiveTypesEnum.VoiceCall,
+                    body: { text: 'Call our support team for help with your order.' },
+                    action: {
+                        name: 'voice_call',
+                        parameters: { display_text: 'Call Support', ttl_minutes: 1440 },
+                    },
+                },
+            });
+
+            const [_, __, ___, body] = mockRequestSend.mock.calls[0];
+
+            expect(JSON.parse(body)).toMatchObject({
+                to: '1234567890',
+                type: 'interactive',
+                category: 'utility',
+                interactive: {
+                    type: 'voice_call',
+                    body: { text: 'Call our support team for help with your order.' },
+                    action: {
+                        name: 'voice_call',
+                        parameters: { display_text: 'Call Support', ttl_minutes: 1440 },
+                    },
+                },
             });
         });
     });

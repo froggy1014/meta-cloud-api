@@ -1,8 +1,16 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-07-27T00:00:00.000Z
+> Updated: 2026-08-03T00:00:00.000Z
 
+
+## July 31, 2026
+
+- [x] **#422** WhatsApp Direct Send utility messaging is now generally available.
+
+## July 30, 2026
+
+- [x] **#421** Documented the Call on WhatsApp (voice call) button for Direct Send.
 
 ## July 20, 2026
 
@@ -1075,4 +1083,4 @@
 
 ---
 
-**Progress: 421/421 (100%)**
+**Progress: 423/423 (100%)**
