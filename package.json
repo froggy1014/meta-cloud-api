@@ -1,6 +1,6 @@
 {
     "name": "meta-cloud-api",
-    "version": "3.2.0",
+    "version": "3.3.0",
     "description": "TypeScript SDK for the official WhatsApp Cloud API — the maintained alternative to Meta's archived Node.js SDK",
     "type": "module",
     "main": "./dist/index.mjs",
