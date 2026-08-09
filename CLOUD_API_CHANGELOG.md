@@ -6,7 +6,7 @@
 
 ## August 4, 2026
 
-- [ ] **#423** Added Standby Webhooks documentation for passively observing conversation activity when Meta Business Agent is the active handler.
+- [x] **#423** Added Standby Webhooks documentation for passively observing conversation activity when Meta Business Agent is the active handler.
 
 ## July 31, 2026
 
@@ -1087,4 +1087,4 @@
 
 ---
 
-**Progress: 423/424 (100%)**
+**Progress: 424/424 (100%)**
