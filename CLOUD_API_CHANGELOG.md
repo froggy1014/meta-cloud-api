@@ -4,6 +4,10 @@
 > Updated: 2026-08-03T00:00:00.000Z
 
 
+## August 4, 2026
+
+- [x] **#423** Added Standby Webhooks documentation for passively observing conversation activity when Meta Business Agent is the active handler.
+
 ## July 31, 2026
 
 - [x] **#422** WhatsApp Direct Send utility messaging is now generally available.
@@ -1083,4 +1087,4 @@
 
 ---
 
-**Progress: 423/423 (100%)**
+**Progress: 424/424 (100%)**

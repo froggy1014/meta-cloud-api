@@ -1,4 +1,6 @@
-import type { WebhookMetadata } from './common';
+import type { WebhookContact, WebhookMetadata } from './common';
+import type { WhatsAppMessage } from './message';
+import type { StatusWebhook } from './status';
 
 // ============================================================================
 // messaging_handovers Webhook Types
@@ -48,19 +50,84 @@ export interface MessagingHandoversWebhookValue {
 // standby Webhook Types
 // @see https://developers.facebook.com/documentation/business-messaging/whatsapp/webhooks/reference/standby
 //
-// Delivered when the app is not the current thread owner (handover protocol).
-// Subscribe to the `standby` webhook field.
+// Delivered when your app is subscribed to the `standby` field, the business has
+// enabled Meta Business Agent on the number and granted your app standby
+// permissions, and your app is NOT the active handler. It lets a passive app
+// observe conversation activity handled by another app (e.g. Meta Business Agent).
 //
-// Sample payload (from Meta webhook test panel):
-// { "messaging_product": "whatsapp" }
+// The payload wraps the event one level deeper than normal webhooks: the message,
+// message-echo, or status objects live under `value.standby.{messages|message_echoes|statuses}`
+// instead of directly under `value`. A given standby notification carries exactly
+// one of those arrays.
 //
-// Note: The sample payload is minimal. Additional fields may be present
-// in production depending on the event that triggered the standby notification.
+// You will NOT receive standby webhooks when you are the active handler (you get
+// regular `messages`-field webhooks instead) or for messages your own app sent.
 // ============================================================================
+
+/**
+ * Flow definition attached to a standby message echo, present only for flow
+ * message echoes.
+ */
+export interface StandbyMessageEchoFlow {
+    id: string;
+    name: string;
+    status: string;
+    categories: string[];
+}
+
+/**
+ * A single echoed outbound message observed while in standby. Carries the raw
+ * Send Message API request body used by the active handler, not rendered content.
+ */
+export interface StandbyMessageEcho {
+    /** WhatsApp message ID (wamid.*) of the echoed outbound message */
+    id: string;
+    /** Unix timestamp (seconds, as a string) of when the message was sent */
+    timestamp: string;
+    /**
+     * The exact Send Message API request body used to send the message, e.g.
+     * `{ messaging_product, to, recipient_type?, type, [type]: {...}, context? }`.
+     * For template messages the send-time variable values live here under `template`.
+     */
+    message: {
+        messaging_product: 'whatsapp';
+        recipient_type?: string;
+        to: string;
+        type: string;
+        context?: {
+            message_id: string;
+        };
+        [key: string]: unknown;
+    };
+    /**
+     * Full unhydrated template definition (layout with placeholders). Present only
+     * for template message echoes, alongside `message`.
+     */
+    template?: Record<string, unknown>;
+    /** Full flow definition. Present only for flow message echoes, alongside `message`. */
+    flow?: StandbyMessageEchoFlow;
+}
+
+/**
+ * The standby event payload nested under `value.standby`. Contains exactly one of
+ * `messages`, `message_echoes`, or `statuses` (with `contacts` alongside `messages`).
+ */
+export interface StandbyEvent {
+    /** Contact profiles for the users in an inbound standby message event */
+    contacts?: WebhookContact[];
+    /** Inbound messages received while your app is not the active handler */
+    messages?: WhatsAppMessage[];
+    /** Echoes of outbound messages sent by the active handler (e.g. Meta Business Agent) */
+    message_echoes?: StandbyMessageEcho[];
+    /** Delivery/read status updates for messages sent by the active handler */
+    statuses?: StatusWebhook[];
+}
 
 export interface StandbyValue {
     messaging_product: 'whatsapp';
-    [key: string]: unknown;
+    metadata: WebhookMetadata;
+    /** The standby event payload; carries exactly one event array */
+    standby: StandbyEvent;
 }
 
 export interface StandbyWebhookValue {
