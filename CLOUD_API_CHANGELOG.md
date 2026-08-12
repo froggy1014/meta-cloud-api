@@ -4,6 +4,10 @@
 > Updated: 2026-08-03T00:00:00.000Z
 
 
+## August 11, 2026
+
+- [ ] **#424** Added the user_changed_user_id system message and corrected BSUID change notification documentation &#x2014; user_id_update is not a subscribable webhook field.
+
 ## August 4, 2026
 
 - [x] **#423** Added Standby Webhooks documentation for passively observing conversation activity when Meta Business Agent is the active handler.
@@ -1087,4 +1091,4 @@
 
 ---
 
-**Progress: 424/424 (100%)**
+**Progress: 424/425 (100%)**
