@@ -4,6 +4,10 @@
 > Updated: 2026-08-03T00:00:00.000Z
 
 
+## August 17, 2026
+
+- [ ] **#425** Documented user_id and parent_user_id on the user_preferences webhook, and clarified that preferences are never applied at the parent BSUID level.
+
 ## August 11, 2026
 
 - [ ] **#424** Added the user_changed_user_id system message and corrected BSUID change notification documentation &#x2014; user_id_update is not a subscribable webhook field.
@@ -1091,4 +1095,4 @@
 
 ---
 
-**Progress: 424/425 (100%)**
+**Progress: 424/426 (100%)**
