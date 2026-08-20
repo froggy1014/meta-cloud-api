@@ -4,6 +4,10 @@
 > Updated: 2026-08-03T00:00:00.000Z
 
 
+## August 19, 2026
+
+- [ ] **#426** Added WhatsApp Business app login, a beta guide for onboarding coexistence customers without a Facebook account.
+
 ## August 17, 2026
 
 - [ ] **#425** Documented user_id and parent_user_id on the user_preferences webhook, and clarified that preferences are never applied at the parent BSUID level.
@@ -1095,4 +1099,4 @@
 
 ---
 
-**Progress: 424/426 (100%)**
+**Progress: 424/427 (99%)**
