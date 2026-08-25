@@ -4,6 +4,10 @@
 > Updated: 2026-08-03T00:00:00.000Z
 
 
+## August 24, 2026
+
+- [ ] **#427** Added a read-only contact book membership check so you can confirm whether a phone number is stored for a business-scoped user ID without retrieving it.
+
 ## August 19, 2026
 
 - [ ] **#426** Added WhatsApp Business app login, a beta guide for onboarding coexistence customers without a Facebook account.
@@ -1099,4 +1103,4 @@
 
 ---
 
-**Progress: 424/427 (99%)**
+**Progress: 424/428 (99%)**
