@@ -4,6 +4,7 @@ import {
     BusinessProfileApi,
     CallingApi,
     CommerceApi,
+    ContactBookApi,
     EncryptionApi,
     FlowApi,
     GroupsApi,
@@ -44,6 +45,7 @@ export default class WhatsApp {
     business: BusinessApi;
     calling: CallingApi;
     commerce: CommerceApi;
+    contactBook: ContactBookApi;
     groups: GroupsApi;
     marketingMessages: MarketingMessagesApi;
     messageHistory: MessageHistoryApi;
@@ -78,6 +80,7 @@ export default class WhatsApp {
         this.business = new BusinessApi(this.config, this.requester);
         this.calling = new CallingApi(this.config, this.requester);
         this.commerce = new CommerceApi(this.config, this.requester);
+        this.contactBook = new ContactBookApi(this.config, this.requester);
         this.groups = new GroupsApi(this.config, this.requester);
         this.marketingMessages = new MarketingMessagesApi(this.config, this.requester);
         this.messageHistory = new MessageHistoryApi(this.config, this.requester);

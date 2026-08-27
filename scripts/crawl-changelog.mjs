@@ -44,6 +44,14 @@ const res = await fetch(RSS);
 if (!res.ok) throw new Error(`RSS fetch failed: ${res.status}`);
 const xml = await res.text();
 
+// RSS descriptions arrive HTML-escaped (e.g. `&#x2014;` for an em dash).
+const decodeEntities = (text) =>
+  text
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(+dec))
+    .replace(/&(lt|gt|quot|apos|nbsp);/g, (_, name) => ({ lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ' })[name])
+    .replace(/&amp;/g, '&');
+
 const tag = (src, name) => src.match(new RegExp(`<${name}>([\\s\\S]*?)</${name}>`))?.[1]?.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/, '$1').trim();
 const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)]
   .map((m) => ({
@@ -51,7 +59,8 @@ const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)]
     desc: tag(m[1], 'description')?.trim(),
     link: tag(m[1], 'link'),
   }))
-  .filter((e) => e.date && e.desc);
+  .filter((e) => e.date && e.desc)
+  .map((e) => ({ ...e, desc: decodeEntities(e.desc) }));
 
 console.log(`Fetched ${items.length} RSS entries`);
 
@@ -60,12 +69,18 @@ const content = existsSync(FILE) ? readFileSync(FILE, 'utf-8') : '';
 const idMatches = [...content.matchAll(/\*\*#(\d+)\*\*/g)];
 const maxId = idMatches.length > 0 ? Math.max(...idMatches.map((m) => +m[1])) : -1;
 
-// Find newest existing date
-const dateMatches = [...content.matchAll(/^## (.+)$/gm)];
-const newestDate = dateMatches.length > 0 ? Math.max(...dateMatches.map((m) => new Date(m[1]).getTime())) : 0;
+// Truncate the same way entry lines are written, so dedupe compares like with like.
+const truncate = (desc) => (desc.length > 500 ? desc.slice(0, 500) + '...' : desc);
+const normalize = (desc) => decodeEntities(truncate(desc)).replace(/\s+/g, ' ').trim().toLowerCase();
 
-// Filter to strictly newer entries
-const newItems = items.filter((e) => new Date(e.date).getTime() > newestDate);
+// Dedupe against the descriptions already recorded, not against the newest date.
+// The RSS feed is a rolling window, so a back-dated entry can surface after a newer
+// one was already merged; a date-only filter would drop it permanently.
+const recorded = new Set(
+  [...content.matchAll(/^- \[[ x]\] \*\*#\d+\*\* (.+)$/gm)].map((m) => normalize(m[1])),
+);
+
+const newItems = items.filter((e) => !recorded.has(normalize(e.desc)));
 if (newItems.length === 0) {
   console.log('No new entries.');
   process.exit(0);
@@ -86,22 +101,47 @@ if (PR_BODY_FILE) {
   writeFileSync(PR_BODY_FILE, buildPrBody(newLines));
 }
 
-// Prepend new entries grouped by date
-let insert = '';
-let prevDate = null;
+// Merge new entries into the document, newest date first. Entries whose date section
+// already exists are added to it; back-dated entries get a section at the right spot.
+const groups = [];
 for (const { date, line } of newLines) {
-  if (date !== prevDate) {
-    insert += `\n## ${date}\n\n`;
-    prevDate = date;
-  }
-  insert += line + '\n';
+  const group = groups.find((g) => g.date === date);
+  if (group) group.lines.push(line);
+  else groups.push({ date, time: new Date(date).getTime(), lines: [line] });
 }
 
-// Insert after header (before first ## or at end of header)
-const headerEnd = content.indexOf('\n## ');
-const updated = headerEnd !== -1
-  ? content.slice(0, headerEnd) + insert + content.slice(headerEnd)
-  : content + insert;
+const headings = (src) =>
+  [...src.matchAll(/^## (.+)$/gm)].map((m) => ({
+    date: m[1].trim(),
+    time: new Date(m[1].trim()).getTime(),
+    index: m.index,
+    end: m.index + m[0].length,
+  }));
+
+// Offsets are recomputed from the live string on every insert, so order does not matter.
+let updated = content;
+for (const group of groups) {
+  const existing = headings(updated);
+  const same = existing.find((h) => h.date === group.date);
+
+  if (same) {
+    // Add to the top of the existing date section, just below its heading.
+    const at = same.end + (updated.slice(same.end).match(/^\n+/)?.[0].length ?? 0);
+    updated = updated.slice(0, at) + group.lines.join('\n') + '\n' + updated.slice(at);
+    continue;
+  }
+
+  // Sections run newest first, so the first older heading is the insertion point.
+  const older = existing.find((h) => h.time < group.time);
+  if (older) {
+    updated =
+      updated.slice(0, older.index) + `## ${group.date}\n\n${group.lines.join('\n')}\n\n` + updated.slice(older.index);
+  } else {
+    const headerEnd = updated.indexOf('\n## ');
+    const block = `\n## ${group.date}\n\n${group.lines.join('\n')}\n`;
+    updated = headerEnd !== -1 ? updated.slice(0, headerEnd) + block + updated.slice(headerEnd) : updated + block;
+  }
+}
 
 // Update progress line
 const total = (updated.match(/^- \[[ x]\]/gm) || []).length;

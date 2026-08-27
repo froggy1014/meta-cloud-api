@@ -251,12 +251,29 @@ export interface OrderMessage extends BaseMessage {
 // Message Types - System
 // ============================================================================
 
+/**
+ * System message webhook (identity changes).
+ *
+ * - `user_changed_number` — the user's phone number changed; `wa_id` holds the new number.
+ * - `user_identity_changed` — the user's identity (profile) changed.
+ * - `user_changed_user_id` — the user's business-scoped user ID (BSUID) changed;
+ *   `user_id` / `parent_user_id` hold the new BSUID / parent BSUID.
+ *
+ * Note: there is no subscribable `user_id_update` webhook field. BSUID changes are
+ * delivered as these `messages` field system messages.
+ */
 export interface SystemMessage extends BaseMessage {
     type: MessageTypesEnum.System;
     system: {
+        /** Human-readable description, e.g. "User A changed from <OLD_BSUID> to <NEW_BSUID>" */
         body: string;
+        /** New WhatsApp ID of the user */
         wa_id: string;
-        type: 'user_changed_number';
+        /** New business-scoped user ID, present for `user_changed_user_id` */
+        user_id?: string;
+        /** New parent business-scoped user ID, present for `user_changed_user_id` */
+        parent_user_id?: string;
+        type: 'user_changed_number' | 'user_identity_changed' | 'user_changed_user_id';
     };
 }
 

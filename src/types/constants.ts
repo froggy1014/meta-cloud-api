@@ -212,8 +212,14 @@ export type WebhookTypesType = (typeof WebhookTypes)[keyof typeof WebhookTypes];
 
 // ---- SystemChangeTypes ----
 export const SystemChangeTypes = {
+    /** @deprecated Meta renamed this to `user_changed_number`. Use `UserChangedNumber`. */
     CustomerChangedNumber: 'customer_changed_number',
+    /** @deprecated Meta renamed this to `user_identity_changed`. Use `UserIdentityChanged`. */
     CustomerIdentityChanged: 'customer_identity_changed',
+    UserChangedNumber: 'user_changed_number',
+    UserIdentityChanged: 'user_identity_changed',
+    /** The user's business-scoped user ID (BSUID) changed. */
+    UserChangedUserId: 'user_changed_user_id',
 } as const;
 export type SystemChangeTypesType = (typeof SystemChangeTypes)[keyof typeof SystemChangeTypes];
 

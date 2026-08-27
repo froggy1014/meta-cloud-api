@@ -256,6 +256,27 @@ describe('Template API - Unit Tests', () => {
             expect(parsedBody.components[0].example.body_text_named_params).toHaveLength(2);
             expect(parsedBody.components[0].example.body_text_named_params[0].param_name).toBe('customer_name');
         });
+
+        it('should create a marketing template with a max price bid_spec', async () => {
+            const templateData: TemplateRequestBody = {
+                name: 'max_price_template',
+                language: LanguagesEnum.English,
+                category: CategoryEnum.Marketing,
+                bid_spec: { bid_amount: 25000 },
+                components: [
+                    {
+                        type: 'BODY',
+                        text: 'Our summer sale starts today.',
+                    },
+                ],
+            };
+
+            await whatsApp.templates.createTemplate(templateData);
+
+            const [_, __, ___, body] = mockRequestSend.mock.calls[0];
+
+            expect(JSON.parse(body).bid_spec).toEqual({ bid_amount: 25000 });
+        });
     });
 
     describe('Error Handling', () => {

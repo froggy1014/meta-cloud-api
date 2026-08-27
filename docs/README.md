@@ -13,6 +13,7 @@
 - [QR Codes](./qr-codes.md)
 - [WABA](./waba.md)
 - [Block Users](./block-users.md)
+- [Contact Book](./contact-book.md)
 - [Calling](./calling.md)
 - [Groups](./groups.md)
 - [Marketing Messages](./marketing-messages.md)
