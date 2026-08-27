@@ -4,6 +4,10 @@
 > Updated: 2026-08-03T00:00:00.000Z
 
 
+## August 25, 2026
+
+- [ ] **#434** The contact book DELETE endpoint now returns deleted:false instead of an error for unknown, invalid, or other-portfolio BSUIDs.
+
 ## August 24, 2026
 
 - [ ] **#427** Added a read-only contact book membership check so you can confirm whether a phone number is stored for a business-scoped user ID without retrieving it.
@@ -1124,4 +1128,4 @@
 
 ---
 
-**Progress: 429/434 (99%)**
+**Progress: 429/435 (99%)**
