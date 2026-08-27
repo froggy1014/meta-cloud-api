@@ -47,4 +47,52 @@ describe('Marketing Messages API - Unit Tests', () => {
             product_policy: 'CLOUD_API_FALLBACK',
         });
     });
+
+    it('sends to a business-scoped user ID via recipient', async () => {
+        await whatsApp.marketingMessages.sendTemplateMessage({
+            recipient: 'US.13491208655302741918',
+            template: {
+                name: 'marketing_template',
+                language: { policy: 'deterministic', code: LanguagesEnum.English_US },
+            },
+        });
+
+        const [, , , body] = mockRequestSend.mock.calls[0];
+        expect(JSON.parse(body)).toEqual({
+            messaging_product: 'whatsapp',
+            recipient_type: 'individual',
+            recipient: 'US.13491208655302741918',
+            type: 'template',
+            template: {
+                name: 'marketing_template',
+                language: { policy: 'deterministic', code: 'en_US' },
+            },
+        });
+    });
+
+    it('rejects sending with both to and recipient', async () => {
+        await expect(
+            whatsApp.marketingMessages.sendTemplateMessage({
+                to: '15551234567',
+                recipient: 'US.13491208655302741918',
+                template: {
+                    name: 'marketing_template',
+                    language: { policy: 'deterministic', code: LanguagesEnum.English_US },
+                },
+            }),
+        ).rejects.toThrow('Provide exactly one of "to" (phone number) or "recipient" (BSUID).');
+        expect(mockRequestSend).not.toHaveBeenCalled();
+    });
+
+    it('rejects sending with neither to nor recipient', async () => {
+        await expect(
+            whatsApp.marketingMessages.sendTemplateMessage({
+                template: {
+                    name: 'marketing_template',
+                    language: { policy: 'deterministic', code: LanguagesEnum.English_US },
+                },
+            }),
+        ).rejects.toThrow('Provide exactly one of "to" (phone number) or "recipient" (BSUID).');
+        expect(mockRequestSend).not.toHaveBeenCalled();
+    });
 });

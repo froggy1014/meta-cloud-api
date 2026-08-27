@@ -10,22 +10,35 @@
 
 ## August 19, 2026
 
-- [ ] **#426** Added WhatsApp Business app login, a beta guide for onboarding coexistence customers without a Facebook account.
+- [x] **#426** Added WhatsApp Business app login, a beta guide for onboarding coexistence customers without a Facebook account.
+
+## August 18, 2026
+
+- [x] **#433** Documented that phone number migration is not supported for accounts on the new WhatsApp account model.
 
 ## August 17, 2026
 
-- [ ] **#425** Documented user_id and parent_user_id on the user_preferences webhook, and clarified that preferences are never applied at the parent BSUID level.
+- [x] **#425** Documented user_id and parent_user_id on the user_preferences webhook, and clarified that preferences are never applied at the parent BSUID level.
 
 ## August 11, 2026
 
-- [ ] **#424** Added the user_changed_user_id system message and corrected BSUID change notification documentation &#x2014; user_id_update is not a subscribable webhook field.
+- [x] **#424** Added the user_changed_user_id system message and corrected BSUID change notification documentation — user_id_update is not a subscribable webhook field.
+
+## August 5, 2026
+
+- [ ] **#432** You can now control whether the max price template experience appears in WhatsApp Manager for a WhatsApp Business Account.
 
 ## August 4, 2026
 
 - [x] **#423** Added Standby Webhooks documentation for passively observing conversation activity when Meta Business Agent is the active handler.
 
+## August 3, 2026
+
+- [ ] **#431** Documented incoming product messages in the interactive messages webhook.
+
 ## July 31, 2026
 
+- [x] **#430** Solution Partners can now allowlist up to 100 end-businesses for the max price feature during the Limited Beta period, increased from 15.
 - [x] **#422** WhatsApp Direct Send utility messaging is now generally available.
 
 ## July 30, 2026
@@ -35,6 +48,10 @@
 ## July 20, 2026
 
 - [x] **#420** Added instructions for requesting a review of a Direct Send template flagged as marketing.
+
+## July 17, 2026
+
+- [ ] **#429** You can now duplicate an approved marketing template to run identical content at a different max price.
 
 ## July 15, 2026
 
@@ -51,6 +68,10 @@
 ## June 29, 2026
 
 - [x] **#416** Username reservation and adoption go live June 29, 2026; BSUID message-send support and the contact-request button move to July 2026.
+
+## June 28, 2026
+
+- [ ] **#428** The GET response for listing allowlisted end-businesses now includes end_business_name, the display name of each enrolled end-business, so Solution Partners no longer need a separate lookup per ID.
 
 ## June 26, 2026
 
@@ -1103,4 +1124,4 @@
 
 ---
 
-**Progress: 424/428 (99%)**
+**Progress: 429/434 (99%)**

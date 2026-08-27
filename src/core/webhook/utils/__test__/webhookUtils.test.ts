@@ -1,7 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 
+import { MessageTypesEnum } from '../../../../types/enums';
 import type WhatsApp from '../../../whatsapp/WhatsApp';
 import type { WebhookPayload } from '../../types';
+import type { SystemMessage } from '../../types/message';
+import type { UserPreferencesWebhookValue } from '../../types/messaging';
 import { processWebhookMessages } from '../webhookUtils';
 
 const createRequest = (payload: WebhookPayload): { request: Request; rawBody: string } => {
@@ -116,5 +119,114 @@ describe('processWebhookMessages', () => {
         expect(filteredPayload.entry[0]?.changes[0]?.field).toBe('message_template_status_update');
         expect(context.rawBody).toBe(rawBody);
         expect(JSON.parse(context.rawBody).entry[0].changes).toHaveLength(2);
+    });
+});
+
+describe('BSUID identity and preference webhooks', () => {
+    it('routes a user_changed_user_id system message with the new BSUIDs', async () => {
+        const payload = {
+            object: 'whatsapp_business_account',
+            entry: [
+                {
+                    id: 'waba-id',
+                    changes: [
+                        {
+                            field: 'messages',
+                            value: {
+                                messaging_product: 'whatsapp',
+                                metadata: {
+                                    display_phone_number: '15551234567',
+                                    phone_number_id: 'phone-number-id',
+                                },
+                                messages: [
+                                    {
+                                        id: 'message-id',
+                                        from: '15557654321',
+                                        timestamp: '1234567890',
+                                        type: 'system',
+                                        system: {
+                                            body: 'User A changed from US.1111111 to US.2222222',
+                                            wa_id: '15557654321',
+                                            user_id: 'US.2222222',
+                                            parent_user_id: 'US.9999999',
+                                            type: 'user_changed_user_id',
+                                        },
+                                    },
+                                ],
+                            },
+                        },
+                    ],
+                },
+            ],
+        } as unknown as WebhookPayload;
+        const { request } = createRequest(payload);
+        const systemHandler = vi.fn();
+
+        await processWebhookMessages(request, whatsapp, {
+            messageHandlers: new Map([[MessageTypesEnum.System, systemHandler]]),
+        });
+
+        expect(systemHandler).toHaveBeenCalledOnce();
+        const processed = systemHandler.mock.calls[0]?.[1] as { message: SystemMessage };
+        expect(processed.message.system).toEqual({
+            body: 'User A changed from US.1111111 to US.2222222',
+            wa_id: '15557654321',
+            user_id: 'US.2222222',
+            parent_user_id: 'US.9999999',
+            type: 'user_changed_user_id',
+        });
+    });
+
+    it('routes a user_preferences change carrying user_id and parent_user_id', async () => {
+        const payload = {
+            object: 'whatsapp_business_account',
+            entry: [
+                {
+                    id: 'waba-id',
+                    changes: [
+                        {
+                            field: 'user_preferences',
+                            value: {
+                                messaging_product: 'whatsapp',
+                                metadata: {
+                                    display_phone_number: '15551234567',
+                                    phone_number_id: 'phone-number-id',
+                                },
+                                user_preferences: [
+                                    {
+                                        wa_id: '15557654321',
+                                        user_id: 'US.2222222',
+                                        parent_user_id: 'US.9999999',
+                                        detail: 'User requested to resume marketing messages',
+                                        category: 'marketing_messages',
+                                        value: 'resume',
+                                        timestamp: 1731705721,
+                                    },
+                                ],
+                            },
+                        },
+                    ],
+                },
+            ],
+        } as unknown as WebhookPayload;
+        const { request } = createRequest(payload);
+        const userPreferencesHandler = vi.fn();
+
+        await processWebhookMessages(request, whatsapp, {
+            messageHandlers: new Map(),
+            userPreferencesHandler,
+        });
+
+        expect(userPreferencesHandler).toHaveBeenCalledOnce();
+        const processed = userPreferencesHandler.mock.calls[0]?.[1] as {
+            wabaId: string;
+            value: UserPreferencesWebhookValue['value'];
+        };
+        expect(processed.wabaId).toBe('waba-id');
+        expect(processed.value.user_preferences[0]).toMatchObject({
+            user_id: 'US.2222222',
+            parent_user_id: 'US.9999999',
+            value: 'resume',
+        });
     });
 });

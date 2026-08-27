@@ -157,11 +157,33 @@ export type ComponentTypes =
     | TemplateLimitedTimeOffer
     | TemplateCarousel;
 
+/**
+ * Max price ("bid") configuration for a marketing template.
+ *
+ * Max price is set per template, and templates carrying it must be sent through
+ * the Marketing Messages API (`POST /{PHONE_NUMBER_ID}/marketing_messages`).
+ * Sending one through the Cloud API `/messages` endpoint fails with error
+ * `131061`; sending one to a BSUID recipient fails with error `131062`.
+ * Omitting `bid_spec` leaves the template on standard rate card pricing.
+ *
+ * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/marketing-messages/send-marketing-messages/
+ */
+export type TemplateBidSpec = {
+    /**
+     * Maximum price per 1,000 message deliveries, in the smallest unit of the
+     * WABA's currency. Multiply the desired per-delivery price by 1,000 after
+     * converting it to the smallest unit.
+     */
+    bid_amount: number;
+};
+
 export type TemplateRequestBody = GeneralRequestBody & {
     name: string;
     language: LanguagesEnum;
     category?: CategoryEnum;
     components?: ComponentTypes[];
+    /** Max price configuration. Marketing templates only, MM API sends only. */
+    bid_spec?: TemplateBidSpec;
 };
 
 export type TemplateResponse = {

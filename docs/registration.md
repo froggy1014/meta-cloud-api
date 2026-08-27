@@ -10,6 +10,7 @@ Register or deregister a phone number with a PIN.
 ## Notes
 - PIN must be a 6-digit numeric string.
 - Data localization region is optional but recommended when required.
+- Phone number migration between WhatsApp Business Accounts is **not supported** for accounts on the new WhatsApp account model (documented August 18, 2026). Register the number on the destination WABA instead. The SDK exposes no phone number migration endpoint.
 
 ## Example
 ```ts

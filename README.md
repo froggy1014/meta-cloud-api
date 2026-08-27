@@ -75,6 +75,7 @@ wa.registration          // Phone registration
 wa.twoStepVerification   // 2FA management
 wa.encryption            // End-to-end encryption
 wa.blockUsers            // Block/unblock users
+wa.contactBook           // Delete a BSUID contact book entry
 wa.waba                  // WhatsApp Business Account management
 ```
 

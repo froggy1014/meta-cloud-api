@@ -4,6 +4,7 @@ export * from './blockUsers';
 export * from './business';
 export * from './calling';
 export * from './commerce';
+export * from './contactBook';
 export * from './encryption';
 export * from './flow';
 export * from './groups';

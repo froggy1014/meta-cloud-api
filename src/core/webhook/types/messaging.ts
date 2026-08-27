@@ -149,6 +149,7 @@ export interface StandbyWebhookValue {
 //   "user_preferences": [{
 //     "wa_id": "16315551181",
 //     "user_id": "US.1234567",
+//     "parent_user_id": "US.7654321",
 //     "detail": "User requested to stop marketing messages",
 //     "category": "marketing_messages",
 //     "value": "stop",
@@ -157,13 +158,26 @@ export interface StandbyWebhookValue {
 //   }],
 //   "contacts": [{ "profile": { "name": "...", "username": "..." }, "wa_id": "...", "user_id": "..." }]
 // }
+//
+// Preferences are always scoped to the individual business-scoped user ID (`user_id`).
+// They are never applied at the parent BSUID (`parent_user_id`) level, so an opt-out on
+// one BSUID does not opt out the other BSUIDs sharing the same parent.
 // ============================================================================
 
 export interface UserPreferenceEntry {
-    /** WhatsApp ID of the user */
-    wa_id: string;
-    /** Meta user ID (e.g. "US.1234567") */
-    user_id: string;
+    /** WhatsApp ID of the user. May be absent when only BSUIDs are shared. */
+    wa_id?: string;
+    /**
+     * Business-scoped user ID the preference applies to (e.g. "US.1234567").
+     * The preference is always scoped to this ID.
+     */
+    user_id?: string;
+    /**
+     * Parent business-scoped user ID of the user, when the user is enrolled in a
+     * parent BSUID. Informational only — preferences are never applied at the
+     * parent BSUID level.
+     */
+    parent_user_id?: string;
     /** Human-readable description of the preference change */
     detail: string;
     /**
@@ -173,9 +187,9 @@ export interface UserPreferenceEntry {
     category: 'marketing_messages' | string;
     /**
      * New preference value.
-     * Known value: "stop" (user opted out)
+     * Known values: "stop" (user opted out), "resume" (user opted back in)
      */
-    value: 'stop' | string;
+    value: 'stop' | 'resume' | string;
     /** Unix timestamp of when the preference was changed */
     timestamp: number;
     /** Signup ID associated with the preference, if applicable */
@@ -189,10 +203,12 @@ export interface UserPreferencesContact {
         /** WhatsApp username, if available */
         username?: string;
     };
-    /** WhatsApp ID of the user */
-    wa_id: string;
-    /** Meta user ID */
+    /** WhatsApp ID of the user. May be absent when only BSUIDs are shared. */
+    wa_id?: string;
+    /** Business-scoped user ID of the user */
     user_id?: string;
+    /** Parent business-scoped user ID of the user, when enrolled */
+    parent_user_id?: string;
 }
 
 export interface UserPreferencesValue {
