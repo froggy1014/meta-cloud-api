@@ -1,7 +1,7 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-08-03T00:00:00.000Z
+> Updated: 2026-08-29T00:00:00.000Z
 
 
 ## August 25, 2026
