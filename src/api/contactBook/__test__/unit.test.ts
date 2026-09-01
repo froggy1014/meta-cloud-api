@@ -31,6 +31,20 @@ describe('Contact Book API - Unit Tests', () => {
         expect(result.deleted).toBe(true);
     });
 
+    it('reports deleted:false for a BSUID with no contact book entry', async () => {
+        mockRequestSend.mockResolvedValueOnce({
+            messaging_product: 'whatsapp',
+            success: true,
+            deleted: false,
+        });
+
+        const result = await whatsApp.contactBook.deleteEntry({ bsuid: 'US.00000000000000000000' });
+
+        expect(mockRequestSend).toHaveBeenCalledTimes(1);
+        expect(result.success).toBe(true);
+        expect(result.deleted).toBe(false);
+    });
+
     it('rejects a delete without a BSUID', async () => {
         await expect(whatsApp.contactBook.deleteEntry({ bsuid: '' })).rejects.toThrow(
             '"bsuid" is required to delete a contact book entry.',

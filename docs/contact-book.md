@@ -11,6 +11,7 @@ It is scoped to the business portfolio, not to a single phone number, and only c
 ## Notes
 - `bsuid` must use the standard BSUID format (e.g. `US.13491208655302741918`).
 - After a delete, the user's phone number and BSUID stop appearing in webhook payloads for every business phone number in the portfolio — unless the number is still in the 30-day cache, or a new interaction recreates the entry.
+- Deleting is idempotent: since August 25, 2026 an unknown, malformed, or other-portfolio BSUID resolves with `deleted: false` instead of raising an API error. Read `result.deleted` to tell a real removal from a no-op.
 - A read-only membership check (confirming a phone number is stored for a BSUID without retrieving it) was announced on August 24, 2026 but is not yet published in the public reference, so the SDK does not expose it.
 
 ## Example
@@ -32,4 +33,4 @@ console.log(result.deleted);
 
 ## Example Details
 - `deleteEntry` sends `messaging_product=whatsapp` and `bsuid` as query parameters and throws a `WhatsAppValidationError` when `bsuid` is missing.
-- The response is `{ messaging_product, success, deleted }`.
+- The response is `{ messaging_product, success, deleted }`; `deleted` is `false` when no entry matched the BSUID.
