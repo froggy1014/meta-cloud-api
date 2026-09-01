@@ -1,8 +1,20 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-08-03T00:00:00.000Z
+> Updated: 2026-09-01T07:35:35.819Z
 
+
+## August 31, 2026
+
+- [ ] **#436** Documented a known issue where call recordings and transcripts can be cut short when a WhatsApp user changes networks.
+
+## August 29, 2026
+
+- [ ] **#435** Clarified when to send messaging_account_id on Messages API calls — the rule is now stated as a single ambiguity condition rather than a fixed list of scenarios.
+
+## August 25, 2026
+
+- [x] **#434** The contact book DELETE endpoint now returns deleted:false instead of an error for unknown, invalid, or other-portfolio BSUIDs.
 
 ## August 24, 2026
 
@@ -1124,4 +1136,4 @@
 
 ---
 
-**Progress: 429/434 (99%)**
+**Progress: 429/437 (98%)**

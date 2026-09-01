@@ -147,7 +147,9 @@ for (const group of groups) {
 const total = (updated.match(/^- \[[ x]\]/gm) || []).length;
 const done = (updated.match(/^- \[x\]/gm) || []).length;
 const pct = total > 0 ? Math.round((done / total) * 100) : 0;
-const final = updated.replace(/\*\*Progress: .+\*\*/, `**Progress: ${done}/${total} (${pct}%)**`);
+const final = updated
+  .replace(/\*\*Progress: .+\*\*/, `**Progress: ${done}/${total} (${pct}%)**`)
+  .replace(/^> Updated: .+$/m, `> Updated: ${new Date().toISOString()}`);
 
 writeFileSync(FILE, final);
 console.log(`Added ${newItems.length} new entries (${total} total)`);

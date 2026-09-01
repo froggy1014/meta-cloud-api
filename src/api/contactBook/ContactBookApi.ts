@@ -38,14 +38,19 @@ export default class ContactBookApi extends BaseAPI implements contactBook.Conta
      * the number is still in the 30-day cache, or a new interaction recreates the
      * entry.
      *
+     * Unknown, malformed, and other-portfolio BSUIDs no longer raise an API error
+     * (changed August 25, 2026): the request resolves with `deleted: false`, so
+     * check that flag instead of relying on a thrown error to detect a miss.
+     *
      * @param params - Delete parameters.
      * @param params.bsuid - BSUID of the entry to delete (e.g. "US.13491208655302741918").
-     * @returns Response reporting whether the entry was deleted.
+     * @returns Response reporting whether the entry was deleted (`deleted: false` when no entry matched).
      * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/business-scoped-user-ids/
      *
      * @example
      * ```typescript
      * const result = await client.contactBook.deleteEntry({ bsuid: 'US.13491208655302741918' });
+     * // true when an entry was removed, false when the BSUID had no entry in the portfolio
      * console.log(result.deleted);
      * ```
      */
