@@ -257,12 +257,12 @@ describe('Template API - Unit Tests', () => {
             expect(parsedBody.components[0].example.body_text_named_params[0].param_name).toBe('customer_name');
         });
 
-        it('should create a marketing template with a max price bid_spec', async () => {
+        it('should create a marketing template with a max price optimization_spec', async () => {
             const templateData: TemplateRequestBody = {
                 name: 'max_price_template',
                 language: LanguagesEnum.English,
                 category: CategoryEnum.Marketing,
-                bid_spec: { bid_amount: 25000 },
+                optimization_spec: { bid_strategy: 'LOWEST_COST_WITH_BID_CAP', bid_amount: 25000 },
                 components: [
                     {
                         type: 'BODY',
@@ -275,7 +275,27 @@ describe('Template API - Unit Tests', () => {
 
             const [_, __, ___, body] = mockRequestSend.mock.calls[0];
 
-            expect(JSON.parse(body).bid_spec).toEqual({ bid_amount: 25000 });
+            expect(JSON.parse(body).optimization_spec).toEqual({
+                bid_strategy: 'LOWEST_COST_WITH_BID_CAP',
+                bid_amount: 25000,
+            });
+        });
+    });
+
+    describe('Max price switching', () => {
+        it('should switch an existing template onto max price via updateTemplate', async () => {
+            await whatsApp.templates.updateTemplate('template_123', {
+                optimization_spec: { bid_strategy: 'LOWEST_COST_WITH_BID_CAP', bid_amount: 25000 },
+            });
+
+            const [method, path, __, body] = mockRequestSend.mock.calls[0];
+
+            expect(method).toBe('POST');
+            expect(path).toBe('template_123');
+            expect(JSON.parse(body).optimization_spec).toEqual({
+                bid_strategy: 'LOWEST_COST_WITH_BID_CAP',
+                bid_amount: 25000,
+            });
         });
     });
 

@@ -1,11 +1,12 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-09-01T07:35:35.819Z
+> Updated: 2026-09-02T13:29:53.791Z
 
 
 ## August 31, 2026
 
+- [x] **#437** You can now switch eligible marketing message templates between rate card pricing and max price without creating a new template.
 - [ ] **#436** Documented a known issue where call recordings and transcripts can be cut short when a WhatsApp user changes networks.
 
 ## August 29, 2026
@@ -1136,4 +1137,4 @@
 
 ---
 
-**Progress: 429/437 (98%)**
+**Progress: 431/438 (98%)**

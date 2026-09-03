@@ -86,6 +86,12 @@ export default class TemplateApi extends BaseAPI implements TemplateClass {
      * an approved template will resubmit it for review, changing its status back
      * to `PENDING`.
      *
+     * Marketing templates also accept `optimization_spec` here. As of
+     * August 31, 2026, an eligible template can be switched between standard rate
+     * card pricing and max price without creating a new template, and an existing
+     * max price can be updated in place. Approved templates allow up to 100 edits
+     * per hour and 2,400 per day.
+     *
      * **Endpoint:** `POST /{TEMPLATE_ID}`
      *
      * @param templateId - The unique identifier of the template to update
@@ -93,11 +99,17 @@ export default class TemplateApi extends BaseAPI implements TemplateClass {
      * @returns A promise resolving to a success response (`{ success: true }`)
      *
      * @see {@link https://developers.facebook.com/docs/whatsapp/cloud-api/reference/message-templates | Message Templates Reference}
+     * @see {@link https://developers.facebook.com/documentation/business-messaging/whatsapp/marketing-messages/pricing | Max price for marketing messages}
      *
      * @example
      * ```ts
      * await client.template.updateTemplate('template_id_123', {
      *   components: [{ type: 'BODY', text: 'Updated greeting: Hello {{1}}!' }],
+     * });
+     *
+     * // Switch an eligible marketing template onto max price (or change the cap).
+     * await client.template.updateTemplate('template_id_123', {
+     *   optimization_spec: { bid_strategy: 'LOWEST_COST_WITH_BID_CAP', bid_amount: 25000 },
      * });
      * ```
      */
