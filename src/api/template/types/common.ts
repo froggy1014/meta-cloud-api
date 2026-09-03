@@ -164,16 +164,31 @@ export type ComponentTypes =
  * the Marketing Messages API (`POST /{PHONE_NUMBER_ID}/marketing_messages`).
  * Sending one through the Cloud API `/messages` endpoint fails with error
  * `131061`; sending one to a BSUID recipient fails with error `131062`.
- * Omitting `bid_spec` leaves the template on standard rate card pricing.
+ * Omitting `optimization_spec` leaves the template on standard rate card pricing.
  *
- * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/marketing-messages/send-marketing-messages/
+ * As of August 31, 2026, eligible templates can be switched between rate card
+ * pricing and max price without creating a new template — send
+ * `optimization_spec` to `POST /{TEMPLATE_ID}` ({@link TemplateClass.updateTemplate}).
+ *
+ * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/marketing-messages/pricing
  */
-export type TemplateBidSpec = {
+export type TemplateOptimizationSpec = {
+    /** Bid strategy. Only `LOWEST_COST_WITH_BID_CAP` is currently accepted. */
+    bid_strategy: 'LOWEST_COST_WITH_BID_CAP';
     /**
      * Maximum price per 1,000 message deliveries, in the smallest unit of the
      * WABA's currency. Multiply the desired per-delivery price by 1,000 after
      * converting it to the smallest unit.
      */
+    bid_amount: number;
+};
+
+/**
+ * @deprecated Meta deprecated `bid_spec` on template create/update on
+ * July 31, 2026. Use {@link TemplateOptimizationSpec} with `optimization_spec`.
+ */
+export type TemplateBidSpec = {
+    /** Maximum price per 1,000 message deliveries, in the WABA currency's smallest unit. */
     bid_amount: number;
 };
 
@@ -183,6 +198,10 @@ export type TemplateRequestBody = GeneralRequestBody & {
     category?: CategoryEnum;
     components?: ComponentTypes[];
     /** Max price configuration. Marketing templates only, MM API sends only. */
+    optimization_spec?: TemplateOptimizationSpec;
+    /**
+     * @deprecated Deprecated by Meta on July 31, 2026. Use `optimization_spec`.
+     */
     bid_spec?: TemplateBidSpec;
 };
 
@@ -193,6 +212,8 @@ export type TemplateResponse = {
     category: CategoryEnum;
     name: string;
     components: ComponentTypes[];
+    /** Max price configuration, returned for templates created with one. */
+    optimization_spec?: TemplateOptimizationSpec;
 };
 
 export type TemplateGetParams = {

@@ -12,10 +12,13 @@ Send marketing template messages via `/marketing_messages`.
 - `message_activity_sharing` controls message analytics sharing.
 - `product_policy` accepts `'CLOUD_API_FALLBACK'` or `'STRICT'`.
 
-### Max price (`bid_spec`)
-- Max price is set per template, at creation time, via `bid_spec.bid_amount` on `client.templates.createTemplate`. `bid_amount` is the maximum price per **1,000** deliveries, in the smallest unit of the WABA's currency — multiply the desired per-delivery price by 1,000 after converting it.
-- Omitting `bid_spec` leaves the template on standard rate card pricing.
-- Templates carrying `bid_spec` must be sent through `/marketing_messages`. Sending one through the Cloud API `/messages` endpoint fails with error `131061`; sending one to a BSUID `recipient` fails with error `131062`.
+### Max price (`optimization_spec`)
+- Max price is set per template via `optimization_spec` on `client.templates.createTemplate`. It takes `bid_strategy` (only `'LOWEST_COST_WITH_BID_CAP'` is accepted) and `bid_amount`, the maximum price per **1,000** deliveries in the smallest unit of the WABA's currency — multiply the desired per-delivery price by 1,000 after converting it.
+- `bid_spec` was the original field name on template create/update; Meta deprecated it on July 31, 2026. The SDK still types it, marked deprecated — use `optimization_spec`.
+- Omitting `optimization_spec` leaves the template on standard rate card pricing.
+- Since August 31, 2026 an eligible template can be switched between rate card pricing and max price **without creating a new template** — pass `optimization_spec` to `client.templates.updateTemplate(templateId, ...)` (`POST /{TEMPLATE_ID}`). The same call updates the cap on a template that already has one. Approved templates allow up to 100 edits per hour and 2,400 per day.
+- Read the current setting back with `client.templates.getTemplate(templateId)`; the response carries `optimization_spec`.
+- Templates carrying a max price must be sent through `/marketing_messages`. Sending one through the Cloud API `/messages` endpoint fails with error `131061`; sending one to a BSUID `recipient` fails with error `131062`.
 - Limited Beta: a Solution Partner can enable the max price feature for up to 100 end-businesses (raised from 15 on July 31, 2026). Enabling end-businesses, duplicating an approved template at a different max price, and the WABA-level toggle for the WhatsApp Manager max price experience are not in the public reference yet, so the SDK does not expose them.
 
 ## Example
@@ -29,12 +32,17 @@ const client = new WhatsApp({
 });
 
 // Optional: cap the price at $0.25 per delivery — 25000 cents per 1,000 deliveries.
-await client.templates.createTemplate({
+const promo = await client.templates.createTemplate({
   name: 'promo_template',
   language: LanguagesEnum.English_US,
   category: CategoryEnum.Marketing,
-  bid_spec: { bid_amount: 25000 },
+  optimization_spec: { bid_strategy: 'LOWEST_COST_WITH_BID_CAP', bid_amount: 25000 },
   components: [{ type: 'BODY', text: 'Our summer sale starts today.' }],
+});
+
+// Switch an eligible template onto max price, or raise the cap, in place.
+await client.templates.updateTemplate(promo.id, {
+  optimization_spec: { bid_strategy: 'LOWEST_COST_WITH_BID_CAP', bid_amount: 40000 },
 });
 
 await client.marketingMessages.sendTemplateMessage({

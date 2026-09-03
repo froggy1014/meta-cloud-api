@@ -22,6 +22,7 @@ export type {
     TemplateHeader,
     TemplateHeaderExample,
     TemplateLimitedTimeOffer,
+    TemplateOptimizationSpec,
     TemplateRequestBody,
     TemplateResponse,
     URLButton,

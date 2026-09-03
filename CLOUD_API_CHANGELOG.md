@@ -6,7 +6,7 @@
 
 ## August 31, 2026
 
-- [ ] **#437** You can now switch eligible marketing message templates between rate card pricing and max price without creating a new template.
+- [x] **#437** You can now switch eligible marketing message templates between rate card pricing and max price without creating a new template.
 - [ ] **#436** Documented a known issue where call recordings and transcripts can be cut short when a WhatsApp user changes networks.
 
 ## August 29, 2026
@@ -1137,4 +1137,4 @@
 
 ---
 
-**Progress: 430/438 (98%)**
+**Progress: 431/438 (98%)**
