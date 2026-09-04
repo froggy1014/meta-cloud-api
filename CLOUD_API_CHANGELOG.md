@@ -1,8 +1,12 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-09-02T13:29:53.791Z
+> Updated: 2026-09-04T13:22:42.272Z
 
+
+## September 3, 2026
+
+- [ ] **#438** Updated the Embedded Signup default flow for v4 with the Phone Number First screen order and how Coexistence starts.
 
 ## August 31, 2026
 
@@ -1137,4 +1141,4 @@
 
 ---
 
-**Progress: 431/438 (98%)**
+**Progress: 431/439 (98%)**
