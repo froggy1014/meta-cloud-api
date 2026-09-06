@@ -6,7 +6,7 @@
 
 ## September 3, 2026
 
-- [ ] **#438** Updated the Embedded Signup default flow for v4 with the Phone Number First screen order and how Coexistence starts.
+- [x] **#438** Updated the Embedded Signup default flow for v4 with the Phone Number First screen order and how Coexistence starts.
 
 ## August 31, 2026
 
@@ -1141,4 +1141,4 @@
 
 ---
 
-**Progress: 431/439 (98%)**
+**Progress: 432/439 (98%)**
