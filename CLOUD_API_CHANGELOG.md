@@ -1,8 +1,16 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-09-04T13:22:42.272Z
+> Updated: 2026-09-09T13:37:34.302Z
 
+
+## September 8, 2026
+
+- [ ] **#440** Updated the Embedded Signup v2 deprecation date to October 8, 2026.
+
+## September 7, 2026
+
+- [ ] **#439** Solution Partners can now allowlist up to 500 end-businesses for the max price feature during the Limited Beta period, increased from 100.
 
 ## September 3, 2026
 
@@ -1141,4 +1149,4 @@
 
 ---
 
-**Progress: 432/439 (98%)**
+**Progress: 432/441 (98%)**
