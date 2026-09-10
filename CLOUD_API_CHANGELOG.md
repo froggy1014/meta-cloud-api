@@ -1,11 +1,12 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-09-09T13:37:34.302Z
+> Updated: 2026-09-10T13:28:42.805Z
 
 
 ## September 8, 2026
 
+- [ ] **#441** Updated the Embedded Signup v2 deprecation date to October 8, 2026, and added the Prepaid billing guide for accounts in India.
 - [x] **#440** Updated the Embedded Signup v2 deprecation date to October 8, 2026.
 
   SDK impact: Documented the v4 migration deadline in [Registration](docs/registration.md#embedded-signup-integrations). Onboarding integration change only; no SDK endpoint, payload, or webhook change.
@@ -1153,4 +1154,4 @@
 
 ---
 
-**Progress: 434/441 (98%)**
+**Progress: 434/442 (98%)**
