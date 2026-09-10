@@ -12,6 +12,10 @@ Register or deregister a phone number with a PIN.
 - Data localization region is optional but recommended when required.
 - Phone number migration between WhatsApp Business Accounts is **not supported** for accounts on the new WhatsApp account model (documented August 18, 2026). Register the number on the destination WABA instead. The SDK exposes no phone number migration endpoint.
 
+### Embedded Signup integrations
+- Embedded Signup v2 is scheduled for deprecation on **October 8, 2026** (date updated September 8, 2026). Migrate your Embedded Signup integration to v4 before that date to avoid disruption; see Meta's [Versions guide](https://developers.facebook.com/documentation/business-messaging/whatsapp/embedded-signup/versions/).
+- Embedded Signup is configured in your onboarding integration, outside this SDK. This deprecation-date change does not change the SDK's phone number registration endpoints or payloads.
+
 ## Example
 ```ts
 import WhatsApp, { DataLocalizationRegionEnum } from 'meta-cloud-api';

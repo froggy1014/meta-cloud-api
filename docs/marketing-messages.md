@@ -19,7 +19,7 @@ Send marketing template messages via `/marketing_messages`.
 - Since August 31, 2026 an eligible template can be switched between rate card pricing and max price **without creating a new template** — pass `optimization_spec` to `client.templates.updateTemplate(templateId, ...)` (`POST /{TEMPLATE_ID}`). The same call updates the cap on a template that already has one. Approved templates allow up to 100 edits per hour and 2,400 per day.
 - Read the current setting back with `client.templates.getTemplate(templateId)`; the response carries `optimization_spec`.
 - Templates carrying a max price must be sent through `/marketing_messages`. Sending one through the Cloud API `/messages` endpoint fails with error `131061`; sending one to a BSUID `recipient` fails with error `131062`.
-- Limited Beta: a Solution Partner can enable the max price feature for up to 100 end-businesses (raised from 15 on July 31, 2026). Enabling end-businesses, duplicating an approved template at a different max price, and the WABA-level toggle for the WhatsApp Manager max price experience are not in the public reference yet, so the SDK does not expose them.
+- Limited Beta: a Solution Partner can enable the max price feature for up to 500 end-businesses (raised from 100 on September 7, 2026; see the [official changelog](https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog/?filter=September+7%2C+2026)). The SDK does not expose end-business enrollment, approved-template duplication at a different max price, or the WABA-level toggle for the WhatsApp Manager max price experience.
 
 ## Example
 ```ts
