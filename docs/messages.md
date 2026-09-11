@@ -13,6 +13,17 @@ Send text, media, template, interactive, and reaction messages through the Cloud
 - Use `context.message_id` to reply to a specific message.
 - Add `category: 'utility' | 'authentication'` to send business-initiated messages without a pre-approved template. See [Direct Send](./direct-send.md).
 
+## Prepaid billing (India)
+Accounts in India that fund a WhatsApp Business account by UPI are on prepaid billing (documented September 8, 2026). Funding and balance live in the Billing Hub — there is no API to add funds or read the balance — but the send path behaves differently:
+
+- A send that fails the funds check is rejected either as an error on the send call **or** as a `messages` status webhook with `status: 'failed'`. Handle both; the send call can still return `message_status: 'accepted'`.
+- Treat `accepted` as queued, not delivered. Subscribe to the `messages` webhook field before sending on a prepaid account, or a funds rejection has nowhere to be delivered.
+- Error `131042` (Business eligibility payment issue) means the payment-eligibility check failed; an insufficient balance is only one possible cause. Do not parse `error_data.details` to detect it — the text is the same for a missing, invalid, or underfunded payment method.
+- Error `130429` (Rate limit hit) is a rate-limit response, not a balance signal. Back off and retry; the SDK already treats it as throttling and retries with backoff.
+- Both codes are in `WHATSAPP_ERROR_CODES`; use `isMetaError` plus the code to branch. Back off rather than retrying in a tight loop, and reconcile billing against `sent`/`delivered` statuses instead of `accepted`.
+
+See Meta's [Prepaid billing guide](https://developers.facebook.com/documentation/business-messaging/whatsapp/pricing/prepaid-billing/). No SDK endpoint or payload change; this is send-path error handling only.
+
 ## Example
 ```ts
 import WhatsApp from 'meta-cloud-api';
