@@ -6,11 +6,11 @@
 
 ## September 11, 2026
 
-- [ ] **#443** Updated the max price recommendations to set a template's bid_amount to the highest acceptable price and scale down with per_message_bid_multiplier.
+- [x] **#443** Updated the max price recommendations to set a template's bid_amount to the highest acceptable price and scale down with per_message_bid_multiplier.
 
 ## September 9, 2026
 
-- [ ] **#442** Added WhatsApp Manager experience, a guide to setting and reviewing max price for marketing message templates in WhatsApp Manager.
+- [x] **#442** Added WhatsApp Manager experience, a guide to setting and reviewing max price for marketing message templates in WhatsApp Manager.
 
 ## September 8, 2026
 
@@ -1165,4 +1165,4 @@
 
 ---
 
-**Progress: 435/444 (98%)**
+**Progress: 437/444 (98%)**

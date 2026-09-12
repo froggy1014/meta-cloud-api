@@ -19,7 +19,13 @@ Send marketing template messages via `/marketing_messages`.
 - Since August 31, 2026 an eligible template can be switched between rate card pricing and max price **without creating a new template** — pass `optimization_spec` to `client.templates.updateTemplate(templateId, ...)` (`POST /{TEMPLATE_ID}`). The same call updates the cap on a template that already has one. Approved templates allow up to 100 edits per hour and 2,400 per day.
 - Read the current setting back with `client.templates.getTemplate(templateId)`; the response carries `optimization_spec`.
 - Templates carrying a max price must be sent through `/marketing_messages`. Sending one through the Cloud API `/messages` endpoint fails with error `131061`; sending one to a BSUID `recipient` fails with error `131062`.
+- Meta's recommendation (September 11, 2026): set the template's `bid_amount` to the **highest** price you are willing to pay per 1,000 deliveries, then scale individual sends **down** with `bid_spec.per_message_bid_multiplier`. That gives the delivery system the widest range to optimize against.
 - Limited Beta: a Solution Partner can enable the max price feature for up to 500 end-businesses (raised from 100 on September 7, 2026; see the [official changelog](https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog/?filter=September+7%2C+2026)). The SDK does not expose end-business enrollment, approved-template duplication at a different max price, or the WABA-level toggle for the WhatsApp Manager max price experience.
+
+### Per-message max price (`bid_spec.per_message_bid_multiplier`)
+- `sendTemplateMessage` accepts `bid_spec: { per_message_bid_multiplier }` — a positive float applied to the template's `bid_amount` for that one send, so the max price changes without editing the template. Default is `1`.
+- `1.5` raises the effective max price by 50% (template `bid_amount` 2000 becomes 3000 for that message); `0.5` halves it.
+- The send call keeps Meta's `bid_spec` object name even though template create/update moved to `optimization_spec`. Meta flags the message-level multiplier as subject to change during the beta.
 
 ## Example
 ```ts
@@ -54,6 +60,16 @@ await client.marketingMessages.sendTemplateMessage({
   message_activity_sharing: true,
 });
 
+// Scale this one send down to half the template's max price.
+await client.marketingMessages.sendTemplateMessage({
+  to: '15551234567',
+  template: {
+    name: 'promo_template',
+    language: { code: LanguagesEnum.English_US },
+  },
+  bid_spec: { per_message_bid_multiplier: 0.5 },
+});
+
 // Same send, addressed by BSUID instead of phone number.
 await client.marketingMessages.sendTemplateMessage({
   recipient: 'US.13491208655302741918',
@@ -67,3 +83,4 @@ await client.marketingMessages.sendTemplateMessage({
 ## Example Details
 - `sendTemplateMessage` requires `template.name` with `language.code`, plus exactly one of `to` or `recipient`; passing both or neither throws a `WhatsAppValidationError`.
 - `message_activity_sharing` toggles analytics sharing for the message.
+- `bid_spec.per_message_bid_multiplier` only takes effect when the template already carries a max price via `optimization_spec`.

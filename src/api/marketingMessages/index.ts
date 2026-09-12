@@ -4,6 +4,5 @@ import MarketingMessagesApi from './MarketingMessagesApi';
 
 export default MarketingMessagesApi;
 
+export type { MarketingMessageBidSpec, MarketingMessageRequest, MarketingMessagesClass } from './types';
 export { MarketingMessagesApi };
-
-export type { MarketingMessageRequest, MarketingMessagesClass } from './types';

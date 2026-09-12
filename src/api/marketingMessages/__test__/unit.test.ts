@@ -70,6 +70,30 @@ describe('Marketing Messages API - Unit Tests', () => {
         });
     });
 
+    it('sends a per-message max price multiplier as bid_spec', async () => {
+        await whatsApp.marketingMessages.sendTemplateMessage({
+            to: '15551234567',
+            template: {
+                name: 'seasonal_sale_promo',
+                language: { policy: 'deterministic', code: LanguagesEnum.English_US },
+            },
+            bid_spec: { per_message_bid_multiplier: 0.5 },
+        });
+
+        const [, , , body] = mockRequestSend.mock.calls[0];
+        expect(JSON.parse(body)).toEqual({
+            messaging_product: 'whatsapp',
+            recipient_type: 'individual',
+            to: '15551234567',
+            type: 'template',
+            template: {
+                name: 'seasonal_sale_promo',
+                language: { policy: 'deterministic', code: 'en_US' },
+            },
+            bid_spec: { per_message_bid_multiplier: 0.5 },
+        });
+    });
+
     it('rejects sending with both to and recipient', async () => {
         await expect(
             whatsApp.marketingMessages.sendTemplateMessage({

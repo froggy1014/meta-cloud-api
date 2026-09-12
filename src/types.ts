@@ -97,7 +97,11 @@ export type {
     UpdateGroupSettingsRequest,
 } from './api/groups/types';
 // Marketing Messages types
-export type { MarketingMessageRequest, MarketingMessagesClass } from './api/marketingMessages/types';
+export type {
+    MarketingMessageBidSpec,
+    MarketingMessageRequest,
+    MarketingMessagesClass,
+} from './api/marketingMessages/types';
 // Media types
 export type { MediaClass, MediaResponse, MediasResponse, UploadMediaResponse } from './api/media/types';
 // Messages types
