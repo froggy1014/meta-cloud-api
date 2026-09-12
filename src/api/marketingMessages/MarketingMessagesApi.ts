@@ -37,6 +37,7 @@ export default class MarketingMessagesApi extends BaseAPI implements marketing.M
      * @param params.template - The template configuration (name, language, components).
      * @param params.message_activity_sharing - Optional flag to enable message activity sharing.
      * @param params.product_policy - Optional product policy for marketing messages.
+     * @param params.bid_spec - Optional send-time multiplier applied to the template's max price.
      * @returns The messages response with message ID and status.
      * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/marketing-messages/send-marketing-messages/
      */
@@ -59,6 +60,7 @@ export default class MarketingMessagesApi extends BaseAPI implements marketing.M
             template: marketing.MarketingMessageRequest['template'];
             message_activity_sharing?: boolean;
             product_policy?: marketing.MarketingMessageRequest['product_policy'];
+            bid_spec?: marketing.MarketingMessageRequest['bid_spec'];
         };
 
         if (params.to !== undefined) {
@@ -75,6 +77,10 @@ export default class MarketingMessagesApi extends BaseAPI implements marketing.M
 
         if (params.product_policy !== undefined) {
             body.product_policy = params.product_policy;
+        }
+
+        if (params.bid_spec !== undefined) {
+            body.bid_spec = params.bid_spec;
         }
 
         return this.sendJson(

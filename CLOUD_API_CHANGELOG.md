@@ -1,8 +1,16 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-09-10T13:28:42.805Z
+> Updated: 2026-09-12T12:46:49.222Z
 
+
+## September 11, 2026
+
+- [x] **#443** Updated the max price recommendations to set a template's bid_amount to the highest acceptable price and scale down with per_message_bid_multiplier.
+
+## September 9, 2026
+
+- [x] **#442** Added WhatsApp Manager experience, a guide to setting and reviewing max price for marketing message templates in WhatsApp Manager.
 
 ## September 8, 2026
 
@@ -1157,4 +1165,4 @@
 
 ---
 
-**Progress: 435/442 (98%)**
+**Progress: 437/444 (98%)**
