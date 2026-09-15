@@ -1,12 +1,21 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-09-12T12:46:49.222Z
+> Updated: 2026-09-15T14:15:56.522Z
 
+
+## September 22, 2026
+
+- [ ] **#446** Updated WhatsApp Business app coexistence and login onboarding, including account lifecycle webhook subscriptions.
 
 ## September 11, 2026
 
+- [ ] **#445** Published Calling API rate cards effective October 1, 2026, covering 9 markets that become standalone on calling rate cards.
 - [x] **#443** Updated the max price recommendations to set a template's bid_amount to the highest acceptable price and scale down with per_message_bid_multiplier.
+
+## September 10, 2026
+
+- [ ] **#444** Documented October 1 service and utility pricing changes and their status webhook pricing values.
 
 ## September 9, 2026
 
@@ -1165,4 +1174,4 @@
 
 ---
 
-**Progress: 437/444 (98%)**
+**Progress: 437/447 (98%)**
