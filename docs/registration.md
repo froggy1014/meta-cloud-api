@@ -16,6 +16,16 @@ Register or deregister a phone number with a PIN.
 - Embedded Signup v2 is scheduled for deprecation on **October 8, 2026** (date updated September 8, 2026). Migrate your Embedded Signup integration to v4 before that date to avoid disruption; see Meta's [Versions guide](https://developers.facebook.com/documentation/business-messaging/whatsapp/embedded-signup/versions/).
 - Embedded Signup is configured in your onboarding integration, outside this SDK. This deprecation-date change does not change the SDK's phone number registration endpoints or payloads.
 
+### Coexistence onboarding on the new account model
+Updated September 22, 2026 for WhatsApp Business app coexistence onboarding and login:
+
+- During onboarding, Meta converts the client's existing WhatsApp Business account into a backward-compatible Messaging account and shares both the client's WhatsApp account and the converted Messaging account with you. No partner-specific Messaging account is created.
+- The Messaging account keeps its existing ID, returned as `waba_id`. Treat the returned `waba_id` as the same account you already had, not a new one, and keep using it as `businessAcctId` when constructing the client.
+- Subscribe to the `account_update` webhook field for the shared accounts — that is where the lifecycle events for both of them arrive. Register a handler with `processor.onAccountUpdate(...)`; `AccountUpdateEvent` already covers the coexistence lifecycle events (`ACCOUNT_OFFBOARDED`, `ACCOUNT_RECONNECTED`, `PARTNER_ADDED`, `PARTNER_REMOVED` with `disconnection_info`).
+- WhatsApp Business app login follows the same conversion, sharing, and returned asset ID semantics.
+
+Onboarding runs in your Embedded Signup integration, outside this SDK. See Meta's [Coexistence onboarding guide](https://developers.facebook.com/documentation/business-messaging/whatsapp/embedded-signup/onboard-business-app-users/) and the [account_update reference](https://developers.facebook.com/documentation/business-messaging/whatsapp/webhooks/reference/account_update/). No SDK endpoint, payload, or webhook type change is needed.
+
 ## Example
 ```ts
 import WhatsApp, { DataLocalizationRegionEnum } from 'meta-cloud-api';

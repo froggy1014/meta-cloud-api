@@ -24,6 +24,19 @@ Accounts in India that fund a WhatsApp Business account by UPI are on prepaid bi
 
 See Meta's [Prepaid billing guide](https://developers.facebook.com/documentation/business-messaging/whatsapp/pricing/prepaid-billing/). No SDK endpoint or payload change; this is send-path error handling only.
 
+## Status webhook pricing (October 1, 2026)
+Meta's October 1, 2026 service and utility pricing change (documented September 10, 2026) adds values and shifts meanings on the `pricing` object of a `messages` status webhook. `StatusWebhook['pricing']` carries them:
+
+- `pricing.type` gains `free_group_customer_service`, alongside `regular`, `free_customer_service`, and `free_entry_point`.
+- From October 1, 2026, `free_customer_service` means a 1:1 service delivery inside the business phone number's **free tier** — not a utility message inside a customer service window. `free_group_customer_service` moves the same way for group service deliveries.
+- From October 1, 2026, `regular` also covers 1:1 utility messages inside an open customer service window, group utility messages inside an open group customer service window, and 1:1 and group service messages sent after the free tier is used up.
+- `pricing.category` gains `group_marketing`, `group_service`, and `group_utility` for Groups API traffic, plus the hyphenated `authentication-international` spelling Meta documents for the pricing category (the underscored `authentication_international` is kept for payloads that still send it, and stays the spelling of `conversation.origin.type`).
+- `pricing.billable` is deprecated by Meta in a future versioned release. Branch on `pricing.type` and `pricing.category` instead.
+
+Switch exhaustively on `pricing.type`/`pricing.category` only with a default branch — Meta adds values without a version bump.
+
+See Meta's [status messages webhook reference](https://developers.facebook.com/documentation/business-messaging/whatsapp/webhooks/reference/messages/status/). Type-only change; no endpoint or request payload change.
+
 ## Example
 ```ts
 import WhatsApp from 'meta-cloud-api';
