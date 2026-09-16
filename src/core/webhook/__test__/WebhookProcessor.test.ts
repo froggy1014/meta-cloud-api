@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { MessageTypesEnum } from '../../../types/enums';
+import type { StatusWebhook } from '../types/status';
 import { WebhookProcessor } from '../WebhookProcessor';
 
 // Mock WhatsApp client to avoid real API calls
@@ -121,6 +122,45 @@ describe('WebhookProcessor', () => {
         it('should not throw when no handlers are registered', () => {
             const processor = createProcessor();
             expect(() => processor.removeAllHandlers()).not.toThrow();
+        });
+    });
+
+    // October 1, 2026 service and utility pricing change (changelog entry #444)
+    describe('status webhook pricing values', () => {
+        it('accepts the group free-tier pricing type and group pricing categories', () => {
+            const groupServiceStatus: StatusWebhook = {
+                id: 'wamid.TEST',
+                status: 'delivered',
+                timestamp: '1759276800',
+                recipient_id: '1234567890@g.us',
+                recipient_type: 'group',
+                pricing: {
+                    billable: false,
+                    pricing_model: 'PMP',
+                    type: 'free_group_customer_service',
+                    category: 'group_service',
+                },
+            };
+
+            expect(groupServiceStatus.pricing?.type).toBe('free_group_customer_service');
+            expect(groupServiceStatus.pricing?.category).toBe('group_service');
+        });
+
+        it('accepts the hyphenated authentication-international pricing category', () => {
+            const authIntlStatus: StatusWebhook = {
+                id: 'wamid.TEST',
+                status: 'sent',
+                timestamp: '1759276800',
+                recipient_id: '15551234567',
+                pricing: {
+                    billable: true,
+                    pricing_model: 'PMP',
+                    type: 'regular',
+                    category: 'authentication-international',
+                },
+            };
+
+            expect(authIntlStatus.pricing?.category).toBe('authentication-international');
         });
     });
 });

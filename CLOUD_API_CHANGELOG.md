@@ -6,16 +6,22 @@
 
 ## September 22, 2026
 
-- [ ] **#446** Updated WhatsApp Business app coexistence and login onboarding, including account lifecycle webhook subscriptions.
+- [x] **#446** Updated WhatsApp Business app coexistence and login onboarding, including account lifecycle webhook subscriptions.
+
+  SDK impact: Documented the new account model in [Registration](docs/registration.md#coexistence-onboarding-on-the-new-account-model): onboarding converts the client's WhatsApp Business account into a backward-compatible Messaging account, `waba_id` keeps the existing ID, and partners must subscribe to `account_update` for lifecycle events on both shared accounts. `AccountUpdateEvent` already covers those events (`ACCOUNT_OFFBOARDED`, `ACCOUNT_RECONNECTED`, `PARTNER_ADDED`, `PARTNER_REMOVED` with `disconnection_info`), and onboarding runs in the Embedded Signup integration, so no SDK endpoint, payload, or webhook type change is needed.
 
 ## September 11, 2026
 
-- [ ] **#445** Published Calling API rate cards effective October 1, 2026, covering 9 markets that become standalone on calling rate cards.
+- [x] **#445** Published Calling API rate cards effective October 1, 2026, covering 9 markets that become standalone on calling rate cards.
+
+  SDK impact: Recorded the October 1, 2026 rate cards in [Calling](docs/calling.md#notes). The 9 markets keep the rate of the region they leave, so this is billing data only; no SDK endpoint, payload, or webhook change.
 - [x] **#443** Updated the max price recommendations to set a template's bid_amount to the highest acceptable price and scale down with per_message_bid_multiplier.
 
 ## September 10, 2026
 
-- [ ] **#444** Documented October 1 service and utility pricing changes and their status webhook pricing values.
+- [x] **#444** Documented October 1 service and utility pricing changes and their status webhook pricing values.
+
+  SDK impact: Extended `StatusWebhook['pricing']` in `src/core/webhook/types/status.ts` — `type` gains `free_group_customer_service`, `category` gains `group_marketing`, `group_service`, `group_utility` and the hyphenated `authentication-international`, and the October 1, 2026 meaning shifts for `regular` / `free_customer_service` are documented inline, along with Meta's deprecation of `billable`. Documented in [Messages](docs/messages.md#status-webhook-pricing-october-1-2026). Type-only change; no endpoint or request payload change.
 
 ## September 9, 2026
 
@@ -1174,4 +1180,4 @@
 
 ---
 
-**Progress: 437/447 (98%)**
+**Progress: 440/447 (98%)**
