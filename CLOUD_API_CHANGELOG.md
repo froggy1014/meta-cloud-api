@@ -1,7 +1,7 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-09-16T14:08:02.583Z
+> Updated: 2026-09-17T14:13:34.492Z
 
 
 ## September 22, 2026
@@ -9,6 +9,12 @@
 - [x] **#446** Updated WhatsApp Business app coexistence and login onboarding, including account lifecycle webhook subscriptions.
 
   SDK impact: Documented the new account model in [Registration](docs/registration.md#coexistence-onboarding-on-the-new-account-model): onboarding converts the client's WhatsApp Business account into a backward-compatible Messaging account, `waba_id` keeps the existing ID, and partners must subscribe to `account_update` for lifecycle events on both shared accounts. `AccountUpdateEvent` already covers those events (`ACCOUNT_OFFBOARDED`, `ACCOUNT_RECONNECTED`, `PARTNER_ADDED`, `PARTNER_REMOVED` with `disconnection_info`), and onboarding runs in the Embedded Signup integration, so no SDK endpoint, payload, or webhook type change is needed.
+
+## September 16, 2026
+
+- [x] **#450** Updated Calling integration guidance and FAQ to recommend the new WhatsApp account model for sharing one phone number across providers.
+
+  SDK impact: Documented in [Calling](docs/calling.md#sharing-one-phone-number-across-providers) — Meta now recommends the new account model (Multi-Solution Conversations) over pointing two apps at one WABA when a messaging partner and a calling partner share a number: each partner gets its own shared account, templates, and billing; the calling app subscribes to `calls` (`processor.onCalls`) and to `account_update` (`processor.onAccountUpdate`) for the shared-account lifecycle events that `AccountUpdateEvent` already types. Onboarding runs in Embedded Signup and `client.calling.*` is unchanged, so no SDK endpoint, payload, or webhook type change.
 
 ## September 15, 2026
 
@@ -1192,4 +1198,4 @@
 
 ---
 
-**Progress: 443/450 (99%)**
+**Progress: 444/451 (98%)**
