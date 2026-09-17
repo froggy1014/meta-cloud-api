@@ -33,6 +33,8 @@ Meta's October 1, 2026 service and utility pricing change (documented September 
 - `pricing.category` gains `group_marketing`, `group_service`, and `group_utility` for Groups API traffic, plus the hyphenated `authentication-international` spelling Meta documents for the pricing category (the underscored `authentication_international` is kept for payloads that still send it, and stays the spelling of `conversation.origin.type`).
 - `pricing.billable` is deprecated by Meta in a future versioned release. Branch on `pricing.type` and `pricing.category` instead.
 
+The free tier that drives those values (documented September 10, 2026): each business phone number gets one shared allowance of **1,000 delivered service messages per month**. A 1:1 delivery consumes one unit, a group send one unit per delivered recipient, and the allowance does not roll over. Inside the tier a delivery arrives as `type: 'free_customer_service'` / `category: 'service'` (or `type: 'free_group_customer_service'` / `category: 'group_service'`); once it is used up the same traffic arrives as `type: 'regular'` with the category unchanged. The same `regular` shift applies from October 1, 2026 to utility and group utility messages sent inside an open customer service window. Meta's pricing analytics values (`pricing_types`, `pricing_categories` on `pricing_analytics`) are unchanged by this update, and the SDK does not type that field.
+
 Switch exhaustively on `pricing.type`/`pricing.category` only with a default branch — Meta adds values without a version bump.
 
 See Meta's [status messages webhook reference](https://developers.facebook.com/documentation/business-messaging/whatsapp/webhooks/reference/messages/status/). Type-only change; no endpoint or request payload change.
