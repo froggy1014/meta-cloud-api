@@ -15,6 +15,11 @@ Create, update, list, and delete message templates on your WABA. Templates must 
 - Components define the template body, header, footer, and buttons.
 - Updates are partial; pass only fields to change.
 
+## Automatic category updates after a category review
+Meta clarified on September 15, 2026 that a template whose category was **confirmed by a category review** stays subject to automatic category updates: if the messages the template actually sends do not meet the [template category guidelines](https://developers.facebook.com/documentation/business-messaging/whatsapp/templates/template-categorization), Meta can still act on the template. A passed review is not a permanent exemption.
+
+Handle that through the webhooks the SDK already exposes: `onTemplateCorrectCategoryDetection` (`template_correct_category_detection`, the advance notice — `current_category` plus `suggested_category`) and `onTemplateCategoryUpdate` (`template_category_update`, the change itself — `previous_category` plus `new_category`). Treat a template's category as server-owned state: read it back with `client.templates.getTemplate(templateId)` rather than caching the category you sent at create time.
+
 ## Example
 ```ts
 import WhatsApp from 'meta-cloud-api';

@@ -1,7 +1,7 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-09-15T14:15:56.522Z
+> Updated: 2026-09-16T14:08:02.583Z
 
 
 ## September 22, 2026
@@ -9,6 +9,15 @@
 - [x] **#446** Updated WhatsApp Business app coexistence and login onboarding, including account lifecycle webhook subscriptions.
 
   SDK impact: Documented the new account model in [Registration](docs/registration.md#coexistence-onboarding-on-the-new-account-model): onboarding converts the client's WhatsApp Business account into a backward-compatible Messaging account, `waba_id` keeps the existing ID, and partners must subscribe to `account_update` for lifecycle events on both shared accounts. `AccountUpdateEvent` already covers those events (`ACCOUNT_OFFBOARDED`, `ACCOUNT_RECONNECTED`, `PARTNER_ADDED`, `PARTNER_REMOVED` with `disconnection_info`), and onboarding runs in the Embedded Signup integration, so no SDK endpoint, payload, or webhook type change is needed.
+
+## September 15, 2026
+
+- [x] **#449** Templates whose category was confirmed by a review remain subject to automatic category updates.
+
+  SDK impact: Documented in [Templates](docs/templates.md#automatic-category-updates-after-a-category-review) — a passed category review is not a permanent exemption, so treat a template's category as server-owned state and track it through `onTemplateCorrectCategoryDetection` (advance notice) and `onTemplateCategoryUpdate` (the change). Both webhook payload types already carry the fields Meta documents. Policy clarification; no SDK endpoint, payload, or webhook type change.
+- [x] **#448** Announced that the max price feature enters Open Beta on October 1, 2026.
+
+  SDK impact: Recorded the rollout phases in [Marketing Messages](docs/marketing-messages.md#max-price-optimization_spec) — Open Beta on October 1, 2026 drops the per-partner client cap (500 end-businesses in Limited Beta), max price stays optional through 2026, and GA lands in Q2 2027. Enrollment happens outside the SDK surface; `optimization_spec` and `bid_spec.per_message_bid_multiplier` are unchanged. Availability change only.
 
 ## September 11, 2026
 
@@ -19,6 +28,9 @@
 
 ## September 10, 2026
 
+- [x] **#447** Documented October 1 service and utility pricing changes and their webhook and analytics pricing values.
+
+  SDK impact: Follow-up to #444 covering the free-tier side. Documented in [Messages](docs/messages.md#status-webhook-pricing-october-1-2026): each business phone number gets one shared tier of 1,000 delivered service messages per month (1:1 and group deliveries draw from it, no roll-over); inside the tier deliveries report `free_customer_service` / `free_group_customer_service`, after it they report `regular`. `StatusWebhook['pricing']` already carries every value from #444. Meta's `pricing_analytics` values (`pricing_types`, `pricing_categories`) are unchanged and that WABA field stays untyped. Docs-only; no type, endpoint, or payload change.
 - [x] **#444** Documented October 1 service and utility pricing changes and their status webhook pricing values.
 
   SDK impact: Extended `StatusWebhook['pricing']` in `src/core/webhook/types/status.ts` — `type` gains `free_group_customer_service`, `category` gains `group_marketing`, `group_service`, `group_utility` and the hyphenated `authentication-international`, and the October 1, 2026 meaning shifts for `regular` / `free_customer_service` are documented inline, along with Meta's deprecation of `billable`. Documented in [Messages](docs/messages.md#status-webhook-pricing-october-1-2026). Type-only change; no endpoint or request payload change.
@@ -1180,4 +1192,4 @@
 
 ---
 
-**Progress: 440/447 (98%)**
+**Progress: 443/450 (99%)**
