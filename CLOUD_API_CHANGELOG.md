@@ -12,7 +12,9 @@
 
 ## September 16, 2026
 
-- [ ] **#450** Updated Calling integration guidance and FAQ to recommend the new WhatsApp account model for sharing one phone number across providers.
+- [x] **#450** Updated Calling integration guidance and FAQ to recommend the new WhatsApp account model for sharing one phone number across providers.
+
+  SDK impact: Documented in [Calling](docs/calling.md#sharing-one-phone-number-across-providers) — Meta now recommends the new account model (Multi-Solution Conversations) over pointing two apps at one WABA when a messaging partner and a calling partner share a number: each partner gets its own shared account, templates, and billing; the calling app subscribes to `calls` (`processor.onCalls`) and to `account_update` (`processor.onAccountUpdate`) for the shared-account lifecycle events that `AccountUpdateEvent` already types. Onboarding runs in Embedded Signup and `client.calling.*` is unchanged, so no SDK endpoint, payload, or webhook type change.
 
 ## September 15, 2026
 
@@ -1196,4 +1198,4 @@
 
 ---
 
-**Progress: 443/451 (98%)**
+**Progress: 444/451 (98%)**
