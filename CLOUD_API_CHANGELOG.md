@@ -1,7 +1,7 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-09-16T14:08:02.583Z
+> Updated: 2026-09-17T14:13:34.492Z
 
 
 ## September 22, 2026
@@ -9,6 +9,10 @@
 - [x] **#446** Updated WhatsApp Business app coexistence and login onboarding, including account lifecycle webhook subscriptions.
 
   SDK impact: Documented the new account model in [Registration](docs/registration.md#coexistence-onboarding-on-the-new-account-model): onboarding converts the client's WhatsApp Business account into a backward-compatible Messaging account, `waba_id` keeps the existing ID, and partners must subscribe to `account_update` for lifecycle events on both shared accounts. `AccountUpdateEvent` already covers those events (`ACCOUNT_OFFBOARDED`, `ACCOUNT_RECONNECTED`, `PARTNER_ADDED`, `PARTNER_REMOVED` with `disconnection_info`), and onboarding runs in the Embedded Signup integration, so no SDK endpoint, payload, or webhook type change is needed.
+
+## September 16, 2026
+
+- [ ] **#450** Updated Calling integration guidance and FAQ to recommend the new WhatsApp account model for sharing one phone number across providers.
 
 ## September 15, 2026
 
@@ -1192,4 +1196,4 @@
 
 ---
 
-**Progress: 443/450 (99%)**
+**Progress: 443/451 (98%)**
