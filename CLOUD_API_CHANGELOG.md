@@ -1,7 +1,7 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-09-17T14:13:34.492Z
+> Updated: 2026-09-18T13:31:30.246Z
 
 
 ## September 22, 2026
@@ -9,6 +9,10 @@
 - [x] **#446** Updated WhatsApp Business app coexistence and login onboarding, including account lifecycle webhook subscriptions.
 
   SDK impact: Documented the new account model in [Registration](docs/registration.md#coexistence-onboarding-on-the-new-account-model): onboarding converts the client's WhatsApp Business account into a backward-compatible Messaging account, `waba_id` keeps the existing ID, and partners must subscribe to `account_update` for lifecycle events on both shared accounts. `AccountUpdateEvent` already covers those events (`ACCOUNT_OFFBOARDED`, `ACCOUNT_RECONNECTED`, `PARTNER_ADDED`, `PARTNER_REMOVED` with `disconnection_info`), and onboarding runs in the Embedded Signup integration, so no SDK endpoint, payload, or webhook type change is needed.
+
+## September 17, 2026
+
+- [ ] **#452** Updated geographic availability of features to add Thailand to the list of countries where delivery optimizations are unavailable.
 
 ## September 16, 2026
 
@@ -34,6 +38,7 @@
 
 ## September 10, 2026
 
+- [ ] **#451** Documented October 1 service and utility pricing changes and their webhook and analytics pricing values, and added offsite_card_pay to the Orders API reference for Brazil.
 - [x] **#447** Documented October 1 service and utility pricing changes and their webhook and analytics pricing values.
 
   SDK impact: Follow-up to #444 covering the free-tier side. Documented in [Messages](docs/messages.md#status-webhook-pricing-october-1-2026): each business phone number gets one shared tier of 1,000 delivered service messages per month (1:1 and group deliveries draw from it, no roll-over); inside the tier deliveries report `free_customer_service` / `free_group_customer_service`, after it they report `regular`. `StatusWebhook['pricing']` already carries every value from #444. Meta's `pricing_analytics` values (`pricing_types`, `pricing_categories`) are unchanged and that WABA field stays untyped. Docs-only; no type, endpoint, or payload change.
@@ -1198,4 +1203,4 @@
 
 ---
 
-**Progress: 444/451 (98%)**
+**Progress: 444/453 (98%)**
