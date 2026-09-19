@@ -1,7 +1,7 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-09-18T13:31:30.246Z
+> Updated: 2026-09-19T13:00:53.460Z
 
 
 ## September 22, 2026
@@ -52,6 +52,7 @@
 
 ## September 8, 2026
 
+- [ ] **#453** Added the Prepaid billing guide for accounts in India.
 - [x] **#441** Updated the Embedded Signup v2 deprecation date to October 8, 2026, and added the Prepaid billing guide for accounts in India.
 
   SDK impact: Same Embedded Signup v2 deadline already tracked in #440 ([Registration](docs/registration.md#embedded-signup-integrations)). The new Prepaid billing guide (India, UPI-funded accounts) is documented in [Messages](docs/messages.md#prepaid-billing-india): a funds rejection can arrive as error `131042` on the send call or on the `messages` status webhook while the send still returns `accepted`, and `130429` stays a rate-limit signal. Both codes are already in `WHATSAPP_ERROR_CODES`; funding and balance are Billing Hub only, so no SDK endpoint, payload, or webhook type change is needed.
@@ -1203,4 +1204,4 @@
 
 ---
 
-**Progress: 444/453 (98%)**
+**Progress: 444/454 (98%)**
