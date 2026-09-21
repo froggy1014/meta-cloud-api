@@ -1,7 +1,7 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-09-17T14:13:34.492Z
+> Updated: 2026-09-19T13:00:53.460Z
 
 
 ## September 22, 2026
@@ -9,6 +9,12 @@
 - [x] **#446** Updated WhatsApp Business app coexistence and login onboarding, including account lifecycle webhook subscriptions.
 
   SDK impact: Documented the new account model in [Registration](docs/registration.md#coexistence-onboarding-on-the-new-account-model): onboarding converts the client's WhatsApp Business account into a backward-compatible Messaging account, `waba_id` keeps the existing ID, and partners must subscribe to `account_update` for lifecycle events on both shared accounts. `AccountUpdateEvent` already covers those events (`ACCOUNT_OFFBOARDED`, `ACCOUNT_RECONNECTED`, `PARTNER_ADDED`, `PARTNER_REMOVED` with `disconnection_info`), and onboarding runs in the Embedded Signup integration, so no SDK endpoint, payload, or webhook type change is needed.
+
+## September 17, 2026
+
+- [x] **#452** Updated geographic availability of features to add Thailand to the list of countries where delivery optimizations are unavailable.
+
+  SDK impact: Delivery optimizations are applied by Meta on the server side and are never expressed in a request payload, response field, or webhook value, so the SDK has no surface for them. Adding Thailand only narrows where Meta applies the optimization. Docs-only; no SDK endpoint, payload, or type change.
 
 ## September 16, 2026
 
@@ -34,6 +40,9 @@
 
 ## September 10, 2026
 
+- [x] **#451** Documented October 1 service and utility pricing changes and their webhook and analytics pricing values, and added offsite_card_pay to the Orders API reference for Brazil.
+
+  SDK impact: The pricing half repeats #447, already documented in [Messages](docs/messages.md#status-webhook-pricing-october-1-2026) and already covered by `StatusWebhook['pricing']`. The new `offsite_card_pay` value belongs to the Orders API `order_details` interactive message (Brazil), which this SDK does not implement: `InteractiveTypesEnum` has no `order_details` or `order_status` member and no payment settings types exist. Nothing to change until the Orders API itself is added.
 - [x] **#447** Documented October 1 service and utility pricing changes and their webhook and analytics pricing values.
 
   SDK impact: Follow-up to #444 covering the free-tier side. Documented in [Messages](docs/messages.md#status-webhook-pricing-october-1-2026): each business phone number gets one shared tier of 1,000 delivered service messages per month (1:1 and group deliveries draw from it, no roll-over); inside the tier deliveries report `free_customer_service` / `free_group_customer_service`, after it they report `regular`. `StatusWebhook['pricing']` already carries every value from #444. Meta's `pricing_analytics` values (`pricing_types`, `pricing_categories`) are unchanged and that WABA field stays untyped. Docs-only; no type, endpoint, or payload change.
@@ -47,6 +56,9 @@
 
 ## September 8, 2026
 
+- [x] **#453** Added the Prepaid billing guide for accounts in India.
+
+  SDK impact: Duplicate of the Prepaid billing half of #441, already documented in [Messages](docs/messages.md#prepaid-billing-india). Error codes `131042` and `130429` are already in `WHATSAPP_ERROR_CODES`, and funding and balance stay Billing Hub only. No SDK endpoint, payload, or webhook type change.
 - [x] **#441** Updated the Embedded Signup v2 deprecation date to October 8, 2026, and added the Prepaid billing guide for accounts in India.
 
   SDK impact: Same Embedded Signup v2 deadline already tracked in #440 ([Registration](docs/registration.md#embedded-signup-integrations)). The new Prepaid billing guide (India, UPI-funded accounts) is documented in [Messages](docs/messages.md#prepaid-billing-india): a funds rejection can arrive as error `131042` on the send call or on the `messages` status webhook while the send still returns `accepted`, and `130429` stays a rate-limit signal. Both codes are already in `WHATSAPP_ERROR_CODES`; funding and balance are Billing Hub only, so no SDK endpoint, payload, or webhook type change is needed.
@@ -1198,4 +1210,4 @@
 
 ---
 
-**Progress: 444/451 (98%)**
+**Progress: 447/454 (98%)**
