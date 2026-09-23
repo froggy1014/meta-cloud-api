@@ -1,11 +1,20 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-09-19T13:00:53.460Z
+> Updated: 2026-09-23T14:10:16.541Z
 
+
+## September 24, 2026
+
+- [ ] **#456** Added template message routing guidance for maintaining an up-to-date template-category mapping, selecting the correct send endpoint, and recovering from category changes.
+
+## September 23, 2026
+
+- [ ] **#455** Added Conversation Routing documentation, covering how inbound messages are routed when more than one partner shares a WhatsApp account.
 
 ## September 22, 2026
 
+- [ ] **#454** Updated WhatsApp Business app onboarding and SIP client certificate guidance, and added Phase 1 general availability dates for the new account model.
 - [x] **#446** Updated WhatsApp Business app coexistence and login onboarding, including account lifecycle webhook subscriptions.
 
   SDK impact: Documented the new account model in [Registration](docs/registration.md#coexistence-onboarding-on-the-new-account-model): onboarding converts the client's WhatsApp Business account into a backward-compatible Messaging account, `waba_id` keeps the existing ID, and partners must subscribe to `account_update` for lifecycle events on both shared accounts. `AccountUpdateEvent` already covers those events (`ACCOUNT_OFFBOARDED`, `ACCOUNT_RECONNECTED`, `PARTNER_ADDED`, `PARTNER_REMOVED` with `disconnection_info`), and onboarding runs in the Embedded Signup integration, so no SDK endpoint, payload, or webhook type change is needed.
@@ -1210,4 +1219,4 @@
 
 ---
 
-**Progress: 447/454 (98%)**
+**Progress: 447/457 (98%)**
