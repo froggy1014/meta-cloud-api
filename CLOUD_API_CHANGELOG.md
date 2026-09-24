@@ -1,7 +1,7 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-09-23T14:10:16.541Z
+> Updated: 2026-09-24T14:08:33.075Z
 
 
 ## September 24, 2026
@@ -33,6 +33,7 @@
 
 ## September 15, 2026
 
+- [ ] **#457** Templates whose category was confirmed by a review remain subject to automatic category updates, and a context parameter identifying usernames revoked by Meta was added to the business_username_updates webhook.
 - [x] **#449** Templates whose category was confirmed by a review remain subject to automatic category updates.
 
   SDK impact: Documented in [Templates](docs/templates.md#automatic-category-updates-after-a-category-review) — a passed category review is not a permanent exemption, so treat a template's category as server-owned state and track it through `onTemplateCorrectCategoryDetection` (advance notice) and `onTemplateCategoryUpdate` (the change). Both webhook payload types already carry the fields Meta documents. Policy clarification; no SDK endpoint, payload, or webhook type change.
@@ -1219,4 +1220,4 @@
 
 ---
 
-**Progress: 447/457 (98%)**
+**Progress: 447/458 (98%)**
