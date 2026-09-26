@@ -1,8 +1,12 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-09-24T14:08:33.075Z
+> Updated: 2026-09-26T13:41:59.416Z
 
+
+## September 25, 2026
+
+- [ ] **#458** Thread control responses now include a request_id to share with support when a specific call needs investigating.
 
 ## September 24, 2026
 
@@ -1220,4 +1224,4 @@
 
 ---
 
-**Progress: 447/458 (98%)**
+**Progress: 447/459 (97%)**
