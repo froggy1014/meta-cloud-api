@@ -1,4 +1,4 @@
-import type { ApiResponse, PaginationMeta } from '@types/index.js';
+import type { ApiResponse, PaginationMeta } from '@app-types/index.js';
 import type { Response } from 'express';
 
 /**

@@ -69,7 +69,7 @@ function handlePrismaError(error: Prisma.PrismaClientKnownRequestError): {
  * Global error handler middleware
  * Catches all errors and sends appropriate responses
  */
-export function errorHandler(err: Error | AppError, req: Request, res: Response, next: NextFunction): void {
+export function errorHandler(err: Error | AppError, req: Request, res: Response, _next: NextFunction): void {
     // Default error response
     let statusCode = 500;
     let message = 'Internal server error';
@@ -124,7 +124,7 @@ export function errorHandler(err: Error | AppError, req: Request, res: Response,
 /**
  * Handle 404 Not Found errors
  */
-export function notFoundHandler(req: Request, res: Response, next: NextFunction): void {
+export function notFoundHandler(req: Request, _res: Response, next: NextFunction): void {
     const error = new AppError(404, `Route ${req.originalUrl} not found`);
     next(error);
 }

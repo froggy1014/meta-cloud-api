@@ -4,12 +4,12 @@ import ticketRoutes from './api/tickets.js';
 import healthRoutes from './health.js';
 import webhookRoutes from './webhook.js';
 
-const router = Router();
+const router: Router = Router();
 
 /**
  * Root route
  */
-router.get('/', (req, res) => {
+router.get('/', (_req, res) => {
     res.json({
         name: config.BUSINESS_NAME,
         version: '1.0.0',
