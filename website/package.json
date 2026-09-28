@@ -29,10 +29,13 @@
         "starlight-llms-txt": "^0.8.0"
     },
     "devDependencies": {
+        "@fontsource/inter": "^5.3.0",
+        "@fontsource/jetbrains-mono": "^5.3.0",
         "@pagefind/default-ui": "^1.1.1",
         "@types/react": "^19.2.13",
         "@types/react-dom": "^19.2.3",
         "pagefind": "^1.1.1",
+        "satori": "^0.33.5",
         "typescript": "^5.7.3"
     }
 }
