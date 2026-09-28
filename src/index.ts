@@ -4,7 +4,9 @@
 export * from './api';
 // Webhooks
 export * from './core/webhook';
-export { default as WhatsApp } from './core/whatsapp/WhatsApp';
+// Default export so `import WhatsApp from 'meta-cloud-api'` (used throughout the
+// README and docs) works in plain Node ESM, not only through bundler interop.
+export { default as WhatsApp, default } from './core/whatsapp/WhatsApp';
 
 // Types and enums
 export * from './types';
