@@ -17,19 +17,27 @@ export interface NextJsAppWebhookConfig extends WhatsAppConfig {
 }
 
 // Singleton cache keyed by phoneNumberId
-// biome-ignore lint/suspicious/noExplicitAny: cache stores the handler return type which is complex and self-referential
-const handlerCache = new Map<string, any>();
+const handlerCache = new Map<string, NextJsAppWebhookHandlers>();
 
 function getCacheKey(config: NextJsAppWebhookConfig): string {
     return `nextjs-app:${config.phoneNumberId ?? 'default'}`;
 }
 
+/** The object returned by {@link nextjsAppWebhookHandler}. */
+export type NextJsAppWebhookHandlers = ReturnType<typeof createHandlers>;
+
 // Next.js App Router webhook handler
-export function nextjsAppWebhookHandler(config: NextJsAppWebhookConfig) {
+export function nextjsAppWebhookHandler(config: NextJsAppWebhookConfig): NextJsAppWebhookHandlers {
     const key = getCacheKey(config);
     const cached = handlerCache.get(key);
     if (cached) return cached;
 
+    const handlers = createHandlers(config, key);
+    handlerCache.set(key, handlers);
+    return handlers;
+}
+
+function createHandlers(config: NextJsAppWebhookConfig, key: string) {
     const processor = new WebhookProcessor(config);
 
     const handlers = {
@@ -155,6 +163,5 @@ export function nextjsAppWebhookHandler(config: NextJsAppWebhookConfig) {
         },
     };
 
-    handlerCache.set(key, handlers);
     return handlers;
 }

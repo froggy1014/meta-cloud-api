@@ -3,5 +3,5 @@
 export type { WebhookContact, WebhookEvent, WebhookMessage } from '../../types';
 
 // Types
-export type { NextJsAppWebhookConfig } from './nextjs-app';
+export type { NextJsAppWebhookConfig, NextJsAppWebhookHandlers } from './nextjs-app';
 export { nextjsAppWebhookHandler } from './nextjs-app';
