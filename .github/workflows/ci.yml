@@ -37,3 +37,14 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+      # examples/express-production is the "production-ready" reference app.
+      # Typecheck and test it against the SDK built above so it cannot rot.
+      - name: Example (express-production)
+        working-directory: examples/express-production
+        env:
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+        run: |
+          pnpm exec prisma generate
+          pnpm typecheck
+          pnpm test

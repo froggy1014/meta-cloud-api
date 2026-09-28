@@ -7,6 +7,16 @@ import { MessageSender } from './sender.js';
  */
 export class MessageTemplates {
     /**
+     * Send a plain text message (thin wrapper so handlers only need MessageTemplates)
+     */
+    static async sendText(
+        to: string,
+        message: string,
+    ): Promise<{ success: boolean; messageId?: string; error?: string }> {
+        return MessageSender.sendText(to, message);
+    }
+
+    /**
      * Send welcome message with quick action button
      */
     static async sendWelcome(to: string): Promise<{ success: boolean; messageId?: string; error?: string }> {

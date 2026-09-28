@@ -36,7 +36,7 @@ export function requestLogger(req: Request, res: Response, next: NextFunction): 
 
         // Call original end function
         if (typeof chunk === 'function') {
-            return originalEnd.call(this, chunk);
+            return (originalEnd as (...args: unknown[]) => Response).call(this, chunk);
         } else if (typeof encoding === 'function') {
             return originalEnd.call(this, chunk, encoding);
         } else {

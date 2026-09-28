@@ -1,6 +1,6 @@
 import { config } from '@config/index.js';
 import { logger } from '@config/logger.js';
-import { redis } from '@config/redis.js';
+import { queueConnection } from '@config/queueConnection.js';
 import { TicketStatus } from '@prisma/client';
 import { TicketService } from '@services/tickets/ticketService.js';
 import { type Job, Worker } from 'bullmq';
@@ -28,7 +28,7 @@ export class TicketWorker {
                 return await this.processJob(job);
             },
             {
-                connection: redis,
+                connection: queueConnection(),
                 prefix: config.QUEUE_PREFIX,
                 concurrency: 10, // Process 10 jobs concurrently
             },
@@ -90,7 +90,7 @@ export class TicketWorker {
      * Handle ticket processing
      * Performs initial ticket analysis and categorization
      */
-    private async handleProcessTicket(ticketId: string, metadata?: Record<string, any>): Promise<void> {
+    private async handleProcessTicket(ticketId: string, _metadata?: Record<string, any>): Promise<void> {
         try {
             const ticket = await TicketService.getById(ticketId);
 

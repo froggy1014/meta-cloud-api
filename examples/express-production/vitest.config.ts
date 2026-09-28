@@ -35,7 +35,7 @@ export default defineConfig({
             '@handlers': path.resolve(__dirname, './src/handlers'),
             '@routes': path.resolve(__dirname, './src/routes'),
             '@utils': path.resolve(__dirname, './src/utils'),
-            '@types': path.resolve(__dirname, './src/types'),
+            '@app-types': path.resolve(__dirname, './src/types'),
         },
         extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
     },

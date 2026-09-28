@@ -13,7 +13,7 @@ import {
 import { type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 
-const router = Router();
+const router: Router = Router();
 
 // Apply API rate limiting
 router.use(apiRateLimiter);
@@ -65,7 +65,7 @@ router.get(
  */
 router.get(
     '/stats',
-    asyncHandler(async (req: Request, res: Response) => {
+    asyncHandler(async (_req: Request, res: Response) => {
         const stats = await TicketService.getStatistics();
         return sendSuccess(res, stats);
     }),
@@ -78,7 +78,7 @@ router.get(
 router.get(
     '/:id',
     asyncHandler(async (req: Request, res: Response) => {
-        const { id } = req.params;
+        const id = String(req.params.id);
         const ticket = await TicketService.getById(id);
 
         if (!ticket) {
@@ -96,7 +96,7 @@ router.get(
 router.get(
     '/number/:ticketNumber',
     asyncHandler(async (req: Request, res: Response) => {
-        const { ticketNumber } = req.params;
+        const ticketNumber = String(req.params.ticketNumber);
         const ticket = await TicketService.getByNumber(ticketNumber);
 
         if (!ticket) {
@@ -115,7 +115,7 @@ router.get(
     '/user/:userId',
     validate(commonSchemas.pagination, 'query'),
     asyncHandler(async (req: Request, res: Response) => {
-        const { userId } = req.params;
+        const userId = String(req.params.userId);
         const { page = 1, limit = 10 } = req.query as any;
 
         const tickets = await TicketService.getByUserId(userId, {
@@ -141,7 +141,7 @@ router.patch(
         'body',
     ),
     asyncHandler(async (req: Request, res: Response) => {
-        const { id } = req.params;
+        const id = String(req.params.id);
         const { status, resolution } = req.body;
 
         const ticket = await TicketService.updateStatus(id, status, resolution);
@@ -167,7 +167,7 @@ router.patch(
         'body',
     ),
     asyncHandler(async (req: Request, res: Response) => {
-        const { id } = req.params;
+        const id = String(req.params.id);
         const { assignedTo } = req.body;
 
         const ticket = await TicketService.assign(id, assignedTo);
@@ -193,7 +193,7 @@ router.patch(
         'body',
     ),
     asyncHandler(async (req: Request, res: Response) => {
-        const { id } = req.params;
+        const id = String(req.params.id);
         const { priority } = req.body;
 
         const ticket = await TicketService.updatePriority(id, priority);
@@ -219,7 +219,7 @@ router.patch(
         'body',
     ),
     asyncHandler(async (req: Request, res: Response) => {
-        const { id } = req.params;
+        const id = String(req.params.id);
         const { tags } = req.body;
 
         const ticket = await TicketService.addTags(id, tags);
@@ -239,7 +239,7 @@ router.patch(
 router.delete(
     '/:id',
     asyncHandler(async (req: Request, res: Response) => {
-        const { id } = req.params;
+        const id = String(req.params.id);
 
         const success = await TicketService.delete(id);
 
