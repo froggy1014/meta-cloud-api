@@ -46,6 +46,9 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version-file: '.nvmrc'
+          # The root package.json pins pnpm via packageManager; this job only
+          # uses npm (like a user running `npm create whatsapp-app`).
+          package-manager-cache: false
 
       # Scaffold the basic template exactly as `npm create whatsapp-app` would,
       # then prove the generated app typechecks and builds against the
