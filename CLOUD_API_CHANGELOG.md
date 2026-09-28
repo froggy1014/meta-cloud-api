@@ -1,8 +1,12 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-09-26T13:41:59.416Z
+> Updated: 2026-09-28T17:31:38.975Z
 
+
+## September 28, 2026
+
+- [ ] **#459** Free entry point windows may now extend up to 7 days for conversations started from an ad that clicks to WhatsApp.
 
 ## September 25, 2026
 
@@ -1234,4 +1238,4 @@
 
 ---
 
-**Progress: 452/459 (98%)**
+**Progress: 452/460 (98%)**
