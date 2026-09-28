@@ -1,5 +1,12 @@
 # meta-cloud-api-express-simple
 
+## 1.0.18
+
+### Patch Changes
+
+- Updated dependencies [aec391b]
+  - meta-cloud-api@3.7.0
+
 ## 1.0.17
 
 ### Patch Changes
