@@ -1,18 +1,16 @@
 ---
+// @ts-expect-error - virtual modules resolved by Starlight at build time
+import LanguageSelect from 'virtual:starlight/components/LanguageSelect';
+// @ts-expect-error
+import Search from 'virtual:starlight/components/Search';
+// @ts-expect-error
+import SiteTitle from 'virtual:starlight/components/SiteTitle';
+// @ts-expect-error
+import SocialIcons from 'virtual:starlight/components/SocialIcons';
 import config from 'virtual:starlight/user-config';
 import type { Props } from '@astrojs/starlight/props';
 
-// @ts-ignore - virtual modules resolved by Starlight at build time
-import LanguageSelect from 'virtual:starlight/components/LanguageSelect';
-// @ts-ignore
-import Search from 'virtual:starlight/components/Search';
-// @ts-ignore
-import SiteTitle from 'virtual:starlight/components/SiteTitle';
-// @ts-ignore
-import SocialIcons from 'virtual:starlight/components/SocialIcons';
-
-const shouldRenderSearch =
-	config.pagefind || config.components.Search !== '@astrojs/starlight/components/Search.astro';
+const shouldRenderSearch = config.pagefind || config.components.Search !== '@astrojs/starlight/components/Search.astro';
 ---
 
 <div class="header sl-flex">

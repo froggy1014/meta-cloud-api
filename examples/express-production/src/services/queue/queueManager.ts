@@ -266,7 +266,7 @@ export class QueueManager {
      */
     static async healthCheck(): Promise<boolean> {
         try {
-            for (const [name, queue] of QueueManager.queues.entries()) {
+            for (const queue of QueueManager.queues.values()) {
                 await queue.getJobCounts();
             }
             return true;

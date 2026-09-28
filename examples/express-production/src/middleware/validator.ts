@@ -86,11 +86,13 @@ export function validatePhoneNumber(req: Request, res: Response, next: NextFunct
     const phoneNumber = req.params.phoneNumber || req.body.phoneNumber || req.query.phoneNumber;
 
     if (!phoneNumber) {
-        return next(new AppError(400, 'Phone number is required'));
+        next(new AppError(400, 'Phone number is required'));
+        return;
     }
 
     if (!/^\d{10,15}$/.test(phoneNumber)) {
-        return next(new AppError(400, 'Invalid phone number format'));
+        next(new AppError(400, 'Invalid phone number format'));
+        return;
     }
 
     next();
@@ -103,7 +105,8 @@ export function validateTicketId(req: Request, res: Response, next: NextFunction
     const ticketId = req.params.ticketId || req.body.ticketId;
 
     if (!ticketId) {
-        return next(new AppError(400, 'Ticket ID is required'));
+        next(new AppError(400, 'Ticket ID is required'));
+        return;
     }
 
     next();

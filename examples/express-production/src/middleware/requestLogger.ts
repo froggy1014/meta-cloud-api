@@ -52,7 +52,8 @@ export function requestLogger(req: Request, res: Response, next: NextFunction): 
  */
 export function skipHealthCheckLogs(req: Request, res: Response, next: NextFunction): void {
     if (req.path === '/health' || req.path === '/ready') {
-        return next();
+        next();
+        return;
     }
 
     requestLogger(req, res, next);
