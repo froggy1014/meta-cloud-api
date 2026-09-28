@@ -300,12 +300,51 @@ WhatsApp requires HTTPS for production webhooks. In development:
 
 ### Signature Verification
 
-While the verify token authenticates the initial setup, you should also verify the signature of incoming webhook POST requests:
+The verify token only protects the one-time GET handshake. Every POST from Meta carries an `X-Hub-Signature-256` header: an HMAC-SHA256 of the raw body keyed with your **App Secret**. Without checking it, anyone who finds your webhook URL can post fake messages and trigger replies, which cost money on a real number.
+
+Turn it on with two config fields:
 
 ```typescript
-// Coming in future SDK versions
-processor.enableSignatureVerification(process.env.APP_SECRET);
+const Whatsapp = nextjsAppWebhookHandler({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN!,
+    appSecret: process.env.APP_SECRET!, // App Dashboard → App settings → Basic
+    verifyWebhookSignature: true,
+});
 ```
+
+With `verifyWebhookSignature: true`:
+
+| Request | Response | Handlers run |
+|---|---|---|
+| Valid signature | 200 | yes |
+| Missing or invalid signature | 401 | no |
+| `appSecret` not configured | 500 (fails closed) | no |
+
+It is off by default so existing apps keep working. Turn it on in production.
+
+<Aside type="caution" title="Express: keep the raw body">
+The signature covers the exact bytes Meta sent. `express.json()` parses and discards them, and re-serialized JSON will not match. Keep the raw body:
+
+```typescript
+app.use(express.json({ verify: (req, _res, buf) => { (req as any).rawBody = buf.toString(); } }));
+```
+
+The Next.js adapters read the raw body themselves and need nothing extra.
+</Aside>
+
+To check signatures yourself, for example in a custom adapter, use the exported helper:
+
+```typescript
+import { isValidWebhookSignature } from 'meta-cloud-api';
+
+const ok = isValidWebhookSignature(rawBody, request.headers.get('x-hub-signature-256'), process.env.APP_SECRET!);
+```
+
+It is constant-time and returns `false` instead of throwing on malformed headers.
+
+Flow endpoint requests are verified the same way with `appSecret`. When no `appSecret` is set they fall back to the verification token for backward compatibility, but Meta signs with the App Secret, so set it.
 
 ## Environment Variables
 
@@ -317,9 +356,18 @@ WHATSAPP_ACCESS_TOKEN=your_access_token
 WHATSAPP_PHONE_NUMBER_ID=123456789
 WHATSAPP_BUSINESS_ACCOUNT_ID=987654321
 WEBHOOK_VERIFICATION_TOKEN=your_secure_random_token
+APP_SECRET=your_meta_app_secret   # enables verifyWebhookSignature
 ```
 
 ## Troubleshooting
+
+### POSTs Return 401 Invalid signature
+
+With `verifyWebhookSignature: true`, check in this order:
+
+1. `appSecret` is the secret of the **same app** that owns the webhook subscription.
+2. The body reaching the SDK is the raw body. On Express, add the `verify` hook shown above. Proxies that rewrite JSON also break it.
+3. The header is `X-Hub-Signature-256`, not the legacy SHA-1 `X-Hub-Signature`.
 
 ### Verification Keeps Failing
 
