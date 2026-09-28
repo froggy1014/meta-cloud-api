@@ -4,8 +4,6 @@ import PaymentsApi from './PaymentsApi';
 
 export default PaymentsApi;
 
-export { PaymentsApi };
-
 export type {
     PaymentConfiguration,
     PaymentConfigurationCode,
@@ -21,3 +19,4 @@ export type {
     PaymentConfigurationUpdateResponse,
     PaymentsClass,
 } from './types';
+export { PaymentsApi };

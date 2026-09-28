@@ -20,7 +20,7 @@
     --sl-color-black: hsl(220, 18%, 6%);
 
     /* Typography */
-    --sl-font-mono: 'JetBrains Mono', var(--sl-font-system-mono);
+    --sl-font-mono: "JetBrains Mono", var(--sl-font-system-mono);
 
     /* Custom tokens */
     --glow-color: hsla(145, 63%, 42%, 0.12);
@@ -31,7 +31,7 @@
 }
 
 /* --- Light mode variant --- */
-:root[data-theme='light'] {
+:root[data-theme="light"] {
     --sl-color-accent-low: hsl(145, 50%, 92%);
     --sl-color-accent: hsl(145, 63%, 35%);
     --sl-color-accent-high: hsl(145, 70%, 20%);
@@ -72,13 +72,17 @@
     background: var(--terminal-bg) !important;
     border: 1px solid var(--terminal-border);
     border-radius: 8px;
-    box-shadow: 0 0 20px var(--glow-color), inset 0 1px 0 hsla(0, 0%, 100%, 0.03);
-    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+    box-shadow:
+        0 0 20px var(--glow-color),
+        inset 0 1px 0 hsla(0, 0%, 100%, 0.03);
+    transition:
+        box-shadow 0.3s ease,
+        border-color 0.3s ease;
     position: relative;
 }
 
 .sl-markdown-content pre::before {
-    content: '\25CF  \25CF  \25CF';
+    content: "\25CF  \25CF  \25CF";
     display: block;
     color: hsl(220, 8%, 28%);
     font-size: 0.6rem;
@@ -90,7 +94,9 @@
 }
 
 .sl-markdown-content pre:hover {
-    box-shadow: 0 0 30px var(--glow-color-strong), inset 0 1px 0 hsla(0, 0%, 100%, 0.05);
+    box-shadow:
+        0 0 30px var(--glow-color-strong),
+        inset 0 1px 0 hsla(0, 0%, 100%, 0.05);
     border-color: hsla(145, 40%, 30%, 0.5);
 }
 
@@ -138,7 +144,9 @@ main .sl-markdown-content {
 nav.sidebar li > a,
 nav.sidebar li > details > summary {
     border-radius: 6px;
-    transition: background-color 0.15s ease, color 0.15s ease;
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease;
 }
 
 nav.sidebar li > a:hover,
@@ -148,13 +156,13 @@ nav.sidebar li > details > summary:hover {
 }
 
 /* Override Starlight's bright active link background */
-nav.sidebar a[aria-current='page'] {
+nav.sidebar a[aria-current="page"] {
     background-color: hsla(145, 50%, 38%, 0.15) !important;
     color: var(--sl-color-accent-high) !important;
     box-shadow: inset 3px 0 0 var(--sl-color-accent);
 }
 
-nav.sidebar a[aria-current='page']:hover {
+nav.sidebar a[aria-current="page"]:hover {
     background-color: hsla(145, 50%, 38%, 0.22) !important;
 }
 
@@ -172,7 +180,9 @@ nav.sidebar a[aria-current='page']:hover {
    ============================================ */
 
 .card {
-    transition: transform 0.2s ease, box-shadow 0.3s ease;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.3s ease;
     border-color: var(--terminal-border);
 }
 
@@ -199,21 +209,21 @@ nav.sidebar a[aria-current='page']:hover {
    Scrollbar (dark mode)
    ============================================ */
 
-:root:not([data-theme='light']) ::-webkit-scrollbar {
+:root:not([data-theme="light"]) ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
 }
 
-:root:not([data-theme='light']) ::-webkit-scrollbar-track {
+:root:not([data-theme="light"]) ::-webkit-scrollbar-track {
     background: transparent;
 }
 
-:root:not([data-theme='light']) ::-webkit-scrollbar-thumb {
+:root:not([data-theme="light"]) ::-webkit-scrollbar-thumb {
     background: hsl(220, 8%, 22%);
     border-radius: 4px;
 }
 
-:root:not([data-theme='light']) ::-webkit-scrollbar-thumb:hover {
+:root:not([data-theme="light"]) ::-webkit-scrollbar-thumb:hover {
     background: hsl(220, 8%, 30%);
 }
 

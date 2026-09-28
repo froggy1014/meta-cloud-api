@@ -3,7 +3,6 @@
 import FlowApi from './FlowApi';
 
 export default FlowApi;
-export { FlowApi };
 
 export type {
     CreateFlowResponse,
@@ -24,3 +23,4 @@ export type {
     ValidateFlowJsonResponse,
 } from './types';
 export { FlowTypeEnum } from './types';
+export { FlowApi };
