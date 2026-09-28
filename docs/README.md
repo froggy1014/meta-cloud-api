@@ -14,6 +14,7 @@
 - [WABA](./waba.md)
 - [Block Users](./block-users.md)
 - [Contact Book](./contact-book.md)
+- [Conversation Routing](./conversation-routing.md)
 - [Calling](./calling.md)
 - [Groups](./groups.md)
 - [Marketing Messages](./marketing-messages.md)

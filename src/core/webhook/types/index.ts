@@ -42,10 +42,19 @@ import type { HistoryWebhookValue } from './history';
 import type { AutomaticEventsWebhookValue, TrackingEventsWebhookValue } from './marketing';
 import type { WhatsAppMessage } from './message';
 import type { MessageEchoesWebhookValue, SmbMessageEchoesWebhookValue } from './messageEchoes';
-import type { MessagingHandoversWebhookValue, StandbyWebhookValue, UserPreferencesWebhookValue } from './messaging';
+import type {
+    ConversationContext,
+    MessagingHandoversWebhookValue,
+    StandbyWebhookValue,
+    UserPreferencesWebhookValue,
+} from './messaging';
 import type { PartnerSolutionsWebhookValue } from './partner';
 import type { PaymentConfigurationUpdateWebhookValue } from './payments';
-import type { PhoneNumberNameUpdateWebhookValue, PhoneNumberQualityUpdateWebhookValue } from './phoneNumber';
+import type {
+    BusinessUsernameUpdatesWebhookValue,
+    PhoneNumberNameUpdateWebhookValue,
+    PhoneNumberQualityUpdateWebhookValue,
+} from './phoneNumber';
 import type { SecurityWebhookValue } from './security';
 import type { StatusWebhook } from './status';
 import type {
@@ -68,6 +77,11 @@ export interface MessageWebhookValue {
     metadata: WebhookMetadata;
     contacts: Array<WebhookContact>;
     messages: Array<WhatsAppMessage>;
+    /**
+     * AI-generated conversation summary, included under Conversation Routing when
+     * a thread is assigned to you without standby history. Optional.
+     */
+    conversation_context?: ConversationContext;
 }
 
 /**
@@ -104,6 +118,7 @@ export type WebhookFieldValue =
     | AutomaticEventsWebhookValue
     | BusinessCapabilityUpdateWebhookValue
     | BusinessStatusUpdateWebhookValue
+    | BusinessUsernameUpdatesWebhookValue
     | CallsWebhookValue
     | FlowsWebhookValue
     | GroupLifecycleUpdateWebhookValue

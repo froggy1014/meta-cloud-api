@@ -4,7 +4,8 @@ import { MessageTypesEnum } from '../../../../types/enums';
 import type WhatsApp from '../../../whatsapp/WhatsApp';
 import type { WebhookPayload } from '../../types';
 import type { SystemMessage } from '../../types/message';
-import type { UserPreferencesWebhookValue } from '../../types/messaging';
+import type { MessagingHandoversWebhookValue, UserPreferencesWebhookValue } from '../../types/messaging';
+import type { BusinessUsernameUpdatesWebhookValue } from '../../types/phoneNumber';
 import { processWebhookMessages } from '../webhookUtils';
 
 const createRequest = (payload: WebhookPayload): { request: Request; rawBody: string } => {
@@ -227,6 +228,136 @@ describe('BSUID identity and preference webhooks', () => {
             user_id: 'US.2222222',
             parent_user_id: 'US.9999999',
             value: 'resume',
+        });
+    });
+
+    it('routes a business_username_updates change carrying the revoked context', async () => {
+        const payload = {
+            object: 'whatsapp_business_account',
+            entry: [
+                {
+                    id: 'waba-id',
+                    changes: [
+                        {
+                            field: 'business_username_updates',
+                            value: {
+                                display_phone_number: '15551234567',
+                                status: 'deleted',
+                                context: 'revoked',
+                            },
+                        },
+                    ],
+                },
+            ],
+        } as unknown as WebhookPayload;
+        const { request } = createRequest(payload);
+        const businessUsernameUpdatesHandler = vi.fn();
+
+        await processWebhookMessages(request, whatsapp, {
+            messageHandlers: new Map(),
+            businessUsernameUpdatesHandler,
+        });
+
+        expect(businessUsernameUpdatesHandler).toHaveBeenCalledOnce();
+        const processed = businessUsernameUpdatesHandler.mock.calls[0]?.[1] as {
+            wabaId: string;
+            value: BusinessUsernameUpdatesWebhookValue['value'];
+        };
+        expect(processed.wabaId).toBe('waba-id');
+        expect(processed.value).toEqual({
+            display_phone_number: '15551234567',
+            status: 'deleted',
+            context: 'revoked',
+        });
+    });
+
+    it('routes a control_passed handover carrying owner roles and conversation context', async () => {
+        const payload = {
+            object: 'whatsapp_business_account',
+            entry: [
+                {
+                    id: 'waba-id',
+                    changes: [
+                        {
+                            field: 'messaging_handovers',
+                            value: {
+                                messaging_product: 'whatsapp',
+                                sender: { phone_number: '15557654321' },
+                                recipient: { phone_number_id: 'phone-number-id', display_phone_number: '15551234567' },
+                                type: 'control_passed',
+                                timestamp: '1697041663',
+                                control_passed: {
+                                    previous_owner_role: 'ai_agent',
+                                    new_owner_role: 'escalation',
+                                    metadata: 'WhatsApp user requested human agent',
+                                    conversation_context: { type: 'summary', summary: { text: 'Summary' } },
+                                },
+                            },
+                        },
+                    ],
+                },
+            ],
+        } as unknown as WebhookPayload;
+        const { request } = createRequest(payload);
+        const messagingHandoversHandler = vi.fn();
+
+        await processWebhookMessages(request, whatsapp, {
+            messageHandlers: new Map(),
+            messagingHandoversHandler,
+        });
+
+        expect(messagingHandoversHandler).toHaveBeenCalledOnce();
+        const processed = messagingHandoversHandler.mock.calls[0]?.[1] as {
+            value: MessagingHandoversWebhookValue['value'];
+        };
+        expect(processed.value.type).toBe('control_passed');
+        expect(processed.value.control_passed).toMatchObject({
+            previous_owner_role: 'ai_agent',
+            new_owner_role: 'escalation',
+            conversation_context: { type: 'summary', summary: { text: 'Summary' } },
+        });
+    });
+
+    it('exposes conversation_context on processed incoming messages', async () => {
+        const payload = {
+            object: 'whatsapp_business_account',
+            entry: [
+                {
+                    id: 'waba-id',
+                    changes: [
+                        {
+                            field: 'messages',
+                            value: {
+                                messaging_product: 'whatsapp',
+                                metadata: { display_phone_number: '15551234567', phone_number_id: 'phone-number-id' },
+                                contacts: [{ profile: { name: 'User' }, wa_id: '15557654321' }],
+                                messages: [
+                                    {
+                                        from: '15557654321',
+                                        id: 'wamid.1',
+                                        timestamp: '1697041663',
+                                        type: 'text',
+                                        text: { body: 'Hello, I need help with my order' },
+                                    },
+                                ],
+                                conversation_context: { type: 'summary', summary: { text: 'Summary' } },
+                            },
+                        },
+                    ],
+                },
+            ],
+        } as unknown as WebhookPayload;
+        const { request } = createRequest(payload);
+        const textHandler = vi.fn();
+
+        await processWebhookMessages(request, whatsapp, {
+            messageHandlers: new Map([[MessageTypesEnum.Text, textHandler]]),
+        });
+
+        expect(textHandler).toHaveBeenCalledOnce();
+        expect(textHandler.mock.calls[0]?.[1].conversationContext).toEqual({
+            type: 'summary',
+            summary: { text: 'Summary' },
         });
     });
 });

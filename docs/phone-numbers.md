@@ -28,6 +28,7 @@ Retrieve phone number details, request verification codes, configure conversatio
 - Fields can be a comma-separated string or string array.
 - Usernames support an optional `transfer_action` (`none` or `force_transfer`). If the API returns error code `147005`, the username is in use by another number in your portfolio — retry with `force_transfer`.
 - Username `status` is `approved` (visible when the feature is available) or `reserved` (approved but not yet visible).
+- Username status changes arrive on the `business_username_updates` webhook field; handle them with `processor.onBusinessUsernameUpdates(...)`. `value.status` is `approved`, `deleted`, or `reserved`, and `value.username` is omitted when `deleted`. Since September 15, 2026 `value.context` is `'revoked'` when Meta revoked the username — `deleted` means it was removed, `approved` means it was replaced with a generated one. `context` is present only when there is extra context, so its absence does not by itself tell you who made the change.
 - `messaging_limit_tier` is typed as known Meta tiers plus future string values, because Meta has changed tier names over time.
 - Official Business Account application payloads support the website fields Meta publishes in the OpenAPI examples and schema: `website_url` and `business_website_url`.
 - Verification `code_method` is `SMS` or `VOICE`.

@@ -76,6 +76,7 @@ wa.twoStepVerification   // 2FA management
 wa.encryption            // End-to-end encryption
 wa.blockUsers            // Block/unblock users
 wa.contactBook           // Delete a BSUID contact book entry
+wa.threadControl         // Conversation Routing: pass, release, take threads
 wa.waba                  // WhatsApp Business Account management
 ```
 

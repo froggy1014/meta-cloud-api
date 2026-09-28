@@ -12,6 +12,14 @@ Send marketing template messages via `/marketing_messages`.
 - `message_activity_sharing` controls message analytics sharing.
 - `product_policy` accepts `'CLOUD_API_FALLBACK'` or `'STRICT'`.
 
+### Routing template messages by category
+Meta's routing guidance (September 24, 2026): pick the send endpoint from the template's **latest** category — `MARKETING` goes through `client.marketingMessages.sendTemplateMessage` (`/marketing_messages`), every other category through `client.messages` (`/messages`).
+
+- Keep a persistent, cached mapping of Messaging account ID, template ID, name, language, and latest category. Seed it from `client.templates.getTemplate(...)` / the template list.
+- Update the mapping from `processor.onTemplateCategoryUpdate(...)` using `new_category`, only after the completed notification. Treat `onTemplateCorrectCategoryDetection` (impending change) as monitoring only — do not route on `correct_category`.
+- Once the Messaging account is fully onboarded and `disable_marketing_messages_on_cloud_api` is set, `/messages` rejects marketing templates with error `131063`: refresh the category and retry via `/marketing_messages`. If an appeal turns a marketing template into utility, `/marketing_messages` rejects it; refresh and retry via `/messages`. Retry only after a confirmed failure, and make retries idempotent.
+- See Meta's [Route template messages by category](https://developers.facebook.com/documentation/business-messaging/whatsapp/marketing-messages/route-template-messages). The SDK recognizes `131063` as a send-message error code; routing itself stays in your code.
+
 ### Max price (`optimization_spec`)
 - Max price is set per template via `optimization_spec` on `client.templates.createTemplate`. It takes `bid_strategy` (only `'LOWEST_COST_WITH_BID_CAP'` is accepted) and `bid_amount`, the maximum price per **1,000** deliveries in the smallest unit of the WABA's currency — multiply the desired per-delivery price by 1,000 after converting it.
 - `bid_spec` was the original field name on template create/update; Meta deprecated it on July 31, 2026. The SDK still types it, marked deprecated — use `optimization_spec`.

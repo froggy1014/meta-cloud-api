@@ -19,5 +19,6 @@ export * from './qrCode';
 export * from './registration';
 export * from './solutions';
 export * from './template';
+export * from './threadControl';
 export * from './twoStepVerification';
 export * from './waba';

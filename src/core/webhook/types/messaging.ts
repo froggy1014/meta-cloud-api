@@ -5,22 +5,69 @@ import type { StatusWebhook } from './status';
 // ============================================================================
 // messaging_handovers Webhook Types
 // @see https://developers.facebook.com/documentation/business-messaging/whatsapp/webhooks/reference/messaging_handovers
+// @see https://developers.facebook.com/documentation/business-messaging/whatsapp/conversation-routing/thread-control/#events
 //
-// Triggered when thread control is passed between apps in the handover protocol.
+// Triggered when Conversation Routing thread ownership changes.
 // Subscribe to the `messaging_handovers` webhook field.
 //
-// Sample payload (from Meta webhook test panel):
+// - `control_passed` is delivered to the new owner when a pass succeeds.
+// - `control_taken` is delivered to the previous owner when the escalation
+//   partner takes the thread (explicitly, or implicitly by sending a Service message).
+// - A release names no new owner, so it fires no event.
+//
+// Sample payload:
 // {
 //   "messaging_product": "whatsapp",
-//   "recipient": { "display_phone_number": "...", "phone_number_id": "..." },
 //   "sender": { "phone_number": "..." },
+//   "recipient": { "phone_number_id": "...", "display_phone_number": "..." },
+//   "type": "control_passed",
 //   "timestamp": "1697041663",
-//   "control_passed": { "metadata": "..." }
+//   "control_passed": {
+//     "previous_owner_role": "ai_agent",
+//     "new_owner_role": "escalation",
+//     "metadata": "...",
+//     "conversation_context": { "type": "summary", "summary": { "text": "..." } }
+//   }
 // }
 // ============================================================================
 
+/**
+ * Conversation Routing role identifier carried on handover events.
+ * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/conversation-routing/overview/
+ */
+export type MessagingHandoverRole = 'ai_agent' | 'ctwa' | 'customer_service' | 'escalation' | 'marketing' | 'utility';
+
+/**
+ * AI-generated summary of the conversation so far, delivered so a responder
+ * picking up a thread has context without the full history. Sent only when the
+ * receiving responder is not in standby and the business is eligible, so treat
+ * it as optional. `summary.text` is model-generated prose — do not parse it.
+ * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/conversation-routing/conversation-context/
+ */
+export interface ConversationContext {
+    type: 'summary';
+    summary: {
+        text: string;
+    };
+}
+
 export interface MessagingHandoverControlPassed {
-    /** Optional metadata string passed with the handover */
+    /** Role of the responder that passed control */
+    previous_owner_role?: MessagingHandoverRole;
+    /** Role of the responder that received control */
+    new_owner_role?: MessagingHandoverRole;
+    /** Optional metadata string (max 2,000 characters) passed by the caller */
+    metadata?: string;
+    /** Conversation summary, included conditionally */
+    conversation_context?: ConversationContext;
+}
+
+export interface MessagingHandoverControlTaken {
+    /** Role of the responder that lost control */
+    previous_owner_role?: MessagingHandoverRole;
+    /** Role of the responder that took control (the escalation partner) */
+    new_owner_role?: MessagingHandoverRole;
+    /** Optional metadata string (max 2,000 characters) passed by the caller */
     metadata?: string;
 }
 
@@ -35,10 +82,14 @@ export interface MessagingHandoversValue {
     sender: {
         phone_number: string;
     };
+    /** Handover event type */
+    type?: 'control_passed' | 'control_taken';
     /** Unix timestamp of the event */
     timestamp: string;
-    /** Present when thread control is passed to another app */
+    /** Present when thread control is passed to you */
     control_passed?: MessagingHandoverControlPassed;
+    /** Present when the escalation partner took thread control from you */
+    control_taken?: MessagingHandoverControlTaken;
 }
 
 export interface MessagingHandoversWebhookValue {
