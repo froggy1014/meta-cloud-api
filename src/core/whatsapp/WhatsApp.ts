@@ -18,6 +18,7 @@ import {
     RegistrationApi,
     SolutionsApi,
     TemplateApi,
+    ThreadControlApi,
     TwoStepVerificationApi,
     WabaApi,
 } from '../../api';
@@ -54,6 +55,7 @@ export default class WhatsApp {
     payments: PaymentsApi;
     phoneNumbers: PhoneNumberApi;
     solutions: SolutionsApi;
+    threadControl: ThreadControlApi;
     twoStepVerification: TwoStepVerificationApi;
     flows: FlowApi;
     businessProfile: BusinessProfileApi;
@@ -89,6 +91,7 @@ export default class WhatsApp {
         this.payments = new PaymentsApi(this.config, this.requester);
         this.phoneNumbers = new PhoneNumberApi(this.config, this.requester);
         this.solutions = new SolutionsApi(this.config, this.requester);
+        this.threadControl = new ThreadControlApi(this.config, this.requester);
         this.twoStepVerification = new TwoStepVerificationApi(this.config, this.requester);
         this.flows = new FlowApi(this.config, this.requester);
         this.businessProfile = new BusinessProfileApi(this.config, this.requester);

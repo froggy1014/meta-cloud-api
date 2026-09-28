@@ -16,7 +16,9 @@ import type {
     AutomaticEventsWebhookValue,
     BusinessCapabilityUpdateWebhookValue,
     BusinessStatusUpdateWebhookValue,
+    BusinessUsernameUpdatesWebhookValue,
     CallsWebhookValue,
+    ConversationContext,
     FlowsWebhookValue,
     GroupLifecycleUpdateWebhookValue,
     GroupParticipantsUpdateWebhookValue,
@@ -67,6 +69,12 @@ export type ProcessedMessage = {
      * For certain types like nfm_reply, this comes from message.context.id
      */
     messageId: string;
+    /**
+     * AI-generated conversation summary from `value.conversation_context`, present
+     * under Conversation Routing when a thread is assigned to you without standby
+     * history. Optional; never parse `summary.text`.
+     */
+    conversationContext?: ConversationContext;
 };
 
 /**
@@ -165,6 +173,11 @@ export type ProcessedAutomaticEvents = {
 export type ProcessedBusinessStatusUpdate = {
     wabaId: string;
     value: BusinessStatusUpdateWebhookValue['value'];
+};
+
+export type ProcessedBusinessUsernameUpdates = {
+    wabaId: string;
+    value: BusinessUsernameUpdatesWebhookValue['value'];
 };
 
 export type ProcessedCalls = {
@@ -338,6 +351,7 @@ export type SmbAppStateSyncHandler = WebhookHandler<ProcessedSmbAppStateSync>;
 export type AccountSettingsUpdateHandler = WebhookHandler<ProcessedAccountSettingsUpdate>;
 export type AutomaticEventsHandler = WebhookHandler<ProcessedAutomaticEvents>;
 export type BusinessStatusUpdateHandler = WebhookHandler<ProcessedBusinessStatusUpdate>;
+export type BusinessUsernameUpdatesHandler = WebhookHandler<ProcessedBusinessUsernameUpdates>;
 export type CallsHandler = WebhookHandler<ProcessedCalls>;
 export type GroupLifecycleUpdateHandler = WebhookHandler<ProcessedGroupLifecycleUpdate>;
 export type GroupParticipantsUpdateHandler = WebhookHandler<ProcessedGroupParticipantsUpdate>;
@@ -399,6 +413,7 @@ export async function processWebhookMessages(
         accountSettingsUpdateHandler?: AccountSettingsUpdateHandler;
         automaticEventsHandler?: AutomaticEventsHandler;
         businessStatusUpdateHandler?: BusinessStatusUpdateHandler;
+        businessUsernameUpdatesHandler?: BusinessUsernameUpdatesHandler;
         callsHandler?: CallsHandler;
         groupLifecycleUpdateHandler?: GroupLifecycleUpdateHandler;
         groupParticipantsUpdateHandler?: GroupParticipantsUpdateHandler;
@@ -600,6 +615,14 @@ export async function processWebhookMessages(
                             entry.id,
                             change as BusinessStatusUpdateWebhookValue,
                             handlers.businessStatusUpdateHandler,
+                            whatsapp,
+                            context,
+                        );
+                    } else if (change.field === 'business_username_updates') {
+                        await processWebhookField(
+                            entry.id,
+                            change as BusinessUsernameUpdatesWebhookValue,
+                            handlers.businessUsernameUpdatesHandler,
                             whatsapp,
                             context,
                         );
@@ -954,6 +977,7 @@ async function processMessages(
                 profileName,
                 message,
                 messageId: extractMessageId(message),
+                ...(messageValue.conversation_context && { conversationContext: messageValue.conversation_context }),
             };
 
             const messageType = message.type;

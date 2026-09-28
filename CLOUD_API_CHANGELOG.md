@@ -6,19 +6,27 @@
 
 ## September 25, 2026
 
-- [ ] **#458** Thread control responses now include a request_id to share with support when a specific call needs investigating.
+- [x] **#458** Thread control responses now include a request_id to share with support when a specific call needs investigating.
+
+  SDK impact: `ThreadControlResponse` (returned by `client.threadControl.pass/release/take`) types `{ messaging_product, request_id }`. Documented in [Conversation Routing](docs/conversation-routing.md#notes).
 
 ## September 24, 2026
 
-- [ ] **#456** Added template message routing guidance for maintaining an up-to-date template-category mapping, selecting the correct send endpoint, and recovering from category changes.
+- [x] **#456** Added template message routing guidance for maintaining an up-to-date template-category mapping, selecting the correct send endpoint, and recovering from category changes.
+
+  SDK impact: Documented in [Marketing Messages](docs/marketing-messages.md#routing-template-messages-by-category) — route `MARKETING` templates through `client.marketingMessages.sendTemplateMessage` and every other category through `client.messages`, keep the mapping current from `onTemplateCategoryUpdate` (`new_category`, completed notifications only), and retry across endpoints after a confirmed rejection. Added error `131063` (marketing template rejected on `/messages`) to the recognized send-message error codes.
 
 ## September 23, 2026
 
-- [ ] **#455** Added Conversation Routing documentation, covering how inbound messages are routed when more than one partner shares a WhatsApp account.
+- [x] **#455** Added Conversation Routing documentation, covering how inbound messages are routed when more than one partner shares a WhatsApp account.
+
+  SDK impact: Added `client.threadControl` (`POST /{PHONE_NUMBER_ID}/thread_control`) with `pass` (untargeted, or `control_pass.target_role`), `release`, and `take`, validating exactly one of `to`/`recipient`, `metadata` ≤ 2,000 characters, and `control_pass` on `pass` only. Extended `messaging_handovers` types with `type` (`control_passed`/`control_taken`), `control_taken`, `previous_owner_role`/`new_owner_role`, and `conversation_context`; added optional `conversation_context` to the `messages` webhook value, surfaced as `processed.conversationContext`. Added error `2494191` (take not permitted). Documented in [Conversation Routing](docs/conversation-routing.md), including call routing through the Incoming Call entry point.
 
 ## September 22, 2026
 
-- [ ] **#454** Updated WhatsApp Business app onboarding and SIP client certificate guidance, and added Phase 1 general availability dates for the new account model.
+- [x] **#454** Updated WhatsApp Business app onboarding and SIP client certificate guidance, and added Phase 1 general availability dates for the new account model.
+
+  SDK impact: Coexistence onboarding was already covered by #446. Documented the Phase 1 rollout (September 23 to mid-October 2026; IDs, endpoints, and tokens keep working) in [Registration](docs/registration.md#coexistence-onboarding-on-the-new-account-model) and the SIP mTLS client certificate (`client.sip.fbclientcerts.com`, client side only) in [Calling](docs/calling.md#notes). No SDK endpoint, payload, or webhook type change.
 - [x] **#446** Updated WhatsApp Business app coexistence and login onboarding, including account lifecycle webhook subscriptions.
 
   SDK impact: Documented the new account model in [Registration](docs/registration.md#coexistence-onboarding-on-the-new-account-model): onboarding converts the client's WhatsApp Business account into a backward-compatible Messaging account, `waba_id` keeps the existing ID, and partners must subscribe to `account_update` for lifecycle events on both shared accounts. `AccountUpdateEvent` already covers those events (`ACCOUNT_OFFBOARDED`, `ACCOUNT_RECONNECTED`, `PARTNER_ADDED`, `PARTNER_REMOVED` with `disconnection_info`), and onboarding runs in the Embedded Signup integration, so no SDK endpoint, payload, or webhook type change is needed.
@@ -37,7 +45,9 @@
 
 ## September 15, 2026
 
-- [ ] **#457** Templates whose category was confirmed by a review remain subject to automatic category updates, and a context parameter identifying usernames revoked by Meta was added to the business_username_updates webhook.
+- [x] **#457** Templates whose category was confirmed by a review remain subject to automatic category updates, and a context parameter identifying usernames revoked by Meta was added to the business_username_updates webhook.
+
+  SDK impact: The template half is #449. Added the `business_username_updates` webhook field (`WebhookField.BusinessUsernameUpdates`, `processor.onBusinessUsernameUpdates`) with `BusinessUsernameUpdatesValue` — `status` (`approved`/`deleted`/`reserved`), optional `username`, and optional `context: 'revoked'`. Documented in [Phone Numbers](docs/phone-numbers.md#notes).
 - [x] **#449** Templates whose category was confirmed by a review remain subject to automatic category updates.
 
   SDK impact: Documented in [Templates](docs/templates.md#automatic-category-updates-after-a-category-review) — a passed category review is not a permanent exemption, so treat a template's category as server-owned state and track it through `onTemplateCorrectCategoryDetection` (advance notice) and `onTemplateCategoryUpdate` (the change). Both webhook payload types already carry the fields Meta documents. Policy clarification; no SDK endpoint, payload, or webhook type change.
@@ -1224,4 +1234,4 @@
 
 ---
 
-**Progress: 447/459 (97%)**
+**Progress: 452/459 (98%)**

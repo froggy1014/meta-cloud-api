@@ -14,6 +14,7 @@ import {
     type AutomaticEventsHandler,
     type BusinessCapabilityUpdateHandler,
     type BusinessStatusUpdateHandler,
+    type BusinessUsernameUpdatesHandler,
     type ButtonMessageHandler,
     type CallsHandler,
     type ContactsMessageHandler,
@@ -94,6 +95,7 @@ export class WebhookProcessor {
     private accountSettingsUpdateHandler: AccountSettingsUpdateHandler | undefined = undefined;
     private automaticEventsHandler: AutomaticEventsHandler | undefined = undefined;
     private businessStatusUpdateHandler: BusinessStatusUpdateHandler | undefined = undefined;
+    private businessUsernameUpdatesHandler: BusinessUsernameUpdatesHandler | undefined = undefined;
     private callsHandler: CallsHandler | undefined = undefined;
     private groupLifecycleUpdateHandler: GroupLifecycleUpdateHandler | undefined = undefined;
     private groupParticipantsUpdateHandler: GroupParticipantsUpdateHandler | undefined = undefined;
@@ -162,6 +164,7 @@ export class WebhookProcessor {
                 accountSettingsUpdateHandler: this.accountSettingsUpdateHandler,
                 automaticEventsHandler: this.automaticEventsHandler,
                 businessStatusUpdateHandler: this.businessStatusUpdateHandler,
+                businessUsernameUpdatesHandler: this.businessUsernameUpdatesHandler,
                 callsHandler: this.callsHandler,
                 groupLifecycleUpdateHandler: this.groupLifecycleUpdateHandler,
                 groupParticipantsUpdateHandler: this.groupParticipantsUpdateHandler,
@@ -529,6 +532,16 @@ export class WebhookProcessor {
     }
 
     /**
+     * Register a handler for business_username_updates webhook field.
+     * Check `value.context === 'revoked'` to tell a Meta revocation from a change the business made.
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/business-scoped-user-ids#business_username_updates-webhook
+     */
+    onBusinessUsernameUpdates(handler: BusinessUsernameUpdatesHandler): void {
+        this.businessUsernameUpdatesHandler = handler;
+        LOGGER.log('Registered business_username_updates handler');
+    }
+
+    /**
      * Register a handler for calls webhook field
      * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/calling/reference/
      */
@@ -727,6 +740,7 @@ export class WebhookProcessor {
         this.accountSettingsUpdateHandler = undefined;
         this.automaticEventsHandler = undefined;
         this.businessStatusUpdateHandler = undefined;
+        this.businessUsernameUpdatesHandler = undefined;
         this.callsHandler = undefined;
         this.groupLifecycleUpdateHandler = undefined;
         this.groupParticipantsUpdateHandler = undefined;
