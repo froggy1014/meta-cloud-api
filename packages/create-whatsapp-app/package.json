@@ -1,0 +1,39 @@
+{
+    "name": "create-whatsapp-app",
+    "version": "0.1.0",
+    "description": "Scaffold a WhatsApp Cloud API app in 30 seconds. Runs in mock mode with no Meta account, then goes live with meta-cloud-api.",
+    "type": "module",
+    "bin": {
+        "create-whatsapp-app": "bin/index.mjs"
+    },
+    "files": [
+        "bin",
+        "templates"
+    ],
+    "engines": {
+        "node": ">=20"
+    },
+    "config": {
+        "sdkVersion": "3.7.0"
+    },
+    "keywords": [
+        "whatsapp",
+        "whatsapp-cloud-api",
+        "whatsapp-bot",
+        "create-app",
+        "scaffold",
+        "meta-cloud-api",
+        "nextjs",
+        "typescript"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/froggy1014/meta-cloud-api.git",
+        "directory": "packages/create-whatsapp-app"
+    },
+    "homepage": "https://meta-cloud-api.site",
+    "license": "MIT",
+    "publishConfig": {
+        "access": "public"
+    }
+}

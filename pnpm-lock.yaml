@@ -238,6 +238,8 @@ importers:
         specifier: ^5
         version: 5.9.3
 
+  packages/create-whatsapp-app: {}
+
   website:
     dependencies:
       '@astrojs/check':
