@@ -58,7 +58,8 @@ export interface StatusWebhook {
          *   window; from October 1, 2026, a 1:1 service delivery inside the
          *   business phone number's free tier.
          * - `free_entry_point` — message sent inside an open free entry point
-         *   window.
+         *   window. Since September 28, 2026 the window may stay open for up to
+         *   7 days (previously 72 hours).
          * - `free_group_customer_service` — through September 30, 2026, a group
          *   utility or non-template message delivered inside an open group
          *   customer service window; from October 1, 2026, a group service
