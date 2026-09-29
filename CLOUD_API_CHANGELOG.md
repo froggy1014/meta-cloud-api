@@ -1,8 +1,14 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-09-26T13:41:59.416Z
+> Updated: 2026-09-28T17:31:38.975Z
 
+
+## September 28, 2026
+
+- [x] **#459** Free entry point windows may now extend up to 7 days for conversations started from an ad that clicks to WhatsApp.
+
+  SDK impact: Documented in [Messages](docs/messages.md#status-webhook-pricing-october-1-2026) — an FEP window opened by replying to a click-to-WhatsApp ad conversation may now stay open for up to 7 days instead of 72 hours; messages inside it still arrive with `pricing.type: 'free_entry_point'`, and the window is shared by every Messaging account on the business phone number. Updated the `StatusWebhook['pricing']['type']` JSDoc. Billing change only, so no SDK endpoint, payload, or webhook type change.
 
 ## September 25, 2026
 
@@ -1234,4 +1240,4 @@
 
 ---
 
-**Progress: 452/459 (98%)**
+**Progress: 453/460 (98%)**
