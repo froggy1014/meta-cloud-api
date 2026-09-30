@@ -1,8 +1,12 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-09-29T15:36:49.512Z
+> Updated: 2026-09-30T15:46:41.119Z
 
+
+## September 29, 2026
+
+- [ ] **#462** Service messages remain free beyond the monthly free tier for eligible governments and non-profits, and reaction messages are never charged.
 
 ## September 28, 2026
 
@@ -27,6 +31,7 @@
 
 ## September 23, 2026
 
+- [ ] **#461** Added Tracking landing page view events, a webhook reference for the landing_page_view action type delivered when a link in a marketing message opens a landing page in the WhatsApp In-App Browser.
 - [x] **#455** Added Conversation Routing documentation, covering how inbound messages are routed when more than one partner shares a WhatsApp account.
 
   SDK impact: Added `client.threadControl` (`POST /{PHONE_NUMBER_ID}/thread_control`) with `pass` (untargeted, or `control_pass.target_role`), `release`, and `take`, validating exactly one of `to`/`recipient`, `metadata` ≤ 2,000 characters, and `control_pass` on `pass` only. Extended `messaging_handovers` types with `type` (`control_passed`/`control_taken`), `control_taken`, `previous_owner_role`/`new_owner_role`, and `conversation_context`; added optional `conversation_context` to the `messages` webhook value, surfaced as `processed.conversationContext`. Added error `2494191` (take not permitted). Documented in [Conversation Routing](docs/conversation-routing.md), including call routing through the Incoming Call entry point.
@@ -1243,4 +1248,4 @@
 
 ---
 
-**Progress: 454/461 (98%)**
+**Progress: 454/463 (98%)**
