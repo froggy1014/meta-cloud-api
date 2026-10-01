@@ -18,7 +18,7 @@ const app = express();
 // 🔧 Configuration from environment variables
 const whatsappConfig = {
     accessToken: process.env.WHATSAPP_ACCESS_TOKEN!,
-    phoneNumberId: parseInt(process.env.WHATSAPP_PHONE_NUMBER_ID!),
+    phoneNumberId: parseInt(process.env.WHATSAPP_PHONE_NUMBER_ID!, 10),
     businessAcctId: process.env.WHATSAPP_BUSINESS_ACCOUNT_ID,
     webhookVerificationToken: process.env.WHATSAPP_WEBHOOK_VERIFICATION_TOKEN!,
 };
@@ -83,7 +83,7 @@ app.post('/webhook', express.json(), POST);
 // app.all('/webhook', Whatsapp.webhook);
 
 // Health check endpoint
-app.get('/', (req, res) => res.send('WhatsApp Bot is running! 🚀'));
+app.get('/', (_req, res) => res.send('WhatsApp Bot is running! 🚀'));
 
 // Start server
 const PORT = process.env.PORT || 3000;

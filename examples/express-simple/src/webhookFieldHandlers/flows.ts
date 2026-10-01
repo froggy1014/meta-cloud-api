@@ -4,7 +4,7 @@ import type { ProcessedFlows, WhatsApp } from 'meta-cloud-api';
  * Example handler for flows webhook field
  * @see https://developers.facebook.com/docs/whatsapp/flows/guides/implementingyourflowendpoint#webhooks
  */
-export async function handleFlowsWebhook(whatsapp: WhatsApp, processed: ProcessedFlows): Promise<void> {
+export async function handleFlowsWebhook(_whatsapp: WhatsApp, processed: ProcessedFlows): Promise<void> {
     console.log('📊 Flows webhook received:');
     console.log('  WABA ID:', processed.wabaId);
     console.log('  Event:', processed.value.event);

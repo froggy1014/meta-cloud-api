@@ -81,7 +81,7 @@ export function isAlphanumeric(str: string): boolean {
  */
 export function isValidDate(dateString: string): boolean {
     const date = new Date(dateString);
-    return date instanceof Date && !isNaN(date.getTime());
+    return date instanceof Date && !Number.isNaN(date.getTime());
 }
 
 /**

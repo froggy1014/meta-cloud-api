@@ -4,7 +4,7 @@ import type { ProcessedHistory, WhatsApp } from 'meta-cloud-api';
  * Example handler for history webhook field
  * @see https://developers.facebook.com/docs/graph-api/webhooks/reference/whatsapp-business-account#history
  */
-export async function handleHistoryWebhook(whatsapp: WhatsApp, processed: ProcessedHistory): Promise<void> {
+export async function handleHistoryWebhook(_whatsapp: WhatsApp, processed: ProcessedHistory): Promise<void> {
     console.log('📜 History sync webhook received:');
     console.log('  WABA ID:', processed.wabaId);
     console.log('  Phase:', processed.value.metadata?.phase);

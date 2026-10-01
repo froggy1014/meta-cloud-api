@@ -18,7 +18,7 @@ export const config = {
 // 🔧 Configuration from environment variables
 const whatsappConfig = {
     accessToken: process.env.WHATSAPP_ACCESS_TOKEN!,
-    phoneNumberId: parseInt(process.env.WHATSAPP_PHONE_NUMBER_ID!),
+    phoneNumberId: parseInt(process.env.WHATSAPP_PHONE_NUMBER_ID!, 10),
     businessAcctId: process.env.WHATSAPP_BUSINESS_ACCOUNT_ID,
     webhookVerificationToken: process.env.WHATSAPP_WEBHOOK_VERIFICATION_TOKEN!,
 };
