@@ -42,7 +42,7 @@ function createHandlers(config: NextJsAppWebhookConfig, key: string) {
 
     const handlers = {
         // Clean GET/POST handlers following whatsapp-api-js methodology
-        GET: async (request: NextRequest) => {
+        GET: async (request: Request) => {
             try {
                 const { searchParams } = new URL(request.url);
                 const mode = searchParams.get('hub.mode');
@@ -62,7 +62,7 @@ function createHandlers(config: NextJsAppWebhookConfig, key: string) {
             }
         },
 
-        POST: async (request: NextRequest) => {
+        POST: async (request: Request) => {
             try {
                 const result = await processor.processWebhook(request);
 
@@ -79,7 +79,7 @@ function createHandlers(config: NextJsAppWebhookConfig, key: string) {
 
         // Legacy webhook object for backward compatibility
         webhook: {
-            GET: async (request: NextRequest) => {
+            GET: async (request: Request) => {
                 try {
                     const { searchParams } = new URL(request.url);
                     const mode = searchParams.get('hub.mode');
@@ -97,7 +97,7 @@ function createHandlers(config: NextJsAppWebhookConfig, key: string) {
                 }
             },
 
-            POST: async (request: NextRequest) => {
+            POST: async (request: Request) => {
                 try {
                     const result = await processor.processWebhook(request);
                     return new Response(result.body, {
@@ -113,7 +113,7 @@ function createHandlers(config: NextJsAppWebhookConfig, key: string) {
 
         // Flow handler for App Router
         flow: {
-            GET: async (request: NextRequest) => {
+            GET: async (request: Request) => {
                 try {
                     const result = await processor.processFlow(request);
 
@@ -131,7 +131,7 @@ function createHandlers(config: NextJsAppWebhookConfig, key: string) {
                 }
             },
 
-            POST: async (request: NextRequest) => {
+            POST: async (request: Request) => {
                 try {
                     const result = await processor.processFlow(request);
 
