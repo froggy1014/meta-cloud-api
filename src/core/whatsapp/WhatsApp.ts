@@ -30,6 +30,7 @@ import { type EncryptionKeyPair, generateEncryption } from '../../utils/flowEncr
 import Requester from '../../utils/http/request';
 import Logger from '../../utils/logger';
 import { printLogo } from '../../utils/logoConsole';
+import type { RateLimitInfo } from '../../utils/rateLimit';
 import { isDebugEnv } from '../../utils/runtime';
 import { getUserAgent, getVersion } from '../../utils/version';
 
@@ -77,6 +78,7 @@ export default class WhatsApp {
             this.config[SDKEnums.WabaConfigEnum.BusinessAcctId],
             this.getUserAgent(),
             this.config.retry,
+            this.config.onRateLimitInfo,
         );
 
         this.blockUsers = new BlockUsersApi(this.config, this.requester);
@@ -123,6 +125,16 @@ export default class WhatsApp {
         this.config[SDKEnums.WabaConfigEnum.AccessToken] = accessToken;
         this.requester.updateAccessToken(accessToken);
         LOGGER.log('Access token updated');
+    }
+
+    /**
+     * Rate limit headers (`X-App-Usage`, `X-Business-Use-Case-Usage`, `Retry-After`) of the most
+     * recent response that carried any, or undefined before the first such response. With
+     * concurrent requests this reflects whichever finished last; pass `onRateLimitInfo` in the
+     * config to observe every response.
+     */
+    getLastRateLimitInfo(): RateLimitInfo | undefined {
+        return this.requester.getLastRateLimitInfo();
     }
 
     /**

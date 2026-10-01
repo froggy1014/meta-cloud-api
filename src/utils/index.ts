@@ -63,6 +63,8 @@ export {
 } from './isMetaError';
 export { default as Logger } from './logger';
 export { objectToQueryString } from './objectToQueryString';
+export type { BusinessUseCaseUsage, RateLimitHeadersInput, RateLimitInfo, RateLimitUsage } from './rateLimit';
+export { parseRateLimitHeaders, parseRetryAfter } from './rateLimit';
 
 // export { getVersion, getUserAgent } from './version';
 

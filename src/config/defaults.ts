@@ -6,6 +6,7 @@ export const DEFAULT_REQUEST_TIMEOUT = 20000;
 export const DEFAULT_RETRY_MAX_ATTEMPTS = 3;
 export const DEFAULT_RETRY_INITIAL_DELAY_MS = 1000;
 export const DEFAULT_RETRY_BACKOFF = 'exponential';
+export const DEFAULT_RETRY_MAX_SERVER_DELAY_MS = 30000;
 
 export const GRAPH_API_HOST = 'graph.facebook.com';
 export const GRAPH_API_PROTOCOL = 'https:';

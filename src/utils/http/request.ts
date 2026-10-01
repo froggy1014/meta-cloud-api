@@ -3,10 +3,11 @@ import {
     DEFAULT_RETRY_BACKOFF,
     DEFAULT_RETRY_INITIAL_DELAY_MS,
     DEFAULT_RETRY_MAX_ATTEMPTS,
+    DEFAULT_RETRY_MAX_SERVER_DELAY_MS,
     GRAPH_API_HOST,
     GRAPH_API_PROTOCOL,
 } from '../../config/defaults';
-import type { RetryConfig } from '../../types/config';
+import type { RateLimitInfoListener, RetryConfig } from '../../types/config';
 import type { HttpMethodsEnum } from '../../types/enums';
 import type { RequesterClass, UrlEncodedFormBody } from '../../types/request';
 import {
@@ -18,6 +19,7 @@ import {
     WhatsAppThrottlingError,
 } from '../isMetaError';
 import Logger from '../logger';
+import { parseRateLimitHeaders, type RateLimitInfo } from '../rateLimit';
 import { isDebugEnv } from '../runtime';
 import HttpsClient from './httpsClient';
 
@@ -38,6 +40,8 @@ export default class Requester implements RequesterClass {
     host: Readonly<string>;
     protocol: Readonly<string> = GRAPH_API_PROTOCOL;
     private retryConfig: RetryConfig | undefined;
+    private onRateLimitInfo: RateLimitInfoListener | undefined;
+    private lastRateLimitInfo: RateLimitInfo | undefined;
 
     constructor(
         apiVersion: string,
@@ -46,6 +50,7 @@ export default class Requester implements RequesterClass {
         businessAcctId: string,
         userAgent: string,
         retryConfig?: RetryConfig,
+        onRateLimitInfo?: RateLimitInfoListener,
     ) {
         this.client = new HttpsClient();
         this.host = GRAPH_API_HOST;
@@ -55,6 +60,37 @@ export default class Requester implements RequesterClass {
         this.businessAcctId = businessAcctId;
         this.userAgent = userAgent;
         this.retryConfig = retryConfig;
+        this.onRateLimitInfo = onRateLimitInfo;
+    }
+
+    /**
+     * Rate limit headers of the most recent response that carried any, or undefined.
+     * With concurrent requests this is whichever response finished last; use the
+     * `onRateLimitInfo` config callback to see every response.
+     */
+    getLastRateLimitInfo(): RateLimitInfo | undefined {
+        return this.lastRateLimitInfo;
+    }
+
+    private captureRateLimitInfo(
+        response: { headers?: () => unknown; statusCode?: () => number },
+        method: string,
+        endpoint: string,
+    ): RateLimitInfo | undefined {
+        if (typeof response.headers !== 'function') return undefined;
+        const info = parseRateLimitHeaders(response.headers() as Parameters<typeof parseRateLimitHeaders>[0]);
+        if (!info) return undefined;
+
+        this.lastRateLimitInfo = info;
+        if (this.onRateLimitInfo) {
+            try {
+                const statusCode = typeof response.statusCode === 'function' ? response.statusCode() : 0;
+                this.onRateLimitInfo(info, { method, endpoint, statusCode });
+            } catch (error) {
+                LOGGER.log(`onRateLimitInfo listener threw: ${error instanceof Error ? error.message : error}`);
+            }
+        }
+        return info;
     }
 
     buildHeader(contentType: string, additionalHeaders?: Record<string, string>): HeadersInit {
@@ -120,6 +156,8 @@ export default class Requester implements RequesterClass {
         const maxAttempts = this.retryConfig?.maxAttempts ?? DEFAULT_RETRY_MAX_ATTEMPTS;
         const initialDelayMs = this.retryConfig?.initialDelayMs ?? DEFAULT_RETRY_INITIAL_DELAY_MS;
         const backoff = this.retryConfig?.backoff ?? DEFAULT_RETRY_BACKOFF;
+        const respectServerDelay = this.retryConfig?.respectServerDelay ?? true;
+        const maxServerDelayMs = this.retryConfig?.maxServerDelayMs ?? DEFAULT_RETRY_MAX_SERVER_DELAY_MS;
 
         let effectiveContentType = contentType;
 
@@ -145,6 +183,8 @@ export default class Requester implements RequesterClass {
                     shouldSendBody ? body : undefined,
                 );
 
+                const rateLimit = this.captureRateLimitInfo(response, method, endpoint);
+
                 if (!response.rawResponse().ok) {
                     let errorData: unknown = null;
                     try {
@@ -154,13 +194,21 @@ export default class Requester implements RequesterClass {
                     }
 
                     const metaError = normalizeMetaError(errorData, response.statusCode());
-                    throw createWhatsAppApiError(metaError.error, response.statusCode());
+                    const apiError = createWhatsAppApiError(metaError.error, response.statusCode());
+                    if (rateLimit) apiError.rateLimit = rateLimit;
+                    throw apiError;
                 }
 
                 return response;
             } catch (error) {
                 if (error instanceof WhatsAppThrottlingError && attempt < maxAttempts) {
-                    const delay = backoff === 'exponential' ? initialDelayMs * 2 ** (attempt - 1) : initialDelayMs;
+                    const backoffDelay =
+                        backoff === 'exponential' ? initialDelayMs * 2 ** (attempt - 1) : initialDelayMs;
+                    const serverDelay = respectServerDelay ? error.rateLimit?.retryDelayMs : undefined;
+                    const delay =
+                        serverDelay !== undefined
+                            ? Math.max(backoffDelay, Math.min(serverDelay, Math.max(0, maxServerDelayMs)))
+                            : backoffDelay;
                     LOGGER.log(`Throttled (attempt ${attempt}/${maxAttempts}). Retrying in ${delay}ms...`);
                     await sleep(delay);
                     continue;
