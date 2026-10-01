@@ -60,6 +60,7 @@ writeFileSync(
                 declarationMap: false,
                 paths: {
                     'meta-cloud-api': ['../src/index.ts'],
+                    'meta-cloud-api/testing': ['../src/testing/index.ts'],
                     '@core/*': ['../src/core/*'],
                     '@api/*': ['../src/api/*'],
                     '@shared/*': ['../src/shared/*'],
