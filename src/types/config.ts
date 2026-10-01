@@ -62,6 +62,44 @@ export interface RateLimitInfoContext {
 
 /** Callback receiving rate limit information parsed from every response that carries it. */
 export type RateLimitInfoListener = (info: RateLimitInfo, context: RateLimitInfoContext) => void | Promise<void>;
+/**
+ * Storage used to drop duplicate webhook deliveries. Meta retries deliveries,
+ * so the same message or status can arrive more than once.
+ *
+ * `setIfAbsent` must be atomic: store `key` for `ttlSeconds` only if it is not
+ * already there, and resolve `true` when it stored the key (first delivery) or
+ * `false` when the key already existed (duplicate). It maps 1:1 to Redis
+ * `SET key 1 NX EX ttlSeconds`, which replies `OK` only when the key was set.
+ *
+ * @example
+ * ```typescript
+ * const store: DedupeStore = {
+ *     async setIfAbsent(key, ttlSeconds) {
+ *         return (await redis.set(`wa:${key}`, '1', { NX: true, EX: ttlSeconds })) === 'OK';
+ *     },
+ * };
+ * ```
+ */
+export interface DedupeStore {
+    /** Atomically store `key` for `ttlSeconds` if absent. Resolves `true` if stored, `false` if it existed. */
+    setIfAbsent(key: string, ttlSeconds: number): Promise<boolean>;
+    /** Optional read-only check. The webhook processor never calls it; it is there for inspection and tests. */
+    has?(key: string): Promise<boolean>;
+}
+
+/**
+ * Opt-in deduplication of webhook deliveries. See {@link DedupeStore}.
+ */
+export interface WebhookDedupeConfig {
+    /**
+     * Where seen keys are kept. Defaults to an in-memory store that is bounded
+     * and only sees deliveries made to this process: with several instances
+     * behind a load balancer, pass a shared store such as Redis.
+     */
+    store?: DedupeStore;
+    /** How long a key is remembered, in seconds. Defaults to 86400 (24 hours). */
+    ttlSeconds?: number;
+}
 
 export type WhatsAppConfig = {
     accessToken: string;
@@ -97,6 +135,19 @@ export type WhatsAppConfig = {
      * `app.use(express.json({ verify: (req, _res, buf) => { req.rawBody = buf.toString(); } }))`.
      */
     verifyWebhookSignature?: boolean;
+    /**
+     * Skip handlers for webhook deliveries that were already seen (Meta retries
+     * deliveries). Duplicates still get a 200 response. Used by
+     * `WebhookProcessor` and the framework adapters only.
+     *
+     * Keys: `message:<id>` for messages, `status:<id>:<status>` for statuses,
+     * and the call or echo ids for `calls`, `smb_message_echoes` and
+     * `message_echoes`. Other fields have no natural id and are never deduped.
+     *
+     * `true` uses the defaults (in-memory store, single instance only, 24 hour TTL).
+     * Off by default.
+     */
+    dedupe?: boolean | WebhookDedupeConfig;
 };
 
 export type WabaConfigType = {
