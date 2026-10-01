@@ -6,15 +6,21 @@
 
 ## October 1, 2026
 
-- [ ] **#465** As a Solution Partner, you no longer need to explicitly allowlist clients for the max price feature.
+- [x] **#465** As a Solution Partner, you no longer need to explicitly allowlist clients for the max price feature.
+
+  SDK impact: Documented automatic eligibility for shared client accounts after partner beta agreement acceptance in [Marketing Messages](docs/marketing-messages.md#max-price-enrollment-october-1-2026). Explicit per-client allowlisting is no longer required. Agreement submission/status endpoints remain outside the SDK; existing template and send payloads are unchanged.
 
 ## September 30, 2026
 
-- [ ] **#464** Added guidance for preparing existing integrations before Meta Business Agent enablement changes message routing.
+- [x] **#464** Added guidance for preparing existing integrations before Meta Business Agent enablement changes message routing.
+
+  SDK impact: Documented live-agent enablement in [Conversation Routing](docs/conversation-routing.md#prepare-existing-integrations-before-changing-routing): enabling the agent changes existing routing, moves previous primary responders to standby for unowned threads, and preserves incoming-call routing. Setup and Agent Test API calls do not alter live routing. Existing SDK standby/handover handlers and thread-control methods cover the contract; no endpoint or type change.
 
 ## September 29, 2026
 
-- [ ] **#463** Service messages remain free beyond the monthly free tier for eligible governments and non-profits, reaction messages are never charged, and businesses can prepare integrations before assigning another partner.
+- [x] **#463** Service messages remain free beyond the monthly free tier for eligible governments and non-profits, reaction messages are never charged, and businesses can prepare integrations before assigning another partner.
+
+  SDK impact: The service-message exemption/reaction policy repeats #462 and is already covered in [Messages](docs/messages.md#status-webhook-pricing-october-1-2026). Added the new partner-assignment readiness guidance to [Conversation Routing](docs/conversation-routing.md#prepare-existing-integrations-before-changing-routing), including initial configuration creation, existing-configuration preservation, account/phone scope, and gradual effects on owned threads. No endpoint or payload change.
 - [x] **#462** Service messages remain free beyond the monthly free tier for eligible governments and non-profits, and reaction messages are never charged.
 
   SDK impact: Documented in [Messages](docs/messages.md#status-webhook-pricing-october-1-2026) — from October 1, 2026 a reaction message is the only service message type that stays free for all businesses and does not count toward the 1,000 free monthly service messages per business phone number; eligible governments (departments, agencies, inter-governmental organizations) and community non-profits keep service messages free beyond the tier through December 31, 2027, applied from 12am WABA-timezone on October 1, 2026 for already-identified organizations. Eligibility is decided by Meta and Meta documents no distinct status webhook `pricing.type` for exempt deliveries, so the `StatusWebhook['pricing']['type']` JSDoc only notes the exemptions. Billing policy only; no endpoint, payload, or webhook type change.
@@ -1261,4 +1267,4 @@
 
 ---
 
-**Progress: 456/466 (98%)**
+**Progress: 459/466 (98%)**

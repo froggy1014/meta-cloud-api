@@ -5,6 +5,14 @@ Conversation Routing (documented September 23, 2026) decides which responder rec
 
 Routing is not enabled through the API: it becomes active once the account has more than one responder and the business has a routing configuration in Meta Business Suite. The account must be enrolled for thread control before the endpoint accepts requests.
 
+## Prepare existing integrations before changing routing
+
+Before assigning another partner, check Conversation Routing in Meta Business Suite. If the account has no configuration, the assignment can create one and change inbound delivery for existing integrations. An existing configuration is preserved; agency-only access does not change routing. Review every integration across the account's phone numbers, including direct integrations, and confirm readiness before creating the initial configuration. Account defaults apply unless a phone-number-specific configuration overrides them. Existing owned threads are not immediately transferred: changes take effect when a thread becomes idle or is routed again. Review primary responders, standby visibility, and escalation roles afterward. See [Prepare before assigning another partner](https://developers.facebook.com/documentation/business-messaging/whatsapp/conversation-routing/prepare-before-assigning-a-partner/).
+
+Enabling Meta Business Agent for live conversations changes routing even when a configuration already exists. The agent becomes primary for new messaging conversations; previous primary responders move to standby and receive `standby` instead of `messages` when they do not own the thread. Incoming-call routing is preserved. Agent setup and the Agent Test API do not change live routing. Check account-default versus phone-number-specific scope, confirm every affected integration supports the required webhook fields and ownership changes, then test delivery and handoffs after enablement. See [Prepare before enabling Meta Business Agent](https://developers.facebook.com/documentation/business-messaging/whatsapp/conversation-routing/prepare-before-enabling-meta-business-agent/).
+
+The SDK already exposes `onStandby`, `onMessagingHandovers`, and `threadControl`. These September 29–30, 2026 updates clarify operational readiness; they introduce no new endpoint or payload fields. Standby handlers must not automatically reply to traffic they do not own.
+
 ## Endpoints
 - POST /{PHONE_NUMBER_ID}/thread_control
 
