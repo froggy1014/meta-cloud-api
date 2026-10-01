@@ -1,14 +1,25 @@
 import { logger } from '@config/logger.js';
-import type { FlowsCallback } from 'meta-cloud-api/webhook';
+
+/**
+ * Fields of the `flows` webhook value this handler reads.
+ * (meta-cloud-api does not export the full FlowsValue type from its root yet.)
+ */
+interface FlowsValue {
+    event: string;
+    flow_id: string;
+    message?: string;
+}
 
 /**
  * Flows webhook handler
  * Handles WhatsApp Flows events
  */
-export async function handleFlowsWebhook(flows: FlowsCallback): Promise<void> {
+export async function handleFlowsWebhook(flows: FlowsValue): Promise<void> {
     try {
         logger.info('Flows webhook received', {
-            flowToken: flows.flow_token,
+            event: flows.event,
+            flowId: flows.flow_id,
+            message: flows.message,
         });
 
         // Process flow data based on your flow configuration

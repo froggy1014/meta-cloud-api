@@ -1,6 +1,6 @@
 import { config } from '@config/index.js';
 import { logger } from '@config/logger.js';
-import { redis } from '@config/redis.js';
+import { queueConnection } from '@config/queueConnection.js';
 import { type Job, Queue, type QueueOptions } from 'bullmq';
 
 /**
@@ -40,7 +40,7 @@ export class QueueManager {
      */
     private static getQueueOptions(): QueueOptions {
         return {
-            connection: redis,
+            connection: queueConnection(),
             prefix: config.QUEUE_PREFIX,
             defaultJobOptions: {
                 attempts: config.QUEUE_ATTEMPTS,
@@ -82,39 +82,8 @@ export class QueueManager {
                 });
             });
 
-            queue.on('active', (job) => {
-                logger.debug('Job active', {
-                    queue: name,
-                    jobId: job.id,
-                    jobName: job.name,
-                });
-            });
-
-            queue.on('completed', (job) => {
-                logger.info('Job completed', {
-                    queue: name,
-                    jobId: job.id,
-                    jobName: job.name,
-                    duration: job.processedOn ? Date.now() - job.processedOn : 0,
-                });
-            });
-
-            queue.on('failed', (job, error) => {
-                logger.error('Job failed', {
-                    queue: name,
-                    jobId: job?.id,
-                    jobName: job?.name,
-                    error: error.message,
-                    attempts: job?.attemptsMade,
-                });
-            });
-
-            queue.on('stalled', (jobId) => {
-                logger.warn('Job stalled', {
-                    queue: name,
-                    jobId,
-                });
-            });
+            // 'active', 'completed', 'failed' and 'stalled' are Worker / QueueEvents
+            // events, not Queue events. The workers in ./workers log them.
 
             QueueManager.queues.set(name, queue);
 
@@ -266,7 +235,7 @@ export class QueueManager {
      */
     static async healthCheck(): Promise<boolean> {
         try {
-            for (const [name, queue] of QueueManager.queues.entries()) {
+            for (const queue of QueueManager.queues.values()) {
                 await queue.getJobCounts();
             }
             return true;

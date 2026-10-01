@@ -1,8 +1,23 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-09-26T13:41:59.416Z
+> Updated: 2026-09-30T15:46:41.119Z
 
+
+## September 29, 2026
+
+- [x] **#462** Service messages remain free beyond the monthly free tier for eligible governments and non-profits, and reaction messages are never charged.
+
+  SDK impact: Documented in [Messages](docs/messages.md#status-webhook-pricing-october-1-2026) — from October 1, 2026 a reaction message is the only service message type that stays free for all businesses and does not count toward the 1,000 free monthly service messages per business phone number; eligible governments (departments, agencies, inter-governmental organizations) and community non-profits keep service messages free beyond the tier through December 31, 2027, applied from 12am WABA-timezone on October 1, 2026 for already-identified organizations. Eligibility is decided by Meta and Meta documents no distinct status webhook `pricing.type` for exempt deliveries, so the `StatusWebhook['pricing']['type']` JSDoc only notes the exemptions. Billing policy only; no endpoint, payload, or webhook type change.
+
+## September 28, 2026
+
+- [x] **#460** Free entry point windows may now extend up to 7 days for conversations started from an ad that clicks to WhatsApp. Updated Pricing for non-template messages with Meta Business Agent analytics details.
+
+  SDK impact: Documented in [Messages](docs/messages.md#status-webhook-pricing-october-1-2026). The 7-day FEP window half repeats #459 (already documented). The new half points Meta Business Agent message analytics to the Business Agent Usage Insights API (`GET https://api.facebook.com/{entity_id}/business_agent_insights`: billable messages, billed tokens, and cost per hour/day/month), while service messages stay on `pricing_analytics` with `pricing_category: SERVICE`. That API sits on the separate Meta Business Agent Platform host, not the Graph API this SDK wraps, so no client method was added. No endpoint, payload, or webhook type change.
+- [x] **#459** Free entry point windows may now extend up to 7 days for conversations started from an ad that clicks to WhatsApp.
+
+  SDK impact: Documented in [Messages](docs/messages.md#status-webhook-pricing-october-1-2026) — an FEP window opened by replying to a click-to-WhatsApp ad conversation may now stay open for up to 7 days instead of 72 hours; messages inside it still arrive with `pricing.type: 'free_entry_point'`, and the window is shared by every Messaging account on the business phone number. Updated the `StatusWebhook['pricing']['type']` JSDoc. Billing change only, so no SDK endpoint, payload, or webhook type change.
 
 ## September 25, 2026
 
@@ -18,6 +33,9 @@
 
 ## September 23, 2026
 
+- [x] **#461** Added Tracking landing page view events, a webhook reference for the landing_page_view action type delivered when a link in a marketing message opens a landing page in the WhatsApp In-App Browser.
+
+  SDK impact: Typed the `user_actions` container Meta delivers on the `messages` webhook field for Marketing Messages API traffic: `UserActionsWebhookValue` (now part of the `WebhookValue` union), `UserAction` (`action_type`, `timestamp`, `marketing_messages_link_click_data`), `UserActionType` (open enum: `marketing_messages_link_click`, `landing_page_view`), and `MarketingMessagesLinkClickData` (`click_id`, `tracking_token`, plus click-only `click_component` and `product_id`). `processWebhookMessages` now routes `user_actions` values to a new `processor.onUserAction(...)` handler (`ProcessedUserAction` with `wabaId`/`phoneNumberId`/`displayPhoneNumber`/`action`; `offUserAction()` removes it) instead of silently dropping them; every action is delivered, including unknown action types. Documented correlation rules (`tracking_token`, fallback `click_id`, keys omitted not null, no ordering guarantee, 7-day tracking-link window) in [Marketing Messages](docs/marketing-messages.md#click-and-landing-page-view-webhooks-user_actions). The pre-existing click event payload is covered by the same types; the separate `tracking_events` field is unchanged.
 - [x] **#455** Added Conversation Routing documentation, covering how inbound messages are routed when more than one partner shares a WhatsApp account.
 
   SDK impact: Added `client.threadControl` (`POST /{PHONE_NUMBER_ID}/thread_control`) with `pass` (untargeted, or `control_pass.target_role`), `release`, and `take`, validating exactly one of `to`/`recipient`, `metadata` ≤ 2,000 characters, and `control_pass` on `pass` only. Extended `messaging_handovers` types with `type` (`control_passed`/`control_taken`), `control_taken`, `previous_owner_role`/`new_owner_role`, and `conversation_context`; added optional `conversation_context` to the `messages` webhook value, surfaced as `processed.conversationContext`. Added error `2494191` (take not permitted). Documented in [Conversation Routing](docs/conversation-routing.md), including call routing through the Incoming Call entry point.
@@ -1234,4 +1252,4 @@
 
 ---
 
-**Progress: 452/459 (98%)**
+**Progress: 456/463 (98%)**

@@ -39,7 +39,7 @@ import type {
     GroupStatusUpdateWebhookValue,
 } from './groups';
 import type { HistoryWebhookValue } from './history';
-import type { AutomaticEventsWebhookValue, TrackingEventsWebhookValue } from './marketing';
+import type { AutomaticEventsWebhookValue, TrackingEventsWebhookValue, UserActionsWebhookValue } from './marketing';
 import type { WhatsAppMessage } from './message';
 import type { MessageEchoesWebhookValue, SmbMessageEchoesWebhookValue } from './messageEchoes';
 import type {
@@ -103,9 +103,11 @@ export interface ErrorWebhookValue {
 }
 
 /**
- * Union type for all webhook value types
+ * Union type for all webhook value types delivered on the `messages` field.
+ * `UserActionsWebhookValue` carries marketing message click and landing page
+ * view actions (`user_actions`) instead of messages or statuses.
  */
-export type WebhookValue = MessageWebhookValue | StatusWebhookValue | ErrorWebhookValue;
+export type WebhookValue = MessageWebhookValue | StatusWebhookValue | ErrorWebhookValue | UserActionsWebhookValue;
 
 /**
  * Union type for all webhook field values

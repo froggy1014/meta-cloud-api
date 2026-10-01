@@ -1,20 +1,20 @@
+import type { HealthCheckResult } from '@app-types/index.js';
 import { checkDatabaseHealth } from '@config/database.js';
 import { logger } from '@config/logger.js';
 import { checkRedisHealth } from '@config/redis.js';
 import { QueueManager } from '@services/queue/queueManager.js';
 import { checkWhatsAppHealth } from '@services/whatsapp/client.js';
-import type { HealthCheckResult } from '@types/index.js';
 import { sendError, sendSuccess } from '@utils/responses.js';
 import { type Request, type Response, Router } from 'express';
 
-const router = Router();
+const router: Router = Router();
 
 /**
  * GET /health
  * Health check endpoint
  * Returns overall system health status
  */
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', async (_req: Request, res: Response) => {
     try {
         const startTime = Date.now();
 
@@ -68,7 +68,7 @@ router.get('/', async (req: Request, res: Response) => {
  * Readiness probe endpoint
  * Checks if the service is ready to accept traffic
  */
-router.get('/ready', async (req: Request, res: Response) => {
+router.get('/ready', async (_req: Request, res: Response) => {
     try {
         // Check critical dependencies
         const [redisHealthy, queueHealthy] = await Promise.all([checkRedisHealth(), QueueManager.healthCheck()]);
@@ -102,7 +102,7 @@ router.get('/ready', async (req: Request, res: Response) => {
  * Liveness probe endpoint
  * Checks if the service is alive (minimal check)
  */
-router.get('/live', (req: Request, res: Response) => {
+router.get('/live', (_req: Request, res: Response) => {
     return sendSuccess(res, {
         alive: true,
         timestamp: new Date().toISOString(),

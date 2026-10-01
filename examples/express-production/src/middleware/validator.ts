@@ -12,7 +12,7 @@ type ValidationTarget = 'body' | 'query' | 'params';
  * Validates request data against a Zod schema
  */
 export function validate(schema: ZodSchema, target: ValidationTarget = 'body') {
-    return (req: Request, res: Response, next: NextFunction) => {
+    return (req: Request, _res: Response, next: NextFunction) => {
         try {
             // Validate the specified target
             const data = req[target];
@@ -82,15 +82,17 @@ export const commonSchemas = {
 /**
  * Validate phone number middleware
  */
-export function validatePhoneNumber(req: Request, res: Response, next: NextFunction): void {
+export function validatePhoneNumber(req: Request, _res: Response, next: NextFunction): void {
     const phoneNumber = req.params.phoneNumber || req.body.phoneNumber || req.query.phoneNumber;
 
     if (!phoneNumber) {
-        return next(new AppError(400, 'Phone number is required'));
+        next(new AppError(400, 'Phone number is required'));
+        return;
     }
 
     if (!/^\d{10,15}$/.test(phoneNumber)) {
-        return next(new AppError(400, 'Invalid phone number format'));
+        next(new AppError(400, 'Invalid phone number format'));
+        return;
     }
 
     next();
@@ -99,11 +101,12 @@ export function validatePhoneNumber(req: Request, res: Response, next: NextFunct
 /**
  * Validate ticket ID middleware
  */
-export function validateTicketId(req: Request, res: Response, next: NextFunction): void {
+export function validateTicketId(req: Request, _res: Response, next: NextFunction): void {
     const ticketId = req.params.ticketId || req.body.ticketId;
 
     if (!ticketId) {
-        return next(new AppError(400, 'Ticket ID is required'));
+        next(new AppError(400, 'Ticket ID is required'));
+        return;
     }
 
     next();

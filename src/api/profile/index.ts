@@ -4,8 +4,6 @@ import BusinessProfileApi from './BusinessProfileApi';
 
 export default BusinessProfileApi;
 
-export { BusinessProfileApi };
-
 export type {
     BusinessProfileClass,
     BusinessProfileData,
@@ -21,3 +19,4 @@ export type {
     UploadSession,
     UploadSessionResponse,
 } from './types';
+export { BusinessProfileApi };

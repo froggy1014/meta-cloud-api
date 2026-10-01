@@ -68,6 +68,19 @@ describe('WebhookProcessor', () => {
         });
     });
 
+    describe('handler removal — offUserAction', () => {
+        it('should register and remove the user action handler', () => {
+            const processor = createProcessor();
+            const handler = vi.fn();
+
+            processor.onUserAction(handler);
+            expect((processor as any).userActionHandler).toBe(handler);
+
+            processor.offUserAction();
+            expect((processor as any).userActionHandler).toBeUndefined();
+        });
+    });
+
     describe('handler removal — offRaw', () => {
         it('should remove the raw handler', () => {
             const processor = createProcessor();
@@ -90,6 +103,7 @@ describe('WebhookProcessor', () => {
             processor.onMessagePreProcess(vi.fn());
             processor.onMessagePostProcess(vi.fn());
             processor.onStatus(vi.fn());
+            processor.onUserAction(vi.fn());
             processor.onRaw(vi.fn());
             processor.onAccountUpdate(vi.fn());
             processor.onFlows(vi.fn());
@@ -100,6 +114,7 @@ describe('WebhookProcessor', () => {
             expect((processor as any).preProcessHandler).toBeDefined();
             expect((processor as any).postProcessHandler).toBeDefined();
             expect((processor as any).statusHandler).toBeDefined();
+            expect((processor as any).userActionHandler).toBeDefined();
             expect((processor as any).rawHandler).toBeDefined();
             expect((processor as any).accountUpdateHandler).toBeDefined();
             expect((processor as any).flowsHandler).toBeDefined();
@@ -112,6 +127,7 @@ describe('WebhookProcessor', () => {
             expect((processor as any).preProcessHandler).toBeUndefined();
             expect((processor as any).postProcessHandler).toBeUndefined();
             expect((processor as any).statusHandler).toBeUndefined();
+            expect((processor as any).userActionHandler).toBeUndefined();
             expect((processor as any).rawHandler).toBeUndefined();
             expect((processor as any).flowHandlers.size).toBe(0);
             expect((processor as any).accountUpdateHandler).toBeUndefined();

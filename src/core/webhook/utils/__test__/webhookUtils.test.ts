@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { MessageTypesEnum } from '../../../../types/enums';
 import type WhatsApp from '../../../whatsapp/WhatsApp';
 import type { WebhookPayload } from '../../types';
+import type { UserActionsWebhookValue } from '../../types/marketing';
 import type { SystemMessage } from '../../types/message';
 import type { MessagingHandoversWebhookValue, UserPreferencesWebhookValue } from '../../types/messaging';
 import type { BusinessUsernameUpdatesWebhookValue } from '../../types/phoneNumber';
@@ -359,5 +360,134 @@ describe('BSUID identity and preference webhooks', () => {
             type: 'summary',
             summary: { text: 'Summary' },
         });
+    });
+});
+
+// Marketing message user actions on the `messages` field (changelog entry #461)
+describe('marketing message user_actions webhooks', () => {
+    const createUserActionsPayload = (userActions: UserActionsWebhookValue['user_actions']): WebhookPayload =>
+        ({
+            object: 'whatsapp_business_account',
+            entry: [
+                {
+                    id: 'waba-id',
+                    changes: [
+                        {
+                            field: 'messages',
+                            value: {
+                                messaging_product: 'whatsapp',
+                                metadata: { display_phone_number: '15551234567', phone_number_id: 'phone-number-id' },
+                                user_actions: userActions,
+                            } satisfies UserActionsWebhookValue,
+                        },
+                    ],
+                },
+            ],
+        }) as unknown as WebhookPayload;
+
+    it('dispatches landing_page_view actions to the user action handler with metadata', async () => {
+        const { request } = createRequest(
+            createUserActionsPayload([
+                {
+                    action_type: 'landing_page_view',
+                    timestamp: '1758585600',
+                    marketing_messages_link_click_data: { tracking_token: 'token-1', click_id: 'click-1' },
+                },
+            ]),
+        );
+        const userActionHandler = vi.fn();
+        const textHandler = vi.fn();
+        const statusHandler = vi.fn();
+
+        const response = await processWebhookMessages(request, whatsapp, {
+            messageHandlers: new Map([[MessageTypesEnum.Text, textHandler]]),
+            statusHandler,
+            userActionHandler,
+        });
+
+        expect(response.status).toBe(200);
+        expect(textHandler).not.toHaveBeenCalled();
+        expect(statusHandler).not.toHaveBeenCalled();
+        expect(userActionHandler).toHaveBeenCalledOnce();
+        expect(userActionHandler.mock.calls[0]?.[1]).toEqual({
+            wabaId: 'waba-id',
+            phoneNumberId: 'phone-number-id',
+            displayPhoneNumber: '15551234567',
+            action: {
+                action_type: 'landing_page_view',
+                timestamp: '1758585600',
+                marketing_messages_link_click_data: { tracking_token: 'token-1', click_id: 'click-1' },
+            },
+        });
+    });
+
+    it('dispatches every action in the array, including click events and unknown action types', async () => {
+        const { request } = createRequest(
+            createUserActionsPayload([
+                {
+                    action_type: 'marketing_messages_link_click',
+                    timestamp: '1758585500',
+                    marketing_messages_link_click_data: {
+                        click_component: 'cta',
+                        product_id: 'sku-1',
+                        click_id: 'click-1',
+                        tracking_token: 'token-1',
+                    },
+                },
+                // Landing page view with neither correlation key — keys are omitted, not null
+                { action_type: 'landing_page_view', timestamp: '1758585600', marketing_messages_link_click_data: {} },
+                // Open enum: future action types must still reach the handler
+                { action_type: 'some_future_action', timestamp: '1758585700' },
+            ]),
+        );
+        const userActionHandler = vi.fn();
+
+        await processWebhookMessages(request, whatsapp, {
+            messageHandlers: new Map(),
+            userActionHandler,
+        });
+
+        expect(userActionHandler).toHaveBeenCalledTimes(3);
+        expect(userActionHandler.mock.calls.map((call) => call[1].action.action_type)).toEqual([
+            'marketing_messages_link_click',
+            'landing_page_view',
+            'some_future_action',
+        ]);
+        expect(userActionHandler.mock.calls[0]?.[1].action.marketing_messages_link_click_data.click_component).toBe(
+            'cta',
+        );
+        expect(userActionHandler.mock.calls[1]?.[1].action.marketing_messages_link_click_data).toEqual({});
+    });
+
+    it('ignores user_actions payloads when no user action handler is registered', async () => {
+        const { request } = createRequest(
+            createUserActionsPayload([{ action_type: 'landing_page_view', timestamp: '1758585600' }]),
+        );
+        const textHandler = vi.fn();
+
+        const response = await processWebhookMessages(request, whatsapp, {
+            messageHandlers: new Map([[MessageTypesEnum.Text, textHandler]]),
+        });
+
+        expect(response.status).toBe(200);
+        expect(textHandler).not.toHaveBeenCalled();
+    });
+
+    it('keeps processing after a user action handler throws', async () => {
+        const { request } = createRequest(
+            createUserActionsPayload([
+                { action_type: 'landing_page_view', timestamp: '1758585600' },
+                { action_type: 'landing_page_view', timestamp: '1758585601' },
+            ]),
+        );
+        const userActionHandler = vi.fn().mockRejectedValueOnce(new Error('boom'));
+
+        const response = await processWebhookMessages(request, whatsapp, {
+            messageHandlers: new Map(),
+            userActionHandler,
+        });
+
+        expect(response.status).toBe(200);
+        expect(userActionHandler).toHaveBeenCalledTimes(2);
     });
 });

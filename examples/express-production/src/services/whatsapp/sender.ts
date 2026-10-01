@@ -101,31 +101,20 @@ export class MessageSender {
 
         for (let attempt = 0; attempt <= config.maxRetries; attempt++) {
             try {
-                const response = await whatsappClient.messages.replyButtons({
+                const response = await whatsappClient.messages.interactiveReplyButtons({
                     to,
                     body: {
-                        text: bodyText,
-                    },
-                    action: {
-                        buttons: buttons.map((btn) => ({
-                            type: 'reply',
-                            reply: {
-                                id: btn.id,
-                                title: btn.title,
-                            },
-                        })),
-                    },
-                    ...(headerText && {
-                        header: {
-                            type: 'text',
-                            text: headerText,
+                        type: 'button',
+                        body: { text: bodyText },
+                        action: {
+                            buttons: buttons.map((btn) => ({
+                                type: 'reply' as const,
+                                reply: { id: btn.id, title: btn.title },
+                            })),
                         },
-                    }),
-                    ...(footerText && {
-                        footer: {
-                            text: footerText,
-                        },
-                    }),
+                        ...(headerText && { header: { type: 'text' as const, text: headerText } }),
+                        ...(footerText && { footer: { text: footerText } }),
+                    },
                 });
 
                 logger.info('Button message sent successfully', {
@@ -187,29 +176,21 @@ export class MessageSender {
 
         for (let attempt = 0; attempt <= config.maxRetries; attempt++) {
             try {
-                const response = await whatsappClient.messages.list({
+                const response = await whatsappClient.messages.interactiveList({
                     to,
                     body: {
-                        text: bodyText,
-                    },
-                    action: {
-                        button: buttonText,
-                        sections: sections.map((section) => ({
-                            ...(section.title && { title: section.title }),
-                            rows: section.rows,
-                        })),
-                    },
-                    ...(headerText && {
-                        header: {
-                            type: 'text',
-                            text: headerText,
+                        type: 'list',
+                        body: { text: bodyText },
+                        action: {
+                            button: buttonText,
+                            sections: sections.map((section) => ({
+                                ...(section.title && { title: section.title }),
+                                rows: section.rows,
+                            })),
                         },
-                    }),
-                    ...(footerText && {
-                        footer: {
-                            text: footerText,
-                        },
-                    }),
+                        ...(headerText && { header: { type: 'text' as const, text: headerText } }),
+                        ...(footerText && { footer: { text: footerText } }),
+                    },
                 });
 
                 logger.info('List message sent successfully', {
@@ -268,11 +249,11 @@ export class MessageSender {
             try {
                 const response = await whatsappClient.messages.template({
                     to,
-                    name: templateName,
-                    language: {
-                        code: languageCode,
+                    body: {
+                        name: templateName,
+                        language: { policy: 'deterministic', code: languageCode },
+                        ...(components && { components }),
                     },
-                    ...(components && { components }),
                 });
 
                 logger.info('Template message sent successfully', {

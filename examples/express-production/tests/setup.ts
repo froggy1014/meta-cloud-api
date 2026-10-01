@@ -23,12 +23,12 @@ process.env.LOG_LEVEL = 'error'; // Reduce log noise in tests
 const mockWhatsAppClient = {
     messages: {
         text: vi.fn().mockResolvedValue({ messages: [{ id: 'msg_123' }] }),
-        replyButtons: vi.fn().mockResolvedValue({ messages: [{ id: 'msg_123' }] }),
-        list: vi.fn().mockResolvedValue({ messages: [{ id: 'msg_123' }] }),
+        interactiveReplyButtons: vi.fn().mockResolvedValue({ messages: [{ id: 'msg_123' }] }),
+        interactiveList: vi.fn().mockResolvedValue({ messages: [{ id: 'msg_123' }] }),
         template: vi.fn().mockResolvedValue({ messages: [{ id: 'msg_123' }] }),
     },
-    phone: {
-        get: vi.fn().mockResolvedValue({ verified_name: 'Test Business' }),
+    phoneNumbers: {
+        getPhoneNumberById: vi.fn().mockResolvedValue({ id: '123', verified_name: 'Test Business' }),
     },
 };
 
@@ -41,7 +41,7 @@ const mockWebhookProcessor = {
     onAudio: vi.fn(),
     onStatus: vi.fn(),
     onFlows: vi.fn(),
-    on: vi.fn(),
+    onRaw: vi.fn(),
 };
 
 vi.mock('meta-cloud-api', () => ({
