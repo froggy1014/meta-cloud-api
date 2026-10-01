@@ -2,6 +2,9 @@
 
 // Main SDK class
 export { default as WhatsApp } from '../whatsapp/WhatsApp';
+// Deduplication of retried webhook deliveries
+export type { MemoryDedupeStoreOptions } from './dedupe';
+export { MemoryDedupeStore } from './dedupe';
 export * from './frameworks/express';
 // Framework interfaces
 export type { ExpressRequest, ExpressResponse, ExpressWebhookConfig, NextFunction } from './frameworks/express/express';
@@ -14,10 +17,12 @@ export type { NextJsWebhookConfig } from './frameworks/nextjs-page/nextjs-page';
 export type {
     MessageStatus,
     MessageWebhookValue,
+    NonMessageWebhookField,
     StatusWebhook,
     StatusWebhookValue,
     WebhookContact,
     WebhookEvent,
+    WebhookFieldValueMap,
     WebhookValue,
     WhatsAppMessage,
 } from './types';
@@ -81,6 +86,8 @@ export type {
     ProcessedMessage,
     ProcessedStatus,
     ProcessedUserAction,
+    ProcessedWebhookField,
+    ProcessWebhookOptions,
     ReactionMessageHandler,
     ReactionProcessedMessage,
     StatusHandler,
@@ -93,6 +100,10 @@ export type {
     UserActionHandler,
     VideoMessageHandler,
     VideoProcessedMessage,
+    WebhookDedupeOptions,
+    WebhookFieldHandler,
+    WebhookFieldHandlerMap,
+    WebhookFieldHandlerOptions,
     WebhookHandlerContext,
     WebhookSignatureOptions,
 } from './utils/webhookUtils';

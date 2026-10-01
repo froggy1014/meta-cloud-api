@@ -116,9 +116,9 @@ describe('WebhookProcessor', () => {
             expect((processor as any).statusHandler).toBeDefined();
             expect((processor as any).userActionHandler).toBeDefined();
             expect((processor as any).rawHandler).toBeDefined();
-            expect((processor as any).accountUpdateHandler).toBeDefined();
-            expect((processor as any).flowsHandler).toBeDefined();
-            expect((processor as any).securityHandler).toBeDefined();
+            expect((processor as any).fieldHandlers.has('account_update')).toBe(true);
+            expect((processor as any).fieldHandlers.has('flows')).toBe(true);
+            expect((processor as any).fieldHandlers.has('security')).toBe(true);
 
             processor.removeAllHandlers();
 
@@ -130,9 +130,7 @@ describe('WebhookProcessor', () => {
             expect((processor as any).userActionHandler).toBeUndefined();
             expect((processor as any).rawHandler).toBeUndefined();
             expect((processor as any).flowHandlers.size).toBe(0);
-            expect((processor as any).accountUpdateHandler).toBeUndefined();
-            expect((processor as any).flowsHandler).toBeUndefined();
-            expect((processor as any).securityHandler).toBeUndefined();
+            expect((processor as any).fieldHandlers.size).toBe(0);
         });
 
         it('should not throw when no handlers are registered', () => {

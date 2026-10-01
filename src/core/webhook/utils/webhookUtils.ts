@@ -1,52 +1,23 @@
 import type { FlowEndpointRequest } from '../../../api/flow';
 import { FlowTypeEnum } from '../../../api/flow/types';
-import type { WabaConfigType } from '../../../types/config';
+import type { DedupeStore, WabaConfigType } from '../../../types/config';
 import { MessageTypesEnum, WabaConfigEnum } from '../../../types/enums';
 import { decryptFlowRequestAsync, encryptFlowResponseAsync } from '../../../utils/flowEncryptionUtils';
 import { isFlowDataExchangeRequest, isFlowErrorRequest, isFlowPingRequest } from '../../../utils/flowTypeGuards';
 import Logger from '../../../utils/logger';
 import { hmacSha256Hex, isDebugEnv, requireNodeCrypto, timingSafeEqualString } from '../../../utils/runtime';
 import type WhatsApp from '../../whatsapp/WhatsApp';
+import { DEFAULT_DEDUPE_TTL_SECONDS } from '../dedupe';
 import type {
-    AccountAlertsWebhookValue,
-    AccountReviewUpdateWebhookValue,
-    AccountSettingsUpdateWebhookValue,
-    AccountUpdateWebhookValue,
-    AutomaticEventsWebhookValue,
-    BusinessCapabilityUpdateWebhookValue,
-    BusinessStatusUpdateWebhookValue,
-    BusinessUsernameUpdatesWebhookValue,
-    CallsWebhookValue,
     ConversationContext,
-    FlowsWebhookValue,
-    GroupLifecycleUpdateWebhookValue,
-    GroupParticipantsUpdateWebhookValue,
-    GroupSettingsUpdateWebhookValue,
-    GroupStatusUpdateWebhookValue,
-    HistoryWebhookValue,
-    MessageEchoesWebhookValue,
-    MessageTemplateComponentsUpdateWebhookValue,
-    MessageTemplateQualityUpdateWebhookValue,
-    MessageTemplateStatusUpdateWebhookValue,
     MessageWebhookValue,
-    MessagingHandoversWebhookValue,
-    PartnerSolutionsWebhookValue,
-    PaymentConfigurationUpdateWebhookValue,
-    PhoneNumberNameUpdateWebhookValue,
-    PhoneNumberQualityUpdateWebhookValue,
-    SecurityWebhookValue,
-    SmbAppStateSyncWebhookValue,
-    SmbMessageEchoesWebhookValue,
-    StandbyWebhookValue,
+    NonMessageWebhookField,
     StatusWebhook,
     StatusWebhookValue,
-    TemplateCategoryUpdateWebhookValue,
-    TemplateCorrectCategoryDetectionWebhookValue,
-    TrackingEventsWebhookValue,
     UserAction,
     UserActionsWebhookValue,
-    UserPreferencesWebhookValue,
     WebhookFieldType,
+    WebhookFieldValueMap,
     WebhookPayload,
     WebhookValue,
     WhatsAppMessage,
@@ -101,167 +72,49 @@ export type ProcessedUserAction = {
 };
 
 /**
+ * What a handler for a non-`messages` webhook field receives: the WhatsApp
+ * Business Account id and the change's `value`, typed by field name.
+ */
+export type ProcessedWebhookField<F extends NonMessageWebhookField> = {
+    wabaId: string;
+    value: WebhookFieldValueMap[F];
+};
+
+/**
  * Processed webhook field types for specialized handlers
  */
-export type ProcessedAccountUpdate = {
-    wabaId: string;
-    value: AccountUpdateWebhookValue['value'];
-};
-
-export type ProcessedAccountReviewUpdate = {
-    wabaId: string;
-    value: AccountReviewUpdateWebhookValue['value'];
-};
-
-export type ProcessedAccountAlerts = {
-    wabaId: string;
-    value: AccountAlertsWebhookValue['value'];
-};
-
-export type ProcessedBusinessCapabilityUpdate = {
-    wabaId: string;
-    value: BusinessCapabilityUpdateWebhookValue['value'];
-};
-
-export type ProcessedPhoneNumberNameUpdate = {
-    wabaId: string;
-    value: PhoneNumberNameUpdateWebhookValue['value'];
-};
-
-export type ProcessedPhoneNumberQualityUpdate = {
-    wabaId: string;
-    value: PhoneNumberQualityUpdateWebhookValue['value'];
-};
-
-export type ProcessedMessageTemplateStatusUpdate = {
-    wabaId: string;
-    value: MessageTemplateStatusUpdateWebhookValue['value'];
-};
-
-export type ProcessedTemplateCategoryUpdate = {
-    wabaId: string;
-    value: TemplateCategoryUpdateWebhookValue['value'];
-};
-
-export type ProcessedMessageTemplateQualityUpdate = {
-    wabaId: string;
-    value: MessageTemplateQualityUpdateWebhookValue['value'];
-};
-
-export type ProcessedFlows = {
-    wabaId: string;
-    value: FlowsWebhookValue['value'];
-};
-
-export type ProcessedSecurity = {
-    wabaId: string;
-    value: SecurityWebhookValue['value'];
-};
-
-export type ProcessedHistory = {
-    wabaId: string;
-    value: HistoryWebhookValue['value'];
-};
-
-export type ProcessedSmbMessageEchoes = {
-    wabaId: string;
-    value: SmbMessageEchoesWebhookValue['value'];
-};
-
-export type ProcessedSmbAppStateSync = {
-    wabaId: string;
-    value: SmbAppStateSyncWebhookValue['value'];
-};
-
-export type ProcessedAccountSettingsUpdate = {
-    wabaId: string;
-    value: AccountSettingsUpdateWebhookValue['value'];
-};
-
-export type ProcessedAutomaticEvents = {
-    wabaId: string;
-    value: AutomaticEventsWebhookValue['value'];
-};
-
-export type ProcessedBusinessStatusUpdate = {
-    wabaId: string;
-    value: BusinessStatusUpdateWebhookValue['value'];
-};
-
-export type ProcessedBusinessUsernameUpdates = {
-    wabaId: string;
-    value: BusinessUsernameUpdatesWebhookValue['value'];
-};
-
-export type ProcessedCalls = {
-    wabaId: string;
-    value: CallsWebhookValue['value'];
-};
-
-export type ProcessedGroupLifecycleUpdate = {
-    wabaId: string;
-    value: GroupLifecycleUpdateWebhookValue['value'];
-};
-
-export type ProcessedGroupParticipantsUpdate = {
-    wabaId: string;
-    value: GroupParticipantsUpdateWebhookValue['value'];
-};
-
-export type ProcessedGroupSettingsUpdate = {
-    wabaId: string;
-    value: GroupSettingsUpdateWebhookValue['value'];
-};
-
-export type ProcessedGroupStatusUpdate = {
-    wabaId: string;
-    value: GroupStatusUpdateWebhookValue['value'];
-};
-
-export type ProcessedMessageEchoes = {
-    wabaId: string;
-    value: MessageEchoesWebhookValue['value'];
-};
-
-export type ProcessedMessageTemplateComponentsUpdate = {
-    wabaId: string;
-    value: MessageTemplateComponentsUpdateWebhookValue['value'];
-};
-
-export type ProcessedMessagingHandovers = {
-    wabaId: string;
-    value: MessagingHandoversWebhookValue['value'];
-};
-
-export type ProcessedPartnerSolutions = {
-    wabaId: string;
-    value: PartnerSolutionsWebhookValue['value'];
-};
-
-export type ProcessedPaymentConfigurationUpdate = {
-    wabaId: string;
-    value: PaymentConfigurationUpdateWebhookValue['value'];
-};
-
-export type ProcessedStandby = {
-    wabaId: string;
-    value: StandbyWebhookValue['value'];
-};
-
-export type ProcessedTemplateCorrectCategoryDetection = {
-    wabaId: string;
-    value: TemplateCorrectCategoryDetectionWebhookValue['value'];
-};
-
-export type ProcessedTrackingEvents = {
-    wabaId: string;
-    value: TrackingEventsWebhookValue['value'];
-};
-
-export type ProcessedUserPreferences = {
-    wabaId: string;
-    value: UserPreferencesWebhookValue['value'];
-};
+export type ProcessedAccountUpdate = ProcessedWebhookField<'account_update'>;
+export type ProcessedAccountReviewUpdate = ProcessedWebhookField<'account_review_update'>;
+export type ProcessedAccountAlerts = ProcessedWebhookField<'account_alerts'>;
+export type ProcessedBusinessCapabilityUpdate = ProcessedWebhookField<'business_capability_update'>;
+export type ProcessedPhoneNumberNameUpdate = ProcessedWebhookField<'phone_number_name_update'>;
+export type ProcessedPhoneNumberQualityUpdate = ProcessedWebhookField<'phone_number_quality_update'>;
+export type ProcessedMessageTemplateStatusUpdate = ProcessedWebhookField<'message_template_status_update'>;
+export type ProcessedTemplateCategoryUpdate = ProcessedWebhookField<'template_category_update'>;
+export type ProcessedMessageTemplateQualityUpdate = ProcessedWebhookField<'message_template_quality_update'>;
+export type ProcessedFlows = ProcessedWebhookField<'flows'>;
+export type ProcessedSecurity = ProcessedWebhookField<'security'>;
+export type ProcessedHistory = ProcessedWebhookField<'history'>;
+export type ProcessedSmbMessageEchoes = ProcessedWebhookField<'smb_message_echoes'>;
+export type ProcessedSmbAppStateSync = ProcessedWebhookField<'smb_app_state_sync'>;
+export type ProcessedAccountSettingsUpdate = ProcessedWebhookField<'account_settings_update'>;
+export type ProcessedAutomaticEvents = ProcessedWebhookField<'automatic_events'>;
+export type ProcessedBusinessStatusUpdate = ProcessedWebhookField<'business_status_update'>;
+export type ProcessedBusinessUsernameUpdates = ProcessedWebhookField<'business_username_updates'>;
+export type ProcessedCalls = ProcessedWebhookField<'calls'>;
+export type ProcessedGroupLifecycleUpdate = ProcessedWebhookField<'group_lifecycle_update'>;
+export type ProcessedGroupParticipantsUpdate = ProcessedWebhookField<'group_participants_update'>;
+export type ProcessedGroupSettingsUpdate = ProcessedWebhookField<'group_settings_update'>;
+export type ProcessedGroupStatusUpdate = ProcessedWebhookField<'group_status_update'>;
+export type ProcessedMessageEchoes = ProcessedWebhookField<'message_echoes'>;
+export type ProcessedMessageTemplateComponentsUpdate = ProcessedWebhookField<'message_template_components_update'>;
+export type ProcessedMessagingHandovers = ProcessedWebhookField<'messaging_handovers'>;
+export type ProcessedPartnerSolutions = ProcessedWebhookField<'partner_solutions'>;
+export type ProcessedPaymentConfigurationUpdate = ProcessedWebhookField<'payment_configuration_update'>;
+export type ProcessedStandby = ProcessedWebhookField<'standby'>;
+export type ProcessedTemplateCorrectCategoryDetection = ProcessedWebhookField<'template_correct_category_detection'>;
+export type ProcessedTrackingEvents = ProcessedWebhookField<'tracking_events'>;
+export type ProcessedUserPreferences = ProcessedWebhookField<'user_preferences'>;
 
 // Type-specific processed messages for specialized handlers
 export type TextProcessedMessage = ProcessedMessage & {
@@ -347,39 +200,52 @@ export type UserActionHandler = WebhookHandler<ProcessedUserAction>;
 export type FlowHandler = WebhookHandler<FlowEndpointRequest, any>;
 export type RawWebhookHandler = WebhookHandler<WebhookPayload>;
 
+/** Handler for a non-`messages` webhook field; `processed.value` is typed by the field name. */
+export type WebhookFieldHandler<F extends NonMessageWebhookField> = WebhookHandler<ProcessedWebhookField<F>>;
+
+/** Registered field handlers keyed by field name, as kept by `WebhookProcessor`. */
+export type WebhookFieldHandlerMap = ReadonlyMap<NonMessageWebhookField, AnyWebhookFieldHandler>;
+
+/**
+ * Field handler with the field type erased, for storage in a map. `on()`
+ * guarantees each stored handler matches its key.
+ */
+// biome-ignore lint/suspicious/noExplicitAny: the value type depends on the map key
+type AnyWebhookFieldHandler = WebhookHandler<{ wabaId: string; value: any }>;
+
 // Webhook field handlers
-export type AccountUpdateHandler = WebhookHandler<ProcessedAccountUpdate>;
-export type AccountReviewUpdateHandler = WebhookHandler<ProcessedAccountReviewUpdate>;
-export type AccountAlertsHandler = WebhookHandler<ProcessedAccountAlerts>;
-export type BusinessCapabilityUpdateHandler = WebhookHandler<ProcessedBusinessCapabilityUpdate>;
-export type PhoneNumberNameUpdateHandler = WebhookHandler<ProcessedPhoneNumberNameUpdate>;
-export type PhoneNumberQualityUpdateHandler = WebhookHandler<ProcessedPhoneNumberQualityUpdate>;
-export type MessageTemplateStatusUpdateHandler = WebhookHandler<ProcessedMessageTemplateStatusUpdate>;
-export type TemplateCategoryUpdateHandler = WebhookHandler<ProcessedTemplateCategoryUpdate>;
-export type MessageTemplateQualityUpdateHandler = WebhookHandler<ProcessedMessageTemplateQualityUpdate>;
-export type FlowsHandler = WebhookHandler<ProcessedFlows>;
-export type SecurityHandler = WebhookHandler<ProcessedSecurity>;
-export type HistoryHandler = WebhookHandler<ProcessedHistory>;
-export type SmbMessageEchoesHandler = WebhookHandler<ProcessedSmbMessageEchoes>;
-export type SmbAppStateSyncHandler = WebhookHandler<ProcessedSmbAppStateSync>;
-export type AccountSettingsUpdateHandler = WebhookHandler<ProcessedAccountSettingsUpdate>;
-export type AutomaticEventsHandler = WebhookHandler<ProcessedAutomaticEvents>;
-export type BusinessStatusUpdateHandler = WebhookHandler<ProcessedBusinessStatusUpdate>;
-export type BusinessUsernameUpdatesHandler = WebhookHandler<ProcessedBusinessUsernameUpdates>;
-export type CallsHandler = WebhookHandler<ProcessedCalls>;
-export type GroupLifecycleUpdateHandler = WebhookHandler<ProcessedGroupLifecycleUpdate>;
-export type GroupParticipantsUpdateHandler = WebhookHandler<ProcessedGroupParticipantsUpdate>;
-export type GroupSettingsUpdateHandler = WebhookHandler<ProcessedGroupSettingsUpdate>;
-export type GroupStatusUpdateHandler = WebhookHandler<ProcessedGroupStatusUpdate>;
-export type MessageEchoesHandler = WebhookHandler<ProcessedMessageEchoes>;
-export type MessageTemplateComponentsUpdateHandler = WebhookHandler<ProcessedMessageTemplateComponentsUpdate>;
-export type MessagingHandoversHandler = WebhookHandler<ProcessedMessagingHandovers>;
-export type PartnerSolutionsHandler = WebhookHandler<ProcessedPartnerSolutions>;
-export type PaymentConfigurationUpdateHandler = WebhookHandler<ProcessedPaymentConfigurationUpdate>;
-export type StandbyHandler = WebhookHandler<ProcessedStandby>;
-export type TemplateCorrectCategoryDetectionHandler = WebhookHandler<ProcessedTemplateCorrectCategoryDetection>;
-export type TrackingEventsHandler = WebhookHandler<ProcessedTrackingEvents>;
-export type UserPreferencesHandler = WebhookHandler<ProcessedUserPreferences>;
+export type AccountUpdateHandler = WebhookFieldHandler<'account_update'>;
+export type AccountReviewUpdateHandler = WebhookFieldHandler<'account_review_update'>;
+export type AccountAlertsHandler = WebhookFieldHandler<'account_alerts'>;
+export type BusinessCapabilityUpdateHandler = WebhookFieldHandler<'business_capability_update'>;
+export type PhoneNumberNameUpdateHandler = WebhookFieldHandler<'phone_number_name_update'>;
+export type PhoneNumberQualityUpdateHandler = WebhookFieldHandler<'phone_number_quality_update'>;
+export type MessageTemplateStatusUpdateHandler = WebhookFieldHandler<'message_template_status_update'>;
+export type TemplateCategoryUpdateHandler = WebhookFieldHandler<'template_category_update'>;
+export type MessageTemplateQualityUpdateHandler = WebhookFieldHandler<'message_template_quality_update'>;
+export type FlowsHandler = WebhookFieldHandler<'flows'>;
+export type SecurityHandler = WebhookFieldHandler<'security'>;
+export type HistoryHandler = WebhookFieldHandler<'history'>;
+export type SmbMessageEchoesHandler = WebhookFieldHandler<'smb_message_echoes'>;
+export type SmbAppStateSyncHandler = WebhookFieldHandler<'smb_app_state_sync'>;
+export type AccountSettingsUpdateHandler = WebhookFieldHandler<'account_settings_update'>;
+export type AutomaticEventsHandler = WebhookFieldHandler<'automatic_events'>;
+export type BusinessStatusUpdateHandler = WebhookFieldHandler<'business_status_update'>;
+export type BusinessUsernameUpdatesHandler = WebhookFieldHandler<'business_username_updates'>;
+export type CallsHandler = WebhookFieldHandler<'calls'>;
+export type GroupLifecycleUpdateHandler = WebhookFieldHandler<'group_lifecycle_update'>;
+export type GroupParticipantsUpdateHandler = WebhookFieldHandler<'group_participants_update'>;
+export type GroupSettingsUpdateHandler = WebhookFieldHandler<'group_settings_update'>;
+export type GroupStatusUpdateHandler = WebhookFieldHandler<'group_status_update'>;
+export type MessageEchoesHandler = WebhookFieldHandler<'message_echoes'>;
+export type MessageTemplateComponentsUpdateHandler = WebhookFieldHandler<'message_template_components_update'>;
+export type MessagingHandoversHandler = WebhookFieldHandler<'messaging_handovers'>;
+export type PartnerSolutionsHandler = WebhookFieldHandler<'partner_solutions'>;
+export type PaymentConfigurationUpdateHandler = WebhookFieldHandler<'payment_configuration_update'>;
+export type StandbyHandler = WebhookFieldHandler<'standby'>;
+export type TemplateCorrectCategoryDetectionHandler = WebhookFieldHandler<'template_correct_category_detection'>;
+export type TrackingEventsHandler = WebhookFieldHandler<'tracking_events'>;
+export type UserPreferencesHandler = WebhookFieldHandler<'user_preferences'>;
 
 // Type-specific handlers for specialized methods
 export type TextMessageHandler = WebhookHandler<TextProcessedMessage>;
@@ -397,6 +263,182 @@ export type OrderMessageHandler = WebhookHandler<OrderProcessedMessage>;
 export type SystemMessageHandler = WebhookHandler<SystemProcessedMessage>;
 
 /**
+ * Named handler options accepted by {@link processWebhookMessages}, one per
+ * webhook field except `messages`. Kept for backward compatibility; new code
+ * can pass `fieldHandlers` instead.
+ */
+export type WebhookFieldHandlerOptions = {
+    accountUpdateHandler?: AccountUpdateHandler;
+    accountReviewUpdateHandler?: AccountReviewUpdateHandler;
+    accountAlertsHandler?: AccountAlertsHandler;
+    businessCapabilityUpdateHandler?: BusinessCapabilityUpdateHandler;
+    phoneNumberNameUpdateHandler?: PhoneNumberNameUpdateHandler;
+    phoneNumberQualityUpdateHandler?: PhoneNumberQualityUpdateHandler;
+    messageTemplateStatusUpdateHandler?: MessageTemplateStatusUpdateHandler;
+    templateCategoryUpdateHandler?: TemplateCategoryUpdateHandler;
+    messageTemplateQualityUpdateHandler?: MessageTemplateQualityUpdateHandler;
+    flowsHandler?: FlowsHandler;
+    securityHandler?: SecurityHandler;
+    historyHandler?: HistoryHandler;
+    smbMessageEchoesHandler?: SmbMessageEchoesHandler;
+    smbAppStateSyncHandler?: SmbAppStateSyncHandler;
+    accountSettingsUpdateHandler?: AccountSettingsUpdateHandler;
+    automaticEventsHandler?: AutomaticEventsHandler;
+    businessStatusUpdateHandler?: BusinessStatusUpdateHandler;
+    businessUsernameUpdatesHandler?: BusinessUsernameUpdatesHandler;
+    callsHandler?: CallsHandler;
+    groupLifecycleUpdateHandler?: GroupLifecycleUpdateHandler;
+    groupParticipantsUpdateHandler?: GroupParticipantsUpdateHandler;
+    groupSettingsUpdateHandler?: GroupSettingsUpdateHandler;
+    groupStatusUpdateHandler?: GroupStatusUpdateHandler;
+    messageEchoesHandler?: MessageEchoesHandler;
+    messageTemplateComponentsUpdateHandler?: MessageTemplateComponentsUpdateHandler;
+    messagingHandoversHandler?: MessagingHandoversHandler;
+    partnerSolutionsHandler?: PartnerSolutionsHandler;
+    paymentConfigurationUpdateHandler?: PaymentConfigurationUpdateHandler;
+    standbyHandler?: StandbyHandler;
+    templateCorrectCategoryDetectionHandler?: TemplateCorrectCategoryDetectionHandler;
+    trackingEventsHandler?: TrackingEventsHandler;
+    userPreferencesHandler?: UserPreferencesHandler;
+};
+
+/** The {@link WebhookFieldHandlerOptions} key whose handler type matches field `F`. */
+type HandlerOptionKeyFor<F extends NonMessageWebhookField> = {
+    [K in keyof WebhookFieldHandlerOptions]-?: NonNullable<WebhookFieldHandlerOptions[K]> extends WebhookFieldHandler<F>
+        ? K
+        : never;
+}[keyof WebhookFieldHandlerOptions];
+
+/**
+ * Registry of every webhook field except `messages`, mapping each field to its
+ * named handler option. Dispatch is driven by this table: a field listed here
+ * is routed to its handler, anything else is logged as unhandled. Adding a
+ * field to `WebhookFieldValueMap` without an entry here fails type checking.
+ */
+export const WEBHOOK_FIELD_REGISTRY = {
+    account_update: 'accountUpdateHandler',
+    account_review_update: 'accountReviewUpdateHandler',
+    account_alerts: 'accountAlertsHandler',
+    account_settings_update: 'accountSettingsUpdateHandler',
+    automatic_events: 'automaticEventsHandler',
+    business_capability_update: 'businessCapabilityUpdateHandler',
+    business_status_update: 'businessStatusUpdateHandler',
+    business_username_updates: 'businessUsernameUpdatesHandler',
+    calls: 'callsHandler',
+    flows: 'flowsHandler',
+    group_lifecycle_update: 'groupLifecycleUpdateHandler',
+    group_participants_update: 'groupParticipantsUpdateHandler',
+    group_settings_update: 'groupSettingsUpdateHandler',
+    group_status_update: 'groupStatusUpdateHandler',
+    history: 'historyHandler',
+    message_echoes: 'messageEchoesHandler',
+    message_template_components_update: 'messageTemplateComponentsUpdateHandler',
+    message_template_quality_update: 'messageTemplateQualityUpdateHandler',
+    message_template_status_update: 'messageTemplateStatusUpdateHandler',
+    messaging_handovers: 'messagingHandoversHandler',
+    partner_solutions: 'partnerSolutionsHandler',
+    payment_configuration_update: 'paymentConfigurationUpdateHandler',
+    phone_number_name_update: 'phoneNumberNameUpdateHandler',
+    phone_number_quality_update: 'phoneNumberQualityUpdateHandler',
+    security: 'securityHandler',
+    smb_app_state_sync: 'smbAppStateSyncHandler',
+    smb_message_echoes: 'smbMessageEchoesHandler',
+    standby: 'standbyHandler',
+    template_category_update: 'templateCategoryUpdateHandler',
+    template_correct_category_detection: 'templateCorrectCategoryDetectionHandler',
+    tracking_events: 'trackingEventsHandler',
+    user_preferences: 'userPreferencesHandler',
+} as const satisfies { [F in NonMessageWebhookField]: HandlerOptionKeyFor<F> };
+
+/** True when `field` is a webhook field other than `messages` that the SDK knows. */
+export function isNonMessageWebhookField(field: string): field is NonMessageWebhookField {
+    return Object.hasOwn(WEBHOOK_FIELD_REGISTRY, field);
+}
+
+/**
+ * Dedupe keys for non-`messages` fields that carry a natural id. Fields not
+ * listed here are never deduped. A change is a duplicate only when its whole
+ * set of ids was seen before.
+ */
+const FIELD_DEDUPE_KEYS: { [F in NonMessageWebhookField]?: (value: WebhookFieldValueMap[F]) => string | undefined } = {
+    calls: (value) =>
+        joinDedupeIds(
+            'calls',
+            mapArray(value?.calls, (call) =>
+                call?.id ? `${call.id}:${call.event}${call.call_status ? `:${call.call_status}` : ''}` : undefined,
+            ),
+        ),
+    smb_message_echoes: (value) =>
+        joinDedupeIds(
+            'smb_message_echoes',
+            mapArray(value?.message_echoes, (echo) => echo?.id),
+        ),
+    message_echoes: (value) =>
+        joinDedupeIds(
+            'message_echoes',
+            mapArray(value?.messaging, (entry) => entry?.message?.mid),
+        ),
+};
+
+function mapArray<T>(
+    items: T[] | undefined,
+    fn: (item: T) => string | undefined,
+): Array<string | undefined> | undefined {
+    return Array.isArray(items) ? items.map(fn) : undefined;
+}
+
+function joinDedupeIds(prefix: string, ids: Array<string | undefined> | undefined): string | undefined {
+    if (!ids || ids.length === 0 || ids.some((id) => !id)) return undefined;
+    return `${prefix}:${ids.join(',')}`;
+}
+
+/** Dedupe key for one change of a non-`messages` field, or undefined when it has no natural id. */
+export function getWebhookFieldDedupeKey<F extends NonMessageWebhookField>(
+    field: F,
+    value: WebhookFieldValueMap[F],
+): string | undefined {
+    const keyFn = FIELD_DEDUPE_KEYS[field] as ((value: WebhookFieldValueMap[F]) => string | undefined) | undefined;
+    return keyFn?.(value);
+}
+
+/** Dedupe settings for {@link processWebhookMessages}. */
+export type WebhookDedupeOptions = {
+    store: DedupeStore;
+    /** Defaults to 86400 (24 hours). */
+    ttlSeconds?: number;
+};
+
+/** Options for {@link processWebhookMessages}. */
+export type ProcessWebhookOptions = WebhookSignatureOptions & {
+    /** Skip handlers for deliveries already seen. Duplicates still get a 200 response. */
+    dedupe?: WebhookDedupeOptions;
+};
+
+type ResolvedDedupeOptions = { store: DedupeStore; ttlSeconds: number };
+
+/**
+ * Claim a dedupe key. Resolves true when the delivery was already seen.
+ * Store errors fail open: the delivery is processed and the error is logged.
+ */
+async function isDuplicateDelivery(
+    dedupe: ResolvedDedupeOptions | undefined,
+    key: string | undefined,
+): Promise<boolean> {
+    if (!dedupe || !key) return false;
+    try {
+        const stored = await dedupe.store.setIfAbsent(key, dedupe.ttlSeconds);
+        if (!stored) {
+            LOGGER.log(`Skipping duplicate webhook delivery: ${key}`);
+            return true;
+        }
+        return false;
+    } catch (error) {
+        LOGGER.error('Dedupe store failed; processing the webhook anyway:', { key, error });
+        return false;
+    }
+}
+
+/**
  * Process webhook messages
  */
 export async function processWebhookMessages(
@@ -410,41 +452,13 @@ export async function processWebhookMessages(
         postProcessHandler?: MessageHandler;
         rawHandler?: RawWebhookHandler;
         rawHandlerFields?: WebhookFieldType[];
-        // Webhook field handlers
-        accountUpdateHandler?: AccountUpdateHandler;
-        accountReviewUpdateHandler?: AccountReviewUpdateHandler;
-        accountAlertsHandler?: AccountAlertsHandler;
-        businessCapabilityUpdateHandler?: BusinessCapabilityUpdateHandler;
-        phoneNumberNameUpdateHandler?: PhoneNumberNameUpdateHandler;
-        phoneNumberQualityUpdateHandler?: PhoneNumberQualityUpdateHandler;
-        messageTemplateStatusUpdateHandler?: MessageTemplateStatusUpdateHandler;
-        templateCategoryUpdateHandler?: TemplateCategoryUpdateHandler;
-        messageTemplateQualityUpdateHandler?: MessageTemplateQualityUpdateHandler;
-        flowsHandler?: FlowsHandler;
-        securityHandler?: SecurityHandler;
-        historyHandler?: HistoryHandler;
-        smbMessageEchoesHandler?: SmbMessageEchoesHandler;
-        smbAppStateSyncHandler?: SmbAppStateSyncHandler;
-        accountSettingsUpdateHandler?: AccountSettingsUpdateHandler;
-        automaticEventsHandler?: AutomaticEventsHandler;
-        businessStatusUpdateHandler?: BusinessStatusUpdateHandler;
-        businessUsernameUpdatesHandler?: BusinessUsernameUpdatesHandler;
-        callsHandler?: CallsHandler;
-        groupLifecycleUpdateHandler?: GroupLifecycleUpdateHandler;
-        groupParticipantsUpdateHandler?: GroupParticipantsUpdateHandler;
-        groupSettingsUpdateHandler?: GroupSettingsUpdateHandler;
-        groupStatusUpdateHandler?: GroupStatusUpdateHandler;
-        messageEchoesHandler?: MessageEchoesHandler;
-        messageTemplateComponentsUpdateHandler?: MessageTemplateComponentsUpdateHandler;
-        messagingHandoversHandler?: MessagingHandoversHandler;
-        partnerSolutionsHandler?: PartnerSolutionsHandler;
-        paymentConfigurationUpdateHandler?: PaymentConfigurationUpdateHandler;
-        standbyHandler?: StandbyHandler;
-        templateCorrectCategoryDetectionHandler?: TemplateCorrectCategoryDetectionHandler;
-        trackingEventsHandler?: TrackingEventsHandler;
-        userPreferencesHandler?: UserPreferencesHandler;
-    },
-    options: WebhookSignatureOptions = {},
+        /**
+         * Handlers for non-`messages` fields keyed by field name. Takes
+         * precedence over the named `xxxHandler` option for the same field.
+         */
+        fieldHandlers?: WebhookFieldHandlerMap;
+    } & WebhookFieldHandlerOptions,
+    options: ProcessWebhookOptions = {},
 ): Promise<Response> {
     try {
         const rawBody = await request.text();
@@ -475,6 +489,9 @@ export async function processWebhookMessages(
             method: request.method,
             url: request.url,
         };
+        const dedupe: ResolvedDedupeOptions | undefined = options.dedupe
+            ? { store: options.dedupe.store, ttlSeconds: options.dedupe.ttlSeconds ?? DEFAULT_DEDUPE_TTL_SECONDS }
+            : undefined;
 
         if (handlers.rawHandler) {
             const { rawHandler, rawHandlerFields } = handlers;
@@ -516,263 +533,20 @@ export async function processWebhookMessages(
             try {
                 const changes = entry.changes;
                 for (const change of changes) {
-                    if (change.field === 'messages') {
-                        await processMessages(entry.id, change.value, whatsapp, handlers, context);
-                    } else if (change.field === 'account_update') {
+                    const field: string = change.field;
+                    if (field === 'messages') {
+                        await processMessages(entry.id, change.value, whatsapp, handlers, context, dedupe);
+                    } else if (isNonMessageWebhookField(field)) {
+                        const handler =
+                            handlers.fieldHandlers?.get(field) ??
+                            (handlers[WEBHOOK_FIELD_REGISTRY[field]] as AnyWebhookFieldHandler | undefined);
                         await processWebhookField(
                             entry.id,
-                            change as AccountUpdateWebhookValue,
-                            handlers.accountUpdateHandler,
+                            { field, value: change.value },
+                            handler,
                             whatsapp,
                             context,
-                        );
-                    } else if (change.field === 'account_review_update') {
-                        await processWebhookField(
-                            entry.id,
-                            change as AccountReviewUpdateWebhookValue,
-                            handlers.accountReviewUpdateHandler,
-                            whatsapp,
-                            context,
-                        );
-                    } else if (change.field === 'account_alerts') {
-                        await processWebhookField(
-                            entry.id,
-                            change as AccountAlertsWebhookValue,
-                            handlers.accountAlertsHandler,
-                            whatsapp,
-                            context,
-                        );
-                    } else if (change.field === 'business_capability_update') {
-                        await processWebhookField(
-                            entry.id,
-                            change as BusinessCapabilityUpdateWebhookValue,
-                            handlers.businessCapabilityUpdateHandler,
-                            whatsapp,
-                            context,
-                        );
-                    } else if (change.field === 'phone_number_name_update') {
-                        await processWebhookField(
-                            entry.id,
-                            change as PhoneNumberNameUpdateWebhookValue,
-                            handlers.phoneNumberNameUpdateHandler,
-                            whatsapp,
-                            context,
-                        );
-                    } else if (change.field === 'phone_number_quality_update') {
-                        await processWebhookField(
-                            entry.id,
-                            change as PhoneNumberQualityUpdateWebhookValue,
-                            handlers.phoneNumberQualityUpdateHandler,
-                            whatsapp,
-                            context,
-                        );
-                    } else if (change.field === 'message_template_status_update') {
-                        await processWebhookField(
-                            entry.id,
-                            change as MessageTemplateStatusUpdateWebhookValue,
-                            handlers.messageTemplateStatusUpdateHandler,
-                            whatsapp,
-                            context,
-                        );
-                    } else if (change.field === 'template_category_update') {
-                        await processWebhookField(
-                            entry.id,
-                            change as TemplateCategoryUpdateWebhookValue,
-                            handlers.templateCategoryUpdateHandler,
-                            whatsapp,
-                            context,
-                        );
-                    } else if (change.field === 'message_template_quality_update') {
-                        await processWebhookField(
-                            entry.id,
-                            change as MessageTemplateQualityUpdateWebhookValue,
-                            handlers.messageTemplateQualityUpdateHandler,
-                            whatsapp,
-                            context,
-                        );
-                    } else if (change.field === 'flows') {
-                        await processWebhookField(
-                            entry.id,
-                            change as FlowsWebhookValue,
-                            handlers.flowsHandler,
-                            whatsapp,
-                            context,
-                        );
-                    } else if (change.field === 'security') {
-                        await processWebhookField(
-                            entry.id,
-                            change as SecurityWebhookValue,
-                            handlers.securityHandler,
-                            whatsapp,
-                            context,
-                        );
-                    } else if (change.field === 'history') {
-                        await processWebhookField(
-                            entry.id,
-                            change as HistoryWebhookValue,
-                            handlers.historyHandler,
-                            whatsapp,
-                            context,
-                        );
-                    } else if (change.field === 'smb_message_echoes') {
-                        await processWebhookField(
-                            entry.id,
-                            change as SmbMessageEchoesWebhookValue,
-                            handlers.smbMessageEchoesHandler,
-                            whatsapp,
-                            context,
-                        );
-                    } else if (change.field === 'smb_app_state_sync') {
-                        await processWebhookField(
-                            entry.id,
-                            change as SmbAppStateSyncWebhookValue,
-                            handlers.smbAppStateSyncHandler,
-                            whatsapp,
-                            context,
-                        );
-                    } else if (change.field === 'account_settings_update') {
-                        await processWebhookField(
-                            entry.id,
-                            change as AccountSettingsUpdateWebhookValue,
-                            handlers.accountSettingsUpdateHandler,
-                            whatsapp,
-                            context,
-                        );
-                    } else if (change.field === 'automatic_events') {
-                        await processWebhookField(
-                            entry.id,
-                            change as AutomaticEventsWebhookValue,
-                            handlers.automaticEventsHandler,
-                            whatsapp,
-                            context,
-                        );
-                    } else if (change.field === 'business_status_update') {
-                        await processWebhookField(
-                            entry.id,
-                            change as BusinessStatusUpdateWebhookValue,
-                            handlers.businessStatusUpdateHandler,
-                            whatsapp,
-                            context,
-                        );
-                    } else if (change.field === 'business_username_updates') {
-                        await processWebhookField(
-                            entry.id,
-                            change as BusinessUsernameUpdatesWebhookValue,
-                            handlers.businessUsernameUpdatesHandler,
-                            whatsapp,
-                            context,
-                        );
-                    } else if (change.field === 'calls') {
-                        await processWebhookField(
-                            entry.id,
-                            change as CallsWebhookValue,
-                            handlers.callsHandler,
-                            whatsapp,
-                            context,
-                        );
-                    } else if (change.field === 'group_lifecycle_update') {
-                        await processWebhookField(
-                            entry.id,
-                            change as GroupLifecycleUpdateWebhookValue,
-                            handlers.groupLifecycleUpdateHandler,
-                            whatsapp,
-                            context,
-                        );
-                    } else if (change.field === 'group_participants_update') {
-                        await processWebhookField(
-                            entry.id,
-                            change as GroupParticipantsUpdateWebhookValue,
-                            handlers.groupParticipantsUpdateHandler,
-                            whatsapp,
-                            context,
-                        );
-                    } else if (change.field === 'group_settings_update') {
-                        await processWebhookField(
-                            entry.id,
-                            change as GroupSettingsUpdateWebhookValue,
-                            handlers.groupSettingsUpdateHandler,
-                            whatsapp,
-                            context,
-                        );
-                    } else if (change.field === 'group_status_update') {
-                        await processWebhookField(
-                            entry.id,
-                            change as GroupStatusUpdateWebhookValue,
-                            handlers.groupStatusUpdateHandler,
-                            whatsapp,
-                            context,
-                        );
-                    } else if (change.field === 'message_echoes') {
-                        await processWebhookField(
-                            entry.id,
-                            change as MessageEchoesWebhookValue,
-                            handlers.messageEchoesHandler,
-                            whatsapp,
-                            context,
-                        );
-                    } else if (change.field === 'message_template_components_update') {
-                        await processWebhookField(
-                            entry.id,
-                            change as MessageTemplateComponentsUpdateWebhookValue,
-                            handlers.messageTemplateComponentsUpdateHandler,
-                            whatsapp,
-                            context,
-                        );
-                    } else if (change.field === 'messaging_handovers') {
-                        await processWebhookField(
-                            entry.id,
-                            change as MessagingHandoversWebhookValue,
-                            handlers.messagingHandoversHandler,
-                            whatsapp,
-                            context,
-                        );
-                    } else if (change.field === 'partner_solutions') {
-                        await processWebhookField(
-                            entry.id,
-                            change as PartnerSolutionsWebhookValue,
-                            handlers.partnerSolutionsHandler,
-                            whatsapp,
-                            context,
-                        );
-                    } else if (change.field === 'payment_configuration_update') {
-                        await processWebhookField(
-                            entry.id,
-                            change as PaymentConfigurationUpdateWebhookValue,
-                            handlers.paymentConfigurationUpdateHandler,
-                            whatsapp,
-                            context,
-                        );
-                    } else if (change.field === 'standby') {
-                        await processWebhookField(
-                            entry.id,
-                            change as StandbyWebhookValue,
-                            handlers.standbyHandler,
-                            whatsapp,
-                            context,
-                        );
-                    } else if (change.field === 'template_correct_category_detection') {
-                        await processWebhookField(
-                            entry.id,
-                            change as TemplateCorrectCategoryDetectionWebhookValue,
-                            handlers.templateCorrectCategoryDetectionHandler,
-                            whatsapp,
-                            context,
-                        );
-                    } else if (change.field === 'tracking_events') {
-                        await processWebhookField(
-                            entry.id,
-                            change as TrackingEventsWebhookValue,
-                            handlers.trackingEventsHandler,
-                            whatsapp,
-                            context,
-                        );
-                    } else if (change.field === 'user_preferences') {
-                        await processWebhookField(
-                            entry.id,
-                            change as UserPreferencesWebhookValue,
-                            handlers.userPreferencesHandler,
-                            whatsapp,
-                            context,
+                            dedupe,
                         );
                     } else {
                         LOGGER.warn(`Unhandled webhook field: ${change.field}`);
@@ -1007,6 +781,7 @@ async function processMessages(
         postProcessHandler?: MessageHandler;
     },
     context: WebhookHandlerContext,
+    dedupe?: ResolvedDedupeOptions,
 ): Promise<void> {
     const metadata = value.metadata;
     const wabaId = waba_id;
@@ -1033,6 +808,10 @@ async function processMessages(
     if ('statuses' in value && value.statuses) {
         const statusValue = value as StatusWebhookValue;
         for (const status of statusValue.statuses) {
+            if (!handlers.statusHandler) continue;
+            if (await isDuplicateDelivery(dedupe, status.id ? `status:${status.id}:${status.status}` : undefined)) {
+                continue;
+            }
             const processed: ProcessedStatus = {
                 wabaId,
                 phoneNumberId,
@@ -1062,16 +841,15 @@ async function processMessages(
             };
 
             const messageType = message.type;
+            const messageHandler = handlers.messageHandlers.get(messageType);
+            if (!handlers.preProcessHandler && !messageHandler && !handlers.postProcessHandler) continue;
+            if (await isDuplicateDelivery(dedupe, processed.messageId ? `message:${processed.messageId}` : undefined)) {
+                continue;
+            }
 
             // Execute handlers in sequence
             await executeMessageHandler(handlers.preProcessHandler, whatsapp, processed, context, 'pre-process');
-            await executeMessageHandler(
-                handlers.messageHandlers.get(messageType),
-                whatsapp,
-                processed,
-                context,
-                messageType,
-            );
+            await executeMessageHandler(messageHandler, whatsapp, processed, context, messageType);
             await executeMessageHandler(handlers.postProcessHandler, whatsapp, processed, context, 'post-process');
         }
     }
@@ -1127,31 +905,26 @@ async function executeUserActionHandler(
  * Generic webhook field processor
  * Processes webhook fields other than 'messages'
  */
-async function processWebhookField<T extends { field: string; value: any }>(
+async function processWebhookField<F extends NonMessageWebhookField>(
     wabaId: string,
-    webhookValue: T,
-    handler:
-        | ((
-              whatsapp: WhatsApp,
-              processed: { wabaId: string; value: T['value'] },
-              context: WebhookHandlerContext,
-          ) => void | Promise<void>)
-        | undefined,
+    webhookValue: { field: F; value: WebhookFieldValueMap[F] },
+    handler: WebhookFieldHandler<F> | AnyWebhookFieldHandler | undefined,
     whatsapp: WhatsApp,
     context: WebhookHandlerContext,
+    dedupe?: ResolvedDedupeOptions,
 ): Promise<void> {
-    if (handler) {
-        try {
-            await handler(
-                whatsapp,
-                {
-                    wabaId,
-                    value: webhookValue.value,
-                },
-                context,
-            );
-        } catch (error) {
-            LOGGER.error(`Error in ${webhookValue.field} handler:`, { error, wabaId });
-        }
+    if (!handler) return;
+    if (await isDuplicateDelivery(dedupe, getWebhookFieldDedupeKey(webhookValue.field, webhookValue.value))) return;
+    try {
+        await handler(
+            whatsapp,
+            {
+                wabaId,
+                value: webhookValue.value,
+            },
+            context,
+        );
+    } catch (error) {
+        LOGGER.error(`Error in ${webhookValue.field} handler:`, { error, wabaId });
     }
 }

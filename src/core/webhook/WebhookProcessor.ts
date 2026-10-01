@@ -5,7 +5,8 @@ import { MessageTypesEnum, WabaConfigEnum } from '../../types/enums';
 import Logger from '../../utils/logger';
 import { isDebugEnv } from '../../utils/runtime';
 import { WhatsApp } from '../whatsapp';
-import type { WebhookFieldType } from './types';
+import { type ResolvedDedupe, resolveDedupe } from './dedupe';
+import type { NonMessageWebhookField, WebhookFieldType } from './types';
 import {
     type AccountAlertsHandler,
     type AccountReviewUpdateHandler,
@@ -29,6 +30,7 @@ import {
     type HistoryHandler,
     type ImageMessageHandler,
     type InteractiveMessageHandler,
+    isNonMessageWebhookField,
     type LocationMessageHandler,
     type MessageEchoesHandler,
     type MessageHandler,
@@ -59,9 +61,22 @@ import {
     type UserActionHandler,
     type UserPreferencesHandler,
     type VideoMessageHandler,
+    type WebhookFieldHandler,
 } from './utils/webhookUtils';
 
 const LOGGER = new Logger('WEBHOOK_PROCESSOR', isDebugEnv());
+
+function assertNonMessageField(field: string, method: 'on' | 'off'): void {
+    if (field === 'messages') {
+        throw new Error(
+            `${method}('messages') is not supported. Use onMessage/onText/... for messages, ` +
+                'onStatus for statuses and onUserAction for marketing user actions.',
+        );
+    }
+    if (!isNonMessageWebhookField(field)) {
+        throw new Error(`${method}('${field}'): unknown webhook field`);
+    }
+}
 
 export interface WebhookResponse {
     status: number;
@@ -80,45 +95,16 @@ export class WebhookProcessor {
     private rawHandler: { handler: RawWebhookHandler; fields?: WebhookFieldType[] } | undefined = undefined;
     private flowHandlers: Map<FlowTypeEnum, FlowHandler> = new Map();
 
-    // Webhook field handlers
-    private accountUpdateHandler: AccountUpdateHandler | undefined = undefined;
-    private accountReviewUpdateHandler: AccountReviewUpdateHandler | undefined = undefined;
-    private accountAlertsHandler: AccountAlertsHandler | undefined = undefined;
-    private businessCapabilityUpdateHandler: BusinessCapabilityUpdateHandler | undefined = undefined;
-    private phoneNumberNameUpdateHandler: PhoneNumberNameUpdateHandler | undefined = undefined;
-    private phoneNumberQualityUpdateHandler: PhoneNumberQualityUpdateHandler | undefined = undefined;
-    private messageTemplateStatusUpdateHandler: MessageTemplateStatusUpdateHandler | undefined = undefined;
-    private templateCategoryUpdateHandler: TemplateCategoryUpdateHandler | undefined = undefined;
-    private messageTemplateQualityUpdateHandler: MessageTemplateQualityUpdateHandler | undefined = undefined;
-    private flowsHandler: FlowsHandler | undefined = undefined;
-    private securityHandler: SecurityHandler | undefined = undefined;
-    private historyHandler: HistoryHandler | undefined = undefined;
-    private smbMessageEchoesHandler: SmbMessageEchoesHandler | undefined = undefined;
-    private smbAppStateSyncHandler: SmbAppStateSyncHandler | undefined = undefined;
-    private accountSettingsUpdateHandler: AccountSettingsUpdateHandler | undefined = undefined;
-    private automaticEventsHandler: AutomaticEventsHandler | undefined = undefined;
-    private businessStatusUpdateHandler: BusinessStatusUpdateHandler | undefined = undefined;
-    private businessUsernameUpdatesHandler: BusinessUsernameUpdatesHandler | undefined = undefined;
-    private callsHandler: CallsHandler | undefined = undefined;
-    private groupLifecycleUpdateHandler: GroupLifecycleUpdateHandler | undefined = undefined;
-    private groupParticipantsUpdateHandler: GroupParticipantsUpdateHandler | undefined = undefined;
-    private groupSettingsUpdateHandler: GroupSettingsUpdateHandler | undefined = undefined;
-    private groupStatusUpdateHandler: GroupStatusUpdateHandler | undefined = undefined;
-    private messageEchoesHandler: MessageEchoesHandler | undefined = undefined;
-    private messageTemplateComponentsUpdateHandler: MessageTemplateComponentsUpdateHandler | undefined = undefined;
-    private messagingHandoversHandler: MessagingHandoversHandler | undefined = undefined;
-    private partnerSolutionsHandler: PartnerSolutionsHandler | undefined = undefined;
-    private paymentConfigurationUpdateHandler: PaymentConfigurationUpdateHandler | undefined = undefined;
-    private standbyHandler: StandbyHandler | undefined = undefined;
-    private templateCorrectCategoryDetectionHandler: TemplateCorrectCategoryDetectionHandler | undefined = undefined;
-    private trackingEventsHandler: TrackingEventsHandler | undefined = undefined;
-    private userPreferencesHandler: UserPreferencesHandler | undefined = undefined;
+    /** Handlers for every webhook field except `messages`, keyed by field name. */
+    private fieldHandlers: Map<NonMessageWebhookField, WebhookFieldHandler<NonMessageWebhookField>> = new Map();
 
     private verifySignature: boolean;
+    private dedupe: ResolvedDedupe | undefined;
 
     constructor(config: WhatsAppConfig) {
         this.config = importConfig(config);
         this.verifySignature = config.verifyWebhookSignature === true;
+        this.dedupe = resolveDedupe(config.dedupe);
         this.client = new WhatsApp(config);
         LOGGER.log('WebhookProcessor instantiated');
     }
@@ -156,43 +142,12 @@ export class WebhookProcessor {
                     postProcessHandler: this.postProcessHandler,
                     rawHandler: this.rawHandler?.handler,
                     rawHandlerFields: this.rawHandler?.fields,
-                    // Webhook field handlers
-                    accountUpdateHandler: this.accountUpdateHandler,
-                    accountReviewUpdateHandler: this.accountReviewUpdateHandler,
-                    accountAlertsHandler: this.accountAlertsHandler,
-                    businessCapabilityUpdateHandler: this.businessCapabilityUpdateHandler,
-                    phoneNumberNameUpdateHandler: this.phoneNumberNameUpdateHandler,
-                    phoneNumberQualityUpdateHandler: this.phoneNumberQualityUpdateHandler,
-                    messageTemplateStatusUpdateHandler: this.messageTemplateStatusUpdateHandler,
-                    templateCategoryUpdateHandler: this.templateCategoryUpdateHandler,
-                    messageTemplateQualityUpdateHandler: this.messageTemplateQualityUpdateHandler,
-                    flowsHandler: this.flowsHandler,
-                    securityHandler: this.securityHandler,
-                    historyHandler: this.historyHandler,
-                    smbMessageEchoesHandler: this.smbMessageEchoesHandler,
-                    smbAppStateSyncHandler: this.smbAppStateSyncHandler,
-                    accountSettingsUpdateHandler: this.accountSettingsUpdateHandler,
-                    automaticEventsHandler: this.automaticEventsHandler,
-                    businessStatusUpdateHandler: this.businessStatusUpdateHandler,
-                    businessUsernameUpdatesHandler: this.businessUsernameUpdatesHandler,
-                    callsHandler: this.callsHandler,
-                    groupLifecycleUpdateHandler: this.groupLifecycleUpdateHandler,
-                    groupParticipantsUpdateHandler: this.groupParticipantsUpdateHandler,
-                    groupSettingsUpdateHandler: this.groupSettingsUpdateHandler,
-                    groupStatusUpdateHandler: this.groupStatusUpdateHandler,
-                    messageEchoesHandler: this.messageEchoesHandler,
-                    messageTemplateComponentsUpdateHandler: this.messageTemplateComponentsUpdateHandler,
-                    messagingHandoversHandler: this.messagingHandoversHandler,
-                    partnerSolutionsHandler: this.partnerSolutionsHandler,
-                    paymentConfigurationUpdateHandler: this.paymentConfigurationUpdateHandler,
-                    standbyHandler: this.standbyHandler,
-                    templateCorrectCategoryDetectionHandler: this.templateCorrectCategoryDetectionHandler,
-                    trackingEventsHandler: this.trackingEventsHandler,
-                    userPreferencesHandler: this.userPreferencesHandler,
+                    fieldHandlers: this.fieldHandlers,
                 },
                 {
                     appSecret: this.config[WabaConfigEnum.AppSecret],
                     verifySignature: this.verifySignature,
+                    dedupe: this.dedupe,
                 },
             );
 
@@ -280,6 +235,39 @@ export class WebhookProcessor {
     onFlow(type: FlowTypeEnum, handler: FlowHandler): void {
         this.flowHandlers.set(type, handler);
         LOGGER.log(`Registered flow handler for ${type}`);
+    }
+
+    /**
+     * Register a handler for any webhook field except `messages`. The type of
+     * `processed.value` follows from the field name. Replaces any handler
+     * already registered for that field, including one set with the matching
+     * `onXxx` method (for example `onCalls` is `on('calls', handler)`).
+     *
+     * `messages` is not accepted: use `onMessage`, the typed message methods
+     * (`onText`, ...), `onStatus` or `onUserAction`, which split that field
+     * into messages, statuses and user actions.
+     *
+     * @example
+     * ```typescript
+     * processor.on('calls', async (whatsapp, { value }) => {
+     *     for (const call of value.calls) console.log(call.id, call.event);
+     * });
+     * ```
+     */
+    on<F extends NonMessageWebhookField>(field: F, handler: WebhookFieldHandler<F>): void {
+        assertNonMessageField(field, 'on');
+        this.fieldHandlers.set(field, handler as unknown as WebhookFieldHandler<NonMessageWebhookField>);
+        LOGGER.log(`Registered ${field} handler`);
+    }
+
+    /**
+     * Remove the handler for a webhook field registered with `on()` or the
+     * matching `onXxx` method. `messages` is not accepted (see {@link on}).
+     */
+    off(field: NonMessageWebhookField): void {
+        assertNonMessageField(field, 'off');
+        this.fieldHandlers.delete(field);
+        LOGGER.log(`Removed ${field} handler`);
     }
 
     // ============================================================================
@@ -413,8 +401,7 @@ export class WebhookProcessor {
      * @see https://developers.facebook.com/docs/whatsapp/business-management-api/webhooks/components#account_update
      */
     onAccountUpdate(handler: AccountUpdateHandler): void {
-        this.accountUpdateHandler = handler;
-        LOGGER.log('Registered account_update handler');
+        this.on('account_update', handler);
     }
 
     /**
@@ -422,8 +409,7 @@ export class WebhookProcessor {
      * @see https://developers.facebook.com/docs/whatsapp/business-management-api/webhooks/components#account_review_update
      */
     onAccountReviewUpdate(handler: AccountReviewUpdateHandler): void {
-        this.accountReviewUpdateHandler = handler;
-        LOGGER.log('Registered account_review_update handler');
+        this.on('account_review_update', handler);
     }
 
     /**
@@ -431,8 +417,7 @@ export class WebhookProcessor {
      * @see https://developers.facebook.com/docs/whatsapp/business-management-api/webhooks/components#account_alerts
      */
     onAccountAlerts(handler: AccountAlertsHandler): void {
-        this.accountAlertsHandler = handler;
-        LOGGER.log('Registered account_alerts handler');
+        this.on('account_alerts', handler);
     }
 
     /**
@@ -440,8 +425,7 @@ export class WebhookProcessor {
      * @see https://developers.facebook.com/docs/whatsapp/business-management-api/webhooks/components#business_capability_update
      */
     onBusinessCapabilityUpdate(handler: BusinessCapabilityUpdateHandler): void {
-        this.businessCapabilityUpdateHandler = handler;
-        LOGGER.log('Registered business_capability_update handler');
+        this.on('business_capability_update', handler);
     }
 
     /**
@@ -449,8 +433,7 @@ export class WebhookProcessor {
      * @see https://developers.facebook.com/docs/whatsapp/business-management-api/webhooks/components#phone_number_name_update
      */
     onPhoneNumberNameUpdate(handler: PhoneNumberNameUpdateHandler): void {
-        this.phoneNumberNameUpdateHandler = handler;
-        LOGGER.log('Registered phone_number_name_update handler');
+        this.on('phone_number_name_update', handler);
     }
 
     /**
@@ -458,8 +441,7 @@ export class WebhookProcessor {
      * @see https://developers.facebook.com/docs/whatsapp/business-management-api/webhooks/components#phone_number_quality_update
      */
     onPhoneNumberQualityUpdate(handler: PhoneNumberQualityUpdateHandler): void {
-        this.phoneNumberQualityUpdateHandler = handler;
-        LOGGER.log('Registered phone_number_quality_update handler');
+        this.on('phone_number_quality_update', handler);
     }
 
     /**
@@ -467,8 +449,7 @@ export class WebhookProcessor {
      * @see https://developers.facebook.com/docs/whatsapp/business-management-api/webhooks/components#message_template_status_update
      */
     onMessageTemplateStatusUpdate(handler: MessageTemplateStatusUpdateHandler): void {
-        this.messageTemplateStatusUpdateHandler = handler;
-        LOGGER.log('Registered message_template_status_update handler');
+        this.on('message_template_status_update', handler);
     }
 
     /**
@@ -476,8 +457,7 @@ export class WebhookProcessor {
      * @see https://developers.facebook.com/docs/whatsapp/business-management-api/webhooks/components#template_category_update
      */
     onTemplateCategoryUpdate(handler: TemplateCategoryUpdateHandler): void {
-        this.templateCategoryUpdateHandler = handler;
-        LOGGER.log('Registered template_category_update handler');
+        this.on('template_category_update', handler);
     }
 
     /**
@@ -485,8 +465,7 @@ export class WebhookProcessor {
      * @see https://developers.facebook.com/docs/whatsapp/business-management-api/webhooks/components#message_template_quality_update
      */
     onMessageTemplateQualityUpdate(handler: MessageTemplateQualityUpdateHandler): void {
-        this.messageTemplateQualityUpdateHandler = handler;
-        LOGGER.log('Registered message_template_quality_update handler');
+        this.on('message_template_quality_update', handler);
     }
 
     /**
@@ -494,8 +473,7 @@ export class WebhookProcessor {
      * @see https://developers.facebook.com/docs/whatsapp/flows/guides/implementingyourflowendpoint#webhooks
      */
     onFlows(handler: FlowsHandler): void {
-        this.flowsHandler = handler;
-        LOGGER.log('Registered flows handler');
+        this.on('flows', handler);
     }
 
     /**
@@ -503,8 +481,7 @@ export class WebhookProcessor {
      * @see https://developers.facebook.com/docs/whatsapp/business-management-api/webhooks/components#security
      */
     onSecurity(handler: SecurityHandler): void {
-        this.securityHandler = handler;
-        LOGGER.log('Registered security handler');
+        this.on('security', handler);
     }
 
     /**
@@ -512,8 +489,7 @@ export class WebhookProcessor {
      * @see https://developers.facebook.com/docs/graph-api/webhooks/reference/whatsapp-business-account#history
      */
     onHistory(handler: HistoryHandler): void {
-        this.historyHandler = handler;
-        LOGGER.log('Registered history handler');
+        this.on('history', handler);
     }
 
     /**
@@ -521,8 +497,7 @@ export class WebhookProcessor {
      * @see https://developers.facebook.com/docs/graph-api/webhooks/reference/whatsapp-business-account#smb_message_echoes
      */
     onSmbMessageEchoes(handler: SmbMessageEchoesHandler): void {
-        this.smbMessageEchoesHandler = handler;
-        LOGGER.log('Registered smb_message_echoes handler');
+        this.on('smb_message_echoes', handler);
     }
 
     /**
@@ -530,32 +505,28 @@ export class WebhookProcessor {
      * @see https://developers.facebook.com/docs/graph-api/webhooks/reference/whatsapp-business-account#smb_app_state_sync
      */
     onSmbAppStateSync(handler: SmbAppStateSyncHandler): void {
-        this.smbAppStateSyncHandler = handler;
-        LOGGER.log('Registered smb_app_state_sync handler');
+        this.on('smb_app_state_sync', handler);
     }
 
     /**
      * Register a handler for account_settings_update webhook field
      */
     onAccountSettingsUpdate(handler: AccountSettingsUpdateHandler): void {
-        this.accountSettingsUpdateHandler = handler;
-        LOGGER.log('Registered account_settings_update handler');
+        this.on('account_settings_update', handler);
     }
 
     /**
      * Register a handler for automatic_events webhook field
      */
     onAutomaticEvents(handler: AutomaticEventsHandler): void {
-        this.automaticEventsHandler = handler;
-        LOGGER.log('Registered automatic_events handler');
+        this.on('automatic_events', handler);
     }
 
     /**
      * Register a handler for business_status_update webhook field
      */
     onBusinessStatusUpdate(handler: BusinessStatusUpdateHandler): void {
-        this.businessStatusUpdateHandler = handler;
-        LOGGER.log('Registered business_status_update handler');
+        this.on('business_status_update', handler);
     }
 
     /**
@@ -564,8 +535,7 @@ export class WebhookProcessor {
      * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/business-scoped-user-ids#business_username_updates-webhook
      */
     onBusinessUsernameUpdates(handler: BusinessUsernameUpdatesHandler): void {
-        this.businessUsernameUpdatesHandler = handler;
-        LOGGER.log('Registered business_username_updates handler');
+        this.on('business_username_updates', handler);
     }
 
     /**
@@ -573,8 +543,7 @@ export class WebhookProcessor {
      * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/calling/reference/
      */
     onCalls(handler: CallsHandler): void {
-        this.callsHandler = handler;
-        LOGGER.log('Registered calls handler');
+        this.on('calls', handler);
     }
 
     /**
@@ -582,8 +551,7 @@ export class WebhookProcessor {
      * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/groups/reference/
      */
     onGroupLifecycleUpdate(handler: GroupLifecycleUpdateHandler): void {
-        this.groupLifecycleUpdateHandler = handler;
-        LOGGER.log('Registered group_lifecycle_update handler');
+        this.on('group_lifecycle_update', handler);
     }
 
     /**
@@ -591,8 +559,7 @@ export class WebhookProcessor {
      * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/groups/reference/
      */
     onGroupParticipantsUpdate(handler: GroupParticipantsUpdateHandler): void {
-        this.groupParticipantsUpdateHandler = handler;
-        LOGGER.log('Registered group_participants_update handler');
+        this.on('group_participants_update', handler);
     }
 
     /**
@@ -600,8 +567,7 @@ export class WebhookProcessor {
      * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/groups/reference/
      */
     onGroupSettingsUpdate(handler: GroupSettingsUpdateHandler): void {
-        this.groupSettingsUpdateHandler = handler;
-        LOGGER.log('Registered group_settings_update handler');
+        this.on('group_settings_update', handler);
     }
 
     /**
@@ -609,8 +575,7 @@ export class WebhookProcessor {
      * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/groups/reference/
      */
     onGroupStatusUpdate(handler: GroupStatusUpdateHandler): void {
-        this.groupStatusUpdateHandler = handler;
-        LOGGER.log('Registered group_status_update handler');
+        this.on('group_status_update', handler);
     }
 
     /**
@@ -618,72 +583,63 @@ export class WebhookProcessor {
      * @see https://developers.facebook.com/docs/graph-api/webhooks/reference/whatsapp-business-account#message_echoes
      */
     onMessageEchoes(handler: MessageEchoesHandler): void {
-        this.messageEchoesHandler = handler;
-        LOGGER.log('Registered message_echoes handler');
+        this.on('message_echoes', handler);
     }
 
     /**
      * Register a handler for message_template_components_update webhook field
      */
     onMessageTemplateComponentsUpdate(handler: MessageTemplateComponentsUpdateHandler): void {
-        this.messageTemplateComponentsUpdateHandler = handler;
-        LOGGER.log('Registered message_template_components_update handler');
+        this.on('message_template_components_update', handler);
     }
 
     /**
      * Register a handler for messaging_handovers webhook field
      */
     onMessagingHandovers(handler: MessagingHandoversHandler): void {
-        this.messagingHandoversHandler = handler;
-        LOGGER.log('Registered messaging_handovers handler');
+        this.on('messaging_handovers', handler);
     }
 
     /**
      * Register a handler for partner_solutions webhook field
      */
     onPartnerSolutions(handler: PartnerSolutionsHandler): void {
-        this.partnerSolutionsHandler = handler;
-        LOGGER.log('Registered partner_solutions handler');
+        this.on('partner_solutions', handler);
     }
 
     /**
      * Register a handler for payment_configuration_update webhook field
      */
     onPaymentConfigurationUpdate(handler: PaymentConfigurationUpdateHandler): void {
-        this.paymentConfigurationUpdateHandler = handler;
-        LOGGER.log('Registered payment_configuration_update handler');
+        this.on('payment_configuration_update', handler);
     }
 
     /**
      * Register a handler for standby webhook field
      */
     onStandby(handler: StandbyHandler): void {
-        this.standbyHandler = handler;
-        LOGGER.log('Registered standby handler');
+        this.on('standby', handler);
     }
 
     /**
      * Register a handler for template_correct_category_detection webhook field
      */
     onTemplateCorrectCategoryDetection(handler: TemplateCorrectCategoryDetectionHandler): void {
-        this.templateCorrectCategoryDetectionHandler = handler;
-        LOGGER.log('Registered template_correct_category_detection handler');
+        this.on('template_correct_category_detection', handler);
     }
 
     /**
      * Register a handler for tracking_events webhook field
      */
     onTrackingEvents(handler: TrackingEventsHandler): void {
-        this.trackingEventsHandler = handler;
-        LOGGER.log('Registered tracking_events handler');
+        this.on('tracking_events', handler);
     }
 
     /**
      * Register a handler for user_preferences webhook field
      */
     onUserPreferences(handler: UserPreferencesHandler): void {
-        this.userPreferencesHandler = handler;
-        LOGGER.log('Registered user_preferences handler');
+        this.on('user_preferences', handler);
     }
 
     // ============================================================================
@@ -758,39 +714,7 @@ export class WebhookProcessor {
         this.rawHandler = undefined;
         this.flowHandlers.clear();
 
-        // Webhook field handlers
-        this.accountUpdateHandler = undefined;
-        this.accountReviewUpdateHandler = undefined;
-        this.accountAlertsHandler = undefined;
-        this.businessCapabilityUpdateHandler = undefined;
-        this.phoneNumberNameUpdateHandler = undefined;
-        this.phoneNumberQualityUpdateHandler = undefined;
-        this.messageTemplateStatusUpdateHandler = undefined;
-        this.templateCategoryUpdateHandler = undefined;
-        this.messageTemplateQualityUpdateHandler = undefined;
-        this.flowsHandler = undefined;
-        this.securityHandler = undefined;
-        this.historyHandler = undefined;
-        this.smbMessageEchoesHandler = undefined;
-        this.smbAppStateSyncHandler = undefined;
-        this.accountSettingsUpdateHandler = undefined;
-        this.automaticEventsHandler = undefined;
-        this.businessStatusUpdateHandler = undefined;
-        this.businessUsernameUpdatesHandler = undefined;
-        this.callsHandler = undefined;
-        this.groupLifecycleUpdateHandler = undefined;
-        this.groupParticipantsUpdateHandler = undefined;
-        this.groupSettingsUpdateHandler = undefined;
-        this.groupStatusUpdateHandler = undefined;
-        this.messageEchoesHandler = undefined;
-        this.messageTemplateComponentsUpdateHandler = undefined;
-        this.messagingHandoversHandler = undefined;
-        this.partnerSolutionsHandler = undefined;
-        this.paymentConfigurationUpdateHandler = undefined;
-        this.standbyHandler = undefined;
-        this.templateCorrectCategoryDetectionHandler = undefined;
-        this.trackingEventsHandler = undefined;
-        this.userPreferencesHandler = undefined;
+        this.fieldHandlers.clear();
 
         LOGGER.log('Removed all handlers');
     }
