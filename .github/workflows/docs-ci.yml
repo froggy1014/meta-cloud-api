@@ -4,6 +4,8 @@ on:
     pull_request:
         branches: [main]
         paths:
+            - 'README.md'
+            - 'package.json'
             - 'website/**'
             - 'src/**'
             - 'scripts/check-doc-snippets.mjs'
