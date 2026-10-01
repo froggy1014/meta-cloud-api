@@ -50,7 +50,7 @@ The code you write in mock mode is the code you deploy.
    - Verify token: `WEBHOOK_VERIFICATION_TOKEN` from `.env.local`. The CLI generated a random one.
    - Subscribe to the `messages` field.
 
-4. Set `APP_SECRET` in `.env.local` so forged POSTs are rejected.
+4. Set `APP_SECRET` in `.env.local`; live webhook POSTs are rejected until it is configured. The dashboard, send endpoint, and conversation stream require login: username `admin`, with the generated `DASHBOARD_PASSWORD` from `.env.local`. Keep this password private and use HTTPS.
 
 5. Restart `npm run dev`. The badge turns green. Message your business number from your phone.
 

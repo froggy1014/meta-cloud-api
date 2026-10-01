@@ -36,6 +36,8 @@ describe('create-whatsapp-app', () => {
         const env = readFileSync(join(dir, '.env.local'), 'utf8');
         expect(env).toMatch(/^CLOUD_API_ACCESS_TOKEN=$/m);
         expect(env).toMatch(/^WEBHOOK_VERIFICATION_TOKEN=[0-9a-f]{24}$/m);
+        expect(env).toMatch(/^DASHBOARD_PASSWORD=[0-9a-f]{48}$/m);
+        expect(existsSync(join(dir, 'proxy.ts'))).toBe(true);
 
         expect(readFileSync(join(dir, 'README.md'), 'utf8')).toContain('pnpm dev');
         for (const f of ['package.json', 'README.md', 'app/layout.tsx', 'app/page.tsx', '.env.local']) {

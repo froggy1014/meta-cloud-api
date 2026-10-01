@@ -22,7 +22,9 @@ With no credentials in `.env.local` the app runs in mock mode. Type into the das
    - Subscribe to the `messages` field
 4. Restart `{{PM_RUN}} dev`. The badge turns green. Message your business number from your phone.
 
-Set `APP_SECRET` so forged webhook POSTs are rejected.
+Set `APP_SECRET` before going live; live webhook POSTs fail closed without it.
+
+The live dashboard requires HTTP Basic authentication: username `admin`, password `DASHBOARD_PASSWORD` from `.env.local`. The CLI generates this password separately from the webhook verify token. This also protects sending messages and the conversation stream. Keep the password private and use HTTPS for the public tunnel. Mock mode needs no login.
 
 ## Files
 

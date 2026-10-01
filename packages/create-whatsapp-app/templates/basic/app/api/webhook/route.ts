@@ -1,5 +1,6 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { webhook } from '@/lib/webhook';
+import { isMock } from '@/lib/whatsapp';
 
 export const runtime = 'nodejs';
 
@@ -10,6 +11,10 @@ export const GET = webhook.GET;
 export async function POST(request: Request): Promise<Response> {
     const raw = await request.text();
     const appSecret = process.env.APP_SECRET;
+
+    if (!isMock && !appSecret) {
+        return new Response('Webhook signature verification is not configured', { status: 503 });
+    }
 
     if (appSecret) {
         const expected = Buffer.from(`sha256=${createHmac('sha256', appSecret).update(raw).digest('hex')}`);

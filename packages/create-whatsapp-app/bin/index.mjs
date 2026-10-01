@@ -135,6 +135,7 @@ async function main() {
         SDK_VERSION: PKG.config?.sdkVersion || '3.7.0',
         PM_RUN: pmRun,
         VERIFY_TOKEN: verifyToken,
+        DASHBOARD_PASSWORD: randomBytes(24).toString('hex'),
     };
 
     console.log(`\n${green('◆')} Creating ${bold(vars.PROJECT_NAME)} in ${dim(target)}`);
