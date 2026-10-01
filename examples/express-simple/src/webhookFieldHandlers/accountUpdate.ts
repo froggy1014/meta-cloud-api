@@ -4,7 +4,10 @@ import type { ProcessedAccountUpdate, WhatsApp } from 'meta-cloud-api';
  * Example handler for account_update webhook field
  * @see https://developers.facebook.com/docs/whatsapp/business-management-api/webhooks/components#account_update
  */
-export async function handleAccountUpdateWebhook(whatsapp: WhatsApp, processed: ProcessedAccountUpdate): Promise<void> {
+export async function handleAccountUpdateWebhook(
+    _whatsapp: WhatsApp,
+    processed: ProcessedAccountUpdate,
+): Promise<void> {
     console.log('🏢 Account update webhook received:');
     console.log('  WABA ID:', processed.wabaId);
     console.log('  Event:', processed.value.event);

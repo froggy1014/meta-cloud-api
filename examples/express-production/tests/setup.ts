@@ -67,7 +67,7 @@ vi.mock('meta-cloud-api', () => ({
             // Invalid token
             return res.status(403).send('Forbidden');
         }),
-        POST: vi.fn((req, res) => res.status(200).json({ success: true })),
+        POST: vi.fn((_req, res) => res.status(200).json({ success: true })),
     })),
 }));
 
