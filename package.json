@@ -20,7 +20,7 @@
         "test:watch": "vitest --watch",
         "smoke:runtime": "node scripts/runtime-smoke/run.mjs",
         "smoke:workerd": "node scripts/runtime-smoke/workerd.mjs",
-        "docs:check-snippets": "node scripts/check-doc-snippets.mjs website/src/content/docs/getting-started/migrate-from-whatsapp-nodejs-sdk.mdx",
+        "docs:check-snippets": "node scripts/check-doc-snippets.mjs website/src/content/docs/getting-started/migrate-from-whatsapp-nodejs-sdk.mdx website/src/content/docs/guides/testing.mdx",
         "changeset": "changeset",
         "changeset:version": "changeset version",
         "changeset:publish": "changeset publish",
@@ -48,14 +48,30 @@
             "node": "./dist/utils/node/index.js",
             "import": "./dist/utils/index.js"
         },
+        "./testing": {
+            "types": "./dist/testing/index.d.ts",
+            "node": "./dist/testing/node/index.js",
+            "import": "./dist/testing/index.js"
+        },
         "./package.json": "./package.json"
     },
     "typesVersions": {
         "*": {
-            "types": "./dist/types/index.d.ts",
-            "types/*": "./dist/types/*",
-            "enums": "./dist/types/enums.d.ts",
-            "utils": "./dist/utils/index.d.ts"
+            "types": [
+                "./dist/types/index.d.ts"
+            ],
+            "types/*": [
+                "./dist/types/*"
+            ],
+            "enums": [
+                "./dist/types/enums.d.ts"
+            ],
+            "utils": [
+                "./dist/utils/index.d.ts"
+            ],
+            "testing": [
+                "./dist/testing/index.d.ts"
+            ]
         }
     },
     "keywords": [

@@ -23,6 +23,7 @@
         "skipLibCheck": false,
         "preserveConstEnums": true,
         "paths": {
+            "meta-cloud-api": ["./src/index.ts"],
             "@core/*": ["./src/core/*"],
             "@api/*": ["./src/api/*"],
             "@shared/*": ["./src/shared/*"]

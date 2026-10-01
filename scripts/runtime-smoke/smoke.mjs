@@ -5,10 +5,19 @@ import {
     FlowTypeEnum,
     WebhookProcessor,
     WhatsApp,
+    WhatsAppAuthorizationError,
     canSendFreeformMessage,
     generateXHub256SigAsync,
     honoWebhookHandler,
 } from '../../dist/index.mjs';
+import {
+    createFlowRequest,
+    createMockCloudApi,
+    createSignedWebhookRequest,
+    createStatusWebhook,
+    createTextMessageWebhook,
+    generateFlowKeyPair,
+} from '../../dist/testing/index.js';
 
 const APP_SECRET = 'smoke-app-secret';
 const PHONE_NUMBER_ID = 1234567890;
@@ -270,11 +279,67 @@ async function checkFlow() {
     assert(decoded.screen === 'SUCCESS' && decoded.data.echoed === 'Zoë', `flow response ${JSON.stringify(decoded)}`);
 }
 
+// meta-cloud-api/testing: the same checks, built with the testing helpers.
+async function checkTesting() {
+    const mock = createMockCloudApi().install();
+    try {
+        const wa = new WhatsApp({
+            accessToken: 'smoke-token',
+            phoneNumberId: PHONE_NUMBER_ID,
+            retry: { maxAttempts: 1 },
+        });
+        const sent = await wa.messages.text({ to: '15551234567', body: 'from the mock' });
+        assert(sent.messages?.[0]?.id?.startsWith('wamid.'), 'mock returns a wamid');
+        assert(mock.sentMessages('text')[0]?.text?.body === 'from the mock', 'mock records the sent message');
+
+        mock.fail('POST', '/:phoneNumberId/messages', { code: 190, message: 'Invalid OAuth access token' });
+        const error = await wa.messages.text({ to: '15551234567', body: 'x' }).catch((e) => e);
+        assert(error instanceof WhatsAppAuthorizationError, `mock error maps to ${error?.name}`);
+    } finally {
+        mock.restore();
+    }
+
+    const processor = new WebhookProcessor({
+        accessToken: 'smoke-token',
+        phoneNumberId: PHONE_NUMBER_ID,
+        appSecret: APP_SECRET,
+        verifyWebhookSignature: true,
+    });
+    const received = [];
+    processor.onText((_wa, processed) => received.push(processed.message.text.body));
+    processor.onStatus((_wa, processed) => received.push(processed.status.status));
+    for (const payload of [
+        createTextMessageWebhook({ from: '15551234567', text: 'factory', phoneNumberId: PHONE_NUMBER_ID }),
+        createStatusWebhook({ status: 'read', recipientId: '15551234567' }),
+    ]) {
+        const request = await createSignedWebhookRequest(payload, { appSecret: APP_SECRET });
+        const response = await processor.processWebhook(request);
+        assert(response.status === 200, `testing webhook status ${response.status}`);
+    }
+    assert(received.join(',') === 'factory,read', `testing webhook handlers saw ${received}`);
+
+    const keys = await generateFlowKeyPair();
+    const flowProcessor = new WebhookProcessor({
+        accessToken: 'smoke-token',
+        phoneNumberId: PHONE_NUMBER_ID,
+        appSecret: APP_SECRET,
+        privatePem: keys.privatePem,
+    });
+    flowProcessor.onFlow(FlowTypeEnum.Change, (_wa, request) => ({ screen: 'DONE', data: { got: request.data.n } }));
+    const flow = await createFlowRequest(
+        { screen: 'START', data: { n: 7 } },
+        { publicKey: keys.publicPem, appSecret: APP_SECRET },
+    );
+    const reply = await flow.decryptResponse(await flowProcessor.processFlow(flow.request));
+    assert(reply.screen === 'DONE' && reply.data.got === 7, `testing flow reply ${JSON.stringify(reply)}`);
+}
+
 export async function runSmoke() {
     const userAgent = await checkClient();
     await checkWebhook();
     await checkHonoAdapter();
     await checkFlow();
+    await checkTesting();
     await checkMediaAndRateLimits();
-    return `ok: client, signed webhook, hono adapter, encrypted flow, media upload (${userAgent})`;
+    return `ok: client, signed webhook, hono adapter, encrypted flow, testing helpers, media upload (${userAgent})`;
 }
