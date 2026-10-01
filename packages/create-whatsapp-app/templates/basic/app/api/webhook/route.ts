@@ -1,4 +1,5 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
+import { NextRequest } from 'next/server';
 import { webhook } from '@/lib/webhook';
 import { isMock } from '@/lib/whatsapp';
 
@@ -24,5 +25,5 @@ export async function POST(request: Request): Promise<Response> {
         }
     }
 
-    return webhook.POST(new Request(request.url, { method: 'POST', headers: request.headers, body: raw }));
+    return webhook.POST(new NextRequest(request.url, { method: 'POST', headers: request.headers, body: raw }));
 }

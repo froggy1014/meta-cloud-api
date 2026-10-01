@@ -60,19 +60,31 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v5
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version-file: '.nvmrc'
-          # The root package.json pins pnpm via packageManager; this job only
-          # uses npm (like a user running `npm create whatsapp-app`).
-          package-manager-cache: false
+          cache: 'pnpm'
 
-      # Scaffold each template exactly as `npm create whatsapp-app` would,
-      # then prove the generated app typechecks and builds against the
-      # published SDK. No ANTHROPIC_API_KEY: the ai-agent runs in echo mode.
+      # Pack the SDK from this commit so the generated app is checked against
+      # the code under review, not whatever version is currently on npm.
+      - name: Build and pack SDK
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build
+          pnpm pack --pack-destination "$RUNNER_TEMP/sdk"
+
+      # Scaffold both templates, then validate against this commit’s SDK.
+      # No ANTHROPIC_API_KEY: the ai-agent runs in echo mode.
       - name: Scaffold
         run: node packages/create-whatsapp-app/bin/index.mjs "$RUNNER_TEMP/app" --yes --pm npm --template ${{ matrix.template }}
+
+      - name: Use the packed SDK
+        working-directory: ${{ runner.temp }}/app
+        run: npm install "$RUNNER_TEMP"/sdk/meta-cloud-api-*.tgz
 
       - name: Type Check generated app
         working-directory: ${{ runner.temp }}/app

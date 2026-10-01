@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { NextRequest } from 'next/server';
 import { webhook } from '@/lib/webhook';
 import { config, isMock, MOCK_DISPLAY_NUMBER } from '@/lib/whatsapp';
 
@@ -55,7 +56,7 @@ export async function POST(request: Request): Promise<Response> {
     };
 
     const res = await webhook.POST(
-        new Request(new URL('/api/webhook', request.url), {
+        new NextRequest(new URL('/api/webhook', request.url), {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify(payload),

@@ -188,7 +188,8 @@ async function main() {
     if (opts.install) {
         console.log(`${green('◆')} Installing dependencies with ${pm}…`);
         const r = spawnSync(pm, ['install'], { cwd: target, stdio: 'inherit', shell: process.platform === 'win32' });
-        if (r.status !== 0) console.log(red(`  ${pm} install failed — run it yourself inside the project.`));
+        if (r.status !== 0)
+            throw new Error(`${pm} install failed. Files were created in ${target}; run ${pm} install there to retry.`);
     }
 
     const cd = relative(process.cwd(), target);

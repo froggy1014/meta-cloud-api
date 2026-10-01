@@ -29,7 +29,7 @@ export const REFUSAL_REPLY = "Sorry, I can't help with that one. Is there someth
 export const EMPTY_REPLY = 'Sorry, I could not come up with a reply. Could you rephrase that?';
 
 export function echoReply(text: string): string {
-    return `Echo: ${text}\n\n(Set ANTHROPIC_API_KEY in .env.local to get replies from Claude.)`;
+    return truncate(`Echo: ${text}\n\n(Set ANTHROPIC_API_KEY in .env.local to get replies from Claude.)`);
 }
 
 const NON_TEXT_LABELS: Record<string, string> = {
@@ -85,8 +85,9 @@ export function createAgent({ createMessage, model, systemPrompt, history }: Age
                 .trim();
             if (!answer) return EMPTY_REPLY;
 
-            history.append(user, text, answer);
-            return truncate(answer);
+            const reply = truncate(answer);
+            history.append(user, text, reply);
+            return reply;
         },
     };
 }

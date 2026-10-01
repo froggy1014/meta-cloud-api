@@ -43,6 +43,7 @@ describe('ai agent', () => {
         });
         expect(await agent.reply('1555', 'hello')).toBe(echoReply('hello'));
         expect(echoReply('hello')).toMatch(/^Echo: hello/);
+        expect(echoReply('x'.repeat(WHATSAPP_TEXT_LIMIT))).toHaveLength(WHATSAPP_TEXT_LIMIT);
     });
 
     it('sends the system prompt, the history, and the new text to Claude', async () => {
@@ -97,8 +98,10 @@ describe('ai agent', () => {
 
     it('handles empty and oversized replies', async () => {
         expect(await setup(() => '').agent.reply('1555', 'hi')).toBe(EMPTY_REPLY);
-        const long = await setup(() => 'x'.repeat(WHATSAPP_TEXT_LIMIT + 100)).agent.reply('1555', 'hi');
+        const { agent, history } = setup(() => 'x'.repeat(WHATSAPP_TEXT_LIMIT + 100));
+        const long = await agent.reply('1555', 'hi');
         expect(long).toHaveLength(WHATSAPP_TEXT_LIMIT);
+        expect(history.get('1555').at(-1)?.content).toBe(long);
     });
 
     it('replies politely to non-text messages', () => {

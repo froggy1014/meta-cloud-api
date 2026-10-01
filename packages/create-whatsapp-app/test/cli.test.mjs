@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -8,11 +8,11 @@ import { afterAll, describe, expect, it } from 'vitest';
 const BIN = fileURLToPath(new URL('../bin/index.mjs', import.meta.url));
 const work = mkdtempSync(join(tmpdir(), 'cwa-'));
 
-function run(args) {
+function run(args, env = {}) {
     return spawnSync(process.execPath, [BIN, ...args], {
         cwd: work,
         encoding: 'utf8',
-        env: { ...process.env, NO_COLOR: '1' },
+        env: { ...process.env, NO_COLOR: '1', ...env },
     });
 }
 
@@ -69,6 +69,17 @@ describe('create-whatsapp-app', () => {
             expect(readFileSync(join(dir, f), 'utf8'), f).not.toMatch(/\{\{\w+\}\}/);
         }
         expect(r.stdout).toContain('lib/prompt.ts');
+    });
+
+    it.skipIf(process.platform === 'win32')('returns failure when the package manager cannot install', () => {
+        const bin = join(work, 'fake-bin');
+        mkdirSync(bin);
+        writeFileSync(join(bin, 'npm'), '#!/bin/sh\nexit 23\n', { mode: 0o755 });
+        const r = run(['failed-install', '--yes', '--pm', 'npm'], { PATH: bin });
+        expect(r.status).toBe(1);
+        expect(r.stderr).toContain('npm install failed');
+        expect(r.stdout).not.toContain('✔ Done.');
+        expect(existsSync(join(work, 'failed-install', 'package.json'))).toBe(true);
     });
 
     it('lists templates in --help', () => {
