@@ -175,4 +175,36 @@ describe('honoWebhookHandler with a real Hono app', () => {
             expect(fresh).not.toBe(wa);
         });
     });
+
+    describe('dedupe and on()', () => {
+        it('drops a repeated delivery but still answers 200', async () => {
+            const { app, received } = setup({ dedupe: true });
+
+            const first = await app.request('/webhook', post(compactBody));
+            const second = await app.request('/webhook', post(compactBody));
+
+            expect(first.status).toBe(200);
+            expect(second.status).toBe(200);
+            expect(received).toEqual(['hi']);
+        });
+
+        it('routes a non-message field registered with on()', async () => {
+            const { app, wa } = setup();
+            const calls = vi.fn();
+            wa.processor.on('calls', calls);
+            const body = JSON.stringify({
+                object: 'whatsapp_business_account',
+                entry: [{ id: 'WABA_ID', changes: [{ field: 'calls', value: { calls: [] } }] }],
+            });
+
+            const response = await app.request('/webhook', post(body));
+
+            expect(response.status).toBe(200);
+            expect(calls).toHaveBeenCalledWith(
+                expect.anything(),
+                { wabaId: 'WABA_ID', value: { calls: [] } },
+                expect.anything(),
+            );
+        });
+    });
 });
