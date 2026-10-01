@@ -112,8 +112,12 @@ jobs:
         run: pnpm smoke:workerd
 
   scaffold:
-    name: create-whatsapp-app smoke
+    name: create-whatsapp-app smoke (${{ matrix.template }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        template: [basic, ai-agent]
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v5
@@ -135,10 +139,10 @@ jobs:
           pnpm build
           pnpm pack --pack-destination "$RUNNER_TEMP/sdk"
 
-      # Scaffold the basic template exactly as `npm create whatsapp-app` would,
-      # then prove the generated app typechecks and builds.
+      # Scaffold both templates, then validate against this commit’s SDK.
+      # No ANTHROPIC_API_KEY: the ai-agent runs in echo mode.
       - name: Scaffold
-        run: node packages/create-whatsapp-app/bin/index.mjs "$RUNNER_TEMP/app" --yes --pm npm
+        run: node packages/create-whatsapp-app/bin/index.mjs "$RUNNER_TEMP/app" --yes --pm npm --template ${{ matrix.template }}
 
       - name: Use the packed SDK
         working-directory: ${{ runner.temp }}/app
@@ -147,6 +151,11 @@ jobs:
       - name: Type Check generated app
         working-directory: ${{ runner.temp }}/app
         run: npm run typecheck
+
+      - name: Test generated app
+        if: matrix.template == 'ai-agent'
+        working-directory: ${{ runner.temp }}/app
+        run: npm test
 
       - name: Build generated app
         working-directory: ${{ runner.temp }}/app

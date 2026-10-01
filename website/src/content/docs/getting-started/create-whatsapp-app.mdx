@@ -60,6 +60,44 @@ The code you write in mock mode is the code you deploy.
 Want to see a fully wired version first? The [playground](https://playground.meta-cloud-api.site) runs on a real number. Scan the QR and say hi.
 </Aside>
 
+## Templates
+
+| Template | |
+|---|---|
+| `basic` (default) | Rule-based bot in `lib/bot.ts`. Start here to learn the SDK |
+| `ai-agent` | Claude-powered agent built on the official [`@anthropic-ai/sdk`](https://platform.claude.com/docs) |
+
+Run without `--template` and the CLI asks which one you want.
+
+### AI agent
+
+```bash
+npm create whatsapp-app@latest my-agent -- --template ai-agent
+cd my-agent
+npm run dev
+```
+
+Each incoming text goes to Claude together with a short per-user history, and the answer is sent back with `wa.messages.text`. Photos, voice notes, stickers, and other non-text messages get a polite "text only" reply.
+
+| Variable | Default | |
+|---|---|---|
+| `ANTHROPIC_API_KEY` | empty | Claude API key. Empty: the agent replies with a deterministic `Echo: …`, so mock mode needs no secrets |
+| `ANTHROPIC_MODEL` | `claude-sonnet-5-5` | Any Claude model ID |
+
+The template adds these files on top of the basic layout:
+
+| File | Purpose |
+|---|---|
+| `lib/prompt.ts` | **System prompt.** The one place to change the agent's personality and rules |
+| `lib/agent.ts` | Reply logic: Claude request, echo fallback, refusal and length handling |
+| `lib/claude.ts` | `@anthropic-ai/sdk` client and model from env |
+| `lib/history.ts` | In-memory per-user history (last 10 exchanges). Replace with a database for production |
+| `test/agent.test.ts` | Vitest unit tests with a mock Claude client: `npm test` |
+
+<Aside type="caution">
+History lives in process memory: it is lost on restart and not shared across instances. Swap `lib/history.ts` for Redis or a database before scaling out.
+</Aside>
+
 ## What is generated
 
 | File | Purpose |
@@ -76,13 +114,13 @@ Want to see a fully wired version first? The [playground](https://playground.met
 ## Options
 
 ```bash
-npx create-whatsapp-app [dir] [--template basic] [--pm npm|pnpm|yarn|bun] [--no-install] [--yes]
+npx create-whatsapp-app [dir] [--template basic|ai-agent] [--pm npm|pnpm|yarn|bun] [--no-install] [--yes]
 ```
 
 | Option | Default | |
 |---|---|---|
 | `dir` | prompt, or `my-whatsapp-app` | Must be empty or not exist |
-| `--template` | `basic` | |
+| `--template` | prompt, or `basic` | `basic` or `ai-agent` |
 | `--pm` | the package manager running the command | Used for install and in printed commands |
 | `--no-install` | install on | Skip dependency install |
 | `--yes`, `-y` | | Never prompt |
