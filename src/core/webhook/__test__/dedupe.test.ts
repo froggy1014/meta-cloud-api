@@ -108,6 +108,34 @@ describe('MemoryDedupeStore', () => {
         expect(await store.has('new')).toBe(true);
     });
 
+    it('removes expired entries behind live entries before evicting a live key', async () => {
+        vi.useFakeTimers();
+        const store = new MemoryDedupeStore({ maxEntries: 2 });
+        await store.setIfAbsent('expired', 1);
+        await store.setIfAbsent('live', 60);
+        await store.setIfAbsent('expired', 1); // recency order is not expiry order
+        vi.advanceTimersByTime(1_000);
+
+        await store.setIfAbsent('new', 60);
+
+        expect(store.size).toBe(2);
+        expect(await store.setIfAbsent('live', 60)).toBe(false);
+        expect(await store.has('expired')).toBe(false);
+        expect(await store.has('new')).toBe(true);
+    });
+
+    it('sweeps expired entries after a live entry when below capacity', async () => {
+        vi.useFakeTimers();
+        const store = new MemoryDedupeStore({ maxEntries: 10 });
+        await store.setIfAbsent('live', 60);
+        await store.setIfAbsent('expired', 1);
+        vi.advanceTimersByTime(1_000);
+
+        await store.setIfAbsent('new', 60);
+
+        expect(store.size).toBe(2);
+    });
+
     it('rejects an invalid maxEntries', () => {
         expect(() => new MemoryDedupeStore({ maxEntries: 0 })).toThrow(/maxEntries/);
     });
@@ -160,6 +188,24 @@ describe('WebhookProcessor dedupe', () => {
         expect(handler).toHaveBeenCalledTimes(2);
         expect(pre).toHaveBeenCalledTimes(2);
         expect(post).toHaveBeenCalledTimes(2);
+    });
+
+    it('claims concurrent retries once while onRaw sees every delivery', async () => {
+        const processor = createProcessor(true);
+        const raw = vi.fn();
+        const handler = vi.fn(async () => {
+            await Promise.resolve();
+        });
+        processor.onRaw(raw);
+        processor.onText(handler);
+
+        const responses = await Promise.all(
+            Array.from({ length: 10 }, () => processor.processWebhook(textMessage('wamid.concurrent'))),
+        );
+
+        expect(responses.every((response) => response.status === 200)).toBe(true);
+        expect(raw).toHaveBeenCalledTimes(10);
+        expect(handler).toHaveBeenCalledOnce();
     });
 
     it('skips a repeated status but not a new status of the same message', async () => {
