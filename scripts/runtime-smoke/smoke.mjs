@@ -5,6 +5,7 @@ import {
     FlowTypeEnum,
     WebhookProcessor,
     WhatsApp,
+    canSendFreeformMessage,
     generateXHub256SigAsync,
     honoWebhookHandler,
 } from '../../dist/index.mjs';
@@ -171,6 +172,50 @@ async function checkHonoAdapter() {
     }
 }
 
+async function checkMediaAndRateLimits() {
+    const calls = [];
+    const realFetch = globalThis.fetch;
+    globalThis.fetch = async (url, init) => {
+        calls.push({ url: String(url), init });
+        return new Response('{"id":"media.smoke"}', {
+            status: 200,
+            headers: {
+                'Content-Type': 'application/json',
+                'x-business-use-case-usage':
+                    '{"102290129340398":[{"type":"whatsapp","call_count":42,"total_cputime":1,"total_time":1,"estimated_time_to_regain_access":0}]}',
+            },
+        });
+    };
+    try {
+        const wa = new WhatsApp({ accessToken: 'smoke-token', phoneNumberId: PHONE_NUMBER_ID });
+        const bytes = new Uint8Array([0x89, 0x50, 0x4e, 0x47]);
+        const stream = new ReadableStream({
+            start(controller) {
+                controller.enqueue(bytes.subarray(0, 2));
+                controller.enqueue(bytes.subarray(2));
+                controller.close();
+            },
+        });
+        const inputs = [stream, bytes, bytes.buffer, new Blob([bytes], { type: 'image/png' })];
+        for (const input of inputs) {
+            const result = await wa.media.uploadMedia(input, { type: 'image/png', filename: 'smoke.png' });
+            assert(result.id === 'media.smoke', 'uploadMedia returns the API response');
+        }
+        assert(calls.length === inputs.length, `expected ${inputs.length} uploads, got ${calls.length}`);
+        for (const { url, init } of calls) {
+            assert(url.endsWith(`/${PHONE_NUMBER_ID}/media`), url);
+            const file = init.body.get('file');
+            const sent = new Uint8Array(await file.arrayBuffer());
+            assert(sent.length === 4 && sent[0] === 0x89 && sent[3] === 0x47, 'uploaded bytes');
+            assert(init.body.get('type') === 'image/png', 'type field');
+        }
+        assert(wa.getLastRateLimitInfo()?.maxUsagePercent === 42, 'rate limit headers parsed');
+        assert(canSendFreeformMessage(String(Math.floor(Date.now() / 1000) - 60)), 'customer service window open');
+    } finally {
+        globalThis.fetch = realFetch;
+    }
+}
+
 function toPem(label, der) {
     const lines = b64.encode(der).match(/.{1,64}/g).join('\n');
     return `-----BEGIN ${label}-----\n${lines}\n-----END ${label}-----\n`;
@@ -230,5 +275,6 @@ export async function runSmoke() {
     await checkWebhook();
     await checkHonoAdapter();
     await checkFlow();
-    return `ok: client, signed webhook, hono adapter, encrypted flow (${userAgent})`;
+    await checkMediaAndRateLimits();
+    return `ok: client, signed webhook, hono adapter, encrypted flow, media upload (${userAgent})`;
 }

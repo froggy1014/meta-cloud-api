@@ -1,5 +1,6 @@
 import { WhatsApp } from '@core/whatsapp';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { WhatsAppValidationError } from '../../../utils/isMetaError';
 
 describe('Media API - Unit Tests', () => {
     let whatsApp: WhatsApp;
@@ -218,5 +219,127 @@ describe('Media API - Unit Tests', () => {
             expect(endpoint).toContain(whatsApp.requester.phoneNumberId.toString());
             expect(endpoint).toContain('media');
         });
+    });
+});
+
+describe('Media API - uploadMedia input types (fetch mocked)', () => {
+    const PNG_BYTES = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+    let whatsApp: WhatsApp;
+    let fetchMock: ReturnType<typeof vi.fn>;
+
+    beforeEach(() => {
+        fetchMock = vi.fn(async () => new Response('{"id":"media_123"}', { status: 200 }));
+        vi.stubGlobal('fetch', fetchMock);
+        whatsApp = new WhatsApp({ accessToken: 'test_token', phoneNumberId: 123456789, businessAcctId: 'biz' });
+    });
+
+    afterEach(() => {
+        vi.unstubAllGlobals();
+    });
+
+    async function sentForm() {
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+        expect(url).toBe('https://graph.facebook.com/v23.0/123456789/media');
+        expect(init.method).toBe('POST');
+        expect(init.body).toBeInstanceOf(FormData);
+        // multipart boundary is set by fetch, never by the SDK
+        expect((init.headers as Record<string, string>)['Content-Type']).toBeUndefined();
+        const form = init.body as FormData;
+        const file = form.get('file') as File;
+        expect(file).toBeInstanceOf(Blob);
+        return { form, file, bytes: [...new Uint8Array(await file.arrayBuffer())] };
+    }
+
+    it('keeps sending a File unchanged', async () => {
+        const input = new File([new Uint8Array(PNG_BYTES)], 'logo.png', { type: 'image/png' });
+        await expect(whatsApp.media.uploadMedia(input)).resolves.toEqual({ id: 'media_123' });
+
+        const { form, file, bytes } = await sentForm();
+        expect(file.name).toBe('logo.png');
+        expect(file.type).toBe('image/png');
+        expect(bytes).toEqual(PNG_BYTES);
+        expect(form.get('type')).toBe('image/png');
+        expect(form.get('messaging_product')).toBe('whatsapp');
+    });
+
+    it('accepts a Blob with a type', async () => {
+        await whatsApp.media.uploadMedia(new Blob([new Uint8Array(PNG_BYTES)], { type: 'image/png' }), {
+            filename: 'a.png',
+        });
+
+        const { form, file, bytes } = await sentForm();
+        expect(file.name).toBe('a.png');
+        expect(bytes).toEqual(PNG_BYTES);
+        expect(form.get('type')).toBe('image/png');
+    });
+
+    it('accepts a Uint8Array (and so a Buffer) with options.type', async () => {
+        await whatsApp.media.uploadMedia(new Uint8Array(PNG_BYTES), { type: 'image/png', filename: 'b.png' });
+
+        const { form, file, bytes } = await sentForm();
+        expect(file.name).toBe('b.png');
+        expect(file.type).toBe('image/png');
+        expect(bytes).toEqual(PNG_BYTES);
+        expect(form.get('type')).toBe('image/png');
+    });
+
+    it('sends only the viewed range of a Uint8Array subarray', async () => {
+        const backing = new Uint8Array([0, 0, ...PNG_BYTES, 0]);
+        await whatsApp.media.uploadMedia(backing.subarray(2, 2 + PNG_BYTES.length), { type: 'image/png' });
+
+        const { file, bytes } = await sentForm();
+        expect(file.name).toBe('file');
+        expect(bytes).toEqual(PNG_BYTES);
+    });
+
+    it('accepts an ArrayBuffer with options.type and a custom messaging product', async () => {
+        await whatsApp.media.uploadMedia(new Uint8Array(PNG_BYTES).buffer, {
+            type: 'image/png',
+            messagingProduct: 'whatsapp',
+        });
+
+        const { form, bytes } = await sentForm();
+        expect(bytes).toEqual(PNG_BYTES);
+        expect(form.get('type')).toBe('image/png');
+    });
+
+    it('collects a ReadableStream into the multipart body', async () => {
+        const chunks = [PNG_BYTES.slice(0, 3), PNG_BYTES.slice(3)];
+        const stream = new ReadableStream<Uint8Array>({
+            start(controller) {
+                for (const chunk of chunks) controller.enqueue(new Uint8Array(chunk));
+                controller.close();
+            },
+        });
+
+        await whatsApp.media.uploadMedia(stream, { type: 'application/pdf', filename: 'report.pdf' });
+
+        const { form, file, bytes } = await sentForm();
+        expect(file.name).toBe('report.pdf');
+        expect(file.type).toBe('application/pdf');
+        expect(bytes).toEqual(PNG_BYTES);
+        expect(form.get('type')).toBe('application/pdf');
+    });
+
+    it('lets options.type override the type of a Blob', async () => {
+        await whatsApp.media.uploadMedia(new Blob(['%PDF'], { type: 'application/octet-stream' }), {
+            type: 'application/pdf',
+        });
+
+        const { form, file } = await sentForm();
+        expect(file.type).toBe('application/pdf');
+        expect(form.get('type')).toBe('application/pdf');
+    });
+
+    it('rejects input without a MIME type before calling fetch', async () => {
+        await expect(whatsApp.media.uploadMedia(new Uint8Array(PNG_BYTES))).rejects.toBeInstanceOf(
+            WhatsAppValidationError,
+        );
+        await expect(whatsApp.media.uploadMedia(new Blob(['x']))).rejects.toBeInstanceOf(WhatsAppValidationError);
+        await expect(whatsApp.media.uploadMedia('nope' as never, { type: 'image/png' })).rejects.toBeInstanceOf(
+            WhatsAppValidationError,
+        );
+        expect(fetchMock).not.toHaveBeenCalled();
     });
 });
