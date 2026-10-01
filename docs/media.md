@@ -11,6 +11,8 @@ Upload media once and reuse the returned media ID in messages. You can also quer
 
 ## Notes
 - Uploads use `multipart/form-data` with `file`, `type`, and `messaging_product`.
+- `uploadMedia` accepts a `File`, `Blob`, `Uint8Array` (including `Buffer`), `ArrayBuffer`, or web `ReadableStream<Uint8Array>` on every runtime. Pass `{ type, filename? }` unless the input is a `Blob`/`File` with a type. `uploadMedia(file, 'whatsapp')` still works.
+- A `ReadableStream` is read fully into memory first: Meta needs a multipart body and `fetch` only takes `Blob` parts in `FormData`. Peak memory is about the file size.
 - Download uses the `url` from `getMediaById`.
 - Delete requires the media ID, not the URL.
 
@@ -34,6 +36,7 @@ await client.media.deleteMedia(upload.id);
 ```
 
 ## Example Details
-- `uploadMedia` expects a `File` with a MIME type; the response `id` is used in messages.
+- `uploadMedia` needs a MIME type (from the `File`/`Blob` or `options.type`); the response `id` is used in messages.
+- Bytes or streams: `await client.media.uploadMedia(res.body!, { type: 'application/pdf', filename: 'report.pdf' })`.
 - `getMediaById` returns metadata and a temporary `url` for downloads.
 - `downloadMedia` uses the `url` from `getMediaById`, and `deleteMedia` removes the media by ID.
