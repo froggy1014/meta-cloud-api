@@ -1,6 +1,9 @@
+import { nodeCrypto } from './runtimeCrypto';
+
 /**
  * Runtime helpers that keep the SDK free of static `node:*` imports, so the
- * same bundle loads on Node.js, Bun, Deno, Cloudflare Workers and Vercel Edge.
+ * universal bundle loads on Bun, Deno, Cloudflare Workers and Vercel Edge.
+ * Node conditional entries inject crypto for versions lacking getBuiltinModule.
  */
 
 type NodeCrypto = typeof import('node:crypto');
@@ -33,11 +36,12 @@ export function isDebugEnv(): boolean {
 /**
  * Load `node:crypto` synchronously without a static import, via
  * `process.getBuiltinModule` (Node.js >= 20.16, Bun, Deno, workerd with
- * `nodejs_compat`). Returns undefined when it is not available.
+ * `nodejs_compat`), or the Node entry module. Returns undefined
+ * when it is not available.
  */
 export function getNodeCrypto(): NodeCrypto | undefined {
     const getBuiltinModule = getProcess()?.getBuiltinModule;
-    if (typeof getBuiltinModule !== 'function') return undefined;
+    if (typeof getBuiltinModule !== 'function') return getProcess() ? nodeCrypto : undefined;
     try {
         return getBuiltinModule('node:crypto') as NodeCrypto;
     } catch {
@@ -51,7 +55,7 @@ export function requireNodeCrypto(feature: string): NodeCrypto {
     if (!crypto) {
         throw new Error(
             `${feature} needs the node:crypto module, which is not available in this runtime. ` +
-                'Use the async Web Crypto variant instead, or run on Node.js >= 20.16, Bun or Deno.',
+                'Use the async Web Crypto variant instead, or run on Node.js >= 20.12, Bun or Deno.',
         );
     }
     return crypto;

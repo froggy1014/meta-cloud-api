@@ -106,7 +106,7 @@ The webhook and Flow pipelines use Web Crypto internally. For your own code, use
 | `decryptFlowRequestAsync(body, config)` | `decryptFlowRequest(...)` |
 | `encryptFlowResponseAsync(response, aesKey, iv)` | `encryptFlowResponse(...)` |
 
-The sync helpers load `node:crypto` on demand, which works on Node.js 20.16+, Bun and Deno, and throws a descriptive error elsewhere. `generateEncryption()` (RSA key generation) is Node.js only.
+The sync helpers load `node:crypto` on demand, which works on Node.js 20.12+, Bun and Deno, and throws a descriptive error elsewhere. `generateEncryption()` (RSA key generation) is Node.js only.
 
 <Aside type="caution" title="Flow private keys on edge runtimes">
 Web Crypto cannot read passphrase-protected private keys. Where `node:crypto` is unavailable (Cloudflare Workers, Vercel Edge), store the Flow private key as an unencrypted PKCS#8 PEM in your platform's secret store:

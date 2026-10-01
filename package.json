@@ -32,6 +32,7 @@
     "exports": {
         ".": {
             "types": "./dist/index.d.mts",
+            "node": "./dist/node/index.mjs",
             "import": "./dist/index.mjs"
         },
         "./types": {
@@ -44,6 +45,7 @@
         },
         "./utils": {
             "types": "./dist/utils/index.d.ts",
+            "node": "./dist/utils/node/index.js",
             "import": "./dist/utils/index.js"
         },
         "./package.json": "./package.json"
