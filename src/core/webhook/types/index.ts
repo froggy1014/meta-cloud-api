@@ -146,6 +146,23 @@ export type WebhookFieldValue =
     | TrackingEventsWebhookValue
     | UserPreferencesWebhookValue;
 
+/**
+ * Maps every webhook field except `messages` to the type of its `value`.
+ * `messages` is left out because the SDK splits it into messages, statuses and
+ * user actions (see `onMessage`, `onStatus` and `onUserAction`).
+ *
+ * @example
+ * ```typescript
+ * type Calls = WebhookFieldValueMap['calls']; // CallsWebhookValue['value']
+ * ```
+ */
+export type WebhookFieldValueMap = {
+    [F in WebhookFieldValue['field']]: Extract<WebhookFieldValue, { field: F }>['value'];
+};
+
+/** Webhook field names accepted by `WebhookProcessor.on()`: every field except `messages`. */
+export type NonMessageWebhookField = keyof WebhookFieldValueMap;
+
 // ============================================================================
 // Top-Level Webhook Structure
 // ============================================================================

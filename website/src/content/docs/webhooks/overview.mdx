@@ -247,20 +247,16 @@ processor.onText(async (whatsapp, message) => {
 
 ### Idempotency
 
-WhatsApp may send the same webhook multiple times. Use message IDs to detect duplicates:
+WhatsApp may send the same webhook multiple times. Turn on `dedupe` and the SDK skips your handlers for messages and statuses it has already seen, while still answering `200`:
 
 ```typescript
-const processedMessages = new Set();
-
-processor.onText(async (whatsapp, message) => {
-    if (processedMessages.has(message.id)) {
-        return; // Already processed
-    }
-
-    processedMessages.add(message.id);
-    // Process message...
+const processor = new WebhookProcessor({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    dedupe: true, // in-memory, single instance only
 });
 ```
+
+The default store is in memory and only fits a single instance. See [Deduplicating Retried Deliveries](/webhooks/custom/#deduplicating-retried-deliveries) for a Redis store and the exact keys.
 
 ### Error Handling
 

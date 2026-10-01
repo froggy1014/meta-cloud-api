@@ -102,6 +102,10 @@ interface WebhookProcessor {
     // Flow handlers
     onFlow(type: FlowTypeEnum, handler: FlowHandler): void;
 
+    // Any webhook field except `messages`, typed by field name
+    on<F extends NonMessageWebhookField>(field: F, handler: WebhookFieldHandler<F>): void;
+    off(field: NonMessageWebhookField): void;
+
     // Webhook field handlers — Account & Business
     onAccountUpdate(handler: AccountUpdateHandler): void;
     onAccountReviewUpdate(handler: AccountReviewUpdateHandler): void;
@@ -243,6 +247,106 @@ processor.removeAllHandlers();
 ```
 
 This is useful for dynamic handler management, testing, or reconfiguring handlers at runtime.
+
+### Generic Field Handlers: `on()` and `off()`
+
+Every webhook field except `messages` can also be handled with `on(field, handler)`. The type of `processed.value` follows from the field name, so you get the same types as the dedicated `onXxx` methods:
+
+```typescript
+processor.on('calls', async (whatsapp, { wabaId, value }) => {
+    // value is CallsWebhookValue['value']
+    for (const call of value.calls) {
+        console.log(`${wabaId}: call ${call.id} ${call.event}`);
+    }
+});
+
+processor.on('message_template_status_update', async (whatsapp, { value }) => {
+    console.log(`Template ${value.message_template_name} is now ${value.event}`);
+});
+
+// Remove it again
+processor.off('calls');
+```
+
+Each `onXxx` method is a thin wrapper around `on()`: `onCalls(handler)` is `on('calls', handler)`, and both replace whatever handler that field had. `removeAllHandlers()` clears them too.
+
+<Aside>
+`on('messages', ...)` is not accepted (a type error, and it throws at runtime). The `messages` field carries incoming messages, statuses and marketing user actions, which the SDK splits for you: use `onMessage` or the typed message methods (`onText`, `onImage`, ...), `onStatus` and `onUserAction`.
+</Aside>
+
+The field-to-value mapping is exported as the `WebhookFieldValueMap` type, and `WebhookFieldHandler<'calls'>` is the handler type for a field.
+
+### Deduplicating Retried Deliveries
+
+Meta retries webhook deliveries, so the same message or status can reach you more than once. Turn on `dedupe` to skip handlers for deliveries that were already seen. Duplicates still get a `200` response, so Meta stops retrying.
+
+```typescript
+const processor = new WebhookProcessor({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN!,
+    dedupe: true, // in-memory store, 24 hour TTL
+});
+```
+
+The same option works with the framework adapters (`expressWebhookHandler`, `nextjsAppWebhookHandler`, `nextjsPagesWebhookHandler`, `honoWebhookHandler`, `fastifyWebhookHandler`), since they pass their config to `WebhookProcessor`.
+
+What counts as a duplicate:
+
+| Field | Dedupe key |
+|---|---|
+| `messages` (incoming message) | `message:<message id>` |
+| `messages` (status update) | `status:<message id>:<status>`, so `sent`, `delivered` and `read` for one message all run |
+| `calls` | the call ids and events in the change |
+| `smb_message_echoes`, `message_echoes` | the echoed message ids in the change |
+| every other field | not deduped (no natural id) |
+
+A duplicate skips every handler for that item, including `onMessagePreProcess` and `onMessagePostProcess`. `onRaw` still sees every delivery. The key is claimed before your handler runs, so a delivery whose handler throws is not run again on a retry.
+
+<Aside type="caution">
+The default store keeps keys in memory, bounded to 10,000 keys. It only works for a **single instance**: other instances behind a load balancer do not see its keys, and it starts empty after every restart or serverless cold start. With more than one instance, use a shared store such as Redis.
+</Aside>
+
+#### Using Redis
+
+A store implements one method, `setIfAbsent(key, ttlSeconds)`. It must atomically store the key only if it is absent and resolve `true` when it stored the key (first delivery) or `false` when the key was already there. That is exactly Redis `SET key value NX EX ttl`:
+
+```typescript
+import { createClient } from 'redis';
+import { WebhookProcessor, type DedupeStore } from 'meta-cloud-api';
+
+const redis = createClient({ url: process.env.REDIS_URL });
+await redis.connect();
+
+const redisStore: DedupeStore = {
+    async setIfAbsent(key, ttlSeconds) {
+        // SET ... NX replies 'OK' only when the key did not exist yet
+        const reply = await redis.set(`whatsapp:dedupe:${key}`, '1', { NX: true, EX: ttlSeconds });
+        return reply === 'OK';
+    },
+};
+
+const processor = new WebhookProcessor({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    dedupe: { store: redisStore, ttlSeconds: 60 * 60 * 24 },
+});
+```
+
+With `ioredis` the call is `redis.set(key, '1', 'EX', ttlSeconds, 'NX')`.
+
+If the store throws (for example Redis is down), the SDK logs the error and processes the delivery anyway: an outage can let a duplicate through but never drops a webhook.
+
+To tune the in-memory store, pass it explicitly:
+
+```typescript
+import { MemoryDedupeStore } from 'meta-cloud-api';
+
+const processor = new WebhookProcessor({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    dedupe: { store: new MemoryDedupeStore({ maxEntries: 50_000 }), ttlSeconds: 3600 },
+});
+```
 
 ### Calls Handler
 
@@ -886,18 +990,7 @@ processor.onText(async (whatsapp, message) => {
 
 ### Idempotency
 
-```typescript
-const processed = new Set<string>();
-
-processor.onText(async (whatsapp, message) => {
-    if (processed.has(message.id)) {
-        return; // Already processed
-    }
-
-    processed.add(message.id);
-    await processMessage(message);
-});
-```
+Meta can deliver the same webhook more than once. Turn on the [`dedupe` option](#deduplicating-retried-deliveries) instead of tracking ids yourself, and use a shared store such as Redis when you run more than one instance.
 
 ### Resource Cleanup
 
