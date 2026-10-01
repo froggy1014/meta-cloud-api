@@ -63,9 +63,9 @@ const SPEC_ALLOWLIST: Record<string, string> = {
     'GET {PHONE_NUMBER_ID}/username_suggestions': 'Business username API, added after v23 snapshot',
     // Conversation routing / thread control (2026 changelog), newer than the snapshot.
     'POST {PHONE_NUMBER_ID}/thread_control': 'Thread control API, added after v23 snapshot',
-    // The snapshot only defines POST/DELETE on invite_link; the Groups reference also documents GET.
-    'GET {ID}/invite_link':
-        'Snapshot lists only POST/DELETE /{group_id}/invite_link; GET is used by getGroupInviteLink',
+    // Verified 2026-10-02 against the live Groups reference, which documents GET (get link) and
+    // POST (reset link). The v23 snapshot only has POST/DELETE, so the snapshot is out of date.
+    'GET {ID}/invite_link': 'Live Groups reference documents GET /{group_id}/invite_link; v23 snapshot lacks it',
 };
 
 /** Prototype methods that never issue a request (private helpers). Key: `<api>.<method>`. */
