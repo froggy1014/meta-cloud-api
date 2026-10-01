@@ -26,6 +26,10 @@ const mf = new Miniflare({
         ...readdirSync(file('../../dist'))
             .filter((name) => name.endsWith('.mjs'))
             .map((name) => ({ type: 'ESModule', path: file(`../../dist/${name}`) })),
+        // meta-cloud-api/testing, which imports ../index.mjs.
+        ...readdirSync(file('../../dist/testing'))
+            .filter((name) => name.endsWith('.js'))
+            .map((name) => ({ type: 'ESModule', path: file(`../../dist/testing/${name}`) })),
     ],
     modulesRoot: file('../../'),
     compatibilityDate: '2026-07-01',
