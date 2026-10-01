@@ -92,8 +92,14 @@ export type {
     VideoMessageHandler,
     VideoProcessedMessage,
     WebhookHandlerContext,
+    WebhookSignatureOptions,
 } from './utils/webhookUtils';
-export { constructFullUrl, processFlowRequest, processWebhookMessages } from './utils/webhookUtils';
+export {
+    constructFullUrl,
+    isValidWebhookSignature,
+    processFlowRequest,
+    processWebhookMessages,
+} from './utils/webhookUtils';
 export type { WebhookResponse } from './WebhookProcessor';
 // Core Processor (for advanced usage)
 export { WebhookProcessor } from './WebhookProcessor';

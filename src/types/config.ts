@@ -52,6 +52,17 @@ export type WhatsAppConfig = {
     passphrase?: string;
     /** Automatic retry configuration for throttling errors. */
     retry?: RetryConfig;
+    /**
+     * Reject webhook POSTs whose `X-Hub-Signature-256` header is not a valid
+     * HMAC-SHA256 of the raw body keyed with `appSecret`. Requires `appSecret`.
+     *
+     * Off by default for backward compatibility. Turn it on in production:
+     * without it anyone who knows your webhook URL can post fake messages.
+     *
+     * Express users must keep the raw body, since re-serialized JSON will not match:
+     * `app.use(express.json({ verify: (req, _res, buf) => { req.rawBody = buf.toString(); } }))`.
+     */
+    verifyWebhookSignature?: boolean;
 };
 
 export type WabaConfigType = {

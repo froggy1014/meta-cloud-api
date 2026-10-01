@@ -87,13 +87,17 @@ import express from 'express';
 import { expressWebhookHandler } from 'meta-cloud-api';
 
 const app = express();
-app.use(express.json());
+// Keep the raw body: signatures are computed over the exact bytes Meta sent
+app.use(express.json({ verify: (req, _res, buf) => { (req as any).rawBody = buf.toString(); } }));
 
 // Handler is automatically cached per phoneNumberId — safe against HMR re-evaluation
 const Whatsapp = expressWebhookHandler({
     accessToken: process.env.CLOUD_API_ACCESS_TOKEN,
     phoneNumberId: process.env.WA_PHONE_NUMBER_ID,
     webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN,
+    // Reject forged POSTs: require a valid X-Hub-Signature-256 from Meta
+    appSecret: process.env.APP_SECRET,
+    verifyWebhookSignature: true,
 });
 
 // Handle incoming text messages — echo back to sender

@@ -1,7 +1,7 @@
 import type { FlowTypeEnum } from '../../api/flow/types';
 import { importConfig } from '../../config/importConfig';
 import type { WabaConfigType, WhatsAppConfig } from '../../types/config';
-import { MessageTypesEnum } from '../../types/enums';
+import { MessageTypesEnum, WabaConfigEnum } from '../../types/enums';
 import Logger from '../../utils/logger';
 import { WhatsApp } from '../whatsapp';
 import type { WebhookFieldType } from './types';
@@ -113,8 +113,11 @@ export class WebhookProcessor {
     private trackingEventsHandler: TrackingEventsHandler | undefined = undefined;
     private userPreferencesHandler: UserPreferencesHandler | undefined = undefined;
 
+    private verifySignature: boolean;
+
     constructor(config: WhatsAppConfig) {
         this.config = importConfig(config);
+        this.verifySignature = config.verifyWebhookSignature === true;
         this.client = new WhatsApp(config);
         LOGGER.log('WebhookProcessor instantiated');
     }
@@ -141,48 +144,56 @@ export class WebhookProcessor {
 
     async processWebhook(request: Request): Promise<WebhookResponse> {
         try {
-            const webResponse = await processWebhookMessages(request, this.client, {
-                messageHandlers: this.messageHandlers,
-                statusHandler: this.statusHandler,
-                userActionHandler: this.userActionHandler,
-                preProcessHandler: this.preProcessHandler,
-                postProcessHandler: this.postProcessHandler,
-                rawHandler: this.rawHandler?.handler,
-                rawHandlerFields: this.rawHandler?.fields,
-                // Webhook field handlers
-                accountUpdateHandler: this.accountUpdateHandler,
-                accountReviewUpdateHandler: this.accountReviewUpdateHandler,
-                accountAlertsHandler: this.accountAlertsHandler,
-                businessCapabilityUpdateHandler: this.businessCapabilityUpdateHandler,
-                phoneNumberNameUpdateHandler: this.phoneNumberNameUpdateHandler,
-                phoneNumberQualityUpdateHandler: this.phoneNumberQualityUpdateHandler,
-                messageTemplateStatusUpdateHandler: this.messageTemplateStatusUpdateHandler,
-                templateCategoryUpdateHandler: this.templateCategoryUpdateHandler,
-                messageTemplateQualityUpdateHandler: this.messageTemplateQualityUpdateHandler,
-                flowsHandler: this.flowsHandler,
-                securityHandler: this.securityHandler,
-                historyHandler: this.historyHandler,
-                smbMessageEchoesHandler: this.smbMessageEchoesHandler,
-                smbAppStateSyncHandler: this.smbAppStateSyncHandler,
-                accountSettingsUpdateHandler: this.accountSettingsUpdateHandler,
-                automaticEventsHandler: this.automaticEventsHandler,
-                businessStatusUpdateHandler: this.businessStatusUpdateHandler,
-                businessUsernameUpdatesHandler: this.businessUsernameUpdatesHandler,
-                callsHandler: this.callsHandler,
-                groupLifecycleUpdateHandler: this.groupLifecycleUpdateHandler,
-                groupParticipantsUpdateHandler: this.groupParticipantsUpdateHandler,
-                groupSettingsUpdateHandler: this.groupSettingsUpdateHandler,
-                groupStatusUpdateHandler: this.groupStatusUpdateHandler,
-                messageEchoesHandler: this.messageEchoesHandler,
-                messageTemplateComponentsUpdateHandler: this.messageTemplateComponentsUpdateHandler,
-                messagingHandoversHandler: this.messagingHandoversHandler,
-                partnerSolutionsHandler: this.partnerSolutionsHandler,
-                paymentConfigurationUpdateHandler: this.paymentConfigurationUpdateHandler,
-                standbyHandler: this.standbyHandler,
-                templateCorrectCategoryDetectionHandler: this.templateCorrectCategoryDetectionHandler,
-                trackingEventsHandler: this.trackingEventsHandler,
-                userPreferencesHandler: this.userPreferencesHandler,
-            });
+            const webResponse = await processWebhookMessages(
+                request,
+                this.client,
+                {
+                    messageHandlers: this.messageHandlers,
+                    statusHandler: this.statusHandler,
+                    userActionHandler: this.userActionHandler,
+                    preProcessHandler: this.preProcessHandler,
+                    postProcessHandler: this.postProcessHandler,
+                    rawHandler: this.rawHandler?.handler,
+                    rawHandlerFields: this.rawHandler?.fields,
+                    // Webhook field handlers
+                    accountUpdateHandler: this.accountUpdateHandler,
+                    accountReviewUpdateHandler: this.accountReviewUpdateHandler,
+                    accountAlertsHandler: this.accountAlertsHandler,
+                    businessCapabilityUpdateHandler: this.businessCapabilityUpdateHandler,
+                    phoneNumberNameUpdateHandler: this.phoneNumberNameUpdateHandler,
+                    phoneNumberQualityUpdateHandler: this.phoneNumberQualityUpdateHandler,
+                    messageTemplateStatusUpdateHandler: this.messageTemplateStatusUpdateHandler,
+                    templateCategoryUpdateHandler: this.templateCategoryUpdateHandler,
+                    messageTemplateQualityUpdateHandler: this.messageTemplateQualityUpdateHandler,
+                    flowsHandler: this.flowsHandler,
+                    securityHandler: this.securityHandler,
+                    historyHandler: this.historyHandler,
+                    smbMessageEchoesHandler: this.smbMessageEchoesHandler,
+                    smbAppStateSyncHandler: this.smbAppStateSyncHandler,
+                    accountSettingsUpdateHandler: this.accountSettingsUpdateHandler,
+                    automaticEventsHandler: this.automaticEventsHandler,
+                    businessStatusUpdateHandler: this.businessStatusUpdateHandler,
+                    businessUsernameUpdatesHandler: this.businessUsernameUpdatesHandler,
+                    callsHandler: this.callsHandler,
+                    groupLifecycleUpdateHandler: this.groupLifecycleUpdateHandler,
+                    groupParticipantsUpdateHandler: this.groupParticipantsUpdateHandler,
+                    groupSettingsUpdateHandler: this.groupSettingsUpdateHandler,
+                    groupStatusUpdateHandler: this.groupStatusUpdateHandler,
+                    messageEchoesHandler: this.messageEchoesHandler,
+                    messageTemplateComponentsUpdateHandler: this.messageTemplateComponentsUpdateHandler,
+                    messagingHandoversHandler: this.messagingHandoversHandler,
+                    partnerSolutionsHandler: this.partnerSolutionsHandler,
+                    paymentConfigurationUpdateHandler: this.paymentConfigurationUpdateHandler,
+                    standbyHandler: this.standbyHandler,
+                    templateCorrectCategoryDetectionHandler: this.templateCorrectCategoryDetectionHandler,
+                    trackingEventsHandler: this.trackingEventsHandler,
+                    userPreferencesHandler: this.userPreferencesHandler,
+                },
+                {
+                    appSecret: this.config[WabaConfigEnum.AppSecret],
+                    verifySignature: this.verifySignature,
+                },
+            );
 
             const body = await webResponse.text();
             const contentType = webResponse.headers.get('content-type') || 'application/json';

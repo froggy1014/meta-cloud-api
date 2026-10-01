@@ -3,7 +3,7 @@ import crypto from 'node:crypto';
 import type { FlowEndpointRequest } from '../../../api/flow';
 import { FlowTypeEnum } from '../../../api/flow/types';
 import type { WabaConfigType } from '../../../types/config';
-import { MessageTypesEnum } from '../../../types/enums';
+import { MessageTypesEnum, WabaConfigEnum } from '../../../types/enums';
 import { decryptFlowRequest, encryptFlowResponse } from '../../../utils/flowEncryptionUtils';
 import { isFlowDataExchangeRequest, isFlowErrorRequest, isFlowPingRequest } from '../../../utils/flowTypeGuards';
 import Logger from '../../../utils/logger';
@@ -445,9 +445,28 @@ export async function processWebhookMessages(
         trackingEventsHandler?: TrackingEventsHandler;
         userPreferencesHandler?: UserPreferencesHandler;
     },
+    options: WebhookSignatureOptions = {},
 ): Promise<Response> {
     try {
         const rawBody = await request.text();
+
+        if (options.verifySignature) {
+            if (!options.appSecret) {
+                LOGGER.error('verifyWebhookSignature is on but appSecret is not configured; rejecting webhook');
+                return new Response(JSON.stringify({ error: 'Webhook signature verification misconfigured' }), {
+                    status: 500,
+                    headers: { 'Content-Type': 'application/json' },
+                });
+            }
+            if (!isValidWebhookSignature(rawBody, request.headers.get('x-hub-signature-256'), options.appSecret)) {
+                LOGGER.warn('Rejected webhook with missing or invalid X-Hub-Signature-256');
+                return new Response(JSON.stringify({ error: 'Invalid signature' }), {
+                    status: 401,
+                    headers: { 'Content-Type': 'application/json' },
+                });
+            }
+        }
+
         const body = JSON.parse(rawBody);
         const context: WebhookHandlerContext = {
             headers: request.headers,
@@ -814,8 +833,15 @@ export async function processFlowRequest(
         };
         const signature = request.headers.get('x-hub-signature-256');
 
-        // Validate request signature
-        if (!verifySignature(body, signature, config.WEBHOOK_VERIFICATION_TOKEN || '')) {
+        // Meta signs Flow requests with the App Secret. Older versions of this SDK
+        // keyed the HMAC with the webhook verification token, which never matches
+        // a real Meta request; that key is kept only as a fallback when no App
+        // Secret is configured.
+        const signingKey = config[WabaConfigEnum.AppSecret] || config.WEBHOOK_VERIFICATION_TOKEN || '';
+        if (!config[WabaConfigEnum.AppSecret]) {
+            LOGGER.warn('appSecret not configured; verifying Flow signature with the webhook verification token');
+        }
+        if (!isValidWebhookSignature(body, signature, signingKey)) {
             LOGGER.warn('Invalid request signature');
             return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
         }
@@ -896,18 +922,25 @@ export async function processFlowRequest(
     }
 }
 
+export type WebhookSignatureOptions = {
+    /** Meta App Secret used as the HMAC key. */
+    appSecret?: string;
+    /** When true, reject requests without a valid `X-Hub-Signature-256`. */
+    verifySignature?: boolean;
+};
+
 /**
- * Verify webhook signature
+ * Check an `X-Hub-Signature-256` header (`sha256=<hex>`) against the raw
+ * request body. Constant-time; returns false instead of throwing on
+ * malformed or wrong-length input.
  */
-function verifySignature(body: string, signature: string | null, verificationToken: string): boolean {
-    if (!signature) {
-        LOGGER.warn('Missing signature in request');
-        return false;
-    }
-
-    const expectedSignature = crypto.createHmac('sha256', verificationToken).update(body).digest('hex');
-
-    return crypto.timingSafeEqual(Buffer.from(signature.replace('sha256=', '')), Buffer.from(expectedSignature));
+export function isValidWebhookSignature(rawBody: string, signatureHeader: string | null, appSecret: string): boolean {
+    if (!signatureHeader || !appSecret) return false;
+    const provided = signatureHeader.startsWith('sha256=') ? signatureHeader.slice(7) : signatureHeader;
+    const expected = crypto.createHmac('sha256', appSecret).update(rawBody, 'utf8').digest('hex');
+    const a = Buffer.from(provided, 'utf8');
+    const b = Buffer.from(expected, 'utf8');
+    return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
 /**
