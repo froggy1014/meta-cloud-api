@@ -137,7 +137,7 @@ All 30+ webhook field types are supported — messages, statuses, templates, flo
 
 ## Requirements
 
-- **Node.js** 18 LTS or later
+- **Node.js** 20.12+, **Bun**, **Deno**, **Cloudflare Workers** or **Vercel Edge** — no runtime dependencies, no `node:*` imports ([runtime guide](https://meta-cloud-api.site/guides/runtimes))
 - **TypeScript** 4.5+ (for TypeScript projects)
 
 ## Resources

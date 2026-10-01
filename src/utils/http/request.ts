@@ -18,10 +18,11 @@ import {
     WhatsAppThrottlingError,
 } from '../isMetaError';
 import Logger from '../logger';
+import { isDebugEnv } from '../runtime';
 import HttpsClient from './httpsClient';
 
 const LIB_NAME = 'REQUESTER';
-const LOGGER = new Logger(LIB_NAME, process.env.DEBUG === 'true');
+const LOGGER = new Logger(LIB_NAME, isDebugEnv());
 
 function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));

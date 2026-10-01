@@ -49,6 +49,68 @@ jobs:
           pnpm typecheck
           pnpm test
 
+  runtime-smoke:
+    name: Runtime smoke (${{ matrix.runtime }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        runtime: [node-20, node-22, node-24, bun, deno, workerd]
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v5
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Build once with the repo's Node version, then run the built bundle on
+      # each target runtime. The smoke test sends a message through a mocked
+      # fetch, verifies a signed webhook and round-trips an encrypted Flow.
+      - name: Build
+        run: pnpm build
+
+      - name: Setup target Node.js
+        if: startsWith(matrix.runtime, 'node-')
+        uses: actions/setup-node@v5
+        with:
+          node-version: ${{ fromJSON('{"node-20":"20","node-22":"22","node-24":"24"}')[matrix.runtime] }}
+
+      - name: Setup Bun
+        if: matrix.runtime == 'bun'
+        uses: oven-sh/setup-bun@v2
+
+      - name: Setup Deno
+        if: matrix.runtime == 'deno'
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Smoke (Node.js)
+        if: startsWith(matrix.runtime, 'node-')
+        run: node scripts/runtime-smoke/run.mjs
+
+      - name: Smoke (Bun)
+        if: matrix.runtime == 'bun'
+        run: bun scripts/runtime-smoke/run.mjs
+
+      - name: Smoke (Deno)
+        if: matrix.runtime == 'deno'
+        run: deno run --allow-read --allow-env scripts/runtime-smoke/run.mjs
+
+      # workerd runs without nodejs_compat, so any node:* import in dist fails here.
+      - name: Smoke (Cloudflare workerd)
+        if: matrix.runtime == 'workerd'
+        run: pnpm smoke:workerd
+
   scaffold:
     name: create-whatsapp-app smoke
     runs-on: ubuntu-latest

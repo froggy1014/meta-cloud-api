@@ -1,11 +1,14 @@
+import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'tsdown';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const { version } = JSON.parse(readFileSync(resolve(__dirname, 'package.json'), 'utf-8')) as { version: string };
+const define = { __SDK_VERSION__: JSON.stringify(version) };
 
 export default defineConfig([
-    // Main bundle for Node.js
+    // Main bundle (runtime-neutral: Node.js, Bun, Deno, Workers, Edge)
     {
         entry: ['src/index.ts'],
         format: ['esm'],
@@ -15,7 +18,10 @@ export default defineConfig([
         minify: true,
         treeshake: true,
         target: 'es2022',
-        platform: 'node',
+        platform: 'neutral',
+        // Keep the .mjs/.d.mts names that package.json exports point to.
+        fixedExtension: true,
+        define,
         hash: false,
         deps: {
             neverBundle: ['node:*', 'crypto', 'fs', 'path', 'url', 'util'],
@@ -49,6 +55,7 @@ export default defineConfig([
         treeshake: true,
         target: 'es2022',
         platform: 'neutral',
+        define,
         hash: false,
     },
     {
@@ -61,6 +68,7 @@ export default defineConfig([
         treeshake: true,
         target: 'es2022',
         platform: 'neutral',
+        define,
         hash: false,
     },
 ]);

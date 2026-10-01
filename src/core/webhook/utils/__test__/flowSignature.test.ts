@@ -1,17 +1,17 @@
 import { createHmac } from 'node:crypto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { importConfig } from '../../../../config/importConfig';
-import { decryptFlowRequest, encryptFlowResponse } from '../../../../utils/flowEncryptionUtils';
+import { decryptFlowRequestAsync, encryptFlowResponseAsync } from '../../../../utils/flowEncryptionUtils';
 import type WhatsApp from '../../../whatsapp/WhatsApp';
 import { processFlowRequest } from '../webhookUtils';
 
 vi.mock('../../../../utils/flowEncryptionUtils', () => ({
-    decryptFlowRequest: vi.fn(() => ({
+    decryptFlowRequestAsync: vi.fn(async () => ({
         decryptedBody: { action: 'ping', version: '3.0' },
         aesKeyBuffer: Buffer.alloc(16),
         initialVectorBuffer: Buffer.alloc(16),
     })),
-    encryptFlowResponse: vi.fn(() => 'encrypted-ping'),
+    encryptFlowResponseAsync: vi.fn(async () => 'encrypted-ping'),
 }));
 const raw = '{ "encrypted_flow_data": "opaque" }';
 function request(key: string) {
@@ -34,8 +34,8 @@ describe('Flow signatures use the App Secret', () => {
         const result = await processFlowRequest(request('app-secret'), config, client, new Map());
         expect(result.status).toBe(200);
         expect(await result.text()).toBe('encrypted-ping');
-        expect(decryptFlowRequest).toHaveBeenCalledOnce();
-        expect(encryptFlowResponse).toHaveBeenCalledOnce();
+        expect(decryptFlowRequestAsync).toHaveBeenCalledOnce();
+        expect(encryptFlowResponseAsync).toHaveBeenCalledOnce();
     });
     it('rejects the verify token when App Secret is configured before decrypting', async () => {
         const config = importConfig({
@@ -45,7 +45,7 @@ describe('Flow signatures use the App Secret', () => {
             webhookVerificationToken: 'verify-token',
         });
         expect((await processFlowRequest(request('verify-token'), config, client, new Map())).status).toBe(401);
-        expect(decryptFlowRequest).not.toHaveBeenCalled();
+        expect(decryptFlowRequestAsync).not.toHaveBeenCalled();
     });
     it('keeps the documented legacy fallback when App Secret is absent', async () => {
         const config = importConfig({

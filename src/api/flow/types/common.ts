@@ -413,7 +413,7 @@ export interface FlowClass {
     updateFlowJson(
         flowId: string,
         data: {
-            file: Blob | Buffer | object;
+            file: Blob | Uint8Array | object;
             name?: string;
         },
     ): Promise<UpdateFlowResponse>;
@@ -426,7 +426,7 @@ export interface FlowClass {
      * @param flowJsonData - The Flow JSON content as a Buffer, JSON object, or Blob.
      * @returns Promise indicating if the JSON is valid and includes validation errors if any.
      */
-    validateFlowJson(flowId: string, flowJsonData: Blob | Buffer | object): Promise<ValidateFlowJsonResponse>;
+    validateFlowJson(flowId: string, flowJsonData: Blob | Uint8Array | object): Promise<ValidateFlowJsonResponse>;
 
     /**
      * Publish Flow

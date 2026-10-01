@@ -1,12 +1,11 @@
-import crypto from 'node:crypto';
-
 import type { FlowEndpointRequest } from '../../../api/flow';
 import { FlowTypeEnum } from '../../../api/flow/types';
 import type { WabaConfigType } from '../../../types/config';
 import { MessageTypesEnum, WabaConfigEnum } from '../../../types/enums';
-import { decryptFlowRequest, encryptFlowResponse } from '../../../utils/flowEncryptionUtils';
+import { decryptFlowRequestAsync, encryptFlowResponseAsync } from '../../../utils/flowEncryptionUtils';
 import { isFlowDataExchangeRequest, isFlowErrorRequest, isFlowPingRequest } from '../../../utils/flowTypeGuards';
 import Logger from '../../../utils/logger';
+import { hmacSha256Hex, isDebugEnv, requireNodeCrypto, timingSafeEqualString } from '../../../utils/runtime';
 import type WhatsApp from '../../whatsapp/WhatsApp';
 import type {
     AccountAlertsWebhookValue,
@@ -54,7 +53,7 @@ import type {
 } from '../types';
 
 const LIB_NAME = 'WEBHOOK_UTILS';
-const LOGGER = new Logger(LIB_NAME, process.env.DEBUG === 'true');
+const LOGGER = new Logger(LIB_NAME, isDebugEnv());
 
 /**
  * Processed message with metadata for handlers
@@ -458,7 +457,9 @@ export async function processWebhookMessages(
                     headers: { 'Content-Type': 'application/json' },
                 });
             }
-            if (!isValidWebhookSignature(rawBody, request.headers.get('x-hub-signature-256'), options.appSecret)) {
+            if (
+                !(await verifyWebhookSignature(rawBody, request.headers.get('x-hub-signature-256'), options.appSecret))
+            ) {
                 LOGGER.warn('Rejected webhook with missing or invalid X-Hub-Signature-256');
                 return new Response(JSON.stringify({ error: 'Invalid signature' }), {
                     status: 401,
@@ -841,7 +842,7 @@ export async function processFlowRequest(
         if (!config[WabaConfigEnum.AppSecret]) {
             LOGGER.warn('appSecret not configured; verifying Flow signature with the webhook verification token');
         }
-        if (!isValidWebhookSignature(body, signature, signingKey)) {
+        if (!(await verifyWebhookSignature(body, signature, signingKey))) {
             LOGGER.warn('Invalid request signature');
             return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
         }
@@ -849,7 +850,7 @@ export async function processFlowRequest(
         const data = JSON.parse(body);
 
         // Decrypt the request and get decrypted AES key and IV
-        const { decryptedBody, aesKeyBuffer, initialVectorBuffer } = decryptFlowRequest(data, config);
+        const { decryptedBody, aesKeyBuffer, initialVectorBuffer } = await decryptFlowRequestAsync(data, config);
 
         // Determine flow type
         const isPing = isFlowPingRequest(decryptedBody);
@@ -905,7 +906,7 @@ export async function processFlowRequest(
         // Both ping and data_exchange responses need to be encrypted
         if (isPing || isDataExchange) {
             // Encrypt the response using decrypted AES key and IV
-            const encryptedResponse = encryptFlowResponse(result, aesKeyBuffer, initialVectorBuffer);
+            const encryptedResponse = await encryptFlowResponseAsync(result, aesKeyBuffer, initialVectorBuffer);
 
             // Meta expects the encrypted response as a plain base64 string (not wrapped in JSON)
             return new Response(encryptedResponse, {
@@ -931,16 +932,30 @@ export type WebhookSignatureOptions = {
 
 /**
  * Check an `X-Hub-Signature-256` header (`sha256=<hex>`) against the raw
- * request body. Constant-time; returns false instead of throwing on
- * malformed or wrong-length input.
+ * request body using Web Crypto, so it works on every runtime. Constant-time;
+ * resolves to false instead of throwing on malformed or wrong-length input.
+ */
+export async function verifyWebhookSignature(
+    rawBody: string,
+    signatureHeader: string | null,
+    appSecret: string,
+): Promise<boolean> {
+    if (!signatureHeader || !appSecret) return false;
+    const provided = signatureHeader.startsWith('sha256=') ? signatureHeader.slice(7) : signatureHeader;
+    const expected = await hmacSha256Hex(appSecret, rawBody);
+    return timingSafeEqualString(provided.toLowerCase(), expected);
+}
+
+/**
+ * Synchronous variant of {@link verifyWebhookSignature}. Needs `node:crypto`
+ * (Node.js >= 20.16, Bun, Deno); prefer the async variant on edge runtimes.
  */
 export function isValidWebhookSignature(rawBody: string, signatureHeader: string | null, appSecret: string): boolean {
     if (!signatureHeader || !appSecret) return false;
+    const crypto = requireNodeCrypto('isValidWebhookSignature');
     const provided = signatureHeader.startsWith('sha256=') ? signatureHeader.slice(7) : signatureHeader;
     const expected = crypto.createHmac('sha256', appSecret).update(rawBody, 'utf8').digest('hex');
-    const a = Buffer.from(provided, 'utf8');
-    const b = Buffer.from(expected, 'utf8');
-    return a.length === b.length && crypto.timingSafeEqual(a, b);
+    return timingSafeEqualString(provided.toLowerCase(), expected);
 }
 
 /**

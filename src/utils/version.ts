@@ -1,24 +1,21 @@
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { describeRuntime } from './runtime';
+
+/**
+ * SDK version, replaced with the package.json version at build time
+ * (see `define` in tsdown.config.ts and vitest.config.ts).
+ */
+declare const __SDK_VERSION__: string;
 
 /**
  * Get SDK version from package.json
  */
 export function getVersion(): string {
-    try {
-        const packagePath = join(__dirname, '../../package.json');
-        const packageJson = JSON.parse(readFileSync(packagePath, 'utf-8'));
-        return packageJson.version;
-    } catch (_error) {
-        return 'unknown';
-    }
+    return typeof __SDK_VERSION__ === 'string' ? __SDK_VERSION__ : 'unknown';
 }
 
 /**
  * Generate User-Agent string following official SDK pattern
  */
 export function getUserAgent(): string {
-    const version = getVersion();
-    const nodeVersion = process.version;
-    return `WhatsApp-Nodejs-SDK/${version} (Node.js ${nodeVersion})`;
+    return `WhatsApp-Nodejs-SDK/${getVersion()} (${describeRuntime()})`;
 }

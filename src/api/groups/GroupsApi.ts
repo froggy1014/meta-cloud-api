@@ -330,7 +330,7 @@ export default class GroupsApi extends BaseAPI implements groups.GroupsClass {
             if (params.subject) formData.append('subject', params.subject);
             if (params.description) formData.append('description', params.description);
 
-            if (params.profilePictureFile instanceof Buffer) {
+            if (params.profilePictureFile instanceof Uint8Array) {
                 const fileBlob = new globalThis.Blob([new Uint8Array(params.profilePictureFile)], {
                     type: 'image/jpeg',
                 });

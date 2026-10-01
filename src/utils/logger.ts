@@ -1,5 +1,4 @@
 // @ts-nocheck
-import { inspect } from 'node:util';
 import type { LoggerInterface } from '../types/logger';
 
 export default class Logger implements LoggerInterface {
@@ -12,9 +11,7 @@ export default class Logger implements LoggerInterface {
     }
 
     private formatData(data: any[]): string {
-        return data
-            .map((item) => (typeof item === 'object' ? inspect(item, { depth: null, colors: true }) : item))
-            .join(' ');
+        return data.map((item) => (typeof item === 'object' && item !== null ? stringify(item) : item)).join(' ');
     }
 
     log(...data: any[]) {
@@ -53,5 +50,35 @@ export default class Logger implements LoggerInterface {
             }
             console.info(prefix, ': ', this.formatData(data));
         }
+    }
+}
+
+/**
+ * Serialize log data without `node:util` so logging works on every runtime.
+ * Errors keep their message and stack; circular references are marked.
+ */
+function stringify(value: object): string {
+    if (value instanceof Error) {
+        return value.stack || `${value.name}: ${value.message}`;
+    }
+    const seen = new WeakSet<object>();
+    try {
+        return JSON.stringify(
+            value,
+            (_key, val) => {
+                if (val instanceof Error) {
+                    return { name: val.name, message: val.message, stack: val.stack };
+                }
+                if (typeof val === 'bigint') return val.toString();
+                if (typeof val === 'object' && val !== null) {
+                    if (seen.has(val)) return '[Circular]';
+                    seen.add(val);
+                }
+                return val;
+            },
+            2,
+        );
+    } catch {
+        return String(value);
     }
 }

@@ -3,6 +3,7 @@ import { importConfig } from '../../config/importConfig';
 import type { WabaConfigType, WhatsAppConfig } from '../../types/config';
 import { MessageTypesEnum, WabaConfigEnum } from '../../types/enums';
 import Logger from '../../utils/logger';
+import { isDebugEnv } from '../../utils/runtime';
 import { WhatsApp } from '../whatsapp';
 import type { WebhookFieldType } from './types';
 import {
@@ -60,7 +61,7 @@ import {
     type VideoMessageHandler,
 } from './utils/webhookUtils';
 
-const LOGGER = new Logger('WEBHOOK_PROCESSOR', process.env.DEBUG === 'true');
+const LOGGER = new Logger('WEBHOOK_PROCESSOR', isDebugEnv());
 
 export interface WebhookResponse {
     status: number;
