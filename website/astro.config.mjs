@@ -38,6 +38,10 @@ export default defineConfig({
                         { label: 'Quick Start', link: '/getting-started/quick-start' },
                         { label: 'create-whatsapp-app', link: '/getting-started/create-whatsapp-app' },
                         { label: 'Configuration', link: '/getting-started/configuration' },
+                        {
+                            label: 'Migrate from WhatsApp-Nodejs-SDK',
+                            link: '/getting-started/migrate-from-whatsapp-nodejs-sdk',
+                        },
                     ],
                 },
                 {
