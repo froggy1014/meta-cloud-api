@@ -1,0 +1,94 @@
+---
+title: create-whatsapp-app
+description: Scaffold a WhatsApp Cloud API app in 30 seconds and run it with no Meta account
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+`create-whatsapp-app` generates a Next.js app wired to meta-cloud-api. It runs immediately in **mock mode**, with no Meta account, token, or phone number.
+
+```bash
+npm create whatsapp-app@latest my-bot
+cd my-bot
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) and type as the customer.
+
+![Mock mode: the customer types in the browser and the bot replies with read receipts](/create-whatsapp-app-mock.png)
+
+## How mock mode works
+
+The dashed **CUSTOMER** box does not call your bot directly. It builds the exact JSON Meta POSTs to a webhook:
+
+```json
+{
+  "object": "whatsapp_business_account",
+  "entry": [{ "changes": [{ "field": "messages", "value": { "messages": [{ "type": "text", "text": { "body": "hi" } }] } }] }]
+}
+```
+
+That JSON goes through `nextjsAppWebhookHandler` and the SDK's webhook processor, the same path production traffic takes. `processor.onText` fires and your code in `lib/bot.ts` replies. The only thing swapped is the outbound transport: `sendText()` stores the reply instead of calling Meta, then simulates delivered and read receipts.
+
+The code you write in mock mode is the code you deploy.
+
+## Going live
+
+<Steps>
+
+1. Create a Meta app with the WhatsApp product. Copy the access token, phone number ID, and WhatsApp Business Account ID into `.env.local`. See [Configuration](/getting-started/configuration).
+
+2. Expose your dev server:
+
+   ```bash
+   cloudflared tunnel --url http://localhost:3000
+   # or: ngrok http 3000
+   ```
+
+3. In the App Dashboard, go to **WhatsApp → Configuration → Webhook**:
+   - Callback URL: `https://<your-tunnel>/api/webhook`
+   - Verify token: `WEBHOOK_VERIFICATION_TOKEN` from `.env.local`. The CLI generated a random one.
+   - Subscribe to the `messages` field.
+
+4. Set `APP_SECRET` in `.env.local`; live webhook POSTs are rejected until it is configured. The dashboard, send endpoint, and conversation stream require login: username `admin`, with the generated `DASHBOARD_PASSWORD` from `.env.local`. Keep this password private and use HTTPS.
+
+5. Restart `npm run dev`. The badge turns green. Message your business number from your phone.
+
+</Steps>
+
+<Aside type="tip">
+Want to see a fully wired version first? The [playground](https://playground.meta-cloud-api.site) runs on a real number. Scan the QR and say hi.
+</Aside>
+
+## What is generated
+
+| File | Purpose |
+|---|---|
+| `lib/bot.ts` | **Your bot.** Called for every incoming text message |
+| `lib/whatsapp.ts` | SDK client, mock/live switch, `sendText()` |
+| `lib/webhook.ts` | `nextjsAppWebhookHandler` with `onText` and `onStatus` |
+| `lib/store.ts` | In-memory chat store and change feed. Swap for a database in production |
+| `app/api/webhook/route.ts` | Meta webhook: GET verification, POST events, signature check |
+| `app/api/simulate/route.ts` | Mock mode only: customer messages as real webhook payloads |
+| `app/api/send/route.ts` | Reply from the dashboard as the business |
+| `app/api/events/route.ts` | Server-Sent Events for the live UI |
+
+## Options
+
+```bash
+npx create-whatsapp-app [dir] [--template basic] [--pm npm|pnpm|yarn|bun] [--no-install] [--yes]
+```
+
+| Option | Default | |
+|---|---|---|
+| `dir` | prompt, or `my-whatsapp-app` | Must be empty or not exist |
+| `--template` | `basic` | |
+| `--pm` | the package manager running the command | Used for install and in printed commands |
+| `--no-install` | install on | Skip dependency install |
+| `--yes`, `-y` | | Never prompt |
+
+## Next steps
+
+- More message types: [Messages API](/api/messages)
+- More webhook events: [Webhooks overview](/webhooks/overview)
+- Deploying: [Deployment guide](/guides/deployment)

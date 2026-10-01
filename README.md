@@ -15,6 +15,17 @@
 
 ## Quick Start
 
+**New project?** Scaffold a working WhatsApp app in 30 seconds. No Meta account needed to start:
+
+```bash
+npm create whatsapp-app@latest my-bot
+cd my-bot && npm run dev
+```
+
+It opens in mock mode: you play the customer in the browser, your message runs through the SDK as a real webhook payload, and `lib/bot.ts` replies. Add credentials to `.env.local` and the same code talks to real WhatsApp. See [create-whatsapp-app](./packages/create-whatsapp-app).
+
+**Existing project?**
+
 ```bash
 pnpm add meta-cloud-api
 ```
