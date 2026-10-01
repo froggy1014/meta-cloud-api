@@ -62,7 +62,7 @@ await wa.messages.image({ to: '1234567890', link: 'https://example.com/image.png
 | Account ban risk | None | None | Yes — violates WhatsApp ToS |
 | Maintenance | Active (tracks OpenAPI v23) | **Archived since 2023** | Varies |
 | TypeScript | Strict, full request/response types | Partial | Varies |
-| API coverage | 20 modules (Messages, Flows, Calling, Payments, and more) | Messaging-focused | Personal-account features |
+| API coverage | 22 modules (Messages, Flows, Calling, Payments, and more) | Messaging-focused | Personal-account features |
 | Webhook adapters | Built-in Express.js, Next.js, Hono, Fastify (NestJS via Express) | Manual | Custom event system |
 
 If you're building on the official Cloud API and don't want to bet on an unmaintained SDK, this is what the archived one would look like if Meta had kept shipping it.
@@ -91,6 +91,9 @@ wa.blockUsers            // Block/unblock users
 wa.contactBook           // Delete a BSUID contact book entry
 wa.threadControl         // Conversation Routing: pass, release, take threads
 wa.waba                  // WhatsApp Business Account management
+wa.business              // Business portfolio, pre-verified phone numbers, owned/client WABAs, credit lines
+wa.messageHistory        // Message history and history events
+wa.solutions             // Multi-Partner Solutions management
 ```
 
 ## Webhooks
