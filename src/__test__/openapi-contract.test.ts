@@ -102,6 +102,7 @@ const ARG_OVERRIDES: Record<string, () => unknown[]> = {
     'threadControl.take': () => [{ to: DUMMY_ID }],
     'threadControl.send': () => ['release', { to: DUMMY_ID }],
     'media.downloadMedia': () => [MEDIA_URL],
+    'media.uploadMedia': () => [new Blob(['x'], { type: 'image/png' })],
 };
 
 type RecordedCall = { method: string; endpoint: string };

@@ -1,3 +1,4 @@
+import type { RateLimitInfo } from '../utils/rateLimit';
 import { WabaConfigEnum } from './enums';
 
 /**
@@ -33,8 +34,34 @@ export interface RetryConfig {
      * Defaults to 1000 (1 second).
      */
     initialDelayMs?: number;
+    /**
+     * Wait as long as Meta asks before retrying a throttled request. When a throttling response
+     * carries `Retry-After` (seconds) or `X-Business-Use-Case-Usage` with
+     * `estimated_time_to_regain_access` (minutes), the retry waits the larger of the backoff delay and
+     * that server delay, capped at {@link RetryConfig.maxServerDelayMs}. It never adds attempts.
+     * Defaults to `true`; set `false` to use the backoff delay only.
+     */
+    respectServerDelay?: boolean;
+    /**
+     * Upper bound in milliseconds for a server-provided wait. A longer wait is shortened to this
+     * value, so the retry may still be throttled; inspect `error.rateLimit` to reschedule instead.
+     * Defaults to 30000 (30 seconds).
+     */
+    maxServerDelayMs?: number;
 }
 
+/** Request details passed to {@link WhatsAppConfig.onRateLimitInfo}. */
+export interface RateLimitInfoContext {
+    /** HTTP method of the request. */
+    method: string;
+    /** Endpoint path or absolute URL as passed to the requester. */
+    endpoint: string;
+    /** HTTP status code of the response. */
+    statusCode: number;
+}
+
+/** Callback receiving rate limit information parsed from every response that carries it. */
+export type RateLimitInfoListener = (info: RateLimitInfo, context: RateLimitInfoContext) => void | Promise<void>;
 /**
  * Storage used to drop duplicate webhook deliveries. Meta retries deliveries,
  * so the same message or status can arrive more than once.
@@ -91,6 +118,12 @@ export type WhatsAppConfig = {
     passphrase?: string;
     /** Automatic retry configuration for throttling errors. */
     retry?: RetryConfig;
+    /**
+     * Called with the parsed `X-App-Usage` / `X-Business-Use-Case-Usage` / `Retry-After` headers of
+     * every response (successful or not) that carries at least one of them. Errors thrown by the
+     * callback are ignored. See also `whatsapp.getLastRateLimitInfo()`.
+     */
+    onRateLimitInfo?: RateLimitInfoListener;
     /**
      * Reject webhook POSTs whose `X-Hub-Signature-256` header is not a valid
      * HMAC-SHA256 of the raw body keyed with `appSecret`. Requires `appSecret`.
@@ -192,4 +225,9 @@ export type WabaConfigType = {
      * Passed through from WhatsAppConfig.
      */
     retry?: RetryConfig;
+
+    /**
+     * Rate limit header listener. Passed through from WhatsAppConfig.
+     */
+    onRateLimitInfo?: RateLimitInfoListener;
 };

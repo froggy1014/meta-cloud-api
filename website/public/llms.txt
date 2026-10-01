@@ -53,6 +53,7 @@ meta-cloud-api provides a type-safe, comprehensive, and modular way to integrate
 - [Testing](https://meta-cloud-api.xyz/guides/testing): Testing guide
 - [Error Handling](https://meta-cloud-api.xyz/guides/error-handling): Error handling strategies
 - [Deployment](https://meta-cloud-api.xyz/guides/deployment): Production deployment
+- [Production Helpers](https://meta-cloud-api.xyz/guides/production-helpers): Customer service window checks, rate limit headers, server-paced retries, stream/bytes media uploads
 
 ## Use Cases
 
