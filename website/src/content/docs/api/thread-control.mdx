@@ -1,0 +1,310 @@
+---
+title: Thread Control API
+description: Manage WhatsApp conversation routing, pass, release, and take thread ownership
+---
+
+Manage WhatsApp conversation routing and thread ownership across multiple responders, allowing systems and human agents to pass, release, or take control of conversations.
+
+**Official Documentation**: [WhatsApp Thread Control API](https://developers.facebook.com/documentation/business-messaging/whatsapp/conversation-routing/thread-control/)
+
+## Overview
+
+When multiple responders (such as AI bots, customer service agents, and marketing teams) share a WhatsApp Business Account, Conversation Routing ensures each conversation has exactly one owner at any given moment:
+
+- **Pass Thread**: Transfer conversation ownership to a specific role (e.g., `customer_service`, `ai_agent`) or to the escalation partner
+- **Release Thread**: Relinquish ownership and return the thread to an idle state so the user's next message is re-routed by entry point
+- **Take Thread**: Allow the designated escalation partner to seize ownership of an active conversation from another responder
+- **Attach Metadata**: Send contextual notes or conversation summaries (up to 2,000 characters) to the receiving responder
+
+## Endpoints
+
+```
+POST /{PHONE_NUMBER_ID}/thread_control
+```
+
+## Important Notes
+
+:::caution[Account Enrollment]
+Conversation routing is configured within Meta Business Suite. Your WhatsApp Business Account must be enrolled in Conversation Routing before calling the Thread Control API.
+:::
+
+:::tip[User Identification: to vs recipient]
+You must supply **exactly one** of `to` (phone number or WhatsApp ID) or `recipient` (Business-Scoped User ID / BSUID). Supplying both or neither will result in a validation error. Using `recipient` (BSUID) is recommended because it remains consistent for a business even if the user changes phone numbers.
+:::
+
+:::tip[Escalation Partner Privileges]
+Only the account's designated escalation partner can call `take()`. Additionally, sending a service message as the escalation partner automatically takes control of the thread without calling `take()` explicitly.
+:::
+
+:::note[Tracking Ownership]
+Meta does not provide an endpoint to inspect the current thread owner. You should track ownership locally using incoming messages and `messaging_handovers` webhook notifications (`control_passed`, `control_taken`), and reset ownership after 24 hours of user inactivity.
+:::
+
+## Available Roles
+
+When passing thread ownership, you can target any of the following responder roles:
+
+| Role | Description |
+| :--- | :--- |
+| `customer_service` | Primary responder for the Service entry point |
+| `marketing` | Primary responder for the Marketing Message Response entry point |
+| `utility` | Primary responder for the Utility Response entry point |
+| `ctwa` | Primary responder for Click to WhatsApp ads |
+| `ai_agent` | Designated AI agent (e.g., Meta Business Agent, when enabled) |
+| `escalation` | Account's designated escalation partner |
+
+## Quick Start
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+});
+
+// 1. Pass thread control to human customer service agent
+const passResult = await client.threadControl.pass({
+    recipient: 'US.13491208655302741918',
+    metadata: 'User requested billing agent assistance',
+    control_pass: {
+        target_role: 'customer_service',
+    },
+});
+console.log('Thread passed, request ID:', passResult.request_id);
+
+// 2. Release thread back to idle
+const releaseResult = await client.threadControl.release({
+    recipient: 'US.13491208655302741918',
+    metadata: 'Inquiry resolved by agent',
+});
+console.log('Thread released, request ID:', releaseResult.request_id);
+
+// 3. Take thread control (escalation partner only)
+const takeResult = await client.threadControl.take({
+    to: '15551234567',
+    metadata: 'Escalation supervisor intervention',
+});
+console.log('Thread taken, request ID:', takeResult.request_id);
+```
+
+## Pass Thread Control
+
+Transfer ownership from your application (the current owner) to another responder.
+
+### Targeted Pass to Specific Role
+
+Pass thread control directly to a specific responder role, such as `customer_service` or `ai_agent`:
+
+```typescript
+const response = await client.threadControl.pass({
+    recipient: 'US.13491208655302741918',
+    metadata: 'Customer requires return authorization',
+    control_pass: {
+        target_role: 'customer_service',
+    },
+});
+
+console.log('Pass request submitted:', response.request_id);
+```
+
+### Untargeted Pass to Escalation Partner
+
+If you omit `control_pass`, Meta automatically passes thread ownership to the account's designated escalation partner:
+
+```typescript
+const response = await client.threadControl.pass({
+    to: '15551234567',
+    metadata: 'Unhandled intent: routing to escalation fallback',
+});
+
+console.log('Escalated with request ID:', response.request_id);
+```
+
+### Pass Using Phone Number (`to`)
+
+```typescript
+await client.threadControl.pass({
+    to: '15551234567',
+    control_pass: {
+        target_role: 'marketing',
+    },
+});
+```
+
+### Pass Using Business-Scoped User ID (`recipient`)
+
+```typescript
+await client.threadControl.pass({
+    recipient: 'US.13491208655302741918',
+    control_pass: {
+        target_role: 'ai_agent',
+    },
+});
+```
+
+## Release Thread Control
+
+Relinquish ownership of a thread and return it to idle. When the user sends their next message, it will be automatically routed according to entry point rules configured in Meta Business Suite.
+
+### Release Active Thread
+
+```typescript
+const response = await client.threadControl.release({
+    recipient: 'US.13491208655302741918',
+    metadata: 'Conversation completed successfully',
+});
+
+console.log('Release request ID:', response.request_id);
+```
+
+### Release Using Phone Number
+
+```typescript
+await client.threadControl.release({
+    to: '15551234567',
+});
+```
+
+:::note[Release Behavior]
+Releasing an already idle thread succeeds. However, attempting to release a thread you do not currently own will fail with a Meta API error.
+:::
+
+## Take Thread Control
+
+Seize ownership of a conversation. Only the account's designated escalation partner is permitted to call this method.
+
+### Take Thread Ownership
+
+```typescript
+const response = await client.threadControl.take({
+    recipient: 'US.13491208655302741918',
+    metadata: 'Supervisor takeover due to negative sentiment score',
+});
+
+console.log('Thread ownership acquired, request ID:', response.request_id);
+```
+
+### Take by Phone Number
+
+```typescript
+const response = await client.threadControl.take({
+    to: '15551234567',
+    metadata: 'Urgent compliance intervention',
+});
+```
+
+:::tip[Implicit Take via Messages]
+When configured as the escalation partner, sending a Service message directly to a user automatically takes ownership of the thread. Calling `client.threadControl.take()` is only necessary when you want to take control without sending an immediate message.
+:::
+
+## Response Format
+
+All successful Thread Control operations return a standard response object containing the messaging product identifier and an opaque request ID:
+
+```typescript
+interface ThreadControlResponse {
+    messaging_product: 'whatsapp';
+    request_id: string;
+}
+```
+
+Example response:
+
+```json
+{
+    "messaging_product": "whatsapp",
+    "request_id": "AQB3Yj5k..."
+}
+```
+
+## Handling Webhook Events
+
+When thread control is passed or taken, Meta sends `messaging_handovers` webhook notifications to involved responders.
+
+```typescript
+import { WebhookProcessor } from 'meta-cloud-api/webhook';
+
+const processor = new WebhookProcessor({
+    verifyToken: process.env.WEBHOOK_VERIFY_TOKEN!,
+});
+
+processor.onMessagingHandovers(async (event) => {
+    const { handover, timestamp } = event;
+
+    if (handover.event === 'control_passed') {
+        console.log(`Thread control passed to: ${handover.new_owner}`);
+        console.log(`Metadata passed from previous owner: ${handover.metadata}`);
+        console.log(`User: ${handover.recipient || handover.from}`);
+    } else if (handover.event === 'control_taken') {
+        console.log(`Thread control was taken by escalation partner: ${handover.new_owner}`);
+    }
+});
+```
+
+## Error Handling
+
+The SDK validates input arguments prior to network transmission, throwing a `WhatsAppValidationError` if parameters are invalid:
+
+```typescript
+import { WhatsAppValidationError } from 'meta-cloud-api';
+
+try {
+    await client.threadControl.pass({
+        to: '15551234567',
+        recipient: 'US.13491208655302741918', // ❌ Error: Cannot provide both
+    });
+} catch (error) {
+    if (error instanceof WhatsAppValidationError) {
+        console.error('Validation error:', error.message);
+    } else if (error.response) {
+        // Meta Graph API error response
+        const { code, message, error_subcode } = error.response.data.error;
+        console.error(`Meta API Error [${code} / subcode ${error_subcode}]: ${message}`);
+    }
+}
+```
+
+Common error scenarios include:
+- **Missing or duplicate identifier**: Providing neither `to` nor `recipient`, or providing both.
+- **Metadata length limit**: Supplying `metadata` longer than 2,000 characters.
+- **Unauthorized take**: Calling `take()` from an app that is not the designated escalation partner.
+- **Invalid target**: Passing control to a role that is disabled or not configured on the WABA.
+- **Ownership conflict**: Attempting to pass control to a role that already owns the thread, or releasing a thread owned by someone else.
+
+## Best Practices
+
+1. **Prefer Business-Scoped User IDs (`recipient`)**:
+   Always prefer BSUIDs when available. A user's phone number may change, but their BSUID remains permanent for your business.
+
+2. **Include Contextual Metadata**:
+   When transferring control, pass helpful context (customer intent, order numbers, language, or prior actions) in `metadata` to avoid re-prompting the user:
+   ```typescript
+   await client.threadControl.pass({
+       recipient: userBsuid,
+       metadata: JSON.stringify({
+           intent: 'order_status',
+           order_id: 'ORD-98421',
+           sentiment: 'neutral',
+       }),
+       control_pass: { target_role: 'customer_service' },
+   });
+   ```
+
+3. **Respect Inactivity Windows**:
+   Threads return to idle after 24 hours of customer inactivity. Synchronize your internal state management with this timer.
+
+4. **Listen to Standby Events**:
+   When your app does not own the thread, messages may be received in the `standby` webhook channel rather than the main messages channel. Monitor standby webhooks if you need visibility into ongoing conversations.
+
+## Related Documentation
+
+- [Messages API](/api/messages) - Send messages within an owned thread
+- [Webhooks Overview](/webhooks/overview) - Configure webhooks and listen for events
+- [Block Users API](/api/block-users) - Manage user blocking and permissions
+
+## Source Code
+
+- TypeScript implementation: [ThreadControlApi.ts](https://github.com/froggy1014/meta-cloud-api/blob/main/src/api/threadControl/ThreadControlApi.ts)
+- Type definitions: [threadControl.ts](https://github.com/froggy1014/meta-cloud-api/blob/main/src/api/threadControl/types/threadControl.ts)

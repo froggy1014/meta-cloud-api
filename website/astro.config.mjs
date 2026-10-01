@@ -87,6 +87,7 @@ export default defineConfig({
                                 { label: 'Payments', link: '/api/payments' },
                                 { label: 'Block Users', link: '/api/block-users' },
                                 { label: 'Encryption', link: '/api/encryption' },
+                                { label: 'Thread Control', link: '/api/thread-control' },
                             ],
                         },
                     ],
