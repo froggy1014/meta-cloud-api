@@ -18,6 +18,9 @@ jobs:
     name: Publish
     runs-on: ubuntu-latest
     steps:
+      - name: Record job start
+        run: echo "JOB_STARTED_AT=$(date -u +%s)" >> "$GITHUB_ENV"
+
       - name: Checkout Repo
         uses: actions/checkout@v5
 
@@ -45,16 +48,30 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Notify playground of new meta-cloud-api release
-        # Also runs when the publish step failed after publishing some packages
-        # (e.g. create-whatsapp-app E403): changesets/action sets these outputs first.
-        if: ${{ !cancelled() && steps.changesets.outputs.published == 'true' }}
+        # Runs even when the publish step failed: a run can publish meta-cloud-api
+        # and then fail on another package (create-whatsapp-app E403 in 3.8.0),
+        # and changesets/action sets no outputs when its publish command fails.
+        # So decide from the registry: dispatch only if the current version was
+        # published after this job started.
+        if: ${{ !cancelled() }}
         env:
           GH_TOKEN: ${{ secrets.PLAYGROUND_DISPATCH_TOKEN }}
-          PUBLISHED_PACKAGES: ${{ steps.changesets.outputs.publishedPackages }}
         run: |
-          version="$(jq -r '.[] | select(.name == "meta-cloud-api") | .version' <<< "$PUBLISHED_PACKAGES")"
-          if [ -z "$version" ]; then
-            echo "meta-cloud-api was not published in this run; skipping playground dispatch."
+          version="$(node -p "require('./package.json').version")"
+          published_at=""
+          for _ in $(seq 15); do
+            published_at="$(npm view meta-cloud-api time --json 2>/dev/null | jq -r --arg v "$version" '.[$v] // empty')"
+            [ -n "$published_at" ] && break
+            # Not on the registry (yet). Only worth waiting if publishing was attempted.
+            [ "${{ steps.changesets.outcome }}" = "skipped" ] && break
+            sleep 20
+          done
+          if [ -z "$published_at" ]; then
+            echo "meta-cloud-api@$version is not on npm; skipping playground dispatch."
+            exit 0
+          fi
+          if [ "$(date -u -d "$published_at" +%s)" -lt "$JOB_STARTED_AT" ]; then
+            echo "meta-cloud-api@$version was published before this run ($published_at); nothing to dispatch."
             exit 0
           fi
           if [ -z "$GH_TOKEN" ]; then
