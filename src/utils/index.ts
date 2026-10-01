@@ -1,5 +1,19 @@
 export { buildFieldsQueryString } from './buildFieldsQueryString';
 export { formatConfigTable } from './configTable';
+export type {
+    CustomerServiceWindowOptions,
+    FreeEntryPointWindowOptions,
+    MessagingWindow,
+    WindowTimestamp,
+} from './customerServiceWindow';
+export {
+    CUSTOMER_SERVICE_WINDOW_MS,
+    canSendFreeformMessage,
+    FREE_ENTRY_POINT_WINDOW_MS,
+    getCustomerServiceWindow,
+    getFreeEntryPointWindow,
+    MAX_FREE_ENTRY_POINT_WINDOW_MS,
+} from './customerServiceWindow';
 export type { ApiPermissionErrorCode, MetaError, MetaErrorData, WhatsAppErrorCode } from './isMetaError';
 export {
     AUTHORIZATION_ERROR_CODES,
