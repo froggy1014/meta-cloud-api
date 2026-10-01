@@ -114,7 +114,8 @@
         "next": "^16.2.9",
         "tsdown": "^0.22.2",
         "typescript": "^6.0.3",
-        "vitest": "^4.1.8"
+        "vitest": "^4.1.8",
+        "yaml": "^2.9.0"
     },
     "lint-staged": {
         "*.{js,jsx,ts,tsx,json}": "biome check --write --"
