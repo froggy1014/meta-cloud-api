@@ -1,0 +1,102 @@
+---
+title: Hono Integration Guide
+description: Receive WhatsApp webhooks and Flows with Hono on Node.js, Bun, Deno, Cloudflare Workers and Vercel Edge
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+`honoWebhookHandler` connects meta-cloud-api to [Hono](https://hono.dev/). Its handlers take a Hono `Context` and return a web `Response`, so the same code runs everywhere Hono does: Node.js, Bun, Deno, Cloudflare Workers and Vercel Edge.
+
+`hono` is not a dependency of meta-cloud-api; the adapter only reads `c.req.raw` (the web `Request`).
+
+## Install
+
+```bash
+pnpm add meta-cloud-api hono
+```
+
+## Webhook and Flow routes
+
+```typescript
+import { Hono } from 'hono';
+import { honoWebhookHandler } from 'meta-cloud-api';
+
+// Cached per phoneNumberId, so calling it again returns the same instance.
+const wa = honoWebhookHandler({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN!,
+    appSecret: process.env.M4D_APP_SECRET!,
+    verifyWebhookSignature: true,
+    privatePem: process.env.FLOW_API_PRIVATE_PEM, // only needed for Flows
+});
+
+wa.processor.onText(async (whatsapp, { message }) => {
+    await whatsapp.messages.text({ to: message.from, body: `You said: ${message.text.body}` });
+});
+
+const app = new Hono();
+
+app.get('/webhook', wa.GET); // Meta's verification request
+app.post('/webhook', wa.POST); // Messages, statuses and other webhook fields
+app.post('/flow', wa.flow); // WhatsApp Flows data endpoint
+
+export default app;
+```
+
+`app.all('/webhook', wa.webhook)` does the same as the two `/webhook` routes: it routes `GET` and `POST` and answers anything else with `405`.
+
+| Handler | Use |
+| --- | --- |
+| `GET` | Webhook verification (`hub.mode`, `hub.verify_token`, `hub.challenge`) |
+| `POST` | Webhook events, dispatched to the `processor.on*` handlers |
+| `webhook` | `GET` and `POST` on one route |
+| `flow` | Encrypted Flow data exchange |
+| `processor` | The underlying `WebhookProcessor`, for registering handlers |
+| `destroy()` | Remove all handlers and evict the cached instance |
+
+<Aside title="Signature verification works out of the box">
+With `verifyWebhookSignature: true` the SDK checks `X-Hub-Signature-256` against the exact bytes of the request body, which Hono passes through untouched. If middleware already read the body (for example `await c.req.json()`), the adapter rebuilds it from Hono's body cache; JSON that was parsed and re-serialized may then no longer match the signature, so avoid reading the webhook body before the handler.
+</Aside>
+
+## Cloudflare Workers
+
+Workers pass secrets per request through `c.env`, not `process.env`. Create the handler on first use:
+
+```typescript
+import { Hono } from 'hono';
+import { type HonoWebhookHandlers, honoWebhookHandler } from 'meta-cloud-api';
+
+type Bindings = {
+    CLOUD_API_ACCESS_TOKEN: string;
+    WA_PHONE_NUMBER_ID: string;
+    WEBHOOK_VERIFICATION_TOKEN: string;
+    M4D_APP_SECRET: string;
+};
+
+let wa: HonoWebhookHandlers | undefined;
+
+function whatsapp(env: Bindings): HonoWebhookHandlers {
+    if (!wa) {
+        wa = honoWebhookHandler({
+            accessToken: env.CLOUD_API_ACCESS_TOKEN,
+            phoneNumberId: Number(env.WA_PHONE_NUMBER_ID),
+            webhookVerificationToken: env.WEBHOOK_VERIFICATION_TOKEN,
+            appSecret: env.M4D_APP_SECRET,
+            verifyWebhookSignature: true,
+        });
+        wa.processor.onText(async (client, { message }) => {
+            await client.messages.text({ to: message.from, body: `You said: ${message.text.body}` });
+        });
+    }
+    return wa;
+}
+
+const app = new Hono<{ Bindings: Bindings }>();
+
+app.all('/webhook', (c) => whatsapp(c.env).webhook(c));
+
+export default app;
+```
+
+No `nodejs_compat` flag is needed. See [Edge & Other Runtimes](/guides/runtimes/) for Flow private keys on Workers.

@@ -1,7 +1,13 @@
 // Runtime smoke test for the built SDK (dist/). It uses only Web APIs so the
 // same file runs on Node.js, Bun, Deno and Cloudflare workerd. Each runner
 // imports `runSmoke` and fails when it throws.
-import { FlowTypeEnum, WebhookProcessor, WhatsApp, generateXHub256SigAsync } from '../../dist/index.mjs';
+import {
+    FlowTypeEnum,
+    WebhookProcessor,
+    WhatsApp,
+    generateXHub256SigAsync,
+    honoWebhookHandler,
+} from '../../dist/index.mjs';
 
 const APP_SECRET = 'smoke-app-secret';
 const PHONE_NUMBER_ID = 1234567890;
@@ -103,6 +109,68 @@ async function checkWebhook() {
     assert(received.length === 1, 'handler did not run for a bad signature');
 }
 
+// The Hono adapter only touches `c.req.raw`, so a minimal context object proves
+// it on every runtime without importing hono.
+async function checkHonoAdapter() {
+    const wa = honoWebhookHandler({
+        accessToken: 'smoke-token',
+        phoneNumberId: PHONE_NUMBER_ID + 1,
+        appSecret: APP_SECRET,
+        webhookVerificationToken: 'smoke-verify',
+        verifyWebhookSignature: true,
+    });
+    const received = [];
+    wa.processor.onText((_wa, processed) => {
+        received.push(processed.message.text.body);
+    });
+    const context = (request) => ({ req: { raw: request } });
+
+    try {
+        const verify = await wa.GET(
+            context(
+                new Request('https://example.com/webhook?hub.mode=subscribe&hub.verify_token=smoke-verify&hub.challenge=c1'),
+            ),
+        );
+        assert(verify.status === 200 && (await verify.text()) === 'c1', `hono GET status ${verify.status}`);
+
+        const body = JSON.stringify({
+            object: 'whatsapp_business_account',
+            entry: [
+                {
+                    id: 'WABA_ID',
+                    changes: [
+                        {
+                            field: 'messages',
+                            value: {
+                                messaging_product: 'whatsapp',
+                                metadata: { display_phone_number: '1', phone_number_id: String(PHONE_NUMBER_ID + 1) },
+                                messages: [{ from: '1', id: 'wamid.hono', timestamp: '1', type: 'text', text: { body: 'hono' } }],
+                            },
+                        },
+                    ],
+                },
+            ],
+        });
+        const post = async (sig) =>
+            wa.webhook(
+                context(
+                    new Request('https://example.com/webhook', {
+                        method: 'POST',
+                        body,
+                        headers: { 'content-type': 'application/json', 'x-hub-signature-256': `sha256=${sig}` },
+                    }),
+                ),
+            );
+        const ok = await post(await generateXHub256SigAsync(body, APP_SECRET));
+        assert(ok.status === 200, `hono POST status ${ok.status}`);
+        assert(received.length === 1 && received[0] === 'hono', 'hono onText handler ran once');
+        const bad = await post('0'.repeat(64));
+        assert(bad.status === 401 && received.length === 1, `hono bad signature status ${bad.status}`);
+    } finally {
+        wa.destroy();
+    }
+}
+
 function toPem(label, der) {
     const lines = b64.encode(der).match(/.{1,64}/g).join('\n');
     return `-----BEGIN ${label}-----\n${lines}\n-----END ${label}-----\n`;
@@ -160,6 +228,7 @@ async function checkFlow() {
 export async function runSmoke() {
     const userAgent = await checkClient();
     await checkWebhook();
+    await checkHonoAdapter();
     await checkFlow();
-    return `ok: client, signed webhook, encrypted flow (${userAgent})`;
+    return `ok: client, signed webhook, hono adapter, encrypted flow (${userAgent})`;
 }

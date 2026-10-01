@@ -5,6 +5,8 @@ export { default as WhatsApp } from '../whatsapp/WhatsApp';
 export * from './frameworks/express';
 // Framework interfaces
 export type { ExpressRequest, ExpressResponse, ExpressWebhookConfig, NextFunction } from './frameworks/express/express';
+export * from './frameworks/fastify';
+export * from './frameworks/hono';
 export * from './frameworks/nextjs-app';
 export * from './frameworks/nextjs-page';
 export type { NextJsWebhookConfig } from './frameworks/nextjs-page/nextjs-page';

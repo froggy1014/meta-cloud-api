@@ -54,7 +54,7 @@ Never hardcode your verification token. Always use environment variables.
 
 ## Implementation
 
-The `WebhookProcessor` handles verification automatically. All framework adapters (Express, Next.js) include verification support.
+The `WebhookProcessor` handles verification automatically. All framework adapters (Express, Next.js, Hono, Fastify) include verification support.
 
 ### Using Framework Adapters
 
@@ -123,6 +123,42 @@ const whatsapp = nextjsWebhookHandler({
 
 // Handles both GET (verification) and POST (webhooks)
 export default whatsapp.webhook;
+```
+
+</TabItem>
+<TabItem label="Hono">
+
+```typescript
+import { Hono } from 'hono';
+import { honoWebhookHandler } from 'meta-cloud-api';
+
+const whatsapp = honoWebhookHandler({
+    accessToken: process.env.WHATSAPP_ACCESS_TOKEN!,
+    phoneNumberId: parseInt(process.env.WHATSAPP_PHONE_NUMBER_ID!),
+    webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN!,
+});
+
+const app = new Hono();
+app.get('/webhook', whatsapp.GET);
+app.post('/webhook', whatsapp.POST);
+```
+
+</TabItem>
+<TabItem label="Fastify">
+
+```typescript
+import Fastify from 'fastify';
+import { fastifyWebhookHandler } from 'meta-cloud-api';
+
+const whatsapp = fastifyWebhookHandler({
+    accessToken: process.env.WHATSAPP_ACCESS_TOKEN!,
+    phoneNumberId: parseInt(process.env.WHATSAPP_PHONE_NUMBER_ID!),
+    webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN!,
+});
+
+const app = Fastify();
+app.get('/webhook', whatsapp.GET);
+app.post('/webhook', whatsapp.POST);
 ```
 
 </TabItem>
@@ -331,7 +367,7 @@ The signature covers the exact bytes Meta sent. `express.json()` parses and disc
 app.use(express.json({ verify: (req, _res, buf) => { (req as any).rawBody = buf.toString(); } }));
 ```
 
-The Next.js adapters read the raw body themselves and need nothing extra.
+On Fastify, set `request.rawBody` in a JSON content-type parser or with `fastify-raw-body` (see the [Fastify guide](/guides/fastify/)). The Next.js and Hono adapters read the raw body themselves and need nothing extra.
 </Aside>
 
 To check signatures yourself, for example in a custom adapter, use the exported helper:
