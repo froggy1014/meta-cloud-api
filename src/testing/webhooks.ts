@@ -293,7 +293,7 @@ export function createStatusWebhook(
     if (options.pricing) status.pricing = options.pricing;
     if (options.bizOpaqueCallbackData !== undefined) status.biz_opaque_callback_data = options.bizOpaqueCallbackData;
     if (options.errors) status.errors = options.errors;
-    else if (options.status === 'failed') status.errors = [{ ...DEFAULT_FAILED_ERROR }];
+    else if (options.status === 'failed') status.errors = [structuredClone(DEFAULT_FAILED_ERROR)];
 
     const value: StatusWebhookValue = {
         messaging_product: 'whatsapp',

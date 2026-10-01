@@ -25,13 +25,10 @@ export async function createSignedWebhookRequest(
 ): Promise<Request> {
     const body = typeof payload === 'string' ? payload : JSON.stringify(payload);
     const signature = await generateXHub256SigAsync(body, options.appSecret);
-    return new Request(options.url ?? TEST_WEBHOOK_URL, {
-        method: 'POST',
-        body,
-        headers: {
-            'content-type': 'application/json',
-            'x-hub-signature-256': `sha256=${signature}`,
-            ...options.headers,
-        },
+    const headers = new Headers({
+        'content-type': 'application/json',
+        'x-hub-signature-256': `sha256=${signature}`,
     });
+    for (const [name, value] of Object.entries(options.headers ?? {})) headers.set(name, value);
+    return new Request(options.url ?? TEST_WEBHOOK_URL, { method: 'POST', body, headers });
 }

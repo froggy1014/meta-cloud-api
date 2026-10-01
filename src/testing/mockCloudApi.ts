@@ -147,7 +147,7 @@ interface Route {
 
 function matchPath(pattern: string | RegExp, path: string): Record<string, string> | undefined {
     if (pattern instanceof RegExp) {
-        const match = pattern.exec(path);
+        const match = new RegExp(pattern.source, pattern.flags).exec(path);
         return match ? { ...match.groups } : undefined;
     }
     const want = pattern.replace(/^\/+|\/+$/g, '').split('/');
@@ -244,7 +244,7 @@ export class MockCloudApi {
     constructor(options: MockCloudApiOptions = {}) {
         const base = options.fetch ?? globalThis.fetch;
         this.passthrough = (input, init) => base(input, init);
-        this.templates = options.templates ? [...options.templates] : [...DEFAULT_TEMPLATES];
+        this.templates = structuredClone(options.templates ?? DEFAULT_TEMPLATES);
         this.unhandled = options.unhandled ?? 'error';
     }
 
@@ -364,9 +364,19 @@ export class MockCloudApi {
             if (route.method !== '*' && route.method !== request.method) continue;
             const params = matchPath(route.pattern, request.path);
             if (!params) continue;
-            const reply = await route.handler({ ...request, params });
-            if (reply === undefined) continue;
+            // Reserve before awaiting so concurrent requests respect `times`.
             route.remaining--;
+            let reply: unknown;
+            try {
+                reply = await route.handler({ ...request, params });
+            } catch (error) {
+                route.remaining++;
+                throw error;
+            }
+            if (reply === undefined) {
+                route.remaining++;
+                continue;
+            }
             return reply instanceof Response ? reply : jsonResponse(reply);
         }
         return this.defaultResponse(request);
