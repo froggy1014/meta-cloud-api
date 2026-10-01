@@ -42,3 +42,6 @@ yarn-error.log*
 .claude
 .npmrc
 .gstack/
+
+# Docs snippet type check (scripts/check-doc-snippets.mjs)
+.doc-snippets/
