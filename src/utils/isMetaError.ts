@@ -1,3 +1,5 @@
+import type { RateLimitInfo } from './rateLimit';
+
 export type MetaErrorData = {
     message: string;
     type: string;
@@ -111,6 +113,11 @@ export class WhatsAppError extends Error {
 export class WhatsAppApiError extends WhatsAppError {
     readonly error: MetaErrorData;
     readonly statusCode?: number;
+    /**
+     * Rate limit headers of the failed response, when it carried any. Set by the SDK's requester;
+     * use `rateLimit.retryDelayMs` to reschedule a throttled call.
+     */
+    rateLimit?: RateLimitInfo;
 
     constructor(message: string, error: MetaErrorData, statusCode?: number) {
         super(message);

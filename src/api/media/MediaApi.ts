@@ -10,6 +10,7 @@ import { WHATSAPP_MESSAGING_PRODUCT } from '../../config/defaults';
 import { BaseAPI } from '../../types/base';
 import { HttpMethodsEnum, WabaConfigEnum } from '../../types/enums';
 import type { ResponseSuccess } from '../../types/request';
+import { WhatsAppValidationError } from '../../utils/isMetaError';
 
 import type * as media from './types';
 
@@ -83,11 +84,24 @@ export default class MediaApi extends BaseAPI implements media.MediaClass {
      * messages containing that media. Media is automatically encrypted and stored
      * on Meta's servers.
      *
-     * **Endpoint:** `POST /{PHONE_NUMBER_ID}/media`
+     * **Endpoint:** `POST /{PHONE_NUMBER_ID}/media` (`multipart/form-data` with `file`, `type` and
+     * `messaging_product`)
      *
-     * @param file - The `File` object to upload. The `type` property must match a supported MIME type.
-     * @param messagingProduct - The messaging product identifier (defaults to `'whatsapp'`)
+     * Accepts a `File`, `Blob`, `Uint8Array` (including a Node.js `Buffer`), `ArrayBuffer` or web
+     * `ReadableStream<Uint8Array>` on every runtime. Pass the MIME type in `options.type` unless the
+     * input is a `Blob`/`File` that already has one.
+     *
+     * **Memory:** a `ReadableStream` is read fully into a `Blob` before the request is sent. Meta
+     * requires a multipart body and `fetch` only accepts `Blob` parts in `FormData`, so the upload is
+     * not streamed end to end. Peak memory can exceed the file size (Meta caps media at 100 MB for
+     * documents, 16 MB for audio/video, 5 MB for images). Buffering once also lets a throttled upload
+     * be retried. Blob construction snapshots byte inputs; allow room for these copies.
+     *
+     * @param file - The content to upload
+     * @param optionsOrMessagingProduct - Upload options, or the messaging product string (legacy form,
+     * defaults to `'whatsapp'`)
      * @returns A promise resolving to the upload response containing the assigned `id` (media ID)
+     * @throws WhatsAppValidationError when no MIME type is available or the input type is unsupported
      *
      * @see {@link https://developers.facebook.com/docs/whatsapp/cloud-api/reference/media#upload-media | Upload Media Reference}
      *
@@ -95,18 +109,44 @@ export default class MediaApi extends BaseAPI implements media.MediaClass {
      * ```ts
      * const file = new File([buffer], 'image.jpg', { type: 'image/jpeg' });
      * const { id } = await client.media.uploadMedia(file);
-     * // Use the media ID to send an image message
-     * await client.messages.image({ body: { id }, to: '1234567890' });
+     *
+     * // Bytes or a web stream (e.g. a fetch() body) need a MIME type
+     * const res = await fetch('https://example.com/report.pdf');
+     * await client.media.uploadMedia(res.body!, { type: 'application/pdf', filename: 'report.pdf' });
      * ```
      */
+    async uploadMedia(file: File, messagingProduct?: string): Promise<media.UploadMediaResponse>;
     async uploadMedia(
-        file: File,
-        messagingProduct: string = WHATSAPP_MESSAGING_PRODUCT,
+        file: media.UploadMediaInput,
+        options?: media.UploadMediaOptions,
+    ): Promise<media.UploadMediaResponse>;
+    async uploadMedia(
+        file: media.UploadMediaInput,
+        optionsOrMessagingProduct?: media.UploadMediaOptions | string,
     ): Promise<media.UploadMediaResponse> {
+        const options: media.UploadMediaOptions =
+            typeof optionsOrMessagingProduct === 'string'
+                ? { messagingProduct: optionsOrMessagingProduct }
+                : (optionsOrMessagingProduct ?? {});
+        const messagingProduct = options.messagingProduct ?? WHATSAPP_MESSAGING_PRODUCT;
+
+        const mimeType = options.type || (file instanceof Blob ? file.type : '');
+        if (!mimeType) {
+            throw new WhatsAppValidationError(
+                'uploadMedia needs a MIME type: pass options.type (e.g. "image/jpeg") or a Blob/File with a type',
+            );
+        }
+
+        const blob = await toUploadBlob(file, options.type);
         const formData = new FormData();
-        formData.append('file', file);
+        if (blob === file && !options.type && !options.filename) {
+            // Unchanged legacy path: append the caller's File/Blob as is.
+            formData.append('file', blob);
+        } else {
+            formData.append('file', blob, options.filename ?? fileNameOf(file) ?? 'file');
+        }
         formData.append('messaging_product', messagingProduct);
-        formData.append('type', file.type);
+        formData.append('type', mimeType);
 
         return this.sendFormData(
             HttpMethodsEnum.Post,
@@ -163,4 +203,39 @@ export default class MediaApi extends BaseAPI implements media.MediaClass {
     async downloadMedia(mediaUrl: string): Promise<Blob> {
         return this.sendJson(HttpMethodsEnum.Get, mediaUrl, this.config[WabaConfigEnum.RequestTimeout], null);
     }
+}
+
+function fileNameOf(input: unknown): string | undefined {
+    const name = (input as { name?: unknown } | null)?.name;
+    return typeof name === 'string' && name !== '' ? name : undefined;
+}
+
+function isReadableStream(input: unknown): input is ReadableStream<Uint8Array> {
+    return (
+        typeof ReadableStream !== 'undefined' &&
+        (input instanceof ReadableStream || typeof (input as ReadableStream | null)?.getReader === 'function')
+    );
+}
+
+async function toUploadBlob(input: media.UploadMediaInput, type: string | undefined): Promise<Blob> {
+    if (input instanceof Blob) {
+        // Re-label only when the caller overrides the MIME type; slice() does not copy the bytes.
+        return type && type !== input.type ? input.slice(0, input.size, type) : input;
+    }
+    const blobOptions = type ? { type } : undefined;
+    if (input instanceof ArrayBuffer) {
+        return new Blob([input], blobOptions);
+    }
+    if (input instanceof Uint8Array) {
+        // Blob parts must be backed by an ArrayBuffer; copy only SharedArrayBuffer-backed views.
+        const bytes = input.buffer instanceof ArrayBuffer ? (input as Uint8Array<ArrayBuffer>) : new Uint8Array(input);
+        return new Blob([bytes], blobOptions);
+    }
+    if (isReadableStream(input)) {
+        const collected = await new Response(input).blob();
+        return type ? collected.slice(0, collected.size, type) : collected;
+    }
+    throw new WhatsAppValidationError(
+        'uploadMedia accepts a File, Blob, Uint8Array, ArrayBuffer or ReadableStream<Uint8Array>',
+    );
 }

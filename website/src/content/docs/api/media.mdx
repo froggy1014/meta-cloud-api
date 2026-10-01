@@ -100,13 +100,40 @@ import fs from 'fs';
 // Read file from disk
 const buffer = fs.readFileSync('/path/to/video.mp4');
 
-// Create File object
-const videoFile = new File([buffer], 'video.mp4', {
-    type: 'video/mp4'
-});
-
-const result = await client.media.uploadMedia(videoFile);
+// Pass the bytes with a MIME type (or wrap them in a File as before)
+const result = await client.media.uploadMedia(buffer, { type: 'video/mp4', filename: 'video.mp4' });
 ```
+
+### Upload Bytes, Blobs and Streams
+
+`uploadMedia` also takes a `Blob`, `Uint8Array` (a Node.js `Buffer` is one), `ArrayBuffer` or web
+`ReadableStream<Uint8Array>`, on Node.js, Bun, Deno, Cloudflare Workers and Vercel Edge. Pass the
+MIME type in `type` unless the input is a `Blob` that already has one:
+
+```typescript
+// Bytes (Buffer, Uint8Array) or an ArrayBuffer
+await client.media.uploadMedia(buffer, { type: 'video/mp4', filename: 'video.mp4' });
+
+// A Blob, e.g. from fetch() or an R2 object
+const blob = await fetch('https://example.com/image.jpg').then((r) => r.blob());
+await client.media.uploadMedia(blob); // uses blob.type
+
+// A web stream, e.g. a fetch() body
+const res = await fetch('https://example.com/report.pdf');
+await client.media.uploadMedia(res.body!, { type: 'application/pdf', filename: 'report.pdf' });
+```
+
+The legacy form `uploadMedia(file, 'whatsapp')` still works. Options: `type` (MIME type, sent as the
+`type` field), `filename` (defaults to the `File` name, otherwise `file`), `messagingProduct`
+(defaults to `'whatsapp'`). A missing MIME type throws `WhatsAppValidationError` before any request.
+
+:::caution[Streams are buffered]
+A `ReadableStream` is read fully into memory before the request is sent. Meta's upload endpoint
+takes `multipart/form-data`, and `fetch` only accepts `Blob` parts in a `FormData`, so the body is not
+streamed end to end. Peak memory can exceed the file size (Meta caps media at 100 MB for
+documents, 16 MB for audio and video, 5 MB for images). Buffering once also means a throttled upload
+can be retried. Blob construction snapshots byte inputs; allow room for these copies.
+:::
 
 ### Upload Different Media Types
 

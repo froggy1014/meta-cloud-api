@@ -1,0 +1,165 @@
+---
+title: Production Helpers
+description: Customer service window checks, rate limit headers and server-paced retries, and memory-aware media uploads
+sidebar:
+    order: 7
+---
+
+Helpers for running a WhatsApp integration in production. Window checks and upload input types are
+additive. Rate limit headers are captured automatically, and retries now respect server-provided
+delays by default (see [below](#server-paced-retries)).
+
+## Customer service window
+
+Meta lets you send free-form (non-template) messages only while a **customer service window** is
+open: "When a WhatsApp user messages you or calls you, a 24-hour timer called a customer service
+window starts. If the user messages or calls you again before the timer expires, the timer resets to
+24 hours. [...] When the window closes, you can only send pre-approved template messages."
+([Send messages](https://developers.facebook.com/documentation/business-messaging/whatsapp/messages/send-messages/))
+
+Store the `timestamp` of the user's latest inbound message from the webhook and check it before
+sending:
+
+```typescript
+import { canSendFreeformMessage, getCustomerServiceWindow } from 'meta-cloud-api';
+// or: from 'meta-cloud-api/utils'
+
+processor.onText(async (_wa, { message }) => {
+    await db.saveLastInbound(message.from, message.timestamp); // "1727856000" (Unix seconds)
+});
+
+const lastInboundAt = await db.getLastInbound(to);
+if (canSendFreeformMessage(lastInboundAt)) {
+    await client.messages.text({ to, body: 'Your order shipped!' });
+} else {
+    await client.messages.template({ to, body: { name: 'order_shipped', language: { code: 'en' } } });
+}
+
+const { isOpen, expiresAt, remainingMs } = getCustomerServiceWindow(lastInboundAt);
+```
+
+- Timestamps can be a `Date`, a number (milliseconds, or seconds when below `1e11`), a numeric
+  string such as the webhook `timestamp` (Unix seconds), or an ISO 8601 string.
+- The window is exactly 24 hours: at `lastInboundAt + 24h` it is closed.
+- `null` or `undefined` (the user never messaged) returns `{ isOpen: false, expiresAt: null, remainingMs: 0 }`.
+- A malformed timestamp throws `WhatsAppValidationError`.
+- `now` overrides the current time, which is useful in tests.
+- `safetyMarginMs` closes the window early to absorb clock drift between your servers and Meta and
+  the time a send spends in flight. `remainingMs` never exceeds 24 hours, even when the stored
+  timestamp is ahead of your clock.
+
+Meta can still reject a free-form send with error `131047`, for example when your stored timestamp
+is stale, so keep a template fallback in the error path too.
+
+### Free entry point windows
+
+For eligible click-to-WhatsApp ad traffic on Android or iOS, replying within the customer service
+window opens a **free entry point (FEP)** window from your reply. Meta documents that these windows
+may last up to 7 days, with messages free while the window is open
+([Pricing](https://developers.facebook.com/documentation/business-messaging/whatsapp/pricing/)).
+
+An FEP window affects **billing only**. Meta: "the customer service window is independent of the FEP
+window, so if the customer service window closes, you will only be able to send template messages."
+So `canSendFreeformMessage` ignores it. Use `getFreeEntryPointWindow` to estimate the billing
+window; the helper cannot guarantee billing eligibility:
+
+```typescript
+import { getFreeEntryPointWindow, MAX_FREE_ENTRY_POINT_WINDOW_MS } from 'meta-cloud-api';
+
+// Best: the exact expiry from the status webhook (conversation.expiration_timestamp)
+getFreeEntryPointWindow(firstReplyAt, { expiresAt: status.conversation?.expiration_timestamp });
+
+// Only use a duration confirmed for your window; the SDK fallback estimate is 72 hours
+getFreeEntryPointWindow(firstReplyAt, { durationMs: MAX_FREE_ENTRY_POINT_WINDOW_MS });
+```
+
+Meta does not say up front how long a given FEP window lasts, so prefer `expiresAt` over a guessed
+`durationMs`.
+
+## Rate limit awareness
+
+Graph API responses carry usage headers. On WhatsApp Cloud API responses Meta sends
+`X-Business-Use-Case-Usage` (rate limit types `whatsapp_business_management` and `whatsapp`) and
+`X-App-Usage`. Throttled responses may also send `Retry-After` (seconds). See
+[Graph API rate limiting](https://developers.facebook.com/docs/graph-api/overview/rate-limiting/).
+
+The SDK parses these headers on every response. Read the latest values, or subscribe to all of them:
+
+```typescript
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    onRateLimitInfo(info, { method, endpoint, statusCode }) {
+        metrics.gauge('whatsapp.usage_percent', info.maxUsagePercent ?? 0);
+        if ((info.maxUsagePercent ?? 0) >= 80) logger.warn({ endpoint, info }, 'close to the Meta rate limit');
+    },
+});
+
+await client.templates.getTemplates();
+client.getLastRateLimitInfo();
+// {
+//   appUsage: { callCount: 0, totalCputime: 0, totalTime: 0 },
+//   businessUseCaseUsage: [
+//     { businessId: '102290129340398', type: 'whatsapp_business_management', callCount: 1,
+//       totalCputime: 1, totalTime: 1, estimatedTimeToRegainAccessMinutes: 0 },
+//     { businessId: '102290129340398', type: 'whatsapp', callCount: 1, ... },
+//   ],
+//   maxUsagePercent: 1,
+// }
+```
+
+| Field | Source |
+|---|---|
+| `appUsage` | `X-App-Usage` (`call_count`, `total_cputime`, `total_time`, as percentages) |
+| `businessUseCaseUsage` | `X-Business-Use-Case-Usage`, flattened across business IDs |
+| `retryAfterMs` | `Retry-After`, in seconds or as an HTTP-date |
+| `maxUsagePercent` | Highest percentage across every metric. Meta throttles at 100 |
+| `retryDelayMs` | Larger of `retryAfterMs` and the largest `estimated_time_to_regain_access` (minutes) |
+
+- `getLastRateLimitInfo()` returns whichever response finished last. With concurrent requests, use
+  `onRateLimitInfo` instead.
+- Errors thrown by the listener are ignored.
+- Malformed header JSON is ignored.
+- Failed requests attach the same object as `error.rateLimit`.
+- To parse headers from your own `fetch` calls, use `parseRateLimitHeaders(response.headers)`.
+
+### Server-paced retries
+
+The SDK already retries `WhatsAppThrottlingError` with backoff (`retry.maxAttempts`, default 3). It
+now waits the larger of the backoff delay and the wait Meta asks for (`retryDelayMs`), capped at
+`retry.maxServerDelayMs`:
+
+```typescript
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    retry: {
+        maxAttempts: 3,
+        initialDelayMs: 1000,
+        respectServerDelay: true, // default
+        maxServerDelayMs: 30_000, // default
+    },
+});
+```
+
+- The number of attempts never changes. Only the delay between them does.
+- A wait longer than the cap is shortened to the cap, so the retry may be throttled again. Then
+  `error.rateLimit.retryDelayMs` tells you when to reschedule.
+- Without a server-provided wait, retries behave as before.
+- `respectServerDelay: false` turns the feature off.
+
+## Media uploads from bytes and streams
+
+`client.media.uploadMedia` accepts a `File`, `Blob`, `Uint8Array` (including a `Buffer`),
+`ArrayBuffer` or web `ReadableStream<Uint8Array>` on every runtime, with no Node.js-only APIs:
+
+```typescript
+// Cloudflare Workers: forward an R2 object or an incoming request body
+const object = await env.MEDIA.get('invoice.pdf');
+await client.media.uploadMedia(object!.body, { type: 'application/pdf', filename: 'invoice.pdf' });
+```
+
+A `ReadableStream` is **read fully into memory** before the request goes out. Meta's endpoint takes
+`multipart/form-data`, and `fetch` only accepts `Blob` parts in a `FormData`, so the upload is not
+streamed end to end. Budget more than the file size in memory per concurrent upload for buffering and multipart encoding (Meta caps media
+at 100 MB for documents, 16 MB for audio and video, 5 MB for images). See the
+[Media API](/api/media#upload-bytes-blobs-and-streams) page for every input type.

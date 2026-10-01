@@ -320,7 +320,15 @@ export type {
 export type { ApiPermissionErrorCode, MetaError, MetaErrorData, WhatsAppErrorCode } from '../utils/isMetaError';
 // Base class interface (type-only)
 export type { BaseClass } from './base';
-export type { DedupeStore, WabaConfigType, WebhookDedupeConfig, WhatsAppConfig } from './config';
+export type {
+    DedupeStore,
+    RateLimitInfoContext,
+    RateLimitInfoListener,
+    RetryConfig,
+    WabaConfigType,
+    WebhookDedupeConfig,
+    WhatsAppConfig,
+} from './config';
 // As-const alternatives to enums
 export * from './constants';
 // All enums (commonly used on client-side)

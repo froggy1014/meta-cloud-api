@@ -177,51 +177,51 @@ const response = await withRetry(
 
 ## Rate Limit Handling
 
-The WhatsApp Cloud API enforces rate limits per phone number. When you hit a limit (code `130429`), the response may include a `Retry-After` header:
+Throttling errors (codes `4`, `80007`, `130429`, `131048`, `131056`) are thrown as
+`WhatsAppThrottlingError` and retried automatically according to the [`retry`
+config](/getting-started/configuration#retry-configuration). When Meta says how long to wait
+(`Retry-After`, or `estimated_time_to_regain_access` in `X-Business-Use-Case-Usage`), the retry waits
+that long, capped at `retry.maxServerDelayMs` (30 seconds by default). Once the attempts are used up,
+the error carries the parsed headers so you can reschedule:
 
 ```typescript
+import { isWhatsAppThrottlingError } from 'meta-cloud-api';
+
 try {
     await client.messages.text({ to, body });
-} catch (error: any) {
-    const code = error.response?.data?.error?.code;
-
-    if (code === 130429) {
-        const retryAfter = error.response?.headers?.['retry-after'];
-        const waitMs = retryAfter ? Number(retryAfter) * 1000 : 60000;
-
-        console.warn(`Rate limited. Retrying after ${waitMs}ms`);
-        await new Promise(r => setTimeout(r, waitMs));
-
-        // Retry the request
-        await client.messages.text({ to, body });
+} catch (error) {
+    if (isWhatsAppThrottlingError(error)) {
+        const waitMs = error.rateLimit?.retryDelayMs ?? 60_000;
+        await queue.add({ to, body }, { delay: waitMs });
     } else {
         throw error;
     }
 }
 ```
 
+See [Production Helpers](/guides/production-helpers#rate-limit-awareness) to watch usage before Meta
+starts throttling.
+
 ## Handling the 24-Hour Window
 
-WhatsApp enforces a 24-hour customer service window. You can only send free-form messages within 24 hours of the customer's last message. After that, you must use an approved template:
+WhatsApp enforces a 24-hour customer service window. You can only send free-form messages within 24
+hours of the customer's last message. After that, you must use an approved template. Check the
+window before sending with `canSendFreeformMessage`, and still handle error `131047` for the cases
+your stored timestamp does not know about:
 
 ```typescript
-try {
-    await client.messages.text({ to, body: 'Follow-up message' });
-} catch (error: any) {
-    const code = error.response?.data?.error?.code;
+import { canSendFreeformMessage, WhatsAppSendMessageError } from 'meta-cloud-api';
 
-    if (code === 131047) {
-        // Window expired -- fall back to a template message
-        await client.messages.template({
-            to,
-            template: {
-                name: 'follow_up',
-                language: { code: 'en' },
-            },
-        });
-    } else {
-        throw error;
+// lastInboundAt: the webhook `timestamp` (Unix seconds) of the user's latest message
+if (canSendFreeformMessage(lastInboundAt)) {
+    try {
+        await client.messages.text({ to, body: 'Follow-up message' });
+    } catch (error) {
+        if (!(error instanceof WhatsAppSendMessageError && error.error.code === 131047)) throw error;
+        await sendFollowUpTemplate(to);
     }
+} else {
+    await sendFollowUpTemplate(to);
 }
 ```
 
