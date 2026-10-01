@@ -1,14 +1,18 @@
 name: PR Labeler
+# pull_request_target runs in the base repo context, so GITHUB_TOKEN can add
+# labels to PRs opened from forks. Safe because this job never checks out or
+# executes PR code: labeler only matches branch names via the API.
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
   labeler:
     name: Label
-    permissions:
-      contents: read
-      pull-requests: write
     runs-on: ubuntu-latest
     steps:
     - id: label-the-PR

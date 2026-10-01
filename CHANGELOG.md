@@ -1,5 +1,49 @@
 # meta-cloud-api
 
+## 3.9.0
+
+### Minor Changes
+
+- c7898f9: Run on Bun, Deno, Cloudflare Workers and Vercel Edge as well as Node.js. The bundle no longer has static `node:*` imports: webhook signatures and Flow encryption use Web Crypto, logging no longer needs `node:util`, and the unused `https.Agent` is gone.
+
+  New async helpers that work on every runtime: `verifyWebhookSignature`, `generateXHub256SigAsync`, `decryptFlowRequestAsync` and `encryptFlowResponseAsync`. The existing sync helpers keep working on Node.js 20.16+, Bun and Deno and now load `node:crypto` on demand. On runtimes without `node:crypto`, Flow private keys must be unencrypted PKCS#8.
+
+  Fix the User-Agent and `version()` always reporting `unknown`: the version is now inlined at build time, and the User-Agent names the actual runtime.
+
+  `profilePictureFile` and Flow JSON uploads accept any `Uint8Array` (a `Buffer` still works).
+
+- 598619f: Add Hono and Fastify webhook adapters. `honoWebhookHandler(config)` takes a Hono `Context` and returns a web `Response`, so it runs on Node.js, Bun, Deno, Cloudflare Workers and Vercel Edge. `fastifyWebhookHandler(config)` takes `(request, reply)`; for `verifyWebhookSignature: true`, keep the raw body as `request.rawBody` (a content-type parser or `fastify-raw-body`), otherwise it falls back to `JSON.stringify(request.body)`. Both return `{ GET, POST, webhook, flow, processor, destroy }`, are cached per `phoneNumberId`, and need no new dependencies. NestJS works with `expressWebhookHandler` (or `fastifyWebhookHandler` on the Fastify platform).
+- 95760c3: Add production helpers and rate limit telemetry. Server-paced retry delays are enabled by default; set `retry.respectServerDelay: false` to preserve backoff-only timing.
+
+  - **Customer service window:** `getCustomerServiceWindow`, `canSendFreeformMessage` and `getFreeEntryPointWindow` (exported from the root and `meta-cloud-api/utils`). They return `{ isOpen, expiresAt, remainingMs }` for the 24-hour window that opens on the user's last inbound message, and for the free entry point window (72 hours by default, up to 7 days for click-to-WhatsApp ads). They accept webhook Unix-seconds strings, numbers, `Date` or ISO strings.
+  - **Rate limit awareness:** the SDK parses `X-App-Usage`, `X-Business-Use-Case-Usage` and `Retry-After` on every response. Read them with `whatsapp.getLastRateLimitInfo()`, a new `onRateLimitInfo` config callback, `error.rateLimit` on API errors, or `parseRateLimitHeaders()`.
+  - **Server-paced retries:** throttling retries now wait as long as Meta asks (`Retry-After` or `estimated_time_to_regain_access`) when that is longer than the backoff delay, capped by the new `retry.maxServerDelayMs` (default 30 s). The number of attempts is unchanged. Set `retry.respectServerDelay: false` to keep the backoff delay only.
+  - **Media uploads:** `media.uploadMedia` also accepts `Blob`, `Uint8Array`, `ArrayBuffer` and web `ReadableStream` input with `{ type, filename, messagingProduct }` options, on every runtime. Streams are buffered into memory before the upload because Meta's endpoint needs a multipart body. `uploadMedia(file, messagingProduct)` still works.
+
+- 0e3b6e6: Add `meta-cloud-api/testing` for testing bots without a Meta account:
+
+  - Webhook payload factories typed with the SDK's webhook types: `createTextMessageWebhook`, `createImageMessageWebhook`, `createButtonReplyWebhook`, `createListReplyWebhook`, `createReactionWebhook`, `createLocationWebhook`, `createStatusWebhook`, `createMessageWebhook` and `createWebhookPayload(field, value)` for every other field, with `value` typed by `WebhookFieldValueMap`.
+  - `createSignedWebhookRequest()` builds a `Request` with a valid `X-Hub-Signature-256`.
+  - `createFlowRequest()`, `decryptFlowResponse()` and `generateFlowKeyPair()` encrypt Flow endpoint requests the way Meta does and read the encrypted reply.
+  - `createMockCloudApi()` is an in-memory Graph API installed on `globalThis.fetch`: it records every request, answers messages, media and template calls with realistic responses, and takes per-route overrides and Meta-shaped errors that surface as the SDK's `WhatsAppError` subclasses.
+
+  The subpath uses Web APIs only and imports the main bundle instead of copying it. `WebhookFieldType` and `WebhookFieldValue` are now exported as types, and `typesVersions` entries are arrays so subpath types resolve under `moduleResolution: node`.
+
+- 20772d1: Add `processor.on(field, handler)` and `processor.off(field)` for every webhook field except `messages`. The type of `processed.value` follows from the field name, so `on('calls', (wa, { value }) => ...)` gets `CallsWebhookValue['value']`. The existing `onXxx` field methods now call `on()` and behave the same. `on('messages')` throws: use `onMessage`, `onStatus` or `onUserAction` for that field. New exported types: `WebhookFieldValueMap`, `NonMessageWebhookField`, `WebhookFieldHandler` and `ProcessedWebhookField`.
+
+  Add opt-in webhook deduplication with the `dedupe` config option. Meta retries deliveries, so the same message or status can arrive twice; with `dedupe` on, handlers are skipped for deliveries already seen and the response is still 200. Messages are keyed by message id, statuses by message id and status, and `calls`, `smb_message_echoes` and `message_echoes` by their ids; other fields are not deduped. `dedupe: true` uses the new `MemoryDedupeStore` (bounded, single instance only). Pass `{ store, ttlSeconds }` with your own `DedupeStore`, whose `setIfAbsent(key, ttlSeconds)` maps 1:1 to Redis `SET NX EX`. Store errors are logged and the webhook is processed anyway.
+
+  `processWebhookMessages` accepts a `fieldHandlers` map and a `dedupe` option; its existing named handler options keep working.
+
+### Patch Changes
+
+- 4cd9ee2: Fix `media.downloadMedia()`: it parsed the media URL's response as JSON, so downloading real media (JPEG, PDF, …) failed. It now returns the bytes as a `Blob` with the response's content type; Meta error responses still throw `WhatsAppError`s.
+
+  Fix a type error in the published declarations under `skipLibCheck: false` (`Logger` did not match `LoggerInterface`; it now has a `debug()` method). `businessProfile.uploadMedia()` accepts any `Uint8Array` (a `Buffer` still works).
+
+- 9ec278f: Fix a type regression from 3.8.0: the handlers returned by `nextjsAppWebhookHandler` accept a plain `Request` again (a `NextRequest` still works). Apps that forward a `Request` to `handler.POST(...)`, including those generated by `create-whatsapp-app`, failed to typecheck.
+- 3e88525: Preserve synchronous crypto helpers and encrypted PKCS8/PKCS1 Flow handling on the supported Node.js 20.12 floor through Node-specific package entries, while keeping the universal edge bundle free of Node imports.
+
 ## 3.8.0
 
 ### Minor Changes
