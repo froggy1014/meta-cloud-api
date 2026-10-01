@@ -48,37 +48,46 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Notify playground of new meta-cloud-api release
-        # Runs even when the publish step failed: a run can publish meta-cloud-api
-        # and then fail on another package (create-whatsapp-app E403 in 3.8.0),
-        # and changesets/action sets no outputs when its publish command fails.
-        # So decide from the registry: dispatch only if the current version was
-        # published after this job started.
-        if: ${{ !cancelled() }}
+        # Current changesets/action exposes partial-publish outputs. Registry time
+        # remains a fallback for action versions/failures without those outputs.
+        if: ${{ !cancelled() && (steps.changesets.outputs.published == 'true' || steps.changesets.outcome == 'failure') }}
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.PLAYGROUND_DISPATCH_TOKEN }}
+          PUBLISHED_PACKAGES: ${{ steps.changesets.outputs.publishedPackages }}
         run: |
-          version="$(node -p "require('./package.json').version")"
-          published_at=""
-          for _ in $(seq 15); do
-            published_at="$(npm view meta-cloud-api time --json 2>/dev/null | jq -r --arg v "$version" '.[$v] // empty')"
-            [ -n "$published_at" ] && break
-            # Not on the registry (yet). Only worth waiting if publishing was attempted.
-            [ "${{ steps.changesets.outcome }}" = "skipped" ] && break
-            sleep 20
-          done
-          if [ -z "$published_at" ]; then
-            echo "meta-cloud-api@$version is not on npm; skipping playground dispatch."
-            exit 0
-          fi
-          if [ "$(date -u -d "$published_at" +%s)" -lt "$JOB_STARTED_AT" ]; then
-            echo "meta-cloud-api@$version was published before this run ($published_at); nothing to dispatch."
-            exit 0
-          fi
           if [ -z "$GH_TOKEN" ]; then
-            echo "::warning::PLAYGROUND_DISPATCH_TOKEN is not set; skipping playground dispatch for meta-cloud-api@$version."
+            echo '::warning::PLAYGROUND_DISPATCH_TOKEN is not set; run sdk-update manually in the playground repository.'
             exit 0
           fi
+          version="$(jq -r '[.[] | select(.name == "meta-cloud-api") | .version][0] // ""' <<< "${PUBLISHED_PACKAGES:-[]}")"
+          if [ -z "$version" ]; then
+            version="$(node -p "require('./package.json').version")"
+            published_at=""
+            deadline=$((SECONDS + 300))
+            while [ "$SECONDS" -lt "$deadline" ]; do
+              published_at="$(npm view meta-cloud-api time --json --fetch-retries=0 --fetch-timeout=10000 2>/dev/null | jq -r --arg v "$version" '.[$v] // empty' || true)"
+              [ -n "$published_at" ] && break
+              sleep 20
+            done
+            if [ -z "$published_at" ]; then
+              echo "::error::Could not confirm publication of meta-cloud-api@$version. Run playground sdk-update manually after registry propagation."
+              exit 1
+            fi
+            if [ "$(date -u -d "$published_at" +%s)" -lt "$JOB_STARTED_AT" ]; then
+              echo "meta-cloud-api@$version predates this run; skipping dispatch."
+              exit 0
+            fi
+          fi
+          payload_file="$RUNNER_TEMP/playground-dispatch.json"
           jq -n --arg version "$version" \
-            '{event_type: "meta-cloud-api-released", client_payload: {version: $version}}' \
-            | gh api --method POST repos/froggy1014/meta-cloud-api-playground/dispatches --input -
-          echo "Dispatched meta-cloud-api-released ($version) to froggy1014/meta-cloud-api-playground."
+            '{event_type: "meta-cloud-api-released", client_payload: {version: $version}}' > "$payload_file"
+          for attempt in 1 2 3; do
+            if gh api --method POST repos/froggy1014/meta-cloud-api-playground/dispatches --input "$payload_file"; then
+              echo "Dispatched meta-cloud-api-released ($version)."
+              exit 0
+            fi
+            sleep "$((attempt * 5))"
+          done
+          echo "::error::Playground dispatch failed. Re-run playground sdk-update with version $version."
+          exit 1
