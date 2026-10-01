@@ -111,6 +111,8 @@
         "@types/node": "^25.9.3",
         "commitizen": "^4.3.1",
         "dotenv": "^17.4.2",
+        "fastify": "^5.12.5",
+        "hono": "^4.13.12",
         "husky": "^9.1.7",
         "lint-staged": "^17.0.7",
         "miniflare": "^4.20260730.0",
