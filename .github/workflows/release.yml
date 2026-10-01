@@ -43,3 +43,25 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Notify playground of new meta-cloud-api release
+        # Also runs when the publish step failed after publishing some packages
+        # (e.g. create-whatsapp-app E403): changesets/action sets these outputs first.
+        if: ${{ !cancelled() && steps.changesets.outputs.published == 'true' }}
+        env:
+          GH_TOKEN: ${{ secrets.PLAYGROUND_DISPATCH_TOKEN }}
+          PUBLISHED_PACKAGES: ${{ steps.changesets.outputs.publishedPackages }}
+        run: |
+          version="$(jq -r '.[] | select(.name == "meta-cloud-api") | .version' <<< "$PUBLISHED_PACKAGES")"
+          if [ -z "$version" ]; then
+            echo "meta-cloud-api was not published in this run; skipping playground dispatch."
+            exit 0
+          fi
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::warning::PLAYGROUND_DISPATCH_TOKEN is not set; skipping playground dispatch for meta-cloud-api@$version."
+            exit 0
+          fi
+          jq -n --arg version "$version" \
+            '{event_type: "meta-cloud-api-released", client_payload: {version: $version}}' \
+            | gh api --method POST repos/froggy1014/meta-cloud-api-playground/dispatches --input -
+          echo "Dispatched meta-cloud-api-released ($version) to froggy1014/meta-cloud-api-playground."
