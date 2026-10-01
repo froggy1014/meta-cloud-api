@@ -34,8 +34,8 @@ pnpm add meta-cloud-api
 import WhatsApp from 'meta-cloud-api';
 
 const wa = new WhatsApp({
-    accessToken: process.env.CLOUD_API_ACCESS_TOKEN,
-    phoneNumberId: process.env.WA_PHONE_NUMBER_ID,
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
 });
 
 // Send a text message
@@ -44,12 +44,14 @@ await wa.messages.text({ to: '1234567890', body: 'Hello from TypeScript!' });
 // Send a template message
 await wa.messages.template({
     to: '1234567890',
-    name: 'hello_world',
-    language: { code: 'en_US' },
+    body: {
+        name: 'hello_world',
+        language: { code: 'en_US', policy: 'deterministic' },
+    },
 });
 
 // Send an image
-await wa.messages.image({ to: '1234567890', link: 'https://example.com/image.png' });
+await wa.messages.image({ to: '1234567890', body: { link: 'https://example.com/image.png' } });
 ```
 
 ## Why meta-cloud-api?
@@ -108,8 +110,8 @@ app.use(express.json({ verify: (req, _res, buf) => { (req as any).rawBody = buf.
 
 // Handler is automatically cached per phoneNumberId — safe against HMR re-evaluation
 const Whatsapp = expressWebhookHandler({
-    accessToken: process.env.CLOUD_API_ACCESS_TOKEN,
-    phoneNumberId: process.env.WA_PHONE_NUMBER_ID,
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
     webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN,
     // Reject forged POSTs: require a valid X-Hub-Signature-256 from Meta
     appSecret: process.env.APP_SECRET,
