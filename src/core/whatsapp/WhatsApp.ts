@@ -30,10 +30,11 @@ import { type EncryptionKeyPair, generateEncryption } from '../../utils/flowEncr
 import Requester from '../../utils/http/request';
 import Logger from '../../utils/logger';
 import { printLogo } from '../../utils/logoConsole';
+import { isDebugEnv } from '../../utils/runtime';
 import { getUserAgent, getVersion } from '../../utils/version';
 
 const LIB_NAME = 'WHATSAPP';
-const LOGGER = new Logger(LIB_NAME, process.env.DEBUG === 'true');
+const LOGGER = new Logger(LIB_NAME, isDebugEnv());
 
 /**
  * WhatsApp SDK Main Class following official patterns

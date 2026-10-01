@@ -1,8 +1,10 @@
+import { readEnv } from './runtime';
+
 export function printLogo() {
     // Skip logo output in test environment
     if (
-        process.env.NODE_ENV === 'test' ||
-        process.env.VITEST === 'true' ||
+        readEnv('NODE_ENV') === 'test' ||
+        readEnv('VITEST') === 'true' ||
         (typeof global !== 'undefined' && (global as any).__VITEST__)
     ) {
         return;
