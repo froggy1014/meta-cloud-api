@@ -153,6 +153,21 @@ describe('Requester — rate limit info and server-provided retry delay', () => 
         expect(requester.getLastRateLimitInfo()?.appUsage).toEqual({ callCount: 0, totalCputime: 0, totalTime: 0 });
     });
 
+    it('consumes rejected async telemetry without blocking successful requests', async () => {
+        let rejectListener!: (reason: Error) => void;
+        const telemetry = new Promise<void>((_resolve, reject) => {
+            rejectListener = reject;
+        });
+        const requester = new Requester('23', 1, 'token', 'biz', 'ua', undefined, () => telemetry);
+        vi.spyOn(requester.client, 'sendRequest').mockResolvedValue(
+            okResponse({ 'x-app-usage': APP_USAGE_SAMPLE }) as never,
+        );
+
+        await expect(requester.sendRequest(HttpMethodsEnum.Get, 'me', 5000)).resolves.toBeDefined();
+        rejectListener(new Error('telemetry unavailable'));
+        await vi.advanceTimersByTimeAsync(0);
+    });
+
     it('waits Retry-After instead of the shorter backoff before retrying', async () => {
         const requester = new Requester('23', 1, 'token', 'biz', 'ua', { maxAttempts: 2, initialDelayMs: 100 });
         const spy = vi.spyOn(requester.client, 'sendRequest');

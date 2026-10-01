@@ -12,7 +12,7 @@ Upload media once and reuse the returned media ID in messages. You can also quer
 ## Notes
 - Uploads use `multipart/form-data` with `file`, `type`, and `messaging_product`.
 - `uploadMedia` accepts a `File`, `Blob`, `Uint8Array` (including `Buffer`), `ArrayBuffer`, or web `ReadableStream<Uint8Array>` on every runtime. Pass `{ type, filename? }` unless the input is a `Blob`/`File` with a type. `uploadMedia(file, 'whatsapp')` still works.
-- A `ReadableStream` is read fully into memory first: Meta needs a multipart body and `fetch` only takes `Blob` parts in `FormData`. Peak memory is about the file size.
+- A `ReadableStream` is read fully into memory first: Meta needs a multipart body and `fetch` only takes `Blob` parts in `FormData`. Peak memory can exceed the file size because buffering and multipart encoding may allocate copies.
 - Download uses the `url` from `getMediaById`.
 - Delete requires the media ID, not the URL.
 

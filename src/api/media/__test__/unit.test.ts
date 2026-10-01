@@ -263,6 +263,15 @@ describe('Media API - uploadMedia input types (fetch mocked)', () => {
         expect(form.get('messaging_product')).toBe('whatsapp');
     });
 
+    it('rejects a missing stream MIME type before consuming or locking the body', async () => {
+        const pull = vi.fn();
+        const input = new ReadableStream<Uint8Array>({ pull }, { highWaterMark: 0 });
+        await expect(whatsApp.media.uploadMedia(input)).rejects.toBeInstanceOf(WhatsAppValidationError);
+        expect(pull).not.toHaveBeenCalled();
+        expect(input.locked).toBe(false);
+        expect(fetchMock).not.toHaveBeenCalled();
+    });
+
     it('accepts a Blob with a type', async () => {
         await whatsApp.media.uploadMedia(new Blob([new Uint8Array(PNG_BYTES)], { type: 'image/png' }), {
             filename: 'a.png',

@@ -16,7 +16,8 @@ const HOUR_MS = 60 * 60 * 1000;
 export const CUSTOMER_SERVICE_WINDOW_MS = 24 * HOUR_MS;
 
 /**
- * Default length of a free entry point (FEP) window: 72 hours.
+ * SDK fallback length of a free entry point (FEP) window: 72 hours.
+ * Prefer the expiry supplied by Meta; this fallback does not establish billing eligibility.
  *
  * @see {@link https://developers.facebook.com/documentation/business-messaging/whatsapp/pricing/ | Pricing: free entry point windows}
  */
@@ -24,7 +25,7 @@ export const FREE_ENTRY_POINT_WINDOW_MS = 72 * HOUR_MS;
 
 /**
  * Longest free entry point window Meta documents: up to 7 days for conversations started from an
- * ad that clicks to WhatsApp (pricing update of September 28, 2026).
+ * ad that clicks to WhatsApp.
  *
  * @see {@link https://developers.facebook.com/documentation/business-messaging/whatsapp/pricing/ | Pricing: free entry point windows}
  */
@@ -95,7 +96,7 @@ function toEpochMs(value: WindowTimestamp, name: string): number {
         ms = Number.NaN;
     }
 
-    if (!Number.isFinite(ms)) {
+    if (!Number.isFinite(ms) || !Number.isFinite(new Date(ms).getTime())) {
         throw new WhatsAppValidationError(`${name} is not a valid timestamp: ${String(value)}`);
     }
     return ms;
@@ -110,6 +111,9 @@ function toNonNegativeMs(value: number | undefined, name: string, fallback: numb
 }
 
 function computeWindow(startMs: number, endMs: number, nowMs: number, safetyMarginMs: number): MessagingWindow {
+    if (!Number.isFinite(new Date(endMs).getTime())) {
+        throw new WhatsAppValidationError('Window expiry is outside the supported timestamp range');
+    }
     const lengthMs = Math.max(0, endMs - startMs);
     const effectiveEndMs = endMs - safetyMarginMs;
     // A start in the future means the clocks disagree; never report more than one full window.
@@ -178,13 +182,11 @@ export function canSendFreeformMessage(
 /**
  * Returns the state of a free entry point (FEP) window.
  *
- * "If a WhatsApp user messages you via a Click to WhatsApp Ad or Facebook Page Call-to-Action button
- * [...] If you respond within 24 hours using any type of message, the message will be free, and a
- * Free Entry Point window will be opened, starting from the time when you responded." While it is
- * open every message is free. Pass the time of **your** first reply as `openedAt`.
+ * For eligible click-to-WhatsApp ad traffic, replying within the customer service window opens
+ * a billing window from the time of your reply. Pass that first reply time as `openedAt`.
  *
- * Meta documents 72 hours, and since September 28, 2026 up to 7 days for ads that click to WhatsApp,
- * without exposing the length up front. Pass `expiresAt` (the status webhook's
+ * Meta documents windows lasting up to 7 days for ads that click to WhatsApp. This helper uses
+ * a 72-hour fallback estimate. Pass `expiresAt` (the status webhook's
  * `conversation.expiration_timestamp`) when you have it, or set `durationMs`.
  *
  * This is a billing window only. It does not allow free-form messages after the customer service

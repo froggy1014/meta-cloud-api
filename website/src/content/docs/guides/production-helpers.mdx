@@ -5,9 +5,9 @@ sidebar:
     order: 7
 ---
 
-Three opt-in helpers for running a WhatsApp integration in production. None of them changes how
-existing code behaves, apart from retries now waiting as long as Meta asks (see
-[below](#server-paced-retries)).
+Helpers for running a WhatsApp integration in production. Window checks and upload input types are
+additive. Rate limit headers are captured automatically, and retries now respect server-provided
+delays by default (see [below](#server-paced-retries)).
 
 ## Customer service window
 
@@ -53,16 +53,15 @@ is stale, so keep a template fallback in the error path too.
 
 ### Free entry point windows
 
-When a user messages you from a click-to-WhatsApp ad or a Facebook Page call-to-action button and
-you reply within 24 hours, Meta opens a **free entry point (FEP)** window from the time of your
-reply, and every message in it is free. Meta documents 72 hours, and since September 28, 2026 up to
-7 days for ads that click to WhatsApp
+For eligible click-to-WhatsApp ad traffic on Android or iOS, replying within the customer service
+window opens a **free entry point (FEP)** window from your reply. Meta documents that these windows
+may last up to 7 days, with messages free while the window is open
 ([Pricing](https://developers.facebook.com/documentation/business-messaging/whatsapp/pricing/)).
 
 An FEP window affects **billing only**. Meta: "the customer service window is independent of the FEP
 window, so if the customer service window closes, you will only be able to send template messages."
-So `canSendFreeformMessage` ignores it. Use `getFreeEntryPointWindow` to know whether a message will
-be free:
+So `canSendFreeformMessage` ignores it. Use `getFreeEntryPointWindow` to estimate the billing
+window; the helper cannot guarantee billing eligibility:
 
 ```typescript
 import { getFreeEntryPointWindow, MAX_FREE_ENTRY_POINT_WINDOW_MS } from 'meta-cloud-api';
@@ -70,7 +69,7 @@ import { getFreeEntryPointWindow, MAX_FREE_ENTRY_POINT_WINDOW_MS } from 'meta-cl
 // Best: the exact expiry from the status webhook (conversation.expiration_timestamp)
 getFreeEntryPointWindow(firstReplyAt, { expiresAt: status.conversation?.expiration_timestamp });
 
-// Otherwise a length: 72 hours by default, up to 7 days for click-to-WhatsApp ads
+// Only use a duration confirmed for your window; the SDK fallback estimate is 72 hours
 getFreeEntryPointWindow(firstReplyAt, { durationMs: MAX_FREE_ENTRY_POINT_WINDOW_MS });
 ```
 
@@ -161,6 +160,6 @@ await client.media.uploadMedia(object!.body, { type: 'application/pdf', filename
 
 A `ReadableStream` is **read fully into memory** before the request goes out. Meta's endpoint takes
 `multipart/form-data`, and `fetch` only accepts `Blob` parts in a `FormData`, so the upload is not
-streamed end to end. Budget roughly the file size in memory per concurrent upload (Meta caps media
+streamed end to end. Budget more than the file size in memory per concurrent upload for buffering and multipart encoding (Meta caps media
 at 100 MB for documents, 16 MB for audio and video, 5 MB for images). See the
 [Media API](/api/media#upload-bytes-blobs-and-streams) page for every input type.

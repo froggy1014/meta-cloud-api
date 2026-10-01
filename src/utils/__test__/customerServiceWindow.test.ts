@@ -70,6 +70,13 @@ describe('getCustomerServiceWindow', () => {
         expect(() => getCustomerServiceWindow(T0, { safetyMarginMs: -1 })).toThrow(WhatsAppValidationError);
     });
 
+    it('rejects finite timestamps and computed expiries outside the Date range', () => {
+        expect(() => getCustomerServiceWindow(1e20, { now: T0 })).toThrow(WhatsAppValidationError);
+        expect(() => getCustomerServiceWindow(T0, { now: 1e20 })).toThrow(WhatsAppValidationError);
+        expect(() => getCustomerServiceWindow(8.64e15, { now: T0 })).toThrow(WhatsAppValidationError);
+        expect(() => getFreeEntryPointWindow(T0, { durationMs: Number.MAX_VALUE })).toThrow(WhatsAppValidationError);
+    });
+
     it('never reports more than 24h remaining when the inbound timestamp is ahead of the local clock', () => {
         const window = getCustomerServiceWindow(T0 + 5 * 60 * 1000, { now: T0 });
         expect(window.isOpen).toBe(true);

@@ -85,7 +85,12 @@ export default class Requester implements RequesterClass {
         if (this.onRateLimitInfo) {
             try {
                 const statusCode = typeof response.statusCode === 'function' ? response.statusCode() : 0;
-                this.onRateLimitInfo(info, { method, endpoint, statusCode });
+                // Observe asynchronous failures too, without delaying the API response on telemetry.
+                void Promise.resolve(this.onRateLimitInfo(info, { method, endpoint, statusCode })).catch(
+                    (error: unknown) => {
+                        LOGGER.log(`onRateLimitInfo listener threw: ${error instanceof Error ? error.message : error}`);
+                    },
+                );
             } catch (error) {
                 LOGGER.log(`onRateLimitInfo listener threw: ${error instanceof Error ? error.message : error}`);
             }

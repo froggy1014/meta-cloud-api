@@ -130,9 +130,9 @@ The legacy form `uploadMedia(file, 'whatsapp')` still works. Options: `type` (MI
 :::caution[Streams are buffered]
 A `ReadableStream` is read fully into memory before the request is sent. Meta's upload endpoint
 takes `multipart/form-data`, and `fetch` only accepts `Blob` parts in a `FormData`, so the body is not
-streamed end to end. Expect peak memory of about the file size (Meta caps media at 100 MB for
+streamed end to end. Peak memory can exceed the file size (Meta caps media at 100 MB for
 documents, 16 MB for audio and video, 5 MB for images). Buffering once also means a throttled upload
-can be retried. Bytes from a `Uint8Array` or `Blob` are not copied.
+can be retried. Blob construction snapshots byte inputs; allow room for these copies.
 :::
 
 ### Upload Different Media Types

@@ -93,9 +93,9 @@ export default class MediaApi extends BaseAPI implements media.MediaClass {
      *
      * **Memory:** a `ReadableStream` is read fully into a `Blob` before the request is sent. Meta
      * requires a multipart body and `fetch` only accepts `Blob` parts in `FormData`, so the upload is
-     * not streamed end to end. Peak memory is about the file size (Meta caps media at 100 MB for
+     * not streamed end to end. Peak memory can exceed the file size (Meta caps media at 100 MB for
      * documents, 16 MB for audio/video, 5 MB for images). Buffering once also lets a throttled upload
-     * be retried. Bytes from a `Uint8Array` backed by a regular `ArrayBuffer` are not copied.
+     * be retried. Blob construction snapshots byte inputs; allow room for these copies.
      *
      * @param file - The content to upload
      * @param optionsOrMessagingProduct - Upload options, or the messaging product string (legacy form,
@@ -130,14 +130,14 @@ export default class MediaApi extends BaseAPI implements media.MediaClass {
                 : (optionsOrMessagingProduct ?? {});
         const messagingProduct = options.messagingProduct ?? WHATSAPP_MESSAGING_PRODUCT;
 
-        const blob = await toUploadBlob(file, options.type);
-        const mimeType = options.type || blob.type;
+        const mimeType = options.type || (file instanceof Blob ? file.type : '');
         if (!mimeType) {
             throw new WhatsAppValidationError(
                 'uploadMedia needs a MIME type: pass options.type (e.g. "image/jpeg") or a Blob/File with a type',
             );
         }
 
+        const blob = await toUploadBlob(file, options.type);
         const formData = new FormData();
         if (blob === file && !options.type && !options.filename) {
             // Unchanged legacy path: append the caller's File/Blob as is.

@@ -61,7 +61,7 @@ export interface RateLimitInfoContext {
 }
 
 /** Callback receiving rate limit information parsed from every response that carries it. */
-export type RateLimitInfoListener = (info: RateLimitInfo, context: RateLimitInfoContext) => void;
+export type RateLimitInfoListener = (info: RateLimitInfo, context: RateLimitInfoContext) => void | Promise<void>;
 
 export type WhatsAppConfig = {
     accessToken: string;
