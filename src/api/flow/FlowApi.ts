@@ -321,7 +321,7 @@ export default class FlowApi extends BaseAPI implements flow.FlowClass {
     async updateFlowJson(
         flowId: string,
         data: {
-            file: Blob | Buffer | object; // JSON object, Buffer, or Blob
+            file: Blob | Uint8Array | object; // JSON object, Buffer, or Blob
             name?: string; // Default to "flow.json"
         },
     ): Promise<flow.UpdateFlowResponse> {
@@ -329,8 +329,8 @@ export default class FlowApi extends BaseAPI implements flow.FlowClass {
         let fileContent: Blob;
 
         // Handle different input types for the file
-        if (data.file instanceof Buffer) {
-            // Buffer - convert to Uint8Array for BlobPart compatibility
+        if (data.file instanceof Uint8Array) {
+            // Buffer or Uint8Array - convert to Uint8Array for BlobPart compatibility
             fileContent = new globalThis.Blob([new Uint8Array(data.file)]);
             formData.append('file', fileContent as unknown as Blob);
         } else if (typeof data.file === 'object' && !(data.file instanceof Blob)) {
@@ -390,7 +390,7 @@ export default class FlowApi extends BaseAPI implements flow.FlowClass {
      */
     async validateFlowJson(
         flowId: string,
-        flowJsonData: Blob | Buffer | object,
+        flowJsonData: Blob | Uint8Array | object,
     ): Promise<flow.ValidateFlowJsonResponse> {
         const result = await this.updateFlowJson(flowId, {
             file: flowJsonData,

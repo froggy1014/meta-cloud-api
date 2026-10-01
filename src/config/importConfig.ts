@@ -1,6 +1,7 @@
 import type { WabaConfigType, WhatsAppConfig } from '../types/config';
 import { WabaConfigEnum } from '../types/enums';
 import Logger from '../utils/logger';
+import { isDebugEnv, readEnv } from '../utils/runtime';
 import {
     DEFAULT_CLOUD_API_VERSION,
     DEFAULT_LISTENER_PORT,
@@ -10,10 +11,10 @@ import {
 
 const LIB_NAME = 'UTILS';
 const LOG_LOCAL = false;
-const LOGGER = new Logger(LIB_NAME, process.env.DEBUG === 'true' || LOG_LOCAL);
+const LOGGER = new Logger(LIB_NAME, isDebugEnv() || LOG_LOCAL);
 
 const emptyConfigChecker = (config: WhatsAppConfig | undefined) => {
-    if (!process.env[WabaConfigEnum.AccessToken] && !config?.accessToken) {
+    if (!readEnv(WabaConfigEnum.AccessToken) && !config?.accessToken) {
         LOGGER.log('Environmental variable: CLOUD_API_ACCESS_TOKEN and/or access token argument is undefined.');
         throw new Error('Missing WhatsApp access token.');
     }
@@ -23,28 +24,28 @@ export const importConfig = (inputConfig?: WhatsAppConfig) => {
     emptyConfigChecker(inputConfig);
 
     const wabaConfig: WabaConfigType = {
-        [WabaConfigEnum.AppId]: inputConfig?.appId || process.env.M4D_APP_ID || '',
-        [WabaConfigEnum.AppSecret]: inputConfig?.appSecret || process.env.M4D_APP_SECRET || '',
+        [WabaConfigEnum.AppId]: inputConfig?.appId || readEnv('M4D_APP_ID') || '',
+        [WabaConfigEnum.AppSecret]: inputConfig?.appSecret || readEnv('M4D_APP_SECRET') || '',
         [WabaConfigEnum.PhoneNumberId]:
-            inputConfig?.phoneNumberId || (process.env.WA_PHONE_NUMBER_ID ? Number(process.env.WA_PHONE_NUMBER_ID) : 0),
-        [WabaConfigEnum.BusinessAcctId]: inputConfig?.businessAcctId || process.env.WA_BUSINESS_ACCOUNT_ID || '',
+            inputConfig?.phoneNumberId || (readEnv('WA_PHONE_NUMBER_ID') ? Number(readEnv('WA_PHONE_NUMBER_ID')) : 0),
+        [WabaConfigEnum.BusinessAcctId]: inputConfig?.businessAcctId || readEnv('WA_BUSINESS_ACCOUNT_ID') || '',
         [WabaConfigEnum.APIVersion]:
-            inputConfig?.apiVersion || process.env.CLOUD_API_VERSION || DEFAULT_CLOUD_API_VERSION,
-        [WabaConfigEnum.AccessToken]: inputConfig?.accessToken || process.env.CLOUD_API_ACCESS_TOKEN || '',
-        [WabaConfigEnum.WebhookEndpoint]: inputConfig?.webhookEndpoint || process.env.WEBHOOK_ENDPOINT || '',
+            inputConfig?.apiVersion || readEnv('CLOUD_API_VERSION') || DEFAULT_CLOUD_API_VERSION,
+        [WabaConfigEnum.AccessToken]: inputConfig?.accessToken || readEnv('CLOUD_API_ACCESS_TOKEN') || '',
+        [WabaConfigEnum.WebhookEndpoint]: inputConfig?.webhookEndpoint || readEnv('WEBHOOK_ENDPOINT') || '',
         [WabaConfigEnum.WebhookVerificationToken]:
-            inputConfig?.webhookVerificationToken || process.env.WEBHOOK_VERIFICATION_TOKEN || '',
+            inputConfig?.webhookVerificationToken || readEnv('WEBHOOK_VERIFICATION_TOKEN') || '',
         [WabaConfigEnum.ListenerPort]:
-            inputConfig?.listenerPort || parseInt(process.env.LISTENER_PORT || '', 10) || DEFAULT_LISTENER_PORT,
+            inputConfig?.listenerPort || parseInt(readEnv('LISTENER_PORT') || '', 10) || DEFAULT_LISTENER_PORT,
         [WabaConfigEnum.MaxRetriesAfterWait]:
             inputConfig?.maxRetriesAfterWait ||
-            parseInt(process.env.MAX_RETRIES_AFTER_WAIT || '', 10) ||
+            parseInt(readEnv('MAX_RETRIES_AFTER_WAIT') || '', 10) ||
             DEFAULT_MAX_RETRIES_AFTER_WAIT,
         [WabaConfigEnum.RequestTimeout]:
-            inputConfig?.requestTimeout || parseInt(process.env.REQUEST_TIMEOUT || '', 10) || DEFAULT_REQUEST_TIMEOUT,
-        [WabaConfigEnum.Debug]: inputConfig?.debug || process.env.DEBUG === 'true',
-        [WabaConfigEnum.PrivatePem]: inputConfig?.privatePem || process.env.FLOW_API_PRIVATE_PEM || '',
-        [WabaConfigEnum.Passphrase]: inputConfig?.passphrase || process.env.FLOW_API_PASSPHRASE || '',
+            inputConfig?.requestTimeout || parseInt(readEnv('REQUEST_TIMEOUT') || '', 10) || DEFAULT_REQUEST_TIMEOUT,
+        [WabaConfigEnum.Debug]: inputConfig?.debug || isDebugEnv(),
+        [WabaConfigEnum.PrivatePem]: inputConfig?.privatePem || readEnv('FLOW_API_PRIVATE_PEM') || '',
+        [WabaConfigEnum.Passphrase]: inputConfig?.passphrase || readEnv('FLOW_API_PASSPHRASE') || '',
         retry: inputConfig?.retry,
     };
 

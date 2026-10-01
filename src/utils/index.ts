@@ -52,7 +52,12 @@ export { objectToQueryString } from './objectToQueryString';
 
 // export { getVersion, getUserAgent } from './version';
 
-export type { EncryptionKeyPair } from './flowEncryptionUtils';
-
-export { decryptFlowRequest, encryptFlowResponse, generateEncryption } from './flowEncryptionUtils';
+export type { DecryptedFlowRequest, EncryptionKeyPair } from './flowEncryptionUtils';
+export {
+    decryptFlowRequest,
+    decryptFlowRequestAsync,
+    encryptFlowResponse,
+    encryptFlowResponseAsync,
+    generateEncryption,
+} from './flowEncryptionUtils';
 export { isFlowDataExchangeRequest, isFlowErrorRequest, isFlowPingRequest } from './flowTypeGuards';

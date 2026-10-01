@@ -116,7 +116,7 @@ export type GroupParticipantsRequest = {
 export type UpdateGroupSettingsRequest = {
     subject?: string;
     description?: string;
-    profilePictureFile?: Blob | Buffer;
+    profilePictureFile?: Blob | Uint8Array;
 };
 
 export type GroupSettingsResponse = ResponseSuccess;

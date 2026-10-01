@@ -337,12 +337,12 @@ The Next.js adapters read the raw body themselves and need nothing extra.
 To check signatures yourself, for example in a custom adapter, use the exported helper:
 
 ```typescript
-import { isValidWebhookSignature } from 'meta-cloud-api';
+import { verifyWebhookSignature } from 'meta-cloud-api';
 
-const ok = isValidWebhookSignature(rawBody, request.headers.get('x-hub-signature-256'), process.env.APP_SECRET!);
+const ok = await verifyWebhookSignature(rawBody, request.headers.get('x-hub-signature-256'), process.env.APP_SECRET!);
 ```
 
-It is constant-time and returns `false` instead of throwing on malformed headers.
+It uses Web Crypto, so it works on every runtime, is constant-time and resolves to `false` instead of throwing on malformed headers. The synchronous `isValidWebhookSignature` is still exported for Node.js code.
 
 Flow endpoint requests are verified the same way with `appSecret`. When no `appSecret` is set they fall back to the verification token for backward compatibility, but Meta signs with the App Secret, so set it.
 

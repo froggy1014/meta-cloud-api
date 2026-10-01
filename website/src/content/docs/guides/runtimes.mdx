@@ -1,0 +1,78 @@
+---
+title: Edge & Other Runtimes
+description: Run meta-cloud-api on Node.js, Bun, Deno, Cloudflare Workers and Vercel Edge
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+meta-cloud-api has no runtime dependencies and no static `node:*` imports. It talks to the Graph API through the global `fetch` and uses Web Crypto for webhook signatures and Flow encryption, so the same package runs on:
+
+| Runtime | Status |
+| --- | --- |
+| Node.js 20.12+ | Supported (tested on 20, 22, 24) |
+| Bun | Supported |
+| Deno 2 | Supported |
+| Cloudflare Workers | Supported, no `nodejs_compat` flag needed |
+| Vercel Edge / Next.js `runtime = 'edge'` | Supported |
+
+Every pull request builds the package and runs a smoke test on each of these runtimes: it sends a message, verifies a signed webhook and round-trips an encrypted Flow request.
+
+## Configuration without `process.env`
+
+On Node.js, Bun and Deno the SDK reads `CLOUD_API_ACCESS_TOKEN`, `WA_PHONE_NUMBER_ID` and friends from `process.env`. Cloudflare Workers pass secrets through the `env` argument instead, so pass them to the constructor:
+
+```typescript
+import { WebhookProcessor } from 'meta-cloud-api';
+
+export default {
+    async fetch(request: Request, env: Env): Promise<Response> {
+        const processor = new WebhookProcessor({
+            accessToken: env.CLOUD_API_ACCESS_TOKEN,
+            phoneNumberId: Number(env.WA_PHONE_NUMBER_ID),
+            appSecret: env.M4D_APP_SECRET,
+            webhookVerificationToken: env.WEBHOOK_VERIFICATION_TOKEN,
+            verifyWebhookSignature: true,
+        });
+
+        processor.onText(async (whatsapp, { message }) => {
+            await whatsapp.messages.text({ to: message.from, body: `You said: ${message.text.body}` });
+        });
+
+        const url = new URL(request.url);
+        if (request.method === 'GET') {
+            const result = await processor.processVerification(
+                url.searchParams.get('hub.mode'),
+                url.searchParams.get('hub.verify_token'),
+                url.searchParams.get('hub.challenge'),
+            );
+            return new Response(result.body, { status: result.status, headers: result.headers });
+        }
+
+        const result = await processor.processWebhook(request);
+        return new Response(result.body, { status: result.status, headers: result.headers });
+    },
+};
+```
+
+## Signatures and Flow encryption
+
+The webhook and Flow pipelines use Web Crypto internally. For your own code, use the async helpers, which work everywhere:
+
+| Async (every runtime) | Sync (needs `node:crypto`) |
+| --- | --- |
+| `verifyWebhookSignature(rawBody, header, appSecret)` | `isValidWebhookSignature(...)` |
+| `generateXHub256SigAsync(body, appSecret)` | `generateXHub256Sig(...)` |
+| `decryptFlowRequestAsync(body, config)` | `decryptFlowRequest(...)` |
+| `encryptFlowResponseAsync(response, aesKey, iv)` | `encryptFlowResponse(...)` |
+
+The sync helpers load `node:crypto` on demand, which works on Node.js 20.16+, Bun and Deno, and throws a descriptive error elsewhere. `generateEncryption()` (RSA key generation) is Node.js only.
+
+<Aside type="caution" title="Flow private keys on edge runtimes">
+Web Crypto cannot read passphrase-protected private keys. Where `node:crypto` is unavailable (Cloudflare Workers, Vercel Edge), store the Flow private key as an unencrypted PKCS#8 PEM in your platform's secret store:
+
+```bash
+openssl pkcs8 -topk8 -nocrypt -in private.pem -out private-pkcs8.pem
+```
+
+On Node.js, Bun and Deno, encrypted PKCS#8 and PKCS#1 keys with `passphrase` keep working.
+</Aside>

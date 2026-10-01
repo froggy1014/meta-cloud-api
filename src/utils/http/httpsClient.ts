@@ -1,5 +1,3 @@
-import { Agent } from 'node:https';
-
 import type { HttpMethodsEnum } from '../../types/enums';
 import type {
     HttpsClientClass,
@@ -8,19 +6,17 @@ import type {
     ResponseJSONBody,
 } from '../../types/httpsClient';
 import Logger from '../logger';
+import { isDebugEnv } from '../runtime';
 
 const LIB_NAME = 'HttpsClient';
-const LOGGER = new Logger(LIB_NAME, process.env.DEBUG === 'true');
+const LOGGER = new Logger(LIB_NAME, isDebugEnv());
 
 export default class HttpsClient implements HttpsClientClass {
-    agent: Agent;
-
-    constructor() {
-        this.agent = new Agent({ keepAlive: true });
-    }
-
+    /**
+     * Kept for backwards compatibility. Requests go through the global `fetch`,
+     * which manages its own connection pool, so there is nothing to clear.
+     */
     clearSockets(): boolean {
-        this.agent.destroy();
         return true;
     }
 

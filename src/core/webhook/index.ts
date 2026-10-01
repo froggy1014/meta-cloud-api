@@ -99,6 +99,7 @@ export {
     isValidWebhookSignature,
     processFlowRequest,
     processWebhookMessages,
+    verifyWebhookSignature,
 } from './utils/webhookUtils';
 export type { WebhookResponse } from './WebhookProcessor';
 // Core Processor (for advanced usage)
