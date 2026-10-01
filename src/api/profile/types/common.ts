@@ -154,7 +154,7 @@ export declare class BusinessProfileClass extends BaseClass {
      * @param uploadId The ID of the upload session.
      * @param file The binary data of the file.
      */
-    uploadMedia(uploadId: string, file: Buffer): Promise<UploadBusinessProfileResponse>;
+    uploadMedia(uploadId: string, file: Uint8Array): Promise<UploadBusinessProfileResponse>;
 
     /**
      * Get the upload handle information.

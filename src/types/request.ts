@@ -27,6 +27,8 @@ export interface GeneralHeaderInterface {
 
 export interface RequesterResponseInterface<T> {
     json: () => Promise<T>;
+    /** The underlying fetch `Response`, for non-JSON bodies such as media downloads. */
+    rawResponse: () => Response;
 }
 
 export interface ResponseSuccess {

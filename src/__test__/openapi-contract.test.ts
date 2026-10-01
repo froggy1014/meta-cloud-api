@@ -219,8 +219,10 @@ function createClient(): { whatsApp: WhatsApp; calls: RecordedCall[] } {
     requester.getJson = record;
     requester.sendFormData = record;
     requester.sendUrlEncodedForm = record;
-    requester.sendRequest = async () => {
-        throw new Error('API classes must go through getJson/sendFormData/sendUrlEncodedForm');
+    // Raw requests (binary downloads via BaseAPI.sendRaw) are recorded too.
+    requester.sendRequest = async (method: string, endpoint: string) => {
+        calls.push({ method, endpoint });
+        return { json: async () => ({}), rawResponse: () => new Response(new Uint8Array()) };
     };
     return { whatsApp, calls };
 }

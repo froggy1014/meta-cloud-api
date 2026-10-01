@@ -20,6 +20,12 @@ export class BaseAPI implements BaseClass {
         return this.client.getJson<T>(method, endpoint, timeout, body);
     }
 
+    /** Send a request and return the raw `Response` (for binary bodies). Errors still throw `WhatsAppError`s. */
+    protected async sendRaw(method: HttpMethodsEnum, endpoint: string, timeout: number): Promise<Response> {
+        const response = await this.client.sendRequest(method, endpoint, timeout);
+        return response.rawResponse();
+    }
+
     protected sendFormData<T>(method: HttpMethodsEnum, endpoint: string, timeout: number, body?: any): Promise<T> {
         return this.client.sendFormData<T>(method, endpoint, timeout, body);
     }
