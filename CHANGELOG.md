@@ -1,5 +1,31 @@
 # meta-cloud-api
 
+## 3.8.0
+
+### Minor Changes
+
+- 8d15ad0: Apply Cloud API changelog entries #461-#462 (landing page view webhook, service message exemptions)
+
+  - **Landing page view webhook (#461)**: Added `WebhookProcessor.onUserAction(handler)` / `offUserAction()` for the `user_actions` array Meta delivers on the `messages` webhook field for Marketing Messages API traffic. New types `UserActionsWebhookValue` (added to the `WebhookValue` union), `UserAction`, `UserActionType` (open enum: `marketing_messages_link_click`, `landing_page_view`), `MarketingMessagesLinkClickData`, `ProcessedUserAction`, and `UserActionHandler`. `processWebhookMessages` previously ignored these payloads; it now dispatches every action (including unknown `action_type` values) to the registered handler. Documented click/landing-page-view correlation rules in `docs/marketing-messages.md`.
+  - **Service message exemptions (#462)**: `docs/messages.md` and the `StatusWebhook['pricing']['type']` JSDoc note that from October 1, 2026 reaction messages are never charged and do not count toward the 1,000 free monthly service messages, and that eligible governments and non-profits keep service messages free beyond the tier through December 31, 2027. Billing policy only; no endpoint, payload, or webhook type change.
+
+- 13141ca: Webhook security and typing fixes.
+
+  - New `verifyWebhookSignature` config option. When `true`, webhook POSTs without a valid `X-Hub-Signature-256` are rejected with 401 before any handler runs. The HMAC is keyed with `appSecret`. It is off by default, so existing apps are unaffected. Turn it on in production. Express apps must keep the raw body, see the README.
+  - The Flow endpoint now verifies signatures with `appSecret`, which is the key Meta signs with. It previously used `webhookVerificationToken`, so real Meta Flow requests failed verification. The token is still used as a fallback when no `appSecret` is set.
+  - The signature check no longer throws on malformed or wrong-length headers.
+  - New export `isValidWebhookSignature(rawBody, header, appSecret)`.
+  - `nextjsAppWebhookHandler` returned `any` because of its internal cache. `processor.onText((wa, processed) => …)` now infers its parameter types again. The new `NextJsAppWebhookHandlers` type is exported.
+
+### Patch Changes
+
+- c6680b1: Apply Cloud API changelog entry #460 (Meta Business Agent usage analytics)
+
+  - **Meta Business Agent analytics (#460)**: `docs/messages.md` documents that Meta Business Agent message usage (billable messages, billed tokens, cost) comes from Meta's Business Agent Usage Insights API on the Meta Business Agent Platform host, while service messages stay on `pricing_analytics`. The 7-day free entry point window in the same entry was already documented for #459. No endpoint, payload, or webhook type change.
+
+- 954e522: Document Cloud API changelog entries #463–#465: preparing existing integrations before assigning another partner or enabling Meta Business Agent, and automatic max-price eligibility for shared clients after the partner beta agreement is accepted. Existing SDK endpoints, message payloads, and webhook types remain unchanged; service-message exemptions repeat the policy already documented for #462.
+- aaaca41: Add a default export for the `WhatsApp` class. `import WhatsApp from 'meta-cloud-api'`, the form used in the README Quick Start and the docs, previously threw `does not provide an export named 'default'` in plain Node ESM. The named export `{ WhatsApp }` is unchanged.
+
 ## 3.7.1
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
     "name": "create-whatsapp-app",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "Scaffold a WhatsApp Cloud API app in 30 seconds. Runs in mock mode with no Meta account, then goes live with meta-cloud-api.",
     "type": "module",
     "bin": {
