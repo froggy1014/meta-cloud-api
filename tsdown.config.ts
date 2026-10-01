@@ -7,7 +7,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const { version } = JSON.parse(readFileSync(resolve(__dirname, 'package.json'), 'utf-8')) as { version: string };
 const define = { __SDK_VERSION__: JSON.stringify(version) };
 
-export default defineConfig([
+const configs = defineConfig([
     // Main bundle (runtime-neutral: Node.js, Bun, Deno, Workers, Edge)
     {
         entry: ['src/index.ts'],
@@ -71,4 +71,24 @@ export default defineConfig([
         define,
         hash: false,
     },
+]);
+
+export default defineConfig([
+    ...configs,
+    ...[configs[0], configs[2]].map((config) => ({
+        ...config,
+        outDir: config.outDir ? `${config.outDir}/node` : 'dist/node',
+        plugins: [
+            {
+                name: 'node-runtime-crypto',
+                resolveId(id: string) {
+                    if (id === './runtimeCrypto') {
+                        return resolve(__dirname, 'src/utils/runtimeCrypto.node.ts');
+                    }
+                    return null;
+                },
+            },
+            ...(config.plugins ?? []),
+        ],
+    })),
 ]);

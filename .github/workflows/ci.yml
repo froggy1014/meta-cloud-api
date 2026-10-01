@@ -55,7 +55,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runtime: [node-20, node-22, node-24, bun, deno, workerd]
+        runtime: [node-20-floor, node-20, node-22, node-24, bun, deno, workerd]
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v5
@@ -82,7 +82,7 @@ jobs:
         if: startsWith(matrix.runtime, 'node-')
         uses: actions/setup-node@v5
         with:
-          node-version: ${{ fromJSON('{"node-20":"20","node-22":"22","node-24":"24"}')[matrix.runtime] }}
+          node-version: ${{ fromJSON('{"node-20-floor":"20.12.0","node-20":"20","node-22":"22","node-24":"24"}')[matrix.runtime] }}
 
       - name: Setup Bun
         if: matrix.runtime == 'bun'
@@ -96,7 +96,9 @@ jobs:
 
       - name: Smoke (Node.js)
         if: startsWith(matrix.runtime, 'node-')
-        run: node scripts/runtime-smoke/run.mjs
+        run: |
+          node scripts/runtime-smoke/run.mjs
+          node scripts/runtime-smoke/node-crypto.mjs
 
       - name: Smoke (Bun)
         if: matrix.runtime == 'bun'

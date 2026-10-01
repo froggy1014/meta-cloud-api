@@ -948,7 +948,7 @@ export async function verifyWebhookSignature(
 
 /**
  * Synchronous variant of {@link verifyWebhookSignature}. Needs `node:crypto`
- * (Node.js >= 20.16, Bun, Deno); prefer the async variant on edge runtimes.
+ * (Node.js >= 20.12, Bun, Deno); prefer the async variant on edge runtimes.
  */
 export function isValidWebhookSignature(rawBody: string, signatureHeader: string | null, appSecret: string): boolean {
     if (!signatureHeader || !appSecret) return false;
