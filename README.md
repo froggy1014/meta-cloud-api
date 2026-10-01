@@ -67,6 +67,8 @@ await wa.messages.image({ to: '1234567890', link: 'https://example.com/image.png
 
 If you're building on the official Cloud API and don't want to bet on an unmaintained SDK, this is what the archived one would look like if Meta had kept shipping it.
 
+**Coming from the `whatsapp` package?** The [migration guide](https://meta-cloud-api.site/getting-started/migrate-from-whatsapp-nodejs-sdk) maps every API of the archived SDK (config, messages, templates, webhooks, errors) to meta-cloud-api, with a checklist.
+
 ## API Coverage
 
 ```

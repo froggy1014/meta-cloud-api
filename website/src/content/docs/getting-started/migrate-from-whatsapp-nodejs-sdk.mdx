@@ -1,0 +1,466 @@
+---
+title: Migrate from WhatsApp-Nodejs-SDK
+description: Move from Meta's archived `whatsapp` npm package to meta-cloud-api, with a side-by-side mapping of config, messages, webhooks and errors
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+Meta's official Node.js SDK ([`WhatsApp/WhatsApp-Nodejs-SDK`](https://github.com/WhatsApp/WhatsApp-Nodejs-SDK), published on npm as `whatsapp`) has been archived since 2023. Both SDKs call the same official Cloud API, so a migration is mostly mechanical: the same environment variables, the same `wa.messages.*` method names, and payload objects with the same field names. This page maps every public API of the archived SDK to its meta-cloud-api equivalent.
+
+<Aside type="tip">
+Every `typescript` block on this page is type-checked against the meta-cloud-api source in CI, so the signatures shown here are the real ones.
+</Aside>
+
+## At a glance
+
+| Archived `whatsapp` SDK | meta-cloud-api |
+| --- | --- |
+| `npm install whatsapp` | `npm install meta-cloud-api` |
+| `import WhatsApp from 'whatsapp'` | `import WhatsApp from 'meta-cloud-api'` |
+| `new WhatsApp(senderNumberId?)` | `new WhatsApp({ accessToken, phoneNumberId, ... })` or `new WhatsApp()` (env only) |
+| Loads `.env` itself (via `dotenv`) outside production | Reads `process.env` but does not load `.env`; use `node --env-file=.env` or `import 'dotenv/config'` |
+| `CLOUD_API_VERSION` required | Optional, defaults to `v23.0` |
+| `wa.messages.text(body, recipient, replyMessageId?)` | `wa.messages.text({ body, to, replyMessageId? })` |
+| `recipient: number` | `to: string` (international format, digits only) |
+| Resolves to a raw HTTP response object | Resolves to the parsed JSON (`MessagesResponse`) |
+| Does not reject on 4xx/5xx; you inspect `statusCode()` | Throws typed errors (`WhatsAppApiError` and subclasses) |
+| `wa.messages.status({ status: 'read', message_id })` | `wa.messages.markAsRead({ messageId })` |
+| `wa.phoneNumbers.requestCode(...)` / `verifyCode(...)` | `wa.phoneNumbers.requestVerificationCode(...)` / `verifyCode(...)` |
+| `wa.twoStepVerification.setPin(123456)` | `wa.twoStepVerification.setTwoStepVerificationCode('123456')` |
+| `wa.webhooks.start(callback)` (built-in HTTP server) | Framework adapters: Express, Next.js, or `WebhookProcessor` for any `fetch`-style runtime |
+| No media, templates or Flows APIs | `wa.media`, `wa.templates`, `wa.flows` and 15+ more modules |
+
+## 1. Install
+
+```bash
+npm uninstall whatsapp
+npm install meta-cloud-api
+```
+
+meta-cloud-api has no runtime dependencies and needs Node.js 20.12+ (or Bun, Deno, Cloudflare Workers, Vercel Edge). The archived SDK targeted Node.js 16.
+
+## 2. Configuration and environment variables
+
+meta-cloud-api reads the same environment variable names as the archived SDK, so an existing `.env` keeps working:
+
+| Variable | Archived SDK | meta-cloud-api | Constructor option |
+| --- | --- | --- | --- |
+| `CLOUD_API_ACCESS_TOKEN` | Required | Required (env or option) | `accessToken` |
+| `WA_PHONE_NUMBER_ID` | Required (or constructor arg) | Needed for anything sent from a number | `phoneNumberId` |
+| `CLOUD_API_VERSION` | Required | Optional, default `v23.0` | `apiVersion` |
+| `WA_BUSINESS_ACCOUNT_ID` | Optional | Needed for WABA-level APIs (templates, flows) | `businessAcctId` |
+| `M4D_APP_ID` | Optional | Optional | `appId` |
+| `M4D_APP_SECRET` | Used to verify webhook signatures | Used to verify webhook signatures | `appSecret` |
+| `WEBHOOK_VERIFICATION_TOKEN` | Webhook subscribe check | Webhook subscribe check | `webhookVerificationToken` |
+| `REQUEST_TIMEOUT` | Default 20000 ms | Default 20000 ms | `requestTimeout` |
+| `DEBUG` | `true` enables logging | `true` enables logging | `debug` |
+| `WEBHOOK_ENDPOINT`, `LISTENER_PORT` | Path and port of the built-in server | Read but unused: you mount the handler on your own route | `webhookEndpoint`, `listenerPort` |
+| `MAX_RETRIES_AFTER_WAIT` | Default 30 | Read but unused | `maxRetriesAfterWait` |
+| `WA_BASE_URL` | Override the Graph API host | Not supported | — |
+| — | — | Flow endpoint private key | `privatePem` / `FLOW_API_PRIVATE_PEM` |
+| — | — | Retry on throttling | `retry: { maxAttempts, backoff, initialDelayMs }` |
+
+<Tabs syncKey="sdk">
+<TabItem label="whatsapp (archived)">
+
+```js
+import WhatsApp from 'whatsapp';
+
+// Reads CLOUD_API_ACCESS_TOKEN, CLOUD_API_VERSION, ... from .env (loaded by the SDK).
+// The argument overrides WA_PHONE_NUMBER_ID.
+const wa = new WhatsApp(123456789012345);
+```
+
+</TabItem>
+<TabItem label="meta-cloud-api">
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+// Option 1: same env vars, no arguments (load .env yourself, e.g. node --env-file=.env)
+const fromEnv = new WhatsApp();
+
+// Option 2: explicit config (required on Cloudflare Workers, where there is no process.env)
+const wa = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID,
+    retry: { maxAttempts: 3, backoff: 'exponential' },
+});
+```
+
+</TabItem>
+</Tabs>
+
+The runtime setters keep their names: `wa.updateAccessToken(token)`, `wa.updateSenderNumberId(id)` and `wa.updateTimeout(ms)` exist on both. They return `void` instead of `true`.
+
+## 3. Sending messages
+
+Every send method takes a single object instead of positional arguments. The payload you passed as the first argument moves to `body`, the recipient moves to `to` (now a string), and `replyMessageId` becomes a named field.
+
+<Tabs syncKey="sdk">
+<TabItem label="whatsapp (archived)">
+
+```js
+const res = await wa.messages.text({ body: 'Hello world' }, 15551234567);
+const json = await res.responseBodyToJSON();
+console.log(json.messages[0].id);
+
+// Reply to a message
+await wa.messages.text({ body: 'Got it' }, 15551234567, 'wamid.HBgL...');
+```
+
+</TabItem>
+<TabItem label="meta-cloud-api">
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const wa = new WhatsApp();
+
+const res = await wa.messages.text({ to: '15551234567', body: 'Hello world' });
+console.log(res.messages[0]?.id);
+
+// Reply to a message
+await wa.messages.text({ to: '15551234567', body: 'Got it', replyMessageId: 'wamid.HBgL...' });
+
+// `body` also accepts the old TextObject shape
+await wa.messages.text({ to: '15551234567', body: { body: 'https://example.com', preview_url: false } });
+```
+
+</TabItem>
+</Tabs>
+
+<Aside>
+`text()` turns on `preview_url` by default. Pass `previewUrl: false` to keep the archived SDK's behavior of no link previews.
+</Aside>
+
+The other message types follow the same pattern. The media, location, contact and interactive payload objects keep the Cloud API field names, so the object you already build can be passed as `body` unchanged:
+
+| Archived SDK | meta-cloud-api |
+| --- | --- |
+| `messages.image(body, recipient, replyId?)` | `messages.image({ body, to, replyMessageId? })` |
+| `messages.video(...)`, `audio(...)`, `document(...)`, `sticker(...)` | `messages.video({ ... })`, `audio`, `document`, `sticker` |
+| `messages.location(body, recipient)` | `messages.location({ body, to })` |
+| `messages.contacts([contact], recipient)` | `messages.contacts({ body: [contact], to })` |
+| `messages.interactive(body, recipient)` | `messages.interactive({ body, to })`, or a typed helper such as `interactiveReplyButtons`, `interactiveList`, `interactiveCtaUrl`, `interactiveFlow` |
+| `messages.template(body, recipient)` | `messages.template({ body, to })` |
+| `messages.status({ status: 'read', message_id })` | `messages.markAsRead({ messageId })` |
+| — | `messages.reaction(...)`, `showTypingIndicator(...)`, `interactiveCarousel(...)`, and more |
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const wa = new WhatsApp();
+const to = '15551234567';
+
+await wa.messages.image({ to, body: { link: 'https://example.com/cat.png', caption: 'A cat' } });
+await wa.messages.document({ to, body: { id: 'MEDIA_ID', filename: 'invoice.pdf' } });
+await wa.messages.location({ to, body: { latitude: 37.48, longitude: 127.04, name: 'Office' } });
+
+await wa.messages.interactiveReplyButtons({
+    to,
+    body: {
+        type: 'button',
+        body: { text: 'Did this answer your question?' },
+        action: {
+            buttons: [
+                { type: 'reply', reply: { id: 'yes', title: 'Yes' } },
+                { type: 'reply', reply: { id: 'no', title: 'No' } },
+            ],
+        },
+    },
+});
+
+await wa.messages.markAsRead({ messageId: 'wamid.HBgL...' });
+```
+
+## 4. Templates
+
+Sending a template is the same `MessageTemplateObject` (`name`, `language`, `components`) moved into `body`:
+
+<Tabs syncKey="sdk">
+<TabItem label="whatsapp (archived)">
+
+```js
+await wa.messages.template(
+    { name: 'hello_world', language: { policy: 'deterministic', code: 'en_US' } },
+    15551234567,
+);
+```
+
+</TabItem>
+<TabItem label="meta-cloud-api">
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const wa = new WhatsApp();
+
+await wa.messages.template({
+    to: '15551234567',
+    body: { name: 'hello_world', language: { policy: 'deterministic', code: 'en_US' } },
+});
+```
+
+</TabItem>
+</Tabs>
+
+The archived SDK could only send templates. meta-cloud-api also manages them (set `businessAcctId` / `WA_BUSINESS_ACCOUNT_ID`):
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const wa = new WhatsApp();
+
+const { data } = await wa.templates.getTemplates({ limit: 20 });
+console.log(data.map((t) => `${t.name}: ${t.status}`));
+
+await wa.templates.deleteTemplate({ name: 'old_promo' });
+```
+
+See [Templates](/api/templates) for `createTemplate` and the component types.
+
+## 5. Media
+
+The archived SDK had no media API: sending your own files meant calling `POST /{phone-number-id}/media` yourself. meta-cloud-api wraps upload, lookup, download and delete. `uploadMedia` takes a standard `File`, so it works the same on Node.js and edge runtimes.
+
+```typescript
+import { readFile } from 'node:fs/promises';
+import WhatsApp from 'meta-cloud-api';
+
+const wa = new WhatsApp();
+
+const file = new File([await readFile('./invoice.pdf')], 'invoice.pdf', { type: 'application/pdf' });
+const { id } = await wa.media.uploadMedia(file);
+await wa.messages.document({ to: '15551234567', body: { id, filename: 'invoice.pdf' } });
+
+// Incoming media: resolve the ID from the webhook, then download it
+const info = await wa.media.getMediaById('INCOMING_MEDIA_ID');
+const blob = await wa.media.downloadMedia(info.url);
+console.log(info.mime_type, blob.size);
+```
+
+## 6. Webhooks
+
+This is the biggest change. The archived SDK started its own `http` server on `LISTENER_PORT` and called one callback with the raw request pieces; you parsed `body.entry[0].changes[0]...` yourself and had to end the response. meta-cloud-api gives you a handler to mount on your existing server and dispatches each event to a typed handler. It answers Meta with `200` for you.
+
+<Tabs syncKey="sdk">
+<TabItem label="whatsapp (archived)">
+
+```js
+import WhatsApp from 'whatsapp';
+
+const wa = new WhatsApp();
+
+wa.webhooks.start((statusCode, headers, body, resp, err) => {
+    if (err) return console.error(err);
+
+    const message = body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
+    if (message?.type === 'text') {
+        wa.messages.text({ body: `Echo: ${message.text.body}` }, Number(message.from));
+    }
+
+    if (resp) {
+        resp.writeHead(200, { 'Content-Type': 'text/plain' });
+        resp.end();
+    }
+});
+```
+
+</TabItem>
+<TabItem label="meta-cloud-api (Express)">
+
+```typescript
+import express from 'express';
+import { expressWebhookHandler } from 'meta-cloud-api';
+
+const app = express();
+// Keep the raw body: the signature is computed over the exact bytes Meta sent
+app.use(
+    express.json({
+        verify: (req, _res, buf) => {
+            (req as unknown as { rawBody: string }).rawBody = buf.toString();
+        },
+    }),
+);
+
+const webhook = expressWebhookHandler({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN!,
+    appSecret: process.env.M4D_APP_SECRET!,
+    verifyWebhookSignature: true,
+});
+
+webhook.processor.onText(async (wa, { message }) => {
+    await wa.messages.text({ to: message.from, body: `Echo: ${message.text.body}` });
+});
+
+webhook.processor.onStatus((_wa, { status }) => {
+    console.log(`${status.id} is now ${status.status}`);
+});
+
+app.get('/webhook', webhook.GET);
+app.post('/webhook', webhook.POST);
+app.listen(3000);
+```
+
+</TabItem>
+<TabItem label="meta-cloud-api (fetch / edge)">
+
+```typescript
+import { WebhookProcessor } from 'meta-cloud-api';
+
+const processor = new WebhookProcessor({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN!,
+    appSecret: process.env.M4D_APP_SECRET!,
+    verifyWebhookSignature: true,
+});
+
+processor.onText(async (wa, { message }) => {
+    await wa.messages.text({ to: message.from, body: `Echo: ${message.text.body}` });
+});
+
+// Works with Bun.serve, Deno.serve, Cloudflare Workers, or any (Request) => Response server
+export async function handle(request: Request): Promise<Response> {
+    const url = new URL(request.url);
+    const result =
+        request.method === 'GET'
+            ? await processor.processVerification(
+                  url.searchParams.get('hub.mode'),
+                  url.searchParams.get('hub.verify_token'),
+                  url.searchParams.get('hub.challenge'),
+              )
+            : await processor.processWebhook(request);
+    return new Response(result.body, { status: result.status, headers: result.headers });
+}
+```
+
+</TabItem>
+</Tabs>
+
+<Aside type="caution" title="Turn signature verification back on">
+The archived SDK always checked `X-Hub-Signature-256` against `M4D_APP_SECRET`. In meta-cloud-api the check is opt-in for backward compatibility. Set `appSecret` and `verifyWebhookSignature: true` so you keep rejecting forged POSTs after the migration.
+</Aside>
+
+How the old callback arguments map:
+
+| Archived `start(cb)` callback | meta-cloud-api |
+| --- | --- |
+| `statusCode` (200/401/500) | Returned to Meta for you; `401` on a bad signature, `403` on a bad verify token |
+| `headers` | `context.headers` (third handler argument, a `Headers` object) |
+| `body` (raw `WebhookObject`) | Typed `processed` object per handler (`processed.message`, `processed.status`, ...); the full payload via `onRaw()` |
+| `resp` (you must end it) | Handled for you |
+| `err` | Bad signatures and verify tokens never reach your handlers |
+| `wa.webhooks.stop(cb)` | Stop your own server; `webhook.destroy()` clears the registered handlers |
+
+Typed handlers exist for every message type (`onText`, `onImage`, `onInteractive`, `onButton`, `onLocation`, ...) and for the account-level webhook fields (`onMessageTemplateStatusUpdate`, `onAccountUpdate`, `onCalls`, `onFlows`, ...). See [Webhooks](/webhooks/overview), and [Next.js App Router](/guides/nextjs-app) if you deploy there.
+
+## 7. Phone numbers and two-step verification
+
+<Tabs syncKey="sdk">
+<TabItem label="whatsapp (archived)">
+
+```js
+await wa.phoneNumbers.requestCode({ code_method: 'SMS', language: 'en_US' });
+await wa.phoneNumbers.verifyCode({ code: '123456' });
+await wa.twoStepVerification.setPin(123456);
+```
+
+</TabItem>
+<TabItem label="meta-cloud-api">
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const wa = new WhatsApp();
+
+await wa.phoneNumbers.requestVerificationCode({ code_method: 'SMS', language: 'en_US' });
+await wa.phoneNumbers.verifyCode({ code: '123456' });
+await wa.twoStepVerification.setTwoStepVerificationCode('123456');
+
+// New: register the number with the Cloud API, read its settings
+await wa.registration.register('123456');
+const phone = await wa.phoneNumbers.getPhoneNumberById();
+console.log(phone.display_phone_number, phone.quality_rating);
+```
+
+</TabItem>
+</Tabs>
+
+## 8. Error handling
+
+The archived SDK resolved its promise for every HTTP response, including `400` and `401`; it only rejected on network errors. You had to check `res.statusCode()` and parse the body to find a Graph API error. meta-cloud-api throws, and the error class tells you what went wrong:
+
+<Tabs syncKey="sdk">
+<TabItem label="whatsapp (archived)">
+
+```js
+const res = await wa.messages.text({ body: 'Hi' }, 15551234567);
+if (res.statusCode() !== 200) {
+    const { error } = await res.responseBodyToJSON();
+    console.error(error.code, error.message);
+}
+```
+
+</TabItem>
+<TabItem label="meta-cloud-api">
+
+```typescript
+import WhatsApp, {
+    WhatsAppApiError,
+    WhatsAppNetworkError,
+    WhatsAppThrottlingError,
+    WhatsAppValidationError,
+} from 'meta-cloud-api';
+
+const wa = new WhatsApp();
+
+try {
+    await wa.messages.text({ to: '15551234567', body: 'Hi' });
+} catch (error) {
+    if (error instanceof WhatsAppThrottlingError) {
+        // Rate limited (codes 4, 130429, ...). Retried for you when `retry` is configured.
+    } else if (error instanceof WhatsAppApiError) {
+        console.error(error.statusCode, error.error.code, error.error.message, error.error.fbtrace_id);
+    } else if (error instanceof WhatsAppValidationError) {
+        // Rejected before any request was sent, e.g. a malformed phone number
+    } else if (error instanceof WhatsAppNetworkError) {
+        console.error('Network failure', error.cause);
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
+`WhatsAppApiError` has subclasses for authorization, throttling, integrity, send-message, Flow, block-user, calling and group errors. See [Error Handling](/core-concepts/error-handling) for the code ranges.
+
+## What's new compared to the archived SDK
+
+- **Types for every request and response.** The archived SDK typed request bodies and returned an untyped HTTP response. meta-cloud-api returns parsed, typed responses, types every webhook payload, and ships `meta-cloud-api/types` and `meta-cloud-api/enums` entry points.
+- **20+ API modules.** Media, templates, Flows, business profile, registration, WABA, QR codes, calling, groups, payments (India), marketing messages, block users, encryption and more, tracking the current Cloud API version.
+- **Framework adapters.** `expressWebhookHandler`, `nextjsAppWebhookHandler` and `nextjsPagesWebhookHandler` replace the single-process built-in server, so webhooks run inside the app you already deploy.
+- **Edge runtimes.** No runtime dependencies and no static `node:*` imports: the same package runs on Node.js, Bun, Deno, Cloudflare Workers and Vercel Edge. See [Edge & Other Runtimes](/guides/runtimes).
+- **WhatsApp Flows, including endpoint encryption.** Create and publish Flows with `wa.flows`, and serve a Flow data endpoint with `processor.onFlow(...)`; request decryption and response encryption are handled for you (`decryptFlowRequestAsync` / `encryptFlowResponseAsync` if you need them directly). See [Flows](/api/flows).
+- **Retries on throttling** via the `retry` option, and typed error classes instead of status-code checks.
+- **A scaffolder.** `npm create whatsapp-app@latest` generates a working bot with a mock mode that needs no Meta account. See [create-whatsapp-app](/getting-started/create-whatsapp-app).
+
+## Migration checklist
+
+- [ ] Replace the `whatsapp` dependency with `meta-cloud-api` and update imports.
+- [ ] Load `.env` yourself (`node --env-file=.env` or `import 'dotenv/config'`); the SDK no longer does it.
+- [ ] Make sure `WA_PHONE_NUMBER_ID` (or `phoneNumberId`) is set. Only the access token is checked at startup.
+- [ ] Optionally drop `CLOUD_API_VERSION` to use the SDK default, or keep it pinned.
+- [ ] Rewrite `wa.messages.*(body, recipient, replyId)` calls as `wa.messages.*({ body, to, replyMessageId })`, with `to` as a string.
+- [ ] Pass `previewUrl: false` to `text()` where you relied on no link previews.
+- [ ] Replace `messages.status({ status: 'read', ... })` with `messages.markAsRead({ messageId })`.
+- [ ] Read message IDs from the returned object (`res.messages[0].id`) instead of `responseBodyToJSON()`.
+- [ ] Replace `statusCode()` checks with `try/catch` on `WhatsAppApiError`.
+- [ ] Replace `wa.webhooks.start()` with an adapter mounted on your own route, and remove `LISTENER_PORT` / `WEBHOOK_ENDPOINT` handling.
+- [ ] Set `appSecret` and `verifyWebhookSignature: true`, and keep the raw request body available to the handler.
+- [ ] Rename `phoneNumbers.requestCode` to `requestVerificationCode`, and `twoStepVerification.setPin(number)` to `setTwoStepVerificationCode(string)`.
+- [ ] Delete hand-written Graph API calls for media, templates or Flows that the SDK now covers.
