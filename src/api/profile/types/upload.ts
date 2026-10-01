@@ -61,9 +61,9 @@ export interface UploadMediaParams {
      */
     uploadId: string;
     /**
-     * The binary data of the file (Buffer).
+     * The binary data of the file (`Uint8Array`; a Node.js `Buffer` works).
      */
-    file: Buffer;
+    file: Uint8Array;
 }
 
 /**

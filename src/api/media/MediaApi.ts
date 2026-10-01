@@ -201,7 +201,9 @@ export default class MediaApi extends BaseAPI implements media.MediaClass {
      * ```
      */
     async downloadMedia(mediaUrl: string): Promise<Blob> {
-        return this.sendJson(HttpMethodsEnum.Get, mediaUrl, this.config[WabaConfigEnum.RequestTimeout], null);
+        // The media URL returns the file bytes, not JSON, so read the body as a Blob.
+        const response = await this.sendRaw(HttpMethodsEnum.Get, mediaUrl, this.config[WabaConfigEnum.RequestTimeout]);
+        return response.blob();
     }
 }
 

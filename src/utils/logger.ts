@@ -1,13 +1,12 @@
-// @ts-nocheck
 import type { LoggerInterface } from '../types/logger';
 
 export default class Logger implements LoggerInterface {
     private name: string;
-    private debug: boolean;
+    private debugEnabled: boolean;
 
     constructor(name: string, debug: boolean = false) {
         this.name = name;
-        this.debug = debug;
+        this.debugEnabled = debug;
     }
 
     private formatData(data: any[]): string {
@@ -15,7 +14,7 @@ export default class Logger implements LoggerInterface {
     }
 
     log(...data: any[]) {
-        if (this.debug) {
+        if (this.debugEnabled) {
             let prefix = `[ ${Date.now()} ]`;
             if (this.name) {
                 prefix += ` - ${this.name}`;
@@ -33,7 +32,7 @@ export default class Logger implements LoggerInterface {
     }
 
     warn(...data: any[]) {
-        if (this.debug) {
+        if (this.debugEnabled) {
             let prefix = `[ ${Date.now()} ] - WARN`;
             if (this.name) {
                 prefix += ` - ${this.name}`;
@@ -43,12 +42,22 @@ export default class Logger implements LoggerInterface {
     }
 
     info(...data: any[]) {
-        if (this.debug) {
+        if (this.debugEnabled) {
             let prefix = `[ ${Date.now()} ] - INFO`;
             if (this.name) {
                 prefix += ` - ${this.name}`;
             }
             console.info(prefix, ': ', this.formatData(data));
+        }
+    }
+
+    debug(...data: any[]) {
+        if (this.debugEnabled) {
+            let prefix = `[ ${Date.now()} ] - DEBUG`;
+            if (this.name) {
+                prefix += ` - ${this.name}`;
+            }
+            console.debug(prefix, ': ', this.formatData(data));
         }
     }
 }

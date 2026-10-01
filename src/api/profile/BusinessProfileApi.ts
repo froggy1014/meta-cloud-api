@@ -180,7 +180,7 @@ export default class BusinessProfileApi extends BaseAPI implements bp.BusinessPr
      * );
      * ```
      */
-    async uploadMedia(uploadId: string, file: Buffer): Promise<bp.UploadBusinessProfileResponse> {
+    async uploadMedia(uploadId: string, file: Uint8Array): Promise<bp.UploadBusinessProfileResponse> {
         return this.sendJson(HttpMethodsEnum.Post, `${uploadId}`, this.config[WabaConfigEnum.RequestTimeout], file);
     }
 

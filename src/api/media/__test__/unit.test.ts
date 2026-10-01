@@ -1,6 +1,6 @@
 import { WhatsApp } from '@core/whatsapp';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { WhatsAppValidationError } from '../../../utils/isMetaError';
+import { WhatsAppError, WhatsAppValidationError } from '../../../utils/isMetaError';
 
 describe('Media API - Unit Tests', () => {
     let whatsApp: WhatsApp;
@@ -28,6 +28,10 @@ describe('Media API - Unit Tests', () => {
 
         mockSendFormData = vi.spyOn(whatsApp.requester, 'sendFormData');
         mockSendFormData.mockResolvedValue({ id: 'media_123' });
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
     });
 
     describe('Media Operations', () => {
@@ -93,18 +97,26 @@ describe('Media API - Unit Tests', () => {
             expect(body).toBeNull();
         });
 
-        it('should download media with correct endpoint', async () => {
-            const mediaUrl = 'https://example.com/media/download/test.jpg';
+        it('downloads the binary body from the media URL with the access token', async () => {
+            const mediaUrl = 'https://lookaside.fbsbx.com/whatsapp_business/attachments/?mid=123';
+            const bytes = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46]); // JPEG header, not JSON
+            const fetchMock = vi
+                .spyOn(globalThis, 'fetch')
+                .mockResolvedValue(new Response(bytes, { status: 200, headers: { 'Content-Type': 'image/jpeg' } }));
 
-            await whatsApp.media.downloadMedia(mediaUrl);
+            const blob = await whatsApp.media.downloadMedia(mediaUrl);
 
-            expect(mockGetJson).toHaveBeenCalled();
-            const [method, endpoint, timeout, body] = mockGetJson.mock.calls[0];
-
-            expect(method).toBe('GET');
-            expect(endpoint).toBe(mediaUrl);
-            expect(timeout).toBeGreaterThan(0);
-            expect(body).toBeNull();
+            expect(mockGetJson).not.toHaveBeenCalled();
+            expect(fetchMock).toHaveBeenCalledOnce();
+            const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+            expect(url).toBe(mediaUrl);
+            expect(init.method).toBe('GET');
+            expect(new Headers(init.headers).get('authorization')).toBe(
+                `Bearer ${process.env.CLOUD_API_ACCESS_TOKEN || 'test_token'}`,
+            );
+            expect(blob).toBeInstanceOf(Blob);
+            expect(blob.type).toBe('image/jpeg');
+            expect(new Uint8Array(await blob.arrayBuffer())).toEqual(bytes);
         });
     });
 
@@ -179,10 +191,30 @@ describe('Media API - Unit Tests', () => {
             await expect(whatsApp.media.deleteMedia('media_123')).rejects.toThrow('Delete failed');
         });
 
-        it('should handle download errors', async () => {
-            mockGetJson.mockRejectedValue(new Error('Download failed'));
+        it('maps a Meta error response from the media URL to a WhatsAppError', async () => {
+            vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+                new Response(
+                    JSON.stringify({
+                        error: {
+                            message: 'Invalid OAuth access token.',
+                            type: 'OAuthException',
+                            code: 190,
+                            fbtrace_id: 'x',
+                        },
+                    }),
+                    { status: 401, headers: { 'Content-Type': 'application/json' } },
+                ),
+            );
 
-            await expect(whatsApp.media.downloadMedia('https://invalid-url.com')).rejects.toThrow('Download failed');
+            const error = await whatsApp.media.downloadMedia('https://invalid-url.com/media').catch((e) => e);
+            expect(error).toBeInstanceOf(WhatsAppError);
+            expect(error.message).toContain('Invalid OAuth access token');
+        });
+
+        it('wraps network failures while downloading', async () => {
+            vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('fetch failed'));
+
+            await expect(whatsApp.media.downloadMedia('https://invalid-url.com/media')).rejects.toThrow('fetch failed');
         });
     });
 
