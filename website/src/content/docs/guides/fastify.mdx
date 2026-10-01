@@ -1,0 +1,77 @@
+---
+title: Fastify Integration Guide
+description: Receive WhatsApp webhooks and Flows with Fastify, including raw-body signature verification
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+`fastifyWebhookHandler` connects meta-cloud-api to [Fastify](https://fastify.dev/). Its handlers have the usual `(request, reply)` signature. `fastify` is not a dependency of meta-cloud-api; the request and reply are typed structurally.
+
+## Install
+
+```bash
+pnpm add meta-cloud-api fastify
+```
+
+## Keep the raw body
+
+<Aside type="caution" title="Signature verification needs the raw body">
+Meta signs the exact bytes it sends. Fastify parses JSON and discards those bytes, and `JSON.stringify(request.body)` does not reproduce them in general (whitespace, key order, escaped characters). Without a raw body the adapter falls back to `JSON.stringify(request.body)`, and `verifyWebhookSignature: true` will reject genuine webhooks with `401`. Always set `request.rawBody` when verifying signatures.
+</Aside>
+
+Store the body string in a JSON content-type parser:
+
+```typescript
+import Fastify from 'fastify';
+
+const app = Fastify();
+
+app.addContentTypeParser('application/json', { parseAs: 'string' }, (request, body, done) => {
+    (request as typeof request & { rawBody?: string }).rawBody = body as string;
+    try {
+        done(null, JSON.parse(body as string));
+    } catch (error) {
+        done(error as Error, undefined);
+    }
+});
+```
+
+Or register the [`fastify-raw-body`](https://github.com/Eomm/fastify-raw-body) plugin, which sets the same `request.rawBody` property (a string or a `Buffer`; both work):
+
+```typescript
+await app.register(import('fastify-raw-body'), { field: 'rawBody', global: true, encoding: 'utf8' });
+```
+
+## Webhook and Flow routes
+
+```typescript
+import { fastifyWebhookHandler } from 'meta-cloud-api';
+
+// Cached per phoneNumberId, so calling it again returns the same instance.
+const wa = fastifyWebhookHandler({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN!,
+    appSecret: process.env.M4D_APP_SECRET!,
+    verifyWebhookSignature: true,
+    privatePem: process.env.FLOW_API_PRIVATE_PEM, // only needed for Flows
+});
+
+wa.processor.onText(async (whatsapp, { message }) => {
+    await whatsapp.messages.text({ to: message.from, body: `You said: ${message.text.body}` });
+});
+
+app.get('/webhook', wa.GET); // Meta's verification request
+app.post('/webhook', wa.POST); // Messages, statuses and other webhook fields
+app.post('/flow', wa.flow); // WhatsApp Flows data endpoint
+
+await app.listen({ port: 3000 });
+```
+
+`app.route({ method: ['GET', 'POST'], url: '/webhook', handler: wa.webhook })` serves both methods on one route. The handler object also exposes `processor` (the underlying `WebhookProcessor`) and `destroy()`, which removes all handlers and evicts the cached instance.
+
+Flow requests are signed too, so the `flow` route reads `request.rawBody` the same way.
+
+## NestJS
+
+On `@nestjs/platform-fastify`, create the app with `rawBody: true` and call the handlers from a controller with `@Req()` and `@Res()`. See the [NestJS guide](/guides/nestjs/).

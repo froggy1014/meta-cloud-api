@@ -63,7 +63,7 @@ await wa.messages.image({ to: '1234567890', link: 'https://example.com/image.png
 | Maintenance | Active (tracks OpenAPI v23) | **Archived since 2023** | Varies |
 | TypeScript | Strict, full request/response types | Partial | Varies |
 | API coverage | 20 modules (Messages, Flows, Calling, Payments, and more) | Messaging-focused | Personal-account features |
-| Webhook adapters | Built-in Express.js + Next.js | Manual | Custom event system |
+| Webhook adapters | Built-in Express.js, Next.js, Hono, Fastify (NestJS via Express) | Manual | Custom event system |
 
 If you're building on the official Cloud API and don't want to bet on an unmaintained SDK, this is what the archived one would look like if Meta had kept shipping it.
 
@@ -132,6 +132,17 @@ Whatsapp.processor.onMessageTemplateStatusUpdate((wa, { value }) => {
 app.get('/webhook', Whatsapp.GET);
 app.post('/webhook', Whatsapp.POST);
 ```
+
+Other frameworks use the same handler object (`GET`, `POST`, `webhook`, `flow`, `processor`, `destroy`):
+
+| Framework | Adapter | Guide |
+|---|---|---|
+| Express.js | `expressWebhookHandler` | [Express](https://meta-cloud-api.site/guides/express/) |
+| Next.js App Router | `nextjsAppWebhookHandler` | [Next.js App Router](https://meta-cloud-api.site/guides/nextjs-app/) |
+| Next.js Pages Router | `nextjsPagesWebhookHandler` | [Next.js Pages Router](https://meta-cloud-api.site/guides/nextjs-pages/) |
+| Hono (Node.js, Bun, Deno, Workers, Edge) | `honoWebhookHandler` | [Hono](https://meta-cloud-api.site/guides/hono/) |
+| Fastify | `fastifyWebhookHandler` | [Fastify](https://meta-cloud-api.site/guides/fastify/) |
+| NestJS | `expressWebhookHandler` or `fastifyWebhookHandler` | [NestJS](https://meta-cloud-api.site/guides/nestjs/) |
 
 All 30+ webhook field types are supported — messages, statuses, templates, flows, groups, calls, and more. See the [Webhooks documentation](https://meta-cloud-api.site/) for the full list of handlers.
 

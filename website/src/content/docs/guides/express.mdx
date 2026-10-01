@@ -537,6 +537,10 @@ export { handleInteractiveMessage } from './interactive';
 export { handleDocumentMessage } from './document';
 ```
 
+### NestJS
+
+NestJS uses Express by default, so `expressWebhookHandler` works inside a Nest controller: inject the request and response with `@Req()` and `@Res()` and call `GET`/`POST`. Create the app with `NestFactory.create(AppModule, { rawBody: true })` so `req.rawBody` is available for signature verification. See the [NestJS guide](/guides/nestjs/) for the controller code.
+
 ## Middleware Patterns
 
 ### Error Handling Middleware (`src/middleware/errorHandler.ts`)

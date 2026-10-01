@@ -15,7 +15,7 @@ meta-cloud-api has no runtime dependencies and no static `node:*` imports. It ta
 | Cloudflare Workers | Supported, no `nodejs_compat` flag needed |
 | Vercel Edge / Next.js `runtime = 'edge'` | Supported |
 
-Every pull request builds the package and runs a smoke test on each of these runtimes: it sends a message, verifies a signed webhook and round-trips an encrypted Flow request.
+Every pull request builds the package and runs a smoke test on each of these runtimes: it sends a message, verifies a signed webhook (directly and through the Hono adapter) and round-trips an encrypted Flow request.
 
 ## Configuration without `process.env`
 
@@ -53,6 +53,47 @@ export default {
     },
 };
 ```
+
+### Hono on Cloudflare Workers
+
+With [Hono](/guides/hono/), `honoWebhookHandler` does the routing and the `Response` for you. Create it on first use, since secrets arrive with each request in `c.env`:
+
+```typescript
+import { Hono } from 'hono';
+import { type HonoWebhookHandlers, honoWebhookHandler } from 'meta-cloud-api';
+
+type Bindings = {
+    CLOUD_API_ACCESS_TOKEN: string;
+    WA_PHONE_NUMBER_ID: string;
+    WEBHOOK_VERIFICATION_TOKEN: string;
+    M4D_APP_SECRET: string;
+};
+
+let wa: HonoWebhookHandlers | undefined;
+
+function whatsapp(env: Bindings): HonoWebhookHandlers {
+    if (!wa) {
+        wa = honoWebhookHandler({
+            accessToken: env.CLOUD_API_ACCESS_TOKEN,
+            phoneNumberId: Number(env.WA_PHONE_NUMBER_ID),
+            webhookVerificationToken: env.WEBHOOK_VERIFICATION_TOKEN,
+            appSecret: env.M4D_APP_SECRET,
+            verifyWebhookSignature: true,
+        });
+        wa.processor.onText(async (client, { message }) => {
+            await client.messages.text({ to: message.from, body: `You said: ${message.text.body}` });
+        });
+    }
+    return wa;
+}
+
+const app = new Hono<{ Bindings: Bindings }>();
+app.all('/webhook', (c) => whatsapp(c.env).webhook(c));
+
+export default app;
+```
+
+The runtime smoke test drives `honoWebhookHandler` on every runtime above.
 
 ## Signatures and Flow encryption
 

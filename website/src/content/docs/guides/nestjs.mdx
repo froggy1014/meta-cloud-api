@@ -1,0 +1,90 @@
+---
+title: NestJS Integration Guide
+description: Receive WhatsApp webhooks in NestJS with the Express or Fastify adapter
+---
+
+NestJS runs on Express by default, so `expressWebhookHandler` works as is: call its handlers from a controller and let them write the response. On `@nestjs/platform-fastify`, use `fastifyWebhookHandler` the same way.
+
+## Keep the raw body
+
+Signature verification (`verifyWebhookSignature: true`) needs the exact bytes Meta sent. Nest keeps them as `req.rawBody` when the app is created with `rawBody: true`:
+
+```typescript
+// main.ts
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+
+const app = await NestFactory.create(AppModule, { rawBody: true });
+await app.listen(3000);
+```
+
+## Controller (Express platform)
+
+```typescript
+// whatsapp.controller.ts
+import { Controller, Get, Post, Req, Res } from '@nestjs/common';
+import type { RawBodyRequest } from '@nestjs/common';
+import type { Request, Response } from 'express';
+import { expressWebhookHandler } from 'meta-cloud-api';
+
+// Cached per phoneNumberId, so Nest re-instantiating the controller is safe.
+const wa = expressWebhookHandler({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN!,
+    appSecret: process.env.M4D_APP_SECRET!,
+    verifyWebhookSignature: true,
+});
+
+wa.processor.onText(async (whatsapp, { message }) => {
+    await whatsapp.messages.text({ to: message.from, body: `You said: ${message.text.body}` });
+});
+
+// Forward unexpected errors to a 500 response.
+const onError = (res: Response) => (error?: unknown) => {
+    if (error && !res.headersSent) res.status(500).json({ error: 'Internal Server Error' });
+};
+
+@Controller('webhook')
+export class WhatsAppController {
+    @Get()
+    verify(@Req() req: Request, @Res() res: Response) {
+        return wa.GET(req, res, onError(res));
+    }
+
+    @Post()
+    receive(@Req() req: RawBodyRequest<Request>, @Res() res: Response) {
+        return wa.POST(req, res, onError(res));
+    }
+}
+```
+
+`@Res()` puts Nest in library-specific mode: the handler sends the response itself, so do not return a value from the route.
+
+## Fastify platform
+
+With `NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter(), { rawBody: true })`, use `fastifyWebhookHandler` and pass the Fastify request and reply:
+
+```typescript
+import { Controller, Get, Post, Req, Res } from '@nestjs/common';
+import type { RawBodyRequest } from '@nestjs/common';
+import type { FastifyReply, FastifyRequest } from 'fastify';
+import { fastifyWebhookHandler } from 'meta-cloud-api';
+
+const wa = fastifyWebhookHandler({ /* same config */ });
+
+@Controller('webhook')
+export class WhatsAppController {
+    @Get()
+    verify(@Req() req: FastifyRequest, @Res() reply: FastifyReply) {
+        return wa.GET(req, reply);
+    }
+
+    @Post()
+    receive(@Req() req: RawBodyRequest<FastifyRequest>, @Res() reply: FastifyReply) {
+        return wa.POST(req, reply);
+    }
+}
+```
+
+See the [Express guide](/guides/express/) and [Fastify guide](/guides/fastify/) for the handler reference.
