@@ -291,6 +291,7 @@ export type {
     InteractiveListReplyMessage,
     InteractiveMessage,
     LocationMessage,
+    MarketingMessagesLinkClickData,
     // Webhook value types
     MessageWebhookValue,
     OrderMessage,
@@ -302,6 +303,9 @@ export type {
     // New message types
     TextMessage,
     UnsupportedMessage,
+    UserAction,
+    UserActionsWebhookValue,
+    UserActionType,
     VideoMessage,
     WebhookContact,
     WebhookEvent,

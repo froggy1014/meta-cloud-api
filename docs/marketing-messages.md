@@ -12,6 +12,34 @@ Send marketing template messages via `/marketing_messages`.
 - `message_activity_sharing` controls message analytics sharing.
 - `product_policy` accepts `'CLOUD_API_FALLBACK'` or `'STRICT'`.
 
+### Click and landing page view webhooks (`user_actions`)
+Marketing Messages API for WhatsApp (and Ads Manager) only; both features are in limited availability. Meta reports what a user did with a marketing message as a `messages` field change whose value carries a `user_actions` array instead of `messages` or `statuses` — no subscription beyond `messages` is needed. Register `Whatsapp.processor.onUserAction(...)`; each action arrives as a `ProcessedUserAction` (`wabaId`, `phoneNumberId`, `displayPhoneNumber`, `action`).
+
+- `action.action_type: 'marketing_messages_link_click'` — the user tapped the body or call-to-action. `marketing_messages_link_click_data` carries `click_component` (`cta` | `body`), `product_id` (when assigned in Ads Manager or the Marketing API), `click_id`, and `tracking_token`. Click events are only available for messages sent in the last 7 days.
+- `action.action_type: 'landing_page_view'` (documented September 23, 2026) — the tapped link opened its landing page in the WhatsApp In-App Browser, so you can measure users who reached the page, not just those who tapped. `marketing_messages_link_click_data` carries only `click_id` and `tracking_token`; `click_component` and `product_id` are never present. Only tracking links created in the last 7 days produce the event.
+- Correlate a landing page view with its click event through `tracking_token`, falling back to `click_id` (shared by both payloads). Either key is **omitted**, not `null`, when unavailable — check for presence. Meta does not guarantee order: the view can arrive before, after, or without its click event, so do not require the click first. When neither key is present, the view cannot be correlated.
+- `action_type` is an open enum. The SDK delivers every action to your handler; ignore values you do not recognize rather than treating them as errors.
+- `timestamp` is a Unix timestamp in seconds, as a string.
+
+```typescript
+Whatsapp.processor.onUserAction(async (wa, { action }) => {
+    const data = action.marketing_messages_link_click_data;
+    switch (action.action_type) {
+        case 'marketing_messages_link_click':
+            recordClick(data?.tracking_token ?? data?.click_id, data?.click_component);
+            break;
+        case 'landing_page_view':
+            recordLandingPageView(data?.tracking_token ?? data?.click_id);
+            break;
+        default:
+            // Open enum — Meta may add action types without notice
+            break;
+    }
+});
+```
+
+See Meta's [Tracking click events](https://developers.facebook.com/documentation/business-messaging/whatsapp/marketing-messages/track-click-events) and [Tracking landing page view events](https://developers.facebook.com/documentation/business-messaging/whatsapp/marketing-messages/track-landing-page-views). The separate `tracking_events` webhook field (`onTrackingEvents`) is unchanged.
+
 ### Routing template messages by category
 Meta's routing guidance (September 24, 2026): pick the send endpoint from the template's **latest** category — `MARKETING` goes through `client.marketingMessages.sendTemplateMessage` (`/marketing_messages`), every other category through `client.messages` (`/messages`).
 

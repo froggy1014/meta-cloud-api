@@ -90,6 +90,7 @@ interface WebhookProcessor {
 
     // Status handler
     onStatus(handler: StatusHandler): void;
+    onUserAction(handler: UserActionHandler): void; // marketing message click / landing_page_view actions
 
     // Pre/post processing
     onMessagePreProcess(handler: MessageHandler): void;
@@ -153,6 +154,7 @@ interface WebhookProcessor {
     // Handler removal
     offMessage(type: MessageTypesEnum): void;
     offStatus(): void;
+    offUserAction(): void;
     offMessagePreProcess(): void;
     offMessagePostProcess(): void;
     offRaw(): void;
