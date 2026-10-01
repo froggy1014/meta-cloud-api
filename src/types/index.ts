@@ -309,6 +309,8 @@ export type {
     VideoMessage,
     WebhookContact,
     WebhookEvent,
+    WebhookFieldType,
+    WebhookFieldValue,
     WebhookMessage,
     WebhookPayload,
     WebhookValue,

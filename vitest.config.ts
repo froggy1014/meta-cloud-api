@@ -19,10 +19,13 @@ export default defineConfig({
         },
     },
     resolve: {
-        alias: {
-            '@core': path.resolve(__dirname, './src/core'),
-            '@features': path.resolve(__dirname, './src/features'),
-            '@shared': path.resolve(__dirname, './src/shared'),
-        },
+        alias: [
+            // src/testing imports the SDK by its package name; the build keeps that
+            // import external, tests point it at the source.
+            { find: /^meta-cloud-api$/, replacement: path.resolve(__dirname, './src/index.ts') },
+            { find: '@core', replacement: path.resolve(__dirname, './src/core') },
+            { find: '@features', replacement: path.resolve(__dirname, './src/features') },
+            { find: '@shared', replacement: path.resolve(__dirname, './src/shared') },
+        ],
     },
 });

@@ -73,8 +73,35 @@ const configs = defineConfig([
     },
 ]);
 
+// meta-cloud-api/testing imports the SDK from the main bundle instead of
+// bundling it, so its types, enums and error classes are the SDK's own. The
+// Node variant points at the Node main bundle so both resolve to one instance.
+const testing = (sdkPath: string, outDir: string, dts: boolean) => ({
+    entry: ['src/testing/index.ts'],
+    outDir,
+    format: ['esm' as const],
+    dts,
+    clean: true,
+    minify: true,
+    treeshake: true,
+    target: 'es2022' as const,
+    platform: 'neutral' as const,
+    define,
+    hash: false,
+    plugins: [
+        {
+            name: 'external-sdk',
+            resolveId(id: string) {
+                return id === 'meta-cloud-api' ? { id: sdkPath, external: true } : null;
+            },
+        },
+    ],
+});
+
 export default defineConfig([
     ...configs,
+    testing('../index.mjs', 'dist/testing', true),
+    testing('../../node/index.mjs', 'dist/testing/node', false),
     ...[configs[0], configs[2]].map((config) => ({
         ...config,
         outDir: config.outDir ? `${config.outDir}/node` : 'dist/node',
