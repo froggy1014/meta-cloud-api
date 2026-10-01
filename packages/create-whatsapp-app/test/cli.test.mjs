@@ -46,6 +46,37 @@ describe('create-whatsapp-app', () => {
         expect(r.stdout).toContain('mock mode');
     });
 
+    it('scaffolds the ai-agent template with Claude wiring and echo-mode env', () => {
+        const r = run(['agent', '--yes', '--no-install', '--pm', 'npm', '--template', 'ai-agent']);
+        expect(r.status, r.stderr).toBe(0);
+
+        const dir = join(work, 'agent');
+        const pkg = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8'));
+        expect(pkg.dependencies['@anthropic-ai/sdk']).toBeDefined();
+        expect(pkg.scripts.test).toBe('vitest run');
+
+        // Empty key = deterministic echo replies, so mock mode needs no secrets.
+        const env = readFileSync(join(dir, '.env.local'), 'utf8');
+        expect(env).toMatch(/^ANTHROPIC_API_KEY=$/m);
+        expect(env).toMatch(/^ANTHROPIC_MODEL=$/m);
+        expect(env).toMatch(/^WEBHOOK_VERIFICATION_TOKEN=[0-9a-f]{24}$/m);
+
+        for (const f of ['lib/prompt.ts', 'lib/agent.ts', 'lib/history.ts', 'test/agent.test.ts', 'proxy.ts']) {
+            expect(existsSync(join(dir, f)), f).toBe(true);
+        }
+        expect(readFileSync(join(dir, 'README.md'), 'utf8')).toContain('npm run dev');
+        for (const f of ['package.json', 'README.md', 'app/layout.tsx', '.env.local']) {
+            expect(readFileSync(join(dir, f), 'utf8'), f).not.toMatch(/\{\{\w+\}\}/);
+        }
+        expect(r.stdout).toContain('lib/prompt.ts');
+    });
+
+    it('lists templates in --help', () => {
+        const r = run(['--help']);
+        expect(r.stdout).toContain('basic');
+        expect(r.stdout).toContain('ai-agent');
+    });
+
     it('refuses a non-empty directory', () => {
         const r = run(['My Bot', '--yes', '--no-install']);
         expect(r.status).toBe(1);
@@ -53,8 +84,10 @@ describe('create-whatsapp-app', () => {
     });
 
     it('rejects an unknown template', () => {
-        const r = run(['other', '--yes', '--no-install', '--template', 'nope']);
-        expect(r.status).toBe(1);
-        expect(r.stderr).toContain('Unknown template');
+        for (const template of ['nope', '../basic']) {
+            const r = run(['other', '--yes', '--no-install', '--template', template]);
+            expect(r.status).toBe(1);
+            expect(r.stderr).toContain('Unknown template');
+        }
     });
 });

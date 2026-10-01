@@ -21,6 +21,16 @@ const dim = c(2);
 const bold = c(1);
 const red = c(31);
 
+// Shown in --help and the interactive picker. Any other template folder still works.
+const TEMPLATE_INFO = {
+    basic: { hint: 'Rule-based bot with a WhatsApp-style dashboard', edit: 'lib/bot.ts', what: 'the replies' },
+    'ai-agent': {
+        hint: 'Claude-powered agent with per-user memory (@anthropic-ai/sdk)',
+        edit: 'lib/prompt.ts',
+        what: "the agent's system prompt",
+    },
+};
+
 function help() {
     console.log(`
 ${bold('create-whatsapp-app')} ${dim(`v${PKG.version}`)}
@@ -30,7 +40,10 @@ Usage
   npx create-whatsapp-app [dir] [options]
 
 Options
-  --template <name>   Template to use (default: basic). Available: ${listTemplates().join(', ')}
+  --template <name>   Template to use (default: basic)
+${listTemplates()
+    .map((t) => `                        ${t.padEnd(10)} ${dim(TEMPLATE_INFO[t]?.hint ?? '')}`)
+    .join('\n')}
   --no-install        Skip installing dependencies
   --pm <npm|pnpm|yarn|bun>  Package manager (default: the one running this command)
   -y, --yes           Accept defaults, never prompt
@@ -40,11 +53,29 @@ Options
 }
 
 function listTemplates() {
-    return readdirSync(TEMPLATES).filter((d) => statSync(join(TEMPLATES, d)).isDirectory());
+    const known = Object.keys(TEMPLATE_INFO);
+    return readdirSync(TEMPLATES)
+        .filter((d) => statSync(join(TEMPLATES, d)).isDirectory())
+        .sort((a, b) => (known.indexOf(a) + 1 || 99) - (known.indexOf(b) + 1 || 99) || a.localeCompare(b));
+}
+
+async function pickTemplate(rl) {
+    const templates = listTemplates();
+    console.log(`${bold('Template')}`);
+    for (const [i, t] of templates.entries()) {
+        console.log(`  ${i + 1}) ${t.padEnd(10)} ${dim(TEMPLATE_INFO[t]?.hint ?? '')}`);
+    }
+    for (;;) {
+        const answer = (await rl.question(`${bold('Choose')} ${dim('(1)')}: `)).trim();
+        if (!answer) return templates[0];
+        const picked = templates[Number(answer) - 1] ?? templates.find((t) => t === answer);
+        if (picked) return picked;
+        console.log(red(`  Pick 1-${templates.length} or a template name.`));
+    }
 }
 
 function parseArgs(argv) {
-    const opts = { dir: undefined, template: 'basic', install: true, pm: undefined, yes: false };
+    const opts = { dir: undefined, template: undefined, install: true, pm: undefined, yes: false };
     for (let i = 0; i < argv.length; i++) {
         const a = argv[i];
         if (a === '-h' || a === '--help') opts.help = true;
@@ -108,19 +139,22 @@ async function main() {
 
     const interactive = process.stdin.isTTY && !opts.yes;
     let dir = opts.dir;
-    if (!dir) {
-        if (interactive) {
-            const rl = createInterface({ input: process.stdin, output: process.stdout });
+    let template = opts.template;
+    if (interactive && (!dir || !template)) {
+        const rl = createInterface({ input: process.stdin, output: process.stdout });
+        if (!dir)
             dir =
                 (await rl.question(`${bold('Project name')} ${dim('(my-whatsapp-app)')}: `)).trim() ||
                 'my-whatsapp-app';
-            rl.close();
-        } else dir = 'my-whatsapp-app';
+        if (!template) template = await pickTemplate(rl);
+        rl.close();
     }
+    dir ||= 'my-whatsapp-app';
+    template ||= 'basic';
 
-    const templateDir = join(TEMPLATES, opts.template);
-    if (!existsSync(templateDir))
-        throw new Error(`Unknown template "${opts.template}". Available: ${listTemplates().join(', ')}`);
+    const templateDir = join(TEMPLATES, template);
+    if (!/^[\w-]+$/.test(template) || !existsSync(templateDir))
+        throw new Error(`Unknown template "${template}". Available: ${listTemplates().join(', ')}`);
 
     const target = resolve(dir);
     if (!isEmptyDir(target))
@@ -138,7 +172,7 @@ async function main() {
         DASHBOARD_PASSWORD: randomBytes(24).toString('hex'),
     };
 
-    console.log(`\n${green('◆')} Creating ${bold(vars.PROJECT_NAME)} in ${dim(target)}`);
+    console.log(`\n${green('◆')} Creating ${bold(vars.PROJECT_NAME)} ${dim(`(${template})`)} in ${dim(target)}`);
     cpSync(templateDir, target, { recursive: true });
 
     for (const file of walk(target)) {
@@ -158,6 +192,7 @@ async function main() {
     }
 
     const cd = relative(process.cwd(), target);
+    const info = TEMPLATE_INFO[template] ?? { edit: 'lib/bot.ts', what: 'the replies' };
     console.log(`
 ${green('✔')} Done.
 
@@ -166,7 +201,11 @@ ${green('✔')} Done.
 Open ${bold('http://localhost:3000')} and message your bot as the customer.
 No Meta account needed — you are in ${bold('mock mode')} until you fill in ${bold('.env.local')}.
 
-Edit ${bold('lib/bot.ts')} to change the replies.
+Edit ${bold(info.edit)} to change ${info.what}.${
+        template === 'ai-agent'
+            ? `\nAdd ${bold('ANTHROPIC_API_KEY')} to ${bold('.env.local')} for Claude replies; without it the agent echoes.`
+            : ''
+    }
 Docs: https://meta-cloud-api.site · Live demo: https://playground.meta-cloud-api.site
 `);
 }
