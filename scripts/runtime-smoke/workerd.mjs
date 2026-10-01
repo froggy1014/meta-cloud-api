@@ -1,5 +1,6 @@
 // Runs the smoke test inside Cloudflare's workerd (via Miniflare) with no
 // Node.js compatibility flags, proving the bundle has no node:* dependency.
+import { readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { Miniflare } from 'miniflare';
 
@@ -21,8 +22,10 @@ const mf = new Miniflare({
     modules: [
         { type: 'ESModule', path: file('../../worker.mjs'), contents: worker },
         { type: 'ESModule', path: file('./smoke.mjs') },
-        { type: 'ESModule', path: file('../../dist/index.mjs') },
-        { type: 'ESModule', path: file('../../dist/chunk.mjs') },
+        // Every top-level .mjs file of the build (entry plus shared chunks).
+        ...readdirSync(file('../../dist'))
+            .filter((name) => name.endsWith('.mjs'))
+            .map((name) => ({ type: 'ESModule', path: file(`../../dist/${name}`) })),
     ],
     modulesRoot: file('../../'),
     compatibilityDate: '2026-07-01',
