@@ -29,7 +29,7 @@ async function main() {
         },
     });
 
-    const conversation2 = await prisma.conversation.create({
+    await prisma.conversation.create({
         data: {
             userId: '14155552672',
             state: ConversationState.COLLECTING_ISSUE,
@@ -56,7 +56,7 @@ async function main() {
     // Create sample tickets
     console.log('🎫 Creating sample tickets...');
 
-    const ticket1 = await prisma.ticket.create({
+    await prisma.ticket.create({
         data: {
             ticketNumber: 'T-10001',
             conversationId: conversation1.id,
@@ -74,7 +74,7 @@ async function main() {
         },
     });
 
-    const ticket2 = await prisma.ticket.create({
+    await prisma.ticket.create({
         data: {
             ticketNumber: 'T-10002',
             conversationId: conversation3.id,

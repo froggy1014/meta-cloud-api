@@ -1,6 +1,6 @@
 import { config } from '@config/index.js';
 import { logger } from '@config/logger.js';
-import { redis } from '@config/redis.js';
+import { queueConnection } from '@config/queueConnection.js';
 import { TicketService } from '@services/tickets/ticketService.js';
 import { MessageSender } from '@services/whatsapp/sender.js';
 import { type Job, Worker } from 'bullmq';
@@ -28,7 +28,7 @@ export class NotificationWorker {
                 return await this.processJob(job);
             },
             {
-                connection: redis,
+                connection: queueConnection(),
                 prefix: config.QUEUE_PREFIX,
                 concurrency: 5, // Process 5 jobs concurrently
             },

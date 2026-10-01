@@ -20,7 +20,7 @@ import { expressWebhookHandler } from 'meta-cloud-api';
  */
 const whatsappConfig = {
     accessToken: config.WHATSAPP_ACCESS_TOKEN,
-    phoneNumberId: config.WHATSAPP_PHONE_NUMBER_ID,
+    phoneNumberId: Number(config.WHATSAPP_PHONE_NUMBER_ID),
     businessAcctId: config.WHATSAPP_BUSINESS_ACCOUNT_ID,
     webhookVerificationToken: config.WHATSAPP_WEBHOOK_VERIFICATION_TOKEN,
 };
@@ -34,45 +34,39 @@ const Whatsapp = expressWebhookHandler(whatsappConfig);
 // REGISTER MESSAGE HANDLERS
 // ===================================
 
+// SDK handlers receive (whatsappClient, processed). Our handlers only need
+// the message itself, so unwrap it here.
+
 // Text message handler
-Whatsapp.processor.onText(handleTextMessage);
+Whatsapp.processor.onText((_wa, { message }) => handleTextMessage(message));
 
 // Interactive message handler (buttons, lists)
-Whatsapp.processor.onInteractive(handleInteractiveMessage);
+Whatsapp.processor.onInteractive((_wa, { message }) => handleInteractiveMessage(message));
 
 // Media message handlers
-Whatsapp.processor.onImage(handleImageMessage);
-Whatsapp.processor.onDocument(handleDocumentMessage);
-Whatsapp.processor.onVideo(handleVideoMessage);
-Whatsapp.processor.onAudio(handleAudioMessage);
+Whatsapp.processor.onImage((_wa, { message }) => handleImageMessage(message));
+Whatsapp.processor.onDocument((_wa, { message }) => handleDocumentMessage(message));
+Whatsapp.processor.onVideo((_wa, { message }) => handleVideoMessage(message));
+Whatsapp.processor.onAudio((_wa, { message }) => handleAudioMessage(message));
 
 // ===================================
 // REGISTER WEBHOOK FIELD HANDLERS
 // ===================================
 
 // Status updates (sent, delivered, read, failed)
-Whatsapp.processor.onStatus(handleStatusWebhook);
+Whatsapp.processor.onStatus((_wa, { status }) => handleStatusWebhook(status));
 
 // Flows webhook handler
-Whatsapp.processor.onFlows(handleFlowsWebhook);
+Whatsapp.processor.onFlows((_wa, { value }) => handleFlowsWebhook(value));
 
 /**
- * Log all incoming webhooks for debugging
+ * Log every incoming webhook for debugging. Handler errors are caught and
+ * logged by the SDK, and Meta still gets a 200 so it does not retry.
  */
-Whatsapp.processor.on('webhook', (webhook) => {
+Whatsapp.processor.onRaw((_wa, payload) => {
     logger.debug('Webhook received', {
-        entry: webhook.entry.length,
-        changes: webhook.entry[0]?.changes.length,
-    });
-});
-
-/**
- * Log processing errors
- */
-Whatsapp.processor.on('error', (error) => {
-    logger.error('Webhook processing error', {
-        error: error.message,
-        stack: error.stack,
+        entry: payload.entry.length,
+        changes: payload.entry[0]?.changes.length,
     });
 });
 
@@ -80,7 +74,7 @@ Whatsapp.processor.on('error', (error) => {
 // WEBHOOK ROUTES
 // ===================================
 
-const router = Router();
+const router: Router = Router();
 
 // Apply rate limiting to webhook routes
 router.use(webhookRateLimiter);

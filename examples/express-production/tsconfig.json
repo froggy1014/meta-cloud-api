@@ -14,7 +14,7 @@
             "@handlers/*": ["./src/handlers/*"],
             "@routes/*": ["./src/routes/*"],
             "@utils/*": ["./src/utils/*"],
-            "@types/*": ["./src/types/*"]
+            "@app-types/*": ["./src/types/*"]
         },
         "resolveJsonModule": true,
         "allowSyntheticDefaultImports": true,

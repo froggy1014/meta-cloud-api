@@ -1,8 +1,8 @@
 import react from '@astrojs/react';
 import sitemap from '@astrojs/sitemap';
 import starlight from '@astrojs/starlight';
-import starlightLlmsTxt from 'starlight-llms-txt';
 import { defineConfig } from 'astro/config';
+import starlightLlmsTxt from 'starlight-llms-txt';
 
 // https://astro.build/config
 export default defineConfig({
@@ -106,7 +106,11 @@ export default defineConfig({
                 {
                     label: 'Playground',
                     items: [
-                        { label: 'Try the SDK', link: 'https://playground.meta-cloud-api.site', attrs: { target: '_blank' } },
+                        {
+                            label: 'Try the SDK',
+                            link: 'https://playground.meta-cloud-api.site',
+                            attrs: { target: '_blank' },
+                        },
                     ],
                 },
                 {

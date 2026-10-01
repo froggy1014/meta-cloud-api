@@ -2,7 +2,7 @@ import { logger } from '@config/logger.js';
 import { ConversationState } from '@prisma/client';
 import { ConversationFlows } from '@services/conversation/flows.js';
 import { SessionStore } from '@services/conversation/sessionStore.js';
-import type { TextMessage } from 'meta-cloud-api/webhook';
+import type { TextMessage } from 'meta-cloud-api';
 
 /**
  * Text message handler

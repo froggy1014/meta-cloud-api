@@ -1,11 +1,11 @@
 import { logger } from '@config/logger.js';
-import type { StatusCallback } from 'meta-cloud-api/webhook';
+import type { StatusWebhook } from 'meta-cloud-api';
 
 /**
  * Message status webhook handler
  * Tracks message delivery status (sent, delivered, read, failed)
  */
-export async function handleStatusWebhook(status: StatusCallback): Promise<void> {
+export async function handleStatusWebhook(status: StatusWebhook): Promise<void> {
     try {
         logger.info('Message status update', {
             messageId: status.id,

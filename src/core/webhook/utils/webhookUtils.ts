@@ -44,6 +44,8 @@ import type {
     TemplateCategoryUpdateWebhookValue,
     TemplateCorrectCategoryDetectionWebhookValue,
     TrackingEventsWebhookValue,
+    UserAction,
+    UserActionsWebhookValue,
     UserPreferencesWebhookValue,
     WebhookFieldType,
     WebhookPayload,
@@ -85,6 +87,18 @@ export type ProcessedStatus = {
     phoneNumberId: string;
     displayPhoneNumber: string;
     status: StatusWebhook;
+};
+
+/**
+ * Processed marketing message user action (link click or landing page view)
+ * delivered as `user_actions` on the `messages` field. Marketing Messages API
+ * for WhatsApp only. Branch on `action.action_type` and ignore unknown values.
+ */
+export type ProcessedUserAction = {
+    wabaId: string;
+    phoneNumberId: string;
+    displayPhoneNumber: string;
+    action: UserAction;
 };
 
 /**
@@ -330,6 +344,7 @@ type WebhookHandler<TProcessed, TReturn = void> = (
 
 export type MessageHandler = WebhookHandler<ProcessedMessage>;
 export type StatusHandler = WebhookHandler<ProcessedStatus>;
+export type UserActionHandler = WebhookHandler<ProcessedUserAction>;
 export type FlowHandler = WebhookHandler<FlowEndpointRequest, any>;
 export type RawWebhookHandler = WebhookHandler<WebhookPayload>;
 
@@ -391,6 +406,7 @@ export async function processWebhookMessages(
     handlers: {
         messageHandlers: Map<MessageTypesEnum, MessageHandler>;
         statusHandler?: StatusHandler;
+        userActionHandler?: UserActionHandler;
         preProcessHandler?: MessageHandler;
         postProcessHandler?: MessageHandler;
         rawHandler?: RawWebhookHandler;
@@ -971,6 +987,7 @@ async function processMessages(
     handlers: {
         messageHandlers: Map<MessageTypesEnum, MessageHandler>;
         statusHandler?: StatusHandler;
+        userActionHandler?: UserActionHandler;
         preProcessHandler?: MessageHandler;
         postProcessHandler?: MessageHandler;
     },
@@ -980,6 +997,22 @@ async function processMessages(
     const wabaId = waba_id;
     const displayPhoneNumber = metadata.display_phone_number;
     const phoneNumberId = metadata.phone_number_id;
+
+    // Handle marketing message user actions (link clicks, landing page views)
+    if ('user_actions' in value && value.user_actions) {
+        const userActionsValue = value as UserActionsWebhookValue;
+        for (const action of userActionsValue.user_actions) {
+            const processed: ProcessedUserAction = {
+                wabaId,
+                phoneNumberId,
+                displayPhoneNumber,
+                action,
+            };
+
+            await executeUserActionHandler(handlers.userActionHandler, whatsapp, processed, context);
+        }
+        return;
+    }
 
     // Handle status webhooks
     if ('statuses' in value && value.statuses) {
@@ -1056,6 +1089,21 @@ async function executeStatusHandler(
             await handler(whatsapp, processed, context);
         } catch (error) {
             LOGGER.error('Error in status handler:', { error, statusId: processed.status.id });
+        }
+    }
+}
+
+async function executeUserActionHandler(
+    handler: UserActionHandler | undefined,
+    whatsapp: WhatsApp,
+    processed: ProcessedUserAction,
+    context: WebhookHandlerContext,
+): Promise<void> {
+    if (handler) {
+        try {
+            await handler(whatsapp, processed, context);
+        } catch (error) {
+            LOGGER.error('Error in user action handler:', { error, actionType: processed.action.action_type });
         }
     }
 }

@@ -17,7 +17,7 @@ class WhatsAppClient {
         if (!WhatsAppClient.instance) {
             WhatsAppClient.instance = new WhatsApp({
                 accessToken: config.WHATSAPP_ACCESS_TOKEN,
-                phoneNumberId: config.WHATSAPP_PHONE_NUMBER_ID,
+                phoneNumberId: Number(config.WHATSAPP_PHONE_NUMBER_ID),
                 businessAcctId: config.WHATSAPP_BUSINESS_ACCOUNT_ID,
             });
 
@@ -36,7 +36,7 @@ class WhatsAppClient {
     public static async healthCheck(): Promise<boolean> {
         try {
             const client = WhatsAppClient.getInstance();
-            await client.phone.get();
+            await client.phoneNumbers.getPhoneNumberById('id');
             return true;
         } catch (error) {
             logger.error('WhatsApp health check failed', {

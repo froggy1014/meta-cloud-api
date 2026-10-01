@@ -55,6 +55,7 @@ import {
     type TemplateCorrectCategoryDetectionHandler,
     type TextMessageHandler,
     type TrackingEventsHandler,
+    type UserActionHandler,
     type UserPreferencesHandler,
     type VideoMessageHandler,
 } from './utils/webhookUtils';
@@ -72,6 +73,7 @@ export class WebhookProcessor {
     private client: WhatsApp;
     private messageHandlers: Map<MessageTypesEnum, MessageHandler> = new Map();
     private statusHandler: StatusHandler | undefined = undefined;
+    private userActionHandler: UserActionHandler | undefined = undefined;
     private preProcessHandler: MessageHandler | undefined = undefined;
     private postProcessHandler: MessageHandler | undefined = undefined;
     private rawHandler: { handler: RawWebhookHandler; fields?: WebhookFieldType[] } | undefined = undefined;
@@ -148,6 +150,7 @@ export class WebhookProcessor {
                 {
                     messageHandlers: this.messageHandlers,
                     statusHandler: this.statusHandler,
+                    userActionHandler: this.userActionHandler,
                     preProcessHandler: this.preProcessHandler,
                     postProcessHandler: this.postProcessHandler,
                     rawHandler: this.rawHandler?.handler,
@@ -244,6 +247,18 @@ export class WebhookProcessor {
     onStatus(handler: StatusHandler): void {
         this.statusHandler = handler;
         LOGGER.log('Registered status handler');
+    }
+
+    /**
+     * Register a handler for marketing message user actions delivered as
+     * `user_actions` on the `messages` webhook field (Marketing Messages API
+     * for WhatsApp only): `marketing_messages_link_click` and
+     * `landing_page_view`. `action_type` is an open enum — ignore unknown values.
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/marketing-messages/track-landing-page-views
+     */
+    onUserAction(handler: UserActionHandler): void {
+        this.userActionHandler = handler;
+        LOGGER.log('Registered user action handler');
     }
 
     onMessagePreProcess(handler: MessageHandler): void {
@@ -707,6 +722,14 @@ export class WebhookProcessor {
     }
 
     /**
+     * Remove the user action handler
+     */
+    offUserAction(): void {
+        this.userActionHandler = undefined;
+        LOGGER.log('Removed user action handler');
+    }
+
+    /**
      * Remove the raw webhook handler
      */
     offRaw(): void {
@@ -728,6 +751,7 @@ export class WebhookProcessor {
     removeAllHandlers(): void {
         this.messageHandlers.clear();
         this.statusHandler = undefined;
+        this.userActionHandler = undefined;
         this.preProcessHandler = undefined;
         this.postProcessHandler = undefined;
         this.rawHandler = undefined;
