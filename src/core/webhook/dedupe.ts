@@ -72,8 +72,13 @@ export class MemoryDedupeStore implements DedupeStore {
     }
 
     private evict(now: number): void {
+        // Recency changes on duplicate deliveries without extending TTL, so
+        // expiry order can differ from Map order. Reclaim expired keys first.
         for (const [key, expiresAt] of this.entries) {
-            if (this.entries.size <= this.maxEntries && expiresAt > now) break;
+            if (expiresAt <= now) this.entries.delete(key);
+        }
+        for (const key of this.entries.keys()) {
+            if (this.entries.size <= this.maxEntries) break;
             this.entries.delete(key);
         }
     }
