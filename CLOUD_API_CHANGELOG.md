@@ -1,17 +1,19 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-10-01T16:13:39.163Z
+> Updated: 2026-10-02T15:37:57.053Z
 
 
 ## October 1, 2026
 
+- [ ] **#467** Updated max price enrollment for Solution Partners for the open beta, removing explicit client allowlisting and clarifying account access.
 - [x] **#465** As a Solution Partner, you no longer need to explicitly allowlist clients for the max price feature.
 
   SDK impact: Documented automatic eligibility for shared client accounts after partner beta agreement acceptance in [Marketing Messages](docs/marketing-messages.md#max-price-enrollment-october-1-2026). Explicit per-client allowlisting is no longer required. Agreement submission/status endpoints remain outside the SDK; existing template and send payloads are unchanged.
 
 ## September 30, 2026
 
+- [ ] **#466** Restructured the pricing page around the rates effective October 1, 2026, added a "Launched in 2026?" column and 16 currency rate cards, and archived the previous page as Pricing (deprecated).
 - [x] **#464** Added guidance for preparing existing integrations before Meta Business Agent enablement changes message routing.
 
   SDK impact: Documented live-agent enablement in [Conversation Routing](docs/conversation-routing.md#prepare-existing-integrations-before-changing-routing): enabling the agent changes existing routing, moves previous primary responders to standby for unowned threads, and preserves incoming-call routing. Setup and Agent Test API calls do not alter live routing. Existing SDK standby/handover handlers and thread-control methods cover the contract; no endpoint or type change.
@@ -1267,4 +1269,4 @@
 
 ---
 
-**Progress: 459/466 (98%)**
+**Progress: 459/468 (98%)**
