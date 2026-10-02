@@ -60,6 +60,7 @@ export default defineConfig({
                             label: 'Messaging',
                             items: [
                                 { label: 'Messages', link: '/api/messages' },
+                                { label: 'Message History', link: '/api/message-history' },
                                 { label: 'Direct Send', link: '/api/direct-send' },
                                 { label: 'Media', link: '/api/media' },
                                 { label: 'Templates', link: '/api/templates' },
@@ -86,6 +87,7 @@ export default defineConfig({
                                 { label: 'Commerce Settings', link: '/api/commerce-settings' },
                                 { label: 'Payments', link: '/api/payments' },
                                 { label: 'Block Users', link: '/api/block-users' },
+                                { label: 'Contact Book', link: '/api/contact-book' },
                                 { label: 'Encryption', link: '/api/encryption' },
                             ],
                         },

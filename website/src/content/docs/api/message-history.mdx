@@ -1,0 +1,140 @@
+---
+title: Message History API
+description: Retrieve WhatsApp message history and delivery events with cursor-based pagination
+---
+
+Use `client.messageHistory` to retrieve message history for the configured business phone number and inspect the events associated with a history record.
+
+**Official Documentation**: [WhatsApp Business Platform overview](https://developers.facebook.com/documentation/business-messaging/whatsapp/overview/)
+
+## Overview
+
+- **Get Message History**: Retrieve history records, optionally filtering by WhatsApp message ID.
+- **Get Message History Events**: Retrieve events for a specific history record, optionally filtering by delivery status.
+- **Pagination**: Both methods support `limit`, `after`, and `before`.
+- **Field Selection**: Supply `fields` as a comma-separated string or an array of field names; the SDK joins arrays before sending the request.
+
+## Endpoints
+
+```text
+GET /{PHONE_NUMBER_ID}/message_history
+GET /{MESSAGE_HISTORY_ID}/events
+```
+
+The SDK supplies the Graph API version and the configured `phoneNumberId` automatically.
+
+## Get Message History
+
+Call `getMessageHistory(params?)` to list records for your business phone number. The parameters object is optional.
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+});
+
+const history = await client.messageHistory.getMessageHistory({
+    message_id: 'wamid.MESSAGE_ID',
+    fields: ['id', 'message_id'],
+    limit: 20,
+});
+
+console.log(history.data);
+```
+
+Replace the illustrative WAMID with the message ID you want to look up, or omit `message_id` to retrieve an unfiltered page.
+
+### Parameters
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `message_id` | `string` | Filter by a WhatsApp message ID (WAMID). |
+| `fields` | `string` or `string[]` | Fields to request, such as `id` and `message_id`. |
+| `start_time` | `string` or `number` | Optional time-bound query value, forwarded unchanged to Meta. |
+| `end_time` | `string` or `number` | Optional time-bound query value, forwarded unchanged to Meta. |
+| `limit` | `number` | Requested page size. |
+| `after` | `string` | Cursor for the next page. |
+| `before` | `string` | Cursor for the previous page. |
+
+All parameters are optional. Field availability and accepted query values depend on the Graph API version and your account's access.
+
+## Get Message History Events
+
+Call `getMessageHistoryEvents(messageHistoryId, params?)` with a history record's ID from the first endpoint, not its WhatsApp message ID (`message_id`).
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+});
+
+const events = await client.messageHistory.getMessageHistoryEvents('1234567890123456', {
+    status_filter: 'DELIVERED',
+    limit: 20,
+});
+
+console.log(events.data);
+```
+
+Replace `1234567890123456` with a real message history record ID.
+
+### Parameters
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `messageHistoryId` | `string` | Required history record ID, passed as the first argument. |
+| `status_filter` | `string` | Optional delivery status filter; the SDK suggests `SENT`, `DELIVERED`, `READ`, and `FAILED` and also accepts other strings. |
+| `fields` | `string` or `string[]` | Optional event fields to request. |
+| `limit` | `number` | Requested page size. |
+| `after` | `string` | Cursor for the next page. |
+| `before` | `string` | Cursor for the previous page. |
+
+## Pagination
+
+Both methods return optional paging information. Request another page only when Meta supplies a next-page link and an `after` cursor:
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+});
+
+const params = { fields: ['id', 'message_id'], limit: 20 };
+const firstPage = await client.messageHistory.getMessageHistory(params);
+const after = firstPage.paging?.cursors?.after;
+
+if (firstPage.paging?.next && after) {
+    const nextPage = await client.messageHistory.getMessageHistory({ ...params, after });
+    console.log(nextPage.data);
+}
+```
+
+For events, pass the same history record ID and repeat any field or status filters when requesting the next page.
+
+## Response Format
+
+Both methods return `MessageHistoryResponse`:
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `data` | `Array<Record<string, unknown>>` | History records or events returned by Meta. |
+| `paging` | `Paging` (optional) | Cursor information and optional next/previous page links. |
+| `summary` | `Record<string, unknown>` (optional) | Summary information when supplied by Meta. |
+
+The SDK leaves individual records untyped. Check a value's type before using a field such as `id`; do not assume every requested field is present in every response.
+
+## Related Documentation
+
+- [Messages API](/api/messages) - Send messages and work with message IDs.
+- [Webhooks](/webhooks/overview) - Receive delivery status notifications.
+
+## Source Code
+
+- [MessageHistoryApi.ts](https://github.com/froggy1014/meta-cloud-api/blob/main/src/api/messageHistory/MessageHistoryApi.ts)
+- [Message History types](https://github.com/froggy1014/meta-cloud-api/blob/main/src/api/messageHistory/types/common.ts)
