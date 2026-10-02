@@ -1,5 +1,4 @@
-import { createHmac, timingSafeEqual } from 'node:crypto';
-import { NextRequest } from 'next/server';
+import { verifyWebhookSignature } from 'meta-cloud-api';
 import { webhook } from '@/lib/webhook';
 import { isMock } from '@/lib/whatsapp';
 
@@ -18,12 +17,10 @@ export async function POST(request: Request): Promise<Response> {
     }
 
     if (appSecret) {
-        const expected = Buffer.from(`sha256=${createHmac('sha256', appSecret).update(raw).digest('hex')}`);
-        const actual = Buffer.from(request.headers.get('x-hub-signature-256') ?? '');
-        if (expected.length !== actual.length || !timingSafeEqual(expected, actual)) {
+        if (!(await verifyWebhookSignature(raw, request.headers.get('x-hub-signature-256'), appSecret))) {
             return new Response('Invalid signature', { status: 401 });
         }
     }
 
-    return webhook.POST(new NextRequest(request.url, { method: 'POST', headers: request.headers, body: raw }));
+    return webhook.POST(new Request(request.url, { method: 'POST', headers: request.headers, body: raw }));
 }
