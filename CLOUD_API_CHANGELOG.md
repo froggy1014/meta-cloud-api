@@ -1,8 +1,12 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-10-02T15:37:57.053Z
+> Updated: 2026-10-03T14:13:42.970Z
 
+
+## October 2, 2026
+
+- [ ] **#468** Documented the phone_number field on the account_update webhook.
 
 ## October 1, 2026
 
@@ -1275,4 +1279,4 @@
 
 ---
 
-**Progress: 461/468 (98%)**
+**Progress: 461/469 (98%)**
