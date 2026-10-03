@@ -6,14 +6,20 @@
 
 ## October 1, 2026
 
-- [ ] **#467** Updated max price enrollment for Solution Partners for the open beta, removing explicit client allowlisting and clarifying account access.
+- [x] **#467** Updated max price enrollment for Solution Partners for the open beta, removing explicit client allowlisting and clarifying account access.
+
+  SDK impact: The allowlist removal repeats #465 (already documented). Added the clarified access scope to [Marketing Messages](docs/marketing-messages.md#max-price-enrollment-october-1-2026): max price applies only to client-owned Messaging accounts shared with or managed by the partner's business; unshared and unmanaged client accounts have no access, and acceptance auto-allowlists the signer's own accounts. Agreement endpoints remain outside the SDK; `optimization_spec`/`bid_spec` payloads are unchanged.
+
 - [x] **#465** As a Solution Partner, you no longer need to explicitly allowlist clients for the max price feature.
 
   SDK impact: Documented automatic eligibility for shared client accounts after partner beta agreement acceptance in [Marketing Messages](docs/marketing-messages.md#max-price-enrollment-october-1-2026). Explicit per-client allowlisting is no longer required. Agreement submission/status endpoints remain outside the SDK; existing template and send payloads are unchanged.
 
 ## September 30, 2026
 
-- [ ] **#466** Restructured the pricing page around the rates effective October 1, 2026, added a "Launched in 2026?" column and 16 currency rate cards, and archived the previous page as Pricing (deprecated).
+- [x] **#466** Restructured the pricing page around the rates effective October 1, 2026, added a "Launched in 2026?" column and 16 currency rate cards, and archived the previous page as Pricing (deprecated).
+
+  SDK impact: Documented in [Messages](docs/messages.md#status-webhook-pricing-october-1-2026): the restructured pricing page (summary table, charge/no-charge sections, prior updates grouped), the rate card *Launched in 2026?* column with CSV/PDF downloads for 16 currencies, and the archived *Pricing (deprecated)* page with deep links preserved. Rates are not served by any Graph API endpoint the SDK wraps; no endpoint, payload, or webhook type change.
+
 - [x] **#464** Added guidance for preparing existing integrations before Meta Business Agent enablement changes message routing.
 
   SDK impact: Documented live-agent enablement in [Conversation Routing](docs/conversation-routing.md#prepare-existing-integrations-before-changing-routing): enabling the agent changes existing routing, moves previous primary responders to standby for unowned threads, and preserves incoming-call routing. Setup and Agent Test API calls do not alter live routing. Existing SDK standby/handover handlers and thread-control methods cover the contract; no endpoint or type change.
@@ -1269,4 +1275,4 @@
 
 ---
 
-**Progress: 459/468 (98%)**
+**Progress: 461/468 (98%)**

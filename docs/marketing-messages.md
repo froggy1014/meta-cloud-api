@@ -62,6 +62,8 @@ Meta's routing guidance (September 24, 2026): pick the send endpoint from the te
 
 Solution Partners no longer explicitly allowlist each client. Once the partner's beta agreement is accepted, eligible clients whose WhatsApp accounts and Messaging accounts are shared with that partner can use max price without separate client agreements. Direct integrators sign for their own business. Meta documents agreement submission and status lookup at `POST` / `GET /{BUSINESS_ID}/max_price_agreements`, with the `business_management` permission; these agreement operations are not currently wrapped by this SDK. This enrollment change does not alter `optimization_spec` or `bid_spec` send payloads. See [Enroll in the max price feature](https://developers.facebook.com/documentation/business-messaging/whatsapp/marketing-messages/pricing/enroll-max-price/).
 
+Access scope (clarified October 1, 2026): for a Solution Partner, max price applies only to Messaging accounts that the client **owns** and that are **shared with or managed by** the partner's business. Client Messaging accounts that are neither shared with nor managed by the partner do not get max price access through the partner's agreement. When the agreement is accepted, Meta automatically allowlists the self-owned and internally owned Messaging accounts of the signing business.
+
 ### Per-message max price (`bid_spec.per_message_bid_multiplier`)
 - `sendTemplateMessage` accepts `bid_spec: { per_message_bid_multiplier }` — a positive float applied to the template's `bid_amount` for that one send, so the max price changes without editing the template. Default is `1`.
 - `1.5` raises the effective max price by 50% (template `bid_amount` 2000 becomes 3000 for that message); `0.5` halves it.
