@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { MessageTypesEnum } from '../../../types/enums';
+import type { AccountUpdateValue } from '../types/account';
 import type { StatusWebhook } from '../types/status';
 import { WebhookProcessor } from '../WebhookProcessor';
 
@@ -175,6 +176,39 @@ describe('WebhookProcessor', () => {
             };
 
             expect(authIntlStatus.pricing?.category).toBe('authentication-international');
+        });
+    });
+
+    // account_update phone_number field (changelog entry #468)
+    describe('account_update phone_number', () => {
+        it('passes phone_number and calling restriction types through to the handler', async () => {
+            const processor = createProcessor();
+            const handler = vi.fn();
+            processor.onAccountUpdate(handler);
+
+            const value: AccountUpdateValue = {
+                phone_number: '15550783881',
+                event: 'ACCOUNT_RESTRICTION',
+                restriction_info: [
+                    { restriction_type: 'RESTRICTED_BUSINESS_INITIATED_CALLING', expiration: 1641330498 },
+                    { restriction_type: 'RESTRICTED_ADD_PHONE_NUMBER_ACTION' },
+                ],
+            };
+
+            await processor.processWebhook(
+                new Request('https://example.com/webhook', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        object: 'whatsapp_business_account',
+                        entry: [{ id: '102290129340398', changes: [{ field: 'account_update', value }] }],
+                    }),
+                }),
+            );
+
+            expect(handler).toHaveBeenCalledTimes(1);
+            expect(handler.mock.lastCall?.[1]).toMatchObject({ wabaId: '102290129340398', value });
+            expect(handler.mock.lastCall?.[1].value.phone_number).toBe('15550783881');
         });
     });
 });

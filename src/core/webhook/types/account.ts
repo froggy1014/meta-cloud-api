@@ -38,9 +38,17 @@ export type WabaBanState = 'SCHEDULE_FOR_DISABLE' | 'DISABLE' | 'REINSTATE';
  * Restriction types imposed on WABA — present on ACCOUNT_RESTRICTION events.
  */
 export type RestrictionType =
-    | 'RESTRICTION_ADD_PHONE_NUMBER_ACTION' // Cannot add phone numbers
+    | 'RESTRICTED_ADD_PHONE_NUMBER_ACTION' // Cannot add phone numbers
+    /** @deprecated Misspelled legacy value; Meta sends `RESTRICTED_ADD_PHONE_NUMBER_ACTION`. */
+    | 'RESTRICTION_ADD_PHONE_NUMBER_ACTION'
     | 'RESTRICTED_BIZ_INITIATED_MESSAGING' // Cannot send business-initiated messages
-    | 'RESTRICTED_CUSTOMER_INITIATED_MESSAGING'; // Cannot send customer-initiated messages
+    | 'RESTRICTED_CUSTOMER_INITIATED_MESSAGING' // Cannot send customer-initiated messages
+    | 'RESTRICTED_BIZ_INITIATED_AND_USER_INITIATED_CALLING' // Cannot make or receive calls
+    | 'RESTRICTED_BUSINESS_INITIATED_CALLING' // Cannot initiate outbound calls
+    | 'RESTRICTED_USER_INITIATED_CALLING' // Cannot receive inbound calls from users
+    | 'RESTRICTED_USER_INITIATED_CALLING_CALL_BUTTON_HIDDEN' // Call button hidden due to low pickup rates
+    | 'RESTRICTED_DIRECT_SEND_UTILITY_TEMPLATES' // Cannot send utility templates via Direct Send
+    | 'RESTRICTED_UTILITY_TEMPLATES'; // Cannot create utility templates
 
 /**
  * Reason for the disconnection — present on PARTNER_REMOVED events where
@@ -150,7 +158,12 @@ export interface PartnerClientCertificationInfo {
 }
 
 export interface AccountUpdateValue {
-    /** Phone number associated with the WABA, if applicable */
+    /**
+     * Business display phone number the event applies to (e.g. "15550783881").
+     * Only included for events about a single business phone number, such as
+     * ACCOUNT_VIOLATION and calling-related ACCOUNT_RESTRICTION events.
+     * Absent on WABA-wide events.
+     */
     phone_number?: string;
     /**
      * Event type describing what changed.

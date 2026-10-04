@@ -19,6 +19,19 @@ Configure calling, check permissions, and control call sessions.
 - Under [Conversation Routing](./conversation-routing.md), call webhooks go to the Incoming Call entry point's primary and call permission replies arrive on the `messages` field, so subscribe to both `calls` and `messages`. Calls never change messaging thread ownership.
 - Calling API rate cards effective **October 1, 2026** (published September 11, 2026) span 16 currencies. Bangladesh, Iraq, Kazakhstan, Kuwait, Morocco, Nepal, Oman, Sri Lanka, and Ukraine leave their "Rest of" pricing region and become standalone entries; each keeps the rate of the region it leaves, so calling rates themselves do not change. Rate cards are billing data only — no SDK endpoint, payload, or webhook change. See Meta's [Calling pricing](https://developers.facebook.com/documentation/business-messaging/whatsapp/calling/pricing/).
 
+## Per-number account restrictions (October 2, 2026)
+Meta documented the `phone_number` field on the `account_update` webhook on October 2, 2026. It carries the business display phone number (for example `15550783881`) and appears only on events about a single business phone number, such as `ACCOUNT_VIOLATION` and calling-related `ACCOUNT_RESTRICTION` events; WABA-wide events omit it. Use it to tell which number on a multi-number WABA lost calling capability.
+
+```ts
+processor.onAccountUpdate(async (_wa, { value }) => {
+    if (value.event !== 'ACCOUNT_RESTRICTION' || !value.phone_number) return;
+    const callingBlocked = value.restriction_info?.some((r) => r.restriction_type.includes('CALLING'));
+    if (callingBlocked) console.log(`Calling restricted on ${value.phone_number}`);
+});
+```
+
+`AccountUpdateValue['phone_number']` is optional, and `RestrictionType` covers the documented calling restrictions: `RESTRICTED_BIZ_INITIATED_AND_USER_INITIATED_CALLING`, `RESTRICTED_BUSINESS_INITIATED_CALLING`, `RESTRICTED_USER_INITIATED_CALLING`, and `RESTRICTED_USER_INITIATED_CALLING_CALL_BUTTON_HIDDEN`. See Meta's [account_update reference](https://developers.facebook.com/documentation/business-messaging/whatsapp/webhooks/reference/account_update/).
+
 ## Sharing one phone number across providers
 Meta updated its Calling integration guidance and FAQ on September 16, 2026 to recommend the **new WhatsApp account model** — [Multi-Solution Conversations (MSC)](https://developers.facebook.com/documentation/business-messaging/whatsapp/solution-providers/multi-solution-conversations) — when a business uses one Solution Partner for messaging and another for calling on the same phone number. The older pattern of pointing two apps at one WABA is no longer the recommended path; the third-party voice provider pattern (a calling vendor behind a single partner, no Meta app of its own) remains a separate option and still forbids PSTN on any leg of the call.
 
