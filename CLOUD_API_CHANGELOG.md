@@ -6,7 +6,9 @@
 
 ## October 2, 2026
 
-- [ ] **#468** Documented the phone_number field on the account_update webhook.
+- [x] **#468** Documented the phone_number field on the account_update webhook.
+
+  SDK impact: `AccountUpdateValue.phone_number` already existed as an optional string; its JSDoc now matches Meta's definition (business display phone number, only on events about a single business phone number such as `ACCOUNT_VIOLATION` and calling-related `ACCOUNT_RESTRICTION`). `RestrictionType` gained the documented values `RESTRICTED_ADD_PHONE_NUMBER_ACTION` (the previous `RESTRICTION_ADD_PHONE_NUMBER_ACTION` spelling is kept as deprecated), `RESTRICTED_BIZ_INITIATED_AND_USER_INITIATED_CALLING`, `RESTRICTED_BUSINESS_INITIATED_CALLING`, `RESTRICTED_USER_INITIATED_CALLING`, `RESTRICTED_USER_INITIATED_CALLING_CALL_BUTTON_HIDDEN`, `RESTRICTED_DIRECT_SEND_UTILITY_TEMPLATES`, and `RESTRICTED_UTILITY_TEMPLATES`. Added a `WebhookProcessor` test and documented per-number restriction handling in [Calling](docs/calling.md#per-number-account-restrictions-october-2-2026).
 
 ## October 1, 2026
 
@@ -1279,4 +1281,4 @@
 
 ---
 
-**Progress: 461/469 (98%)**
+**Progress: 462/469 (98%)**
