@@ -1,8 +1,13 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-10-03T14:13:42.970Z
+> Updated: 2026-10-06T15:48:11.221Z
 
+
+## October 5, 2026
+
+- [ ] **#470** Added one-click payments to payment request CTA templates, along with new conditional amount fields, and clarified call routing in the Conversation Routing documentation.
+- [ ] **#469** Added error code 131065 for max price messages sent to WhatsApp users in countries where max price delivery is unavailable.
 
 ## October 2, 2026
 
@@ -1281,4 +1286,4 @@
 
 ---
 
-**Progress: 462/469 (98%)**
+**Progress: 462/471 (98%)**
