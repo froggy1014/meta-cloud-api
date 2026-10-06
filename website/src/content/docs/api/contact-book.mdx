@@ -1,0 +1,86 @@
+---
+title: Contact Book API
+description: Delete a business-scoped user ID entry from the Meta-hosted WhatsApp contact book
+---
+
+Use `client.contactBook` to delete a user's phone-number-to-business-scoped-user-ID (BSUID) mapping from the Meta-hosted contact book.
+
+**Official Documentation**: [WhatsApp Business-Scoped User IDs](https://developers.facebook.com/documentation/business-messaging/whatsapp/business-scoped-user-ids/)
+
+## Overview
+
+- **Delete an Entry**: Remove a contact book entry by BSUID with `deleteEntry(params)`.
+- **Check the Result**: Inspect `deleted` to determine whether an entry was removed.
+- **Business Portfolio Scope**: The contact book is shared across business phone numbers in the same business portfolio, not limited to the phone number used to make the request.
+
+The SDK currently exposes deletion only, not contact book listing or creation. Meta populates the contact book from interactions with users.
+
+## Endpoint
+
+```text
+DELETE /{PHONE_NUMBER_ID}/contact_book?messaging_product=whatsapp&bsuid={BSUID}
+```
+
+The SDK supplies the configured phone number ID and `messaging_product=whatsapp` automatically.
+
+## Delete a Contact Book Entry
+
+Pass the user's BSUID, not their phone number or WhatsApp message ID:
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+});
+
+const result = await client.contactBook.deleteEntry({
+    bsuid: 'US.13491208655302741918',
+});
+
+if (result.deleted === true) {
+    console.log('Contact book entry deleted');
+} else if (result.deleted === false) {
+    console.log('No matching contact book entry was deleted');
+}
+```
+
+Replace the illustrative BSUID with the entry you intend to delete.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+| --- | --- | --- | --- |
+| `bsuid` | `string` | Yes | Business-scoped user ID of the contact book entry. |
+
+The SDK throws `WhatsAppValidationError` before sending a request when `bsuid` is missing or empty. A non-empty BSUID is sent to Meta without local format validation.
+
+## Response Format
+
+`deleteEntry()` returns `DeleteContactBookEntryResponse`:
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `messaging_product` | `'whatsapp'` | Messaging product. |
+| `success` | `boolean` (optional) | Whether Meta processed the request successfully. |
+| `deleted` | `boolean` (optional) | `true` when an entry was removed; `false` when no matching entry was deleted. |
+
+Unknown, malformed, or other-portfolio BSUIDs can resolve with `deleted: false` rather than throwing an API error. A resolved request or `success: true` alone does not prove that an entry existed and was removed.
+
+## Important Notes
+
+:::caution[Deletion Scope and Cached Numbers]
+Deleting an entry affects the business portfolio's contact book. Subsequent webhooks may stop including that user's phone number and BSUID for phone numbers in the portfolio, but a phone number may remain available through Meta's 30-day cache. New interactions can recreate the entry. Do not treat deletion as an immediate guarantee that all subsequent webhook payloads will omit the phone number.
+:::
+
+## Related Documentation
+
+- [Messages API](/api/messages) - Work with WhatsApp messages.
+- [Webhooks](/webhooks/overview) - Receive user and message notifications.
+- [Block Users API](/api/block-users) - Block or unblock users instead of deleting a contact book mapping.
+
+## Source Code
+
+- [ContactBookApi.ts](https://github.com/froggy1014/meta-cloud-api/blob/main/src/api/contactBook/ContactBookApi.ts)
+- [Contact Book types](https://github.com/froggy1014/meta-cloud-api/blob/main/src/api/contactBook/types/contactBook.ts)
