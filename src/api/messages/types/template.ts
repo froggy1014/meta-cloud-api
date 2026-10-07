@@ -87,8 +87,59 @@ type ComponentObject<T extends ComponentTypesEnum> = {
     )[];
 };
 
-type ButtonComponentObject = ComponentObject<ComponentTypesEnum.Button> & {
-    parameters?: (TextParametersObject | PayloadParametersObject)[];
+/**
+ * Payment request CTA amount (Brazil). `value` is the amount multiplied by `offset`
+ * (12.34 BRL is `{ value: 1234, offset: 100 }`); `offset` must be 100 for BRL.
+ */
+export type PaymentRequestAmount = {
+    value: number;
+    offset: number;
+};
+
+export type PaymentRequestSetting =
+    | { type: 'pix_dynamic_code'; pix_dynamic_code: { code: string } }
+    | { type: 'boleto'; boleto: { digitable_line: string } }
+    | { type: 'payment_link'; payment_link: { uri: string } }
+    | {
+          type: 'offsite_card_pay';
+          offsite_card_pay: {
+              /** Last four card digits shown to the user for confirmation. */
+              last_four_digits: string;
+              /** Echoed in the payment confirmation webhook when provided. */
+              credential_id?: string;
+          };
+      };
+
+/**
+ * `payment_request` object sent in a payment request CTA button component.
+ * `currency` and `total_amount` are siblings of `payment_setting`: required for one-click
+ * payment (`offsite_card_pay`), optional for Pix (amount shown to the user), and not used
+ * for Boleto or Payment Link.
+ * Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/payments/payments-br/payment-request-cta/
+ */
+export type PaymentRequestObject =
+    | {
+          payment_setting: Extract<PaymentRequestSetting, { type: 'offsite_card_pay' }>;
+          currency: 'BRL';
+          total_amount: PaymentRequestAmount;
+      }
+    | {
+          payment_setting: Extract<PaymentRequestSetting, { type: 'pix_dynamic_code' }>;
+          currency?: 'BRL';
+          total_amount?: PaymentRequestAmount;
+      }
+    | {
+          payment_setting: Extract<PaymentRequestSetting, { type: 'boleto' | 'payment_link' }>;
+      };
+
+export type PaymentRequestActionParametersObject = ParametersObject<ParametersTypesEnum.Action> & {
+    action: {
+        payment_request: PaymentRequestObject;
+    };
+};
+
+type ButtonComponentObject = Omit<ComponentObject<ComponentTypesEnum.Button>, 'parameters'> & {
+    parameters?: (TextParametersObject | PayloadParametersObject | PaymentRequestActionParametersObject)[];
     sub_type: SubTypeEnum;
     index: ButtonPositionEnum;
 };

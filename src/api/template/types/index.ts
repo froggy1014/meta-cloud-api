@@ -7,6 +7,8 @@ export type {
     FlowButton,
     MPMButton,
     OTPButton,
+    PaymentRequestButton,
+    PaymentRequestButtonSetting,
     PhoneNumberButton,
     QuickReplyButton,
     SPMButton,

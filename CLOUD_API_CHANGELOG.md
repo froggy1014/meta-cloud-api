@@ -6,8 +6,13 @@
 
 ## October 5, 2026
 
-- [ ] **#470** Added one-click payments to payment request CTA templates, along with new conditional amount fields, and clarified call routing in the Conversation Routing documentation.
-- [ ] **#469** Added error code 131065 for max price messages sent to WhatsApp users in countries where max price delivery is unavailable.
+- [x] **#470** Added one-click payments to payment request CTA templates, along with new conditional amount fields, and clarified call routing in the Conversation Routing documentation.
+
+  SDK impact: Added payment request CTA (Brazil) typing. Template creation: `PaymentRequestButton` (`type: 'PAYMENT_REQUEST'`, `payment_setting` of `pix_dynamic_code` / `boleto` / `payment_link` / `offsite_card_pay`, the one-click type carrying no sample) joins `TemplateButton`. Sending: `SubTypeEnum.PaymentRequest` and `PaymentRequestActionParametersObject` (`type: ParametersTypesEnum.Action`, `action.payment_request`) on button components, with `PaymentRequestObject` requiring `currency: 'BRL'` + `total_amount` (`{ value, offset }`) beside `offsite_card_pay` (`last_four_digits`, optional `credential_id`), allowing them for Pix and omitting them for Boleto/Payment Link. `ButtonComponentObject` now omits the base component `parameters` so non-text button parameters type-check. Conversation Routing half: the Incoming Call entry point is renamed Call; only the Call primary may initiate/pre-accept/accept/reject/terminate calls, others get error `138038`, now mapped to `WhatsAppCallingError`. Documented in [Templates](docs/templates.md#payment-request-cta-templates-brazil-october-5-2026), [Conversation Routing](docs/conversation-routing.md#webhooks), and [Calling](docs/calling.md#notes).
+
+- [x] **#469** Added error code 131065 for max price messages sent to WhatsApp users in countries where max price delivery is unavailable.
+
+  SDK impact: Error `131065` (max price `optimization_spec` template sent to a recipient in a country where max price delivery is unavailable) added to the recognized WhatsApp and send-message error codes, so it maps to `WhatsAppSendMessageError`. Documented in [Marketing Messages](docs/marketing-messages.md#max-price-optimization_spec).
 
 ## October 2, 2026
 
@@ -1286,4 +1291,4 @@
 
 ---
 
-**Progress: 462/471 (98%)**
+**Progress: 464/471 (99%)**

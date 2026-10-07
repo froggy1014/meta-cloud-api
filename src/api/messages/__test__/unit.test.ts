@@ -1,10 +1,13 @@
 import { WhatsApp } from '@core/whatsapp';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-    type ComponentTypesEnum,
+    ButtonPositionEnum,
+    ComponentTypesEnum,
     InteractiveTypesEnum,
     LanguagesEnum,
     MessageCategoryEnum,
+    ParametersTypesEnum,
+    SubTypeEnum,
 } from '../../../types/enums';
 import type { ContactObject, InteractiveObject, MessageRequestParams, MessageTemplateObject } from '../types';
 
@@ -484,6 +487,95 @@ describe('Messages API - Unit Tests', () => {
                     language: {
                         code: LanguagesEnum.English,
                     },
+                },
+            });
+        });
+    });
+
+    describe('Payment request CTA templates (Brazil)', () => {
+        it('should send a one-click payment request button with currency and total_amount beside payment_setting', async () => {
+            const templateParams: MessageRequestParams<MessageTemplateObject<ComponentTypesEnum>> = {
+                to: '5511999999999',
+                body: {
+                    name: 'payment_request_template',
+                    language: { policy: 'deterministic', code: 'pt_BR' },
+                    components: [
+                        {
+                            type: ComponentTypesEnum.Button,
+                            sub_type: SubTypeEnum.PaymentRequest,
+                            index: ButtonPositionEnum.First,
+                            parameters: [
+                                {
+                                    type: ParametersTypesEnum.Action,
+                                    action: {
+                                        payment_request: {
+                                            currency: 'BRL',
+                                            total_amount: { value: 1000, offset: 100 },
+                                            payment_setting: {
+                                                type: 'offsite_card_pay',
+                                                offsite_card_pay: {
+                                                    last_four_digits: '4242',
+                                                    credential_id: 'cred_abc123',
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                        {
+                            type: ComponentTypesEnum.Button,
+                            sub_type: SubTypeEnum.PaymentRequest,
+                            index: ButtonPositionEnum.Second,
+                            parameters: [
+                                {
+                                    type: ParametersTypesEnum.Action,
+                                    action: {
+                                        payment_request: {
+                                            payment_setting: {
+                                                type: 'boleto',
+                                                boleto: {
+                                                    digitable_line: '03399026944140000002628346101018898510000008848',
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                },
+            };
+
+            await whatsApp.messages.template(templateParams);
+
+            const [_, __, ___, body] = mockRequestSend.mock.calls[0];
+            const requestBody = JSON.parse(body);
+
+            expect(requestBody.template.components[0]).toEqual({
+                type: 'BUTTON',
+                sub_type: 'PAYMENT_REQUEST',
+                index: ButtonPositionEnum.First,
+                parameters: [
+                    {
+                        type: 'ACTION',
+                        action: {
+                            payment_request: {
+                                currency: 'BRL',
+                                total_amount: { value: 1000, offset: 100 },
+                                payment_setting: {
+                                    type: 'offsite_card_pay',
+                                    offsite_card_pay: { last_four_digits: '4242', credential_id: 'cred_abc123' },
+                                },
+                            },
+                        },
+                    },
+                ],
+            });
+            expect(requestBody.template.components[1].parameters[0].action.payment_request).toEqual({
+                payment_setting: {
+                    type: 'boleto',
+                    boleto: { digitable_line: '03399026944140000002628346101018898510000008848' },
                 },
             });
         });

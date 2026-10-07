@@ -58,6 +58,18 @@ describe('WhatsApp error mapping', () => {
         expect(error).toBeInstanceOf(WhatsAppCallingError);
     });
 
+    it('maps max price unsupported-country error 131065 as a send message error', () => {
+        expect(isWhatsAppErrorCode(131065)).toBe(true);
+        const error = createWhatsAppApiError(buildError(131065));
+        expect(error).toBeInstanceOf(WhatsAppSendMessageError);
+    });
+
+    it('maps Conversation Routing call primary error 138038 as a calling error', () => {
+        expect(isWhatsAppErrorCode(138038)).toBe(true);
+        const error = createWhatsAppApiError(buildError(138038));
+        expect(error).toBeInstanceOf(WhatsAppCallingError);
+    });
+
     it('maps group errors', () => {
         const error = createWhatsAppApiError(buildError(131020));
         expect(error).toBeInstanceOf(WhatsAppGroupError);
