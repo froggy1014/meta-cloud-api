@@ -229,6 +229,47 @@ describe('Template API - Unit Tests', () => {
             expect(parsedBody.components[1].buttons[1].type).toBe('URL');
         });
 
+        it('should create a payment request CTA template with a one-click payment button', async () => {
+            const templateData: TemplateRequestBody = {
+                name: 'payment_request_template',
+                language: LanguagesEnum.Portuguese_BR,
+                category: CategoryEnum.Utility,
+                components: [
+                    { type: 'BODY', text: 'Your order is ready for payment.' },
+                    {
+                        type: 'BUTTONS',
+                        buttons: [
+                            {
+                                type: 'PAYMENT_REQUEST',
+                                text: 'Copy Pix code',
+                                payment_setting: {
+                                    type: 'pix_dynamic_code',
+                                    pix_dynamic_code: { code: '00020101021226700014br.gov.bcb.pix' },
+                                },
+                            },
+                            {
+                                type: 'PAYMENT_REQUEST',
+                                text: 'Review payment',
+                                payment_setting: { type: 'offsite_card_pay' },
+                            },
+                        ],
+                    },
+                ],
+            };
+
+            await whatsApp.templates.createTemplate(templateData);
+
+            const [_, __, ___, body] = mockRequestSend.mock.calls[0];
+            const parsedBody = JSON.parse(body);
+
+            expect(parsedBody.components[1].buttons[1]).toEqual({
+                type: 'PAYMENT_REQUEST',
+                text: 'Review payment',
+                payment_setting: { type: 'offsite_card_pay' },
+            });
+            expect(parsedBody.components[1].buttons[0].payment_setting.type).toBe('pix_dynamic_code');
+        });
+
         it('should create template with named parameters', async () => {
             const templateData: TemplateRequestBody = {
                 name: 'named_params_template',

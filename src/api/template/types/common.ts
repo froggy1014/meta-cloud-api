@@ -69,7 +69,26 @@ export type CatalogButton = {
     };
 };
 
+/**
+ * Payment request CTA button setting at template creation (Brazil).
+ * One-click payment (`offsite_card_pay`) has no sample value: set only `type`.
+ * Docs: https://developers.facebook.com/documentation/business-messaging/whatsapp/payments/payments-br/payment-request-cta/
+ */
+export type PaymentRequestButtonSetting =
+    | { type: 'pix_dynamic_code'; pix_dynamic_code: { code: string } }
+    | { type: 'boleto'; boleto: { digitable_line: string } }
+    | { type: 'payment_link'; payment_link: { uri: string } }
+    | { type: 'offsite_card_pay' };
+
+export type PaymentRequestButton = {
+    type: 'PAYMENT_REQUEST';
+    /** Must be `Copy Pix code`, `Copy Boleto code`, `Open payment link`, or `Review payment` (one-click). */
+    text: string;
+    payment_setting: PaymentRequestButtonSetting;
+};
+
 export type TemplateButton =
+    | PaymentRequestButton
     | PhoneNumberButton
     | URLButton
     | QuickReplyButton

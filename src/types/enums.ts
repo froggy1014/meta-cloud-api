@@ -107,6 +107,7 @@ export enum SubTypeEnum {
     Flow = 'FLOW',
     Mpm = 'MPM',
     OrderDetails = 'ORDER_DETAILS',
+    PaymentRequest = 'PAYMENT_REQUEST',
     PhoneNumber = 'PHONE_NUMBER',
     QuickReply = 'QUICK_REPLY',
     Reminder = 'REMINDER',
