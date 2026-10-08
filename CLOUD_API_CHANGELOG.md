@@ -6,7 +6,9 @@
 
 ## October 5, 2026
 
-- [ ] **#471** Added one-click payments to payment request CTA templates, along with new conditional amount fields.
+- [x] **#471** Added one-click payments to payment request CTA templates, along with new conditional amount fields.
+
+  SDK impact: Duplicate of the Cloud API half of #470 (the October 5 changelog now lists Payment request CTA templates for Brazil and the Conversation Routing call update as separate items). One-click payment (`offsite_card_pay` with `last_four_digits` and optional `credential_id`) and the `currency` + `total_amount` fields (required for one-click, optional for Pix, not used for Boleto or Payment Link) are already typed by `PaymentRequestButton` and `PaymentRequestObject` and documented in [Templates](docs/templates.md#payment-request-cta-templates-brazil-october-5-2026). No SDK endpoint, payload, or webhook type change.
 - [x] **#470** Added one-click payments to payment request CTA templates, along with new conditional amount fields, and clarified call routing in the Conversation Routing documentation.
 
   SDK impact: Added payment request CTA (Brazil) typing. Template creation: `PaymentRequestButton` (`type: 'PAYMENT_REQUEST'`, `payment_setting` of `pix_dynamic_code` / `boleto` / `payment_link` / `offsite_card_pay`, the one-click type carrying no sample) joins `TemplateButton`. Sending: `SubTypeEnum.PaymentRequest` and `PaymentRequestActionParametersObject` (`type: ParametersTypesEnum.Action`, `action.payment_request`) on button components, with `PaymentRequestObject` requiring `currency: 'BRL'` + `total_amount` (`{ value, offset }`) beside `offsite_card_pay` (`last_four_digits`, optional `credential_id`), allowing them for Pix and omitting them for Boleto/Payment Link. `ButtonComponentObject` now omits the base component `parameters` so non-text button parameters type-check. Conversation Routing half: the Incoming Call entry point is renamed Call; only the Call primary may initiate/pre-accept/accept/reject/terminate calls, others get error `138038`, now mapped to `WhatsAppCallingError`. Documented in [Templates](docs/templates.md#payment-request-cta-templates-brazil-october-5-2026), [Conversation Routing](docs/conversation-routing.md#webhooks), and [Calling](docs/calling.md#notes).
@@ -1292,4 +1294,4 @@
 
 ---
 
-**Progress: 464/472 (98%)**
+**Progress: 465/472 (99%)**
