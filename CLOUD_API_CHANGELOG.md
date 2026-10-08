@@ -1,8 +1,12 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-10-07T16:16:38.996Z
+> Updated: 2026-10-08T16:17:50.659Z
 
+
+## October 7, 2026
+
+- [ ] **#472** Updated WhatsApp Manager experience with open beta availability and the benefits of setting a max price for marketing message templates.
 
 ## October 5, 2026
 
@@ -1294,4 +1298,4 @@
 
 ---
 
-**Progress: 465/472 (99%)**
+**Progress: 465/473 (98%)**
