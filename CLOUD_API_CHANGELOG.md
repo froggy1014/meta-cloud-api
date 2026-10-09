@@ -1,8 +1,13 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-10-08T16:17:50.659Z
+> Updated: 2026-10-09T16:01:57.184Z
 
+
+## October 8, 2026
+
+- [ ] **#474** Added error 131070 guidance and clarified the terms prerequisite for Conversation Routing features.
+- [ ] **#473** Business portfolios with a messaging limit of 100,000 or unlimited are now generally eligible for Direct Send utility messaging.
 
 ## October 7, 2026
 
@@ -1298,4 +1303,4 @@
 
 ---
 
-**Progress: 465/473 (98%)**
+**Progress: 465/475 (98%)**
