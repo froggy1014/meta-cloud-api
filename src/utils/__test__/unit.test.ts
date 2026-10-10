@@ -64,6 +64,12 @@ describe('WhatsApp error mapping', () => {
         expect(error).toBeInstanceOf(WhatsAppSendMessageError);
     });
 
+    it('maps thread ownership error 131070 as a send message error', () => {
+        expect(isWhatsAppErrorCode(131070)).toBe(true);
+        const error = createWhatsAppApiError(buildError(131070));
+        expect(error).toBeInstanceOf(WhatsAppSendMessageError);
+    });
+
     it('maps Conversation Routing call primary error 138038 as a calling error', () => {
         expect(isWhatsAppErrorCode(138038)).toBe(true);
         const error = createWhatsAppApiError(buildError(138038));

@@ -5,6 +5,8 @@ Direct Send sends business-initiated utility and authentication messages through
 
 Utility messaging became generally available on July 31, 2026.
 
+Eligibility (updated October 8, 2026): business portfolios with a messaging limit of 100,000 or unlimited are generally eligible for Direct Send utility messaging. WhatsApp Manager shows a banner confirming whether the account is eligible; ineligible accounts can express interest. Direct Send for authentication messages remains in beta by request. See [Direct Send eligibility](https://developers.facebook.com/documentation/business-messaging/whatsapp/direct-send#eligibility).
+
 ## Endpoints
 - POST /{PHONE_NUMBER_ID}/messages
 
@@ -16,7 +18,7 @@ Utility messaging became generally available on July 31, 2026.
 - `preview_url` is ignored — Direct Send messages do not render a URL preview.
 - `directSendConfig.template_name` pins message-to-template attribution (utility only). Names must match `^[a-z0-9_]+$` and be unique within the WABA.
 - The message-status webhook carries an extra `template_id` field for Direct Send messages.
-- Sending a `category` from an ineligible WABA returns error `100`.
+- Sending a `category` from an ineligible WABA returns error `100` with `error_data.details` "Parameter Invalid: The 'category' value requires Direct Send, which isn't enabled for this account. Use an approved message template instead."
 
 ## Example
 ```ts
