@@ -68,10 +68,23 @@ export interface StatusWebhook {
          * From October 1, 2026 reaction messages are the only service message
          * type that is never charged and do not count toward the free tier, and
          * eligible governments and non-profits keep service messages free beyond
-         * the tier through December 31, 2027. Meta documents no distinct `type`
-         * for those exemptions, so do not infer eligibility from this value.
+         * the tier through December 31, 2027. Those exempt deliveries keep
+         * `free_customer_service` / `free_group_customer_service` here and are
+         * identified by `subtype: 'paid_exempt'`, not by this value.
          */
         type: 'regular' | 'free_customer_service' | 'free_entry_point' | 'free_group_customer_service';
+        /**
+         * Pricing subtype (added October 12, 2026). Only included for service
+         * messages that are free because the organization is eligible for the
+         * pricing policy for eligible governments and non-profits:
+         * - `paid_exempt` — the service message is free under that policy.
+         *
+         * Absent on every other status, including ordinary free-tier service
+         * deliveries.
+         *
+         * @see {@link https://developers.facebook.com/documentation/business-messaging/whatsapp/pricing#service-pricing-policy-for-eligible-governments-and-non-profits | Pricing policy for eligible governments and non-profits}
+         */
+        subtype?: 'paid_exempt';
         /**
          * Pricing category (rate) applied if billable.
          *

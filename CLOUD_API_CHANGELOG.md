@@ -1,8 +1,14 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-10-09T16:01:57.184Z
+> Updated: 2026-10-10T15:10:31.058Z
 
+
+## October 12, 2026
+
+- [x] **#475** Added a subtype field to the pricing object of status messages webhooks to identify service messages that are free for eligible governments and non-profits.
+
+  SDK impact: Added optional `subtype?: 'paid_exempt'` to `StatusWebhook['pricing']`. Meta includes it only on service messages that are free because the organization is eligible for the pricing policy for eligible governments and non-profits; those deliveries keep `type: 'free_customer_service'` (or `'free_group_customer_service'`) and `billable: false`, so `subtype` is the only marker. The `pricing.type` doc comment no longer says Meta documents no exemption marker, a `WebhookProcessor` test covers the field reaching `onStatus`, and [Messages](docs/messages.md) documents it with an example. Meta's planned eligibility check (by October 30, 2026) and eligibility review request are not available yet and are not wrapped. No endpoint or request payload change.
 
 ## October 8, 2026
 
@@ -1309,4 +1315,4 @@
 
 ---
 
-**Progress: 468/475 (99%)**
+**Progress: 469/476 (99%)**
