@@ -6,12 +6,18 @@
 
 ## October 8, 2026
 
-- [ ] **#474** Added error 131070 guidance and clarified the terms prerequisite for Conversation Routing features.
-- [ ] **#473** Business portfolios with a messaging limit of 100,000 or unlimited are now generally eligible for Direct Send utility messaging.
+- [x] **#474** Added error 131070 guidance and clarified the terms prerequisite for Conversation Routing features.
+
+  SDK impact: Error `131070` ("Message failed to send because another app is controlling this thread now": a Service message sent by an app that neither owns the thread nor is the escalation partner, including while the thread is idle) added to the recognized WhatsApp and send-message error codes, so it maps to `WhatsAppSendMessageError`. The Meta Business Agents and Platform Terms of Service prerequisite for standby visibility, the escalation partner, and thread control is documented in [Conversation Routing](docs/conversation-routing.md#notes). No endpoint, payload, or webhook type change.
+- [x] **#473** Business portfolios with a messaging limit of 100,000 or unlimited are now generally eligible for Direct Send utility messaging.
+
+  SDK impact: Eligibility is an account-level rollout, not an API change. Documented in [Direct Send](docs/direct-send.md#overview): portfolios at the 100,000 or unlimited messaging limit are generally eligible for utility Direct Send, WhatsApp Manager shows an eligibility banner, authentication stays in beta, and the ineligible-account error `100` now carries the documented `error_data.details` text. `category` and `directSendConfig` payloads are unchanged.
 
 ## October 7, 2026
 
-- [ ] **#472** Updated WhatsApp Manager experience with open beta availability and the benefits of setting a max price for marketing message templates.
+- [x] **#472** Updated WhatsApp Manager experience with open beta availability and the benefits of setting a max price for marketing message templates.
+
+  SDK impact: WhatsApp Manager UI guidance only. Documented in [Marketing Messages](docs/marketing-messages.md#whatsapp-manager-max-price-experience-october-7-2026): open beta since October 1, 2026 (enrollment still required), the Set maximum price / Use default price options with estimated cost and delivery, the Pricing column, and template insights. The API equivalent remains `optimization_spec` on template create/update; no endpoint, payload, or webhook type change.
 
 ## October 5, 2026
 
@@ -1303,4 +1309,4 @@
 
 ---
 
-**Progress: 465/475 (98%)**
+**Progress: 468/475 (99%)**
