@@ -62,6 +62,8 @@ export {
     WhatsAppValidationError,
 } from './isMetaError';
 export { default as Logger } from './logger';
+export type { MessageDeliveryStatus } from './messageStatus';
+export { compareMessageStatus, isMessageStatusAdvance, resolveMessageStatus } from './messageStatus';
 export { objectToQueryString } from './objectToQueryString';
 export type { BusinessUseCaseUsage, RateLimitHeadersInput, RateLimitInfo, RateLimitUsage } from './rateLimit';
 export { parseRateLimitHeaders, parseRetryAfter } from './rateLimit';
