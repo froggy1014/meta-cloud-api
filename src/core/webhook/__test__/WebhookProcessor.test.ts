@@ -177,6 +177,59 @@ describe('WebhookProcessor', () => {
 
             expect(authIntlStatus.pricing?.category).toBe('authentication-international');
         });
+
+        // Changelog entry #475
+        it('passes the paid_exempt pricing subtype through to the status handler', async () => {
+            const processor = createProcessor();
+            const handler = vi.fn();
+            processor.onStatus(handler);
+
+            const status: StatusWebhook = {
+                id: 'wamid.TEST',
+                status: 'delivered',
+                timestamp: '1760227200',
+                recipient_id: '15551234567',
+                pricing: {
+                    billable: false,
+                    pricing_model: 'PMP',
+                    category: 'service',
+                    type: 'free_customer_service',
+                    subtype: 'paid_exempt',
+                },
+            };
+
+            await processor.processWebhook(
+                new Request('https://example.com/webhook', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        object: 'whatsapp_business_account',
+                        entry: [
+                            {
+                                id: 'WABA_ID',
+                                changes: [
+                                    {
+                                        field: 'messages',
+                                        value: {
+                                            messaging_product: 'whatsapp',
+                                            metadata: {
+                                                display_phone_number: '15550000000',
+                                                phone_number_id: '123456789',
+                                            },
+                                            statuses: [status],
+                                        },
+                                    },
+                                ],
+                            },
+                        ],
+                    }),
+                }),
+            );
+
+            expect(handler).toHaveBeenCalledTimes(1);
+            expect(handler.mock.lastCall?.[1].status.pricing).toEqual(status.pricing);
+            expect(handler.mock.lastCall?.[1].status.pricing?.subtype).toBe('paid_exempt');
+        });
     });
 
     // account_update phone_number field (changelog entry #468)
