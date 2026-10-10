@@ -1,5 +1,12 @@
 # nextjs-page-router-example
 
+## 0.1.26
+
+### Patch Changes
+
+- Updated dependencies [b7b7ccd]
+  - meta-cloud-api@3.10.3
+
 ## 0.1.25
 
 ### Patch Changes

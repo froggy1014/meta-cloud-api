@@ -1,5 +1,11 @@
 # meta-cloud-api
 
+## 3.10.3
+
+### Patch Changes
+
+- b7b7ccd: Type the `pricing.subtype` field (`'paid_exempt'`) on status webhooks, which marks service messages that are free under the pricing policy for eligible governments and non-profits (Cloud API changelog #475).
+
 ## 3.10.2
 
 ### Patch Changes
