@@ -20,7 +20,7 @@
         "test:watch": "vitest --watch",
         "smoke:runtime": "node scripts/runtime-smoke/run.mjs",
         "smoke:workerd": "node scripts/runtime-smoke/workerd.mjs",
-        "docs:check-snippets": "node scripts/check-doc-snippets.mjs README.md website/src/content/docs/getting-started/migrate-from-whatsapp-nodejs-sdk.mdx website/src/content/docs/guides/testing.mdx website/src/content/docs/api/message-history.mdx website/src/content/docs/api/contact-book.mdx",
+        "docs:check-snippets": "node scripts/check-doc-snippets.mjs README.md website/src/content/docs/getting-started/migrate-from-whatsapp-nodejs-sdk.mdx website/src/content/docs/guides/testing.mdx website/src/content/docs/api/message-history.mdx website/src/content/docs/api/contact-book.mdx website/src/content/docs/api/thread-control.mdx",
         "changeset": "changeset",
         "changeset:version": "changeset version",
         "changeset:publish": "changeset publish",
