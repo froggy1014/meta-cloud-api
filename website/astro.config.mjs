@@ -87,6 +87,7 @@ export default defineConfig({
                                 { label: 'Commerce Settings', link: '/api/commerce-settings' },
                                 { label: 'Payments', link: '/api/payments' },
                                 { label: 'Block Users', link: '/api/block-users' },
+                                { label: 'Thread Control', link: '/api/thread-control' },
                                 { label: 'Contact Book', link: '/api/contact-book' },
                                 { label: 'Encryption', link: '/api/encryption' },
                             ],

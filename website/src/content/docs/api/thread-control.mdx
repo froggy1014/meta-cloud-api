@@ -1,0 +1,222 @@
+---
+title: Thread Control API
+description: Pass, release, and take WhatsApp thread ownership under Conversation Routing
+---
+
+Use `client.threadControl` to pass, release, or take ownership of a WhatsApp thread when more than one responder shares a WhatsApp account.
+
+**Official Documentation**: [WhatsApp Thread Control](https://developers.facebook.com/documentation/business-messaging/whatsapp/conversation-routing/thread-control/)
+
+## Overview
+
+Conversation Routing gives each thread (a business phone number plus a WhatsApp user) exactly one owner, or none when the thread is idle. Thread control changes that owner:
+
+- **Pass**: The current owner hands the thread to another responder.
+- **Release**: The current owner returns the thread to idle, so the next inbound message is routed again by entry point.
+- **Take**: The account's escalation partner takes the thread, whoever owns it.
+
+Routing itself is configured by the business in Meta Business Suite, not through the API. The account must be enrolled for thread control before the endpoint accepts requests.
+
+## Endpoints
+
+```text
+POST /{PHONE_NUMBER_ID}/thread_control
+```
+
+All three methods call the same endpoint with a different `action`. The SDK supplies `messaging_product: 'whatsapp'`, the `action`, and the configured `phoneNumberId`.
+
+## Important Notes
+
+:::caution[Terms of Service]
+Thread control, the escalation partner, and standby visibility require the business to accept the Meta Business Agents and Platform Terms of Service. Until it does, `pass` and `take` are unavailable. See [Terms of Service requirement](https://developers.facebook.com/documentation/business-messaging/whatsapp/conversation-routing/get-started/#terms-of-service-requirement).
+:::
+
+:::note[No ownership lookup]
+There is no endpoint that reports the current owner of a thread. Track ownership yourself from inbound messages, `messaging_handovers` events, and standby events. A thread returns to idle on its own after 24 hours of user inactivity.
+:::
+
+:::tip[Identify the user with a BSUID]
+Every method takes exactly one of `to` (phone number or wa_id) or `recipient` (business-scoped user ID). Prefer `recipient`: a BSUID stays stable even if the user's phone number changes. Passing both or neither throws a `WhatsAppValidationError` before any request is sent.
+:::
+
+## Roles
+
+`control_pass.target_role` and the roles on handover events use these values:
+
+| Role | Responder |
+| --- | --- |
+| `customer_service` | Primary for the Service entry point |
+| `marketing` | Primary for the Marketing Message Response entry point |
+| `utility` | Primary for the Utility Response entry point |
+| `ctwa` | Primary for the Click to WhatsApp entry point |
+| `ai_agent` | The designated AI agent (Meta Business Agent); only where it is enabled on the account |
+| `escalation` | The account's designated escalation partner |
+
+## Pass Thread Control
+
+Call `pass(params)` when you own the thread and want another responder to take over. Without `control_pass`, control goes to the escalation partner. With `control_pass.target_role`, it goes to that role.
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+});
+
+const { request_id } = await client.threadControl.pass({
+    recipient: 'US.13491208655302741918',
+    metadata: 'WhatsApp user requested human agent',
+    control_pass: { target_role: 'customer_service' },
+});
+
+console.log('Pass request:', request_id);
+```
+
+Meta rejects the pass if the thread is idle, you do not own it, the target role is not enabled, or the target already owns the thread. The new owner receives a `control_passed` handover event.
+
+### Parameters
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `to` | `string` | The WhatsApp user's phone number or wa_id. Use this or `recipient`. |
+| `recipient` | `string` | The WhatsApp user's BSUID. Use this or `to`. |
+| `metadata` | `string` | Optional. Up to 2,000 characters, forwarded verbatim on the handover event. |
+| `control_pass.target_role` | `ThreadControlRole` | Optional. The role receiving control. Omit it to pass to the escalation partner. |
+
+## Release Thread Control
+
+Call `release(params)` to return a thread you own to idle. The user's next message is routed again by entry point.
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+});
+
+await client.threadControl.release({
+    to: '15551234567',
+    metadata: 'Order question resolved',
+});
+```
+
+Releasing an idle thread succeeds. Releasing a thread you do not own is rejected; the escalation partner has to take it first. No `messaging_handovers` event fires for a release.
+
+`release` accepts `to` or `recipient`, plus optional `metadata`. It does not accept `control_pass`.
+
+## Take Thread Control
+
+Call `take(params)` as the escalation partner to take a thread, whoever owns it. Other callers are rejected with error `2494191`.
+
+```typescript
+import WhatsApp from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+});
+
+await client.threadControl.take({
+    recipient: 'US.13491208655302741918',
+    metadata: 'Human agent stepping in',
+});
+```
+
+The previous owner receives a `control_taken` handover event. The escalation partner also takes a thread implicitly when it sends a Service message, without calling `take`.
+
+`take` accepts `to` or `recipient`, plus optional `metadata`. It does not accept `control_pass`.
+
+## Handover Webhooks
+
+Subscribe to the `messaging_handovers` webhook field and register `onMessagingHandovers` on the webhook processor. `value.type` tells you which event arrived:
+
+- `control_passed` is delivered to the new owner. Details are in `value.control_passed`, which can also carry an AI-generated `conversation_context` summary.
+- `control_taken` is delivered to the previous owner. Details are in `value.control_taken`.
+
+```typescript
+import { expressWebhookHandler } from 'meta-cloud-api';
+
+const Whatsapp = expressWebhookHandler({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN,
+});
+
+Whatsapp.processor.onMessagingHandovers(async (wa, { value }) => {
+    const user = value.sender.phone_number;
+
+    if (value.type === 'control_passed' && value.control_passed) {
+        const { previous_owner_role, new_owner_role, metadata, conversation_context } = value.control_passed;
+        console.log(`${user}: ${previous_owner_role} passed the thread to ${new_owner_role}`, metadata);
+
+        // Optional and model-generated: show it to the agent, do not parse it
+        if (conversation_context) {
+            console.log('Summary:', conversation_context.summary.text);
+        }
+    } else if (value.type === 'control_taken' && value.control_taken) {
+        console.log(`${user}: thread taken by ${value.control_taken.new_owner_role}`);
+    }
+});
+```
+
+The same processor works with every framework adapter (`nextjsWebhookHandler`, `honoWebhookHandler`, `fastifyWebhookHandler`). While you do not own a thread you may receive `standby` copies of its messages through `processor.onStandby`; do not reply to them.
+
+## Response Format
+
+Every successful `pass`, `release`, and `take` returns:
+
+```typescript
+import type { ThreadControlResponse } from 'meta-cloud-api';
+
+const response: ThreadControlResponse = {
+    messaging_product: 'whatsapp',
+    request_id: 'REQUEST_ID',
+};
+```
+
+Quote `request_id` when you contact Meta support about a specific call.
+
+## Error Handling
+
+Invalid input throws a `WhatsAppValidationError` before any request is sent: both or neither of `to` and `recipient`, `metadata` over 2,000 characters, or `control_pass` on `release` or `take`. Errors returned by Meta are `WhatsAppApiError` instances, with the Graph API error under `error.error`.
+
+```typescript
+import WhatsApp, { WhatsAppApiError, WhatsAppValidationError } from 'meta-cloud-api';
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+});
+
+try {
+    await client.threadControl.take({ to: '15551234567' });
+} catch (error) {
+    if (error instanceof WhatsAppValidationError) {
+        console.error('Invalid request:', error.message);
+    } else if (error instanceof WhatsAppApiError) {
+        const { code, message, fbtrace_id } = error.error;
+        if (code === 2494191) {
+            console.error('Only the escalation partner can take a thread');
+        } else {
+            console.error(`Thread control failed (${code}): ${message}`, fbtrace_id);
+        }
+    } else {
+        throw error;
+    }
+}
+```
+
+Sending a Service message while you do not own the thread, including while it is idle, fails with error `131070`. The SDK maps it to `WhatsAppSendMessageError`. Get ownership through routing or a `pass` first. The escalation partner is exempt, because its Service message takes the thread.
+
+## Related Documentation
+
+- [Messages API](/api/messages) - Send messages once you own the thread
+- [Custom webhook handlers](/webhooks/custom) - `onMessagingHandovers` and `onStandby`
+- [Error Handling](/guides/error-handling) - `WhatsAppApiError` and its subclasses
+- [Conversation Routing overview](https://developers.facebook.com/documentation/business-messaging/whatsapp/conversation-routing/overview/) - How Meta routes threads between responders
+
+## Source Code
+
+View the source code on GitHub: [ThreadControlApi.ts](https://github.com/froggy1014/meta-cloud-api/blob/main/src/api/threadControl/ThreadControlApi.ts)
