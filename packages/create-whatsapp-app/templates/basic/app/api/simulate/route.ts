@@ -1,5 +1,4 @@
-import { randomUUID } from 'node:crypto';
-import { NextRequest } from 'next/server';
+import { createTextMessageWebhook } from 'meta-cloud-api/testing';
 import { webhook } from '@/lib/webhook';
 import { config, isMock, MOCK_DISPLAY_NUMBER } from '@/lib/whatsapp';
 
@@ -24,39 +23,17 @@ export async function POST(request: Request): Promise<Response> {
     };
     if (!text?.trim()) return Response.json({ error: 'text is required' }, { status: 400 });
 
-    const payload = {
-        object: 'whatsapp_business_account',
-        entry: [
-            {
-                id: config.businessAcctId,
-                changes: [
-                    {
-                        field: 'messages',
-                        value: {
-                            messaging_product: 'whatsapp',
-                            metadata: {
-                                display_phone_number: MOCK_DISPLAY_NUMBER.replace(/\D/g, ''),
-                                phone_number_id: String(config.phoneNumberId),
-                            },
-                            contacts: [{ profile: { name }, wa_id: from }],
-                            messages: [
-                                {
-                                    from,
-                                    id: `wamid.mock.${randomUUID()}`,
-                                    timestamp: String(Math.floor(Date.now() / 1000)),
-                                    type: 'text',
-                                    text: { body: text },
-                                },
-                            ],
-                        },
-                    },
-                ],
-            },
-        ],
-    };
+    const payload = createTextMessageWebhook({
+        from,
+        text,
+        profileName: name,
+        phoneNumberId: config.phoneNumberId,
+        displayPhoneNumber: MOCK_DISPLAY_NUMBER.replace(/\D/g, ''),
+        wabaId: config.businessAcctId,
+    });
 
     const res = await webhook.POST(
-        new NextRequest(new URL('/api/webhook', request.url), {
+        new Request(new URL('/api/webhook', request.url), {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify(payload),
