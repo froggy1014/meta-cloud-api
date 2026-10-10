@@ -1,8 +1,12 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-10-09T16:01:57.184Z
+> Updated: 2026-10-10T15:10:31.058Z
 
+
+## October 12, 2026
+
+- [ ] **#475** Added a subtype field to the pricing object of status messages webhooks to identify service messages that are free for eligible governments and non-profits.
 
 ## October 8, 2026
 
@@ -1309,4 +1313,4 @@
 
 ---
 
-**Progress: 468/475 (99%)**
+**Progress: 468/476 (98%)**
