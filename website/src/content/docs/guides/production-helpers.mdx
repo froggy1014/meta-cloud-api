@@ -1,6 +1,6 @@
 ---
 title: Production Helpers
-description: Customer service window checks, rate limit headers and server-paced retries, and memory-aware media uploads
+description: Customer service window checks, out-of-order status webhooks, rate limit headers and server-paced retries, and memory-aware media uploads
 sidebar:
     order: 7
 ---
@@ -75,6 +75,27 @@ getFreeEntryPointWindow(firstReplyAt, { durationMs: MAX_FREE_ENTRY_POINT_WINDOW_
 
 Meta does not say up front how long a given FEP window lasts, so prefer `expiresAt` over a guessed
 `durationMs`.
+
+## Out-of-order status webhooks
+
+Meta does not guarantee the order of status webhooks. `sent`, `delivered` and `read` for one message
+often arrive within the same second, and `read` can arrive before `delivered`. Storing each webhook
+as it comes turns a read message back into a delivered one. Resolve every update with
+`resolveMessageStatus`, which never moves a status backwards:
+
+```typescript
+import { resolveMessageStatus } from 'meta-cloud-api';
+
+handler.processor.onStatus(async (_whatsapp, { status }) => {
+    const row = await db.messages.find(status.id);
+    const next = resolveMessageStatus(row?.status, status.status);
+    if (next !== row?.status) await db.messages.update(status.id, { status: next });
+});
+```
+
+The order is `sent` < `failed` < `delivered` < `read`: a `failed` replaces `sent`, but cannot undo a
+`delivered` or `read` Meta already reported. `isMessageStatusAdvance(current, incoming)` answers the
+same question as a boolean, and `compareMessageStatus` sorts statuses.
 
 ## Rate limit awareness
 
