@@ -614,9 +614,10 @@ describe('Messages API - Unit Tests', () => {
 
             const requestBody = JSON.parse(body);
 
-            expect(requestBody).toMatchObject({
+            // Meta rejects status 'typing' (enum ["read", null]); typing rides on a read receipt.
+            expect(requestBody).toEqual({
                 messaging_product: 'whatsapp',
-                status: 'typing',
+                status: 'read',
                 message_id: 'msg_test_123',
                 typing_indicator: { type: 'text' },
             });

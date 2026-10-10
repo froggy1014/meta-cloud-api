@@ -18,7 +18,8 @@ export type GeneralMessageBody = GeneralRequestBody & {
 };
 
 export type StatusObject = {
-    status: 'read' | 'typing';
+    /** The Cloud API accepts only `'read'`; add `typing_indicator` to show "typing…". */
+    status: 'read';
     message_id: string;
     typing_indicator?: TypingIndicatorObject;
 };

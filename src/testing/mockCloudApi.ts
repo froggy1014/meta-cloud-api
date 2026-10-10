@@ -395,7 +395,7 @@ export class MockCloudApi {
 
         if (method === 'POST' && segments.length === 2 && /^(messages|marketing_messages)$/.test(segments[1] ?? '')) {
             const body = isRecord(request.body) ? request.body : {};
-            if (body.status === 'read' || body.status === 'typing') return jsonResponse({ success: true });
+            if (body.status === 'read') return jsonResponse({ success: true });
             const to = typeof body.to === 'string' ? body.to : '';
             const response: MessagesResponse = {
                 messaging_product: 'whatsapp',
