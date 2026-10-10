@@ -1,5 +1,15 @@
 # meta-cloud-api
 
+## 3.11.0
+
+### Minor Changes
+
+- 7de2492: Add `resolveMessageStatus`, `compareMessageStatus` and `isMessageStatusAdvance` so status webhook handlers never move a stored message status backwards. Meta does not guarantee webhook order, and a `delivered` that arrives after `read` used to turn blue ticks grey again.
+
+### Patch Changes
+
+- a730360: Fix `messages.showTypingIndicator`: send `status: 'read'` with `typing_indicator` instead of `status: 'typing'`, which the Cloud API rejects (enum `["read", null]`). Showing the indicator also marks the message read. `StatusObject['status']` is now `'read'` only, and the mock Cloud API no longer accepts `'typing'`.
+
 ## 3.10.3
 
 ### Patch Changes
