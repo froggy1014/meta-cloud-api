@@ -75,7 +75,7 @@ export type MessagePayloadType<T extends MessageTypesEnum> = T extends MessageTy
  * - {@link MessagesApi.interactiveFlow | interactiveFlow} - Send flow interactive messages
  * - {@link MessagesApi.interactiveCarousel | interactiveCarousel} - Send carousel interactive messages
  * - {@link MessagesApi.reaction | reaction} - Send reaction emoji to a message
- * - {@link MessagesApi.status | status} - Update message status (read, typing)
+ * - {@link MessagesApi.status | status} - Mark a message read, optionally with a typing indicator
  * - {@link MessagesApi.markAsRead | markAsRead} - Mark a message as read
  * - {@link MessagesApi.showTypingIndicator | showTypingIndicator} - Show typing indicator
  *
@@ -569,13 +569,16 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
     }
 
     /**
-     * Updates the status of a message (e.g., mark as read or show typing indicator).
+     * Marks a message as read, optionally showing a typing indicator at the same time.
+     *
+     * The Cloud API only accepts `status: 'read'`; a typing indicator is a read receipt
+     * with `typing_indicator` attached.
      *
      * This is the low-level status method. For convenience, use {@link MessagesApi.markAsRead}
      * or {@link MessagesApi.showTypingIndicator} instead.
      *
      * @param params - The status update parameters
-     * @param params.status - The status to set (e.g., `'read'`, `'typing'`)
+     * @param params.status - Always `'read'`
      * @param params.messageId - The ID of the message to update
      * @param params.typingIndicator - Optional typing indicator configuration
      * @returns A promise resolving to the API response
@@ -629,13 +632,14 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * Shows a typing indicator to the user, indicating that a response is being composed.
      *
      * The typing indicator is displayed for approximately 25 seconds or until a message
-     * is sent, whichever comes first.
+     * is sent, whichever comes first. It also marks the message as read: the request is a
+     * read receipt (`status: 'read'`) with `typing_indicator` attached.
      *
      * @param params - The parameters
      * @param params.messageId - The ID of the incoming message to associate the typing indicator with
      * @returns A promise resolving to the API response
      *
-     * @see {@link https://developers.facebook.com/docs/whatsapp/cloud-api/reference/messages#status-object | Status Object Reference}
+     * @see {@link https://developers.facebook.com/docs/whatsapp/cloud-api/typing-indicators | Typing indicators}
      *
      * @example
      * ```ts
@@ -645,7 +649,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
     async showTypingIndicator(params: { messageId: string }): Promise<m.StatusResponse> {
         const body = {
             messaging_product: WHATSAPP_MESSAGING_PRODUCT,
-            status: 'typing',
+            status: 'read',
             message_id: params.messageId,
             typing_indicator: { type: 'text' },
         };

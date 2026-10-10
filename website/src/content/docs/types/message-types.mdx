@@ -834,11 +834,11 @@ await client.messages.reaction({
 
 ### StatusParams
 
-Message read status and typing indicator.
+Read receipt, optionally with a typing indicator. The Cloud API only accepts `status: 'read'`; `showTypingIndicator` sends a read receipt with `typing_indicator`, so it also marks the message read.
 
 ```typescript
 interface StatusParams {
-    status: string;
+    status: 'read';
     messageId: string;
     typingIndicator?: {
         type: string;
@@ -854,7 +854,7 @@ await client.messages.markAsRead({
     messageId: 'wamid.ABC123...'
 });
 
-// Show typing indicator
+// Show typing indicator (also marks the message read)
 await client.messages.showTypingIndicator({
     messageId: 'wamid.ABC123...'
 });
