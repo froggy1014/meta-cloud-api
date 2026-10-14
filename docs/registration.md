@@ -13,8 +13,10 @@ Register or deregister a phone number with a PIN.
 - Phone number migration between WhatsApp Business Accounts is **not supported** for accounts on the new WhatsApp account model (documented August 18, 2026). Register the number on the destination WABA instead. The SDK exposes no phone number migration endpoint.
 
 ### Embedded Signup integrations
-- Embedded Signup v2 is scheduled for deprecation on **October 8, 2026** (date updated September 8, 2026). Migrate your Embedded Signup integration to v4 before that date to avoid disruption; see Meta's [Versions guide](https://developers.facebook.com/documentation/business-messaging/whatsapp/embedded-signup/versions/).
-- Embedded Signup is configured in your onboarding integration, outside this SDK. This deprecation-date change does not change the SDK's phone number registration endpoints or payloads.
+- Embedded Signup v2 and v3 are deprecated as of **October 15, 2026**, including their public preview versions (`v2-public-preview`, `v3-public-preview`). Requests for those versions, and requests with no version or an invalid one, are served as v4. Features with no v4 equivalent no longer apply.
+- On v4, products such as Marketing Messages Lite are set in your Facebook Login for Business configuration rather than through `featureType`. Create a new configuration to see every product you can use.
+- v2 WABA-only sharing (`featureType: "only_waba_sharing"`) keeps working until **November 16, 2026**, then is served as v4. See Meta's [Versions guide](https://developers.facebook.com/documentation/business-messaging/whatsapp/embedded-signup/versions/).
+- Embedded Signup is configured in your onboarding integration, outside this SDK. The deprecation does not change the SDK's phone number registration endpoints or payloads.
 
 ### Coexistence onboarding on the new account model
 Updated September 22, 2026 for WhatsApp Business app coexistence onboarding and login:

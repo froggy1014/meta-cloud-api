@@ -1,14 +1,26 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-10-10T15:10:31.058Z
+> Updated: 2026-10-14T14:25:56.920Z
 
+
+## October 15, 2026
+
+- [x] **#477** Embedded Signup v2 and v3 are deprecated and served as v4.
+
+  SDK impact: Embedded Signup runs in the partner's front-end onboarding integration, outside this SDK. Documented in [Registration](docs/registration.md#embedded-signup-integrations), replacing the earlier v2-only October 8 note: since October 15, 2026, v2, v3, their public previews, and requests with no or an invalid version are served as v4, and features with no v4 equivalent no longer apply; products such as Marketing Messages Lite are chosen in the Facebook Login for Business configuration; v2 `only_waba_sharing` keeps working until November 16, 2026. No endpoint, payload, or webhook type change.
 
 ## October 12, 2026
 
 - [x] **#475** Added a subtype field to the pricing object of status messages webhooks to identify service messages that are free for eligible governments and non-profits.
 
   SDK impact: Added optional `subtype?: 'paid_exempt'` to `StatusWebhook['pricing']`. Meta includes it only on service messages that are free because the organization is eligible for the pricing policy for eligible governments and non-profits; those deliveries keep `type: 'free_customer_service'` (or `'free_group_customer_service'`) and `billable: false`, so `subtype` is the only marker. The `pricing.type` doc comment no longer says Meta documents no exemption marker, a `WebhookProcessor` test covers the field reaching `onStatus`, and [Messages](docs/messages.md) documents it with an example. Meta's planned eligibility check (by October 30, 2026) and eligibility review request are not available yet and are not wrapped. No endpoint or request payload change.
+
+## October 9, 2026
+
+- [x] **#476** Clarified that SIP requires an IP allowlist for signaling and media, and that firewall rules should match the packet source IP address.
+
+  SDK impact: Network configuration guidance only. Documented in [Calling](docs/calling.md#notes): SIP uses the Cloud API webhook IP addresses, which must be allowlisted for both SIP signaling and media; the webhook mTLS alternative does not apply to SIP (Meta-initiated connections only, and never media); firewall rules should match each packet's source IP address, not SIP header addresses such as `Via`. The SIP settings payload (`include_sip_credentials`, `webhook_delivery`) is unchanged; no endpoint, payload, or webhook type change.
 
 ## October 8, 2026
 
@@ -1315,4 +1327,4 @@
 
 ---
 
-**Progress: 469/476 (99%)**
+**Progress: 471/478 (99%)**
