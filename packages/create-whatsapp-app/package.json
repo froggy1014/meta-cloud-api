@@ -14,7 +14,7 @@
         "node": ">=20"
     },
     "config": {
-        "sdkVersion": "3.7.0"
+        "sdkVersion": "3.9.0"
     },
     "keywords": [
         "whatsapp",

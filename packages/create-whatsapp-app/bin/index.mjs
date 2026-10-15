@@ -166,7 +166,7 @@ async function main() {
     const verifyToken = randomBytes(12).toString('hex');
     const vars = {
         PROJECT_NAME: toPackageName(dir),
-        SDK_VERSION: PKG.config?.sdkVersion || '3.7.0',
+        SDK_VERSION: PKG.config?.sdkVersion || '3.9.0',
         PM_RUN: pmRun,
         VERIFY_TOKEN: verifyToken,
         DASHBOARD_PASSWORD: randomBytes(24).toString('hex'),
