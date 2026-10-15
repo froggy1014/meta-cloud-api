@@ -1,11 +1,16 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-10-14T14:25:56.920Z
+> Updated: 2026-10-15T14:03:55.466Z
 
+
+## October 20, 2026
+
+- [ ] **#479** Embedded Signup v5 and v5-public-preview are available.
 
 ## October 15, 2026
 
+- [ ] **#478** Embedded Signup version updates. Türkiye added as an in-scope market for AI Provider pricing.
 - [x] **#477** Embedded Signup v2 and v3 are deprecated and served as v4.
 
   SDK impact: Embedded Signup runs in the partner's front-end onboarding integration, outside this SDK. Documented in [Registration](docs/registration.md#embedded-signup-integrations), replacing the earlier v2-only October 8 note: since October 15, 2026, v2, v3, their public previews, and requests with no or an invalid version are served as v4, and features with no v4 equivalent no longer apply; products such as Marketing Messages Lite are chosen in the Facebook Login for Business configuration; v2 `only_waba_sharing` keeps working until November 16, 2026. No endpoint, payload, or webhook type change.
@@ -1327,4 +1332,4 @@
 
 ---
 
-**Progress: 471/478 (99%)**
+**Progress: 471/480 (98%)**
