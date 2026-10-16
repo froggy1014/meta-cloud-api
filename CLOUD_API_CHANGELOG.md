@@ -1,7 +1,7 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-10-15T14:03:55.466Z
+> Updated: 2026-10-16T13:52:07.993Z
 
 
 ## October 20, 2026
@@ -10,6 +10,8 @@
 
 ## October 15, 2026
 
+- [ ] **#481** Embedded Signup version updates. Türkiye added as an in-scope market for AI Provider pricing. Group messages can now be marked as read.
+- [ ] **#480** Direct Send messages are subject to business portfolio pacing, with pacing outcomes reported through status messages webhooks.
 - [ ] **#478** Embedded Signup version updates. Türkiye added as an in-scope market for AI Provider pricing.
 - [x] **#477** Embedded Signup v2 and v3 are deprecated and served as v4.
 
@@ -1332,4 +1334,4 @@
 
 ---
 
-**Progress: 471/480 (98%)**
+**Progress: 471/482 (98%)**
