@@ -6,13 +6,21 @@
 
 ## October 20, 2026
 
-- [ ] **#479** Embedded Signup v5 and v5-public-preview are available.
+- [x] **#479** Embedded Signup v5 and v5-public-preview are available.
+
+  SDK impact: Embedded Signup runs in the partner's front-end onboarding integration, outside this SDK. Documented in [Registration](docs/registration.md#embedded-signup-integrations): v5 and `v5-public-preview` turn WhatsApp Business app onboarding on by default with an opt-out, drop `sessionInfoVersion`, and add `messaging_account_ids`, `primary_waac_ids`, and `is_on_biz_app` to the session info object (a browser `message` event payload, not a Graph API response or webhook). Meta's Versions guide did not list v5 yet when this was applied, so the note is based on the changelog text and points readers to the guide for the `extras` shape. No endpoint, payload, or webhook type change.
 
 ## October 15, 2026
 
-- [ ] **#481** Embedded Signup version updates. Türkiye added as an in-scope market for AI Provider pricing. Group messages can now be marked as read.
-- [ ] **#480** Direct Send messages are subject to business portfolio pacing, with pacing outcomes reported through status messages webhooks.
-- [ ] **#478** Embedded Signup version updates. Türkiye added as an in-scope market for AI Provider pricing.
+- [x] **#481** Embedded Signup version updates. Türkiye added as an in-scope market for AI Provider pricing. Group messages can now be marked as read.
+
+  SDK impact: The Embedded Signup part is the v2/v3 deprecation already documented under #477. Türkiye (+90) is documented in [Messages](docs/messages.md#status-webhook-pricing-october-1-2026): from October 15, 2026 AI Providers can send service messages there and Meta does not charge through at least April 11, 2027; the policy applies only to service messages. Group mark-as-read needs no code change because `client.messages.markAsRead({ messageId })` already sends `status: 'read'` with any wamid; [Messages](docs/messages.md#notes) and [Groups](docs/groups.md#notes) now note that the `message.id` comes from the group's `messages` webhook and that each group message must be marked individually, since earlier messages are not marked as read. No endpoint, payload, or webhook type change.
+- [x] **#480** Direct Send messages are subject to business portfolio pacing, with pacing outcomes reported through status messages webhooks.
+
+  SDK impact: Documented in [Direct Send](docs/direct-send.md#notes): a paced Direct Send message may be held and delivered later or dropped, and the outcome is reported only through `messages` status webhooks; a dropped message arrives as `status: 'failed'` with error `135000`. `135000` is already in `WHATSAPP_ERROR_CODES`, and `StatusWebhook` already carries `errors`, so no type or error-code change. No endpoint or payload change.
+- [x] **#478** Embedded Signup version updates. Türkiye added as an in-scope market for AI Provider pricing.
+
+  SDK impact: Duplicate of #481, which republished the same October 15, 2026 entry with group mark-as-read added. Covered there: the Embedded Signup deprecation under #477 and Türkiye AI Provider pricing in [Messages](docs/messages.md#status-webhook-pricing-october-1-2026). No SDK change.
 - [x] **#477** Embedded Signup v2 and v3 are deprecated and served as v4.
 
   SDK impact: Embedded Signup runs in the partner's front-end onboarding integration, outside this SDK. Documented in [Registration](docs/registration.md#embedded-signup-integrations), replacing the earlier v2-only October 8 note: since October 15, 2026, v2, v3, their public previews, and requests with no or an invalid version are served as v4, and features with no v4 equivalent no longer apply; products such as Marketing Messages Lite are chosen in the Facebook Login for Business configuration; v2 `only_waba_sharing` keeps working until November 16, 2026. No endpoint, payload, or webhook type change.
@@ -1334,4 +1342,4 @@
 
 ---
 
-**Progress: 471/482 (98%)**
+**Progress: 475/482 (99%)**

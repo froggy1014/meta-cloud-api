@@ -20,6 +20,7 @@ Create groups, manage join requests, invite links, participants, and settings.
 - `join_approval_mode` can be `auto_approve` or `approval_required`.
 - Participant removal supports up to 8 users per request.
 - Group settings updates can include a profile picture file.
+- Mark a group message as read with `client.messages.markAsRead({ messageId })`, using the `message.id` from the group's `messages` webhook (supported since October 15, 2026). Each call marks only that message; earlier group messages are not marked as read, unlike 1:1 chats. See Meta's [Mark a group message as read](https://developers.facebook.com/documentation/business-messaging/whatsapp/messages/mark-message-as-read#mark-a-group-message-as-read).
 
 ## Example
 ```ts

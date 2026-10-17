@@ -18,6 +18,7 @@ Eligibility (updated October 8, 2026): business portfolios with a messaging limi
 - `preview_url` is ignored — Direct Send messages do not render a URL preview.
 - `directSendConfig.template_name` pins message-to-template attribution (utility only). Names must match `^[a-z0-9_]+$` and be unique within the WABA.
 - The message-status webhook carries an extra `template_id` field for Direct Send messages.
+- Message pacing (October 15, 2026): Direct Send messages are subject to business portfolio pacing. A paced message may be held and delivered later, or dropped. Outcomes are reported only through `messages` status webhooks, never on the send response: a dropped message arrives as `status: 'failed'` with error code `135000` in `errors`. A send that returns `message_status: 'accepted'` is therefore not a delivery guarantee; subscribe to the `messages` webhook field and handle `135000` in `onStatus`. `135000` is already in `WHATSAPP_ERROR_CODES`. See Meta's [Message pacing](https://developers.facebook.com/documentation/business-messaging/whatsapp/direct-send/supported-features-and-limits#message-pacing).
 - Sending a `category` from an ineligible WABA returns error `100` with `error_data.details` "Parameter Invalid: The 'category' value requires Direct Send, which isn't enabled for this account. Use an approved message template instead."
 
 ## Example
