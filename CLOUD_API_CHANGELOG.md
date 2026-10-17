@@ -1,7 +1,7 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-10-16T13:52:07.993Z
+> Updated: 2026-10-17T12:51:39.011Z
 
 
 ## October 20, 2026
@@ -10,8 +10,13 @@
 
   SDK impact: Embedded Signup runs in the partner's front-end onboarding integration, outside this SDK. Documented in [Registration](docs/registration.md#embedded-signup-integrations): v5 and `v5-public-preview` turn WhatsApp Business app onboarding on by default with an opt-out, drop `sessionInfoVersion`, and add `messaging_account_ids`, `primary_waac_ids`, and `is_on_biz_app` to the session info object (a browser `message` event payload, not a Graph API response or webhook). Meta's Versions guide did not list v5 yet when this was applied, so the note is based on the changelog text and points readers to the guide for the `extras` shape. No endpoint, payload, or webhook type change.
 
+## October 16, 2026
+
+- [ ] **#483** Documented the Pix App-Switch experience for Brazil order details and payment request CTA messages, selected with the new flow_type field in pix_dynamic_code.
+
 ## October 15, 2026
 
+- [ ] **#482** Added Max price billing SKU, which describes the November 1 invoice, Pricing Analytics API, Template Analytics API, and pricing webhook identifiers for max price traffic.
 - [x] **#481** Embedded Signup version updates. Türkiye added as an in-scope market for AI Provider pricing. Group messages can now be marked as read.
 
   SDK impact: The Embedded Signup part is the v2/v3 deprecation already documented under #477. Türkiye (+90) is documented in [Messages](docs/messages.md#status-webhook-pricing-october-1-2026): from October 15, 2026 AI Providers can send service messages there and Meta does not charge through at least April 11, 2027; the policy applies only to service messages. Group mark-as-read needs no code change because `client.messages.markAsRead({ messageId })` already sends `status: 'read'` with any wamid; [Messages](docs/messages.md#notes) and [Groups](docs/groups.md#notes) now note that the `message.id` comes from the group's `messages` webhook and that each group message must be marked individually, since earlier messages are not marked as read. No endpoint, payload, or webhook type change.
@@ -1342,4 +1347,4 @@
 
 ---
 
-**Progress: 475/482 (99%)**
+**Progress: 475/484 (98%)**
