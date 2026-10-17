@@ -12,6 +12,7 @@ Send text, media, template, interactive, and reaction messages through the Cloud
 - `type` must match the body key (e.g., `type: "text"` with a `text` object).
 - Use `context.message_id` to reply to a specific message.
 - Add `category: 'utility' | 'authentication'` to send business-initiated messages without a pre-approved template. See [Direct Send](./direct-send.md).
+- `client.messages.markAsRead({ messageId })` also marks group messages as read (October 15, 2026): pass the `message.id` from the group's `messages` webhook. Unlike 1:1 chats, marking a group message as read does **not** mark earlier messages in that group as read, so mark each group message individually. See Meta's [Mark a group message as read](https://developers.facebook.com/documentation/business-messaging/whatsapp/messages/mark-message-as-read#mark-a-group-message-as-read).
 
 ## Prepaid billing (India)
 Accounts in India that fund a WhatsApp Business account by UPI are on prepaid billing (documented September 8, 2026). Funding and balance live in the Billing Hub — there is no API to add funds or read the balance — but the send path behaves differently:
@@ -52,6 +53,8 @@ Whatsapp.processor.onStatus((_wa, { status }) => {
 ```
 
 Meta plans a way to check eligibility across the Messaging accounts you manage by October 30, 2026, and a way to request an eligibility review; neither is available yet, so the SDK does not wrap them.
+
+AI Provider pricing in Türkiye (October 15, 2026): Meta added Türkiye (+90) as an in-scope market of the [pricing policy for AI Providers](https://developers.facebook.com/documentation/business-messaging/whatsapp/pricing/ai-providers). From October 15, 2026, AI Providers can send service messages to users in Türkiye, and Meta does not charge for them through at least April 11, 2027. The page also clarifies that the AI Provider policy applies only to service messages (`pricing.category: 'service'`). Whether a business is an AI Provider is decided by Meta; the status webhook carries no AI Provider marker, so reconcile against the AI Provider rate cards. Billing change only.
 
 Pricing page restructure (documented September 30, 2026): Meta rewrote [Pricing on the WhatsApp Business Platform](https://developers.facebook.com/documentation/business-messaging/whatsapp/pricing/) around the rates and policies effective October 1, 2026 (by Messaging account timezone). The page now opens with a summary table per message category, then covers what Meta charges for, when it does not charge (free entry point window, monthly free tier of service messages), and volume tiers; earlier rate and policy updates moved under *Prior updates to pricing and rates*. The rate card table gained a *Launched in 2026?* column and offers list rates (CSV), utility/authentication volume tiers (CSV), and combined rates and volume tiers (PDF) for all 16 supported currencies. The previous page is archived as *Pricing (deprecated)*, and existing deep links resolve to the matching section of the new page. Rates are not exposed by any Graph API endpoint this SDK wraps; read them from the rate cards and reconcile charges with `pricing_analytics`.
 
