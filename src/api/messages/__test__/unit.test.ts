@@ -579,6 +579,52 @@ describe('Messages API - Unit Tests', () => {
                 },
             });
         });
+
+        // Changelog entry #483
+        it('should send a Pix App-Switch payment request with flow_type inside pix_dynamic_code', async () => {
+            const templateParams: MessageRequestParams<MessageTemplateObject<ComponentTypesEnum>> = {
+                to: '5511999999999',
+                body: {
+                    name: 'payment_request_template',
+                    language: { policy: 'deterministic', code: 'pt_BR' },
+                    components: [
+                        {
+                            type: ComponentTypesEnum.Button,
+                            sub_type: SubTypeEnum.PaymentRequest,
+                            index: ButtonPositionEnum.First,
+                            parameters: [
+                                {
+                                    type: ParametersTypesEnum.Action,
+                                    action: {
+                                        payment_request: {
+                                            payment_setting: {
+                                                type: 'pix_dynamic_code',
+                                                pix_dynamic_code: {
+                                                    code: '00020101021226700014br.gov.bcb.pix',
+                                                    flow_type: 'APPSWITCH',
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                },
+            };
+
+            await whatsApp.messages.template(templateParams);
+
+            const [_, __, ___, body] = mockRequestSend.mock.calls[0];
+            const requestBody = JSON.parse(body);
+
+            expect(requestBody.template.components[0].parameters[0].action.payment_request).toEqual({
+                payment_setting: {
+                    type: 'pix_dynamic_code',
+                    pix_dynamic_code: { code: '00020101021226700014br.gov.bcb.pix', flow_type: 'APPSWITCH' },
+                },
+            });
+        });
     });
 
     describe('Message Status Operations', () => {

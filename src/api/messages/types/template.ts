@@ -97,7 +97,18 @@ export type PaymentRequestAmount = {
 };
 
 export type PaymentRequestSetting =
-    | { type: 'pix_dynamic_code'; pix_dynamic_code: { code: string } }
+    | {
+          type: 'pix_dynamic_code';
+          pix_dynamic_code: {
+              code: string;
+              /**
+               * Pix payment experience. `APPSWITCH` opens the buyer's bank app with the
+               * payment filled in (requires onboarding by Meta); `COPYPASTE` or omitted
+               * keeps the copy and paste experience.
+               */
+              flow_type?: 'APPSWITCH' | 'COPYPASTE';
+          };
+      }
     | { type: 'boleto'; boleto: { digitable_line: string } }
     | { type: 'payment_link'; payment_link: { uri: string } }
     | {
