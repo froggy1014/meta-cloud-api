@@ -12,11 +12,15 @@
 
 ## October 16, 2026
 
-- [ ] **#483** Documented the Pix App-Switch experience for Brazil order details and payment request CTA messages, selected with the new flow_type field in pix_dynamic_code.
+- [x] **#483** Documented the Pix App-Switch experience for Brazil order details and payment request CTA messages, selected with the new flow_type field in pix_dynamic_code.
+
+  SDK impact: Added optional `flow_type?: 'APPSWITCH' | 'COPYPASTE'` to the send-time `pix_dynamic_code` object on `PaymentRequestSetting`, so `client.messages.template` payment request CTA buttons can select Pix App-Switch (omitted or `COPYPASTE` keeps copy and paste). Documented in [Templates](docs/templates.md#payment-request-cta-templates-brazil-october-5-2026), including the Meta onboarding requirement and the fallback to the Pix code for buyers App-Switch cannot reach. Order details (`review_and_pay`) interactive messages are not typed by the SDK, so the same `pix_dynamic_code.flow_type` there needs no SDK change. Meta documents `flow_type` for sending only, so the template-creation sample `PaymentRequestButtonSetting` is unchanged.
 
 ## October 15, 2026
 
-- [ ] **#482** Added Max price billing SKU, which describes the November 1 invoice, Pricing Analytics API, Template Analytics API, and pricing webhook identifiers for max price traffic.
+- [x] **#482** Added Max price billing SKU, which describes the November 1 invoice, Pricing Analytics API, Template Analytics API, and pricing webhook identifiers for max price traffic.
+
+  SDK impact: Added `'marketing_lite_dynamic'` to `StatusWebhook['pricing'].category`; from November 1, 2026 Marketing Messages API messages charged at a max price arrive with it, while published-rate traffic keeps `marketing_lite`. Documented in [Marketing Messages](docs/marketing-messages.md#max-price-billing-sku-from-november-1-2026): the new Pricing Analytics `pricing_category` value `MARKETING_LITE_DYNAMIC`, the Template Analytics `cost[].type` values (`amount_spent_publish_rate`, `amount_spent_max_price`, and the coming-soon `cost_per_delivered_*` splits), and the separate List / Max Price invoice line items. The SDK does not wrap the Pricing or Template Analytics endpoints, so those values are documented only. No request parameter or subscription change.
 - [x] **#481** Embedded Signup version updates. Türkiye added as an in-scope market for AI Provider pricing. Group messages can now be marked as read.
 
   SDK impact: The Embedded Signup part is the v2/v3 deprecation already documented under #477. Türkiye (+90) is documented in [Messages](docs/messages.md#status-webhook-pricing-october-1-2026): from October 15, 2026 AI Providers can send service messages there and Meta does not charge through at least April 11, 2027; the policy applies only to service messages. Group mark-as-read needs no code change because `client.messages.markAsRead({ messageId })` already sends `status: 'read'` with any wamid; [Messages](docs/messages.md#notes) and [Groups](docs/groups.md#notes) now note that the `message.id` comes from the group's `messages` webhook and that each group message must be marked individually, since earlier messages are not marked as read. No endpoint, payload, or webhook type change.
@@ -1347,4 +1351,4 @@
 
 ---
 
-**Progress: 475/484 (98%)**
+**Progress: 477/484 (98%)**

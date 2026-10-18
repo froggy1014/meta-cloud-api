@@ -92,6 +92,12 @@ export interface StatusWebhook {
          * pricing category with a hyphen, unlike the `conversation.origin.type`
          * value `authentication_international`. The underscored spelling is kept
          * for payloads that still use it.
+         *
+         * From November 1, 2026 Marketing Messages API messages charged at a max
+         * price arrive as `marketing_lite_dynamic`; published-rate traffic keeps
+         * `marketing_lite`.
+         *
+         * @see {@link https://developers.facebook.com/documentation/business-messaging/whatsapp/marketing-messages/pricing/max-price-billing-sku | Max price billing SKU}
          */
         category:
             | 'authentication'
@@ -102,6 +108,7 @@ export interface StatusWebhook {
             | 'group_utility'
             | 'marketing'
             | 'marketing_lite'
+            | 'marketing_lite_dynamic'
             | 'referral_conversion'
             | 'service'
             | 'utility';
