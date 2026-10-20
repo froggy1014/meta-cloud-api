@@ -1,7 +1,7 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-10-17T12:51:39.011Z
+> Updated: 2026-10-20T14:13:14.900Z
 
 
 ## October 20, 2026
@@ -10,8 +10,13 @@
 
   SDK impact: Embedded Signup runs in the partner's front-end onboarding integration, outside this SDK. Documented in [Registration](docs/registration.md#embedded-signup-integrations): v5 and `v5-public-preview` turn WhatsApp Business app onboarding on by default with an opt-out, drop `sessionInfoVersion`, and add `messaging_account_ids`, `primary_waac_ids`, and `is_on_biz_app` to the session info object (a browser `message` event payload, not a Graph API response or webhook). Meta's Versions guide did not list v5 yet when this was applied, so the note is based on the changelog text and points readers to the guide for the `extras` shape. No endpoint, payload, or webhook type change.
 
+## October 19, 2026
+
+- [ ] **#486** Increased the maximum number of bid_country_multiplier_overrides entries from 50 to 240 per template.
+
 ## October 16, 2026
 
+- [ ] **#485** Documented the Pix with redirect experience for Brazil order details and payment request CTA messages, selected with the new flow_type field in pix_dynamic_code.
 - [x] **#483** Documented the Pix App-Switch experience for Brazil order details and payment request CTA messages, selected with the new flow_type field in pix_dynamic_code.
 
   SDK impact: Added optional `flow_type?: 'APPSWITCH' | 'COPYPASTE'` to the send-time `pix_dynamic_code` object on `PaymentRequestSetting`, so `client.messages.template` payment request CTA buttons can select Pix App-Switch (omitted or `COPYPASTE` keeps copy and paste). Documented in [Templates](docs/templates.md#payment-request-cta-templates-brazil-october-5-2026), including the Meta onboarding requirement and the fallback to the Pix code for buyers App-Switch cannot reach. Order details (`review_and_pay`) interactive messages are not typed by the SDK, so the same `pix_dynamic_code.flow_type` there needs no SDK change. Meta documents `flow_type` for sending only, so the template-creation sample `PaymentRequestButtonSetting` is unchanged.
@@ -33,6 +38,10 @@
 - [x] **#477** Embedded Signup v2 and v3 are deprecated and served as v4.
 
   SDK impact: Embedded Signup runs in the partner's front-end onboarding integration, outside this SDK. Documented in [Registration](docs/registration.md#embedded-signup-integrations), replacing the earlier v2-only October 8 note: since October 15, 2026, v2, v3, their public previews, and requests with no or an invalid version are served as v4, and features with no v4 equivalent no longer apply; products such as Marketing Messages Lite are chosen in the Facebook Login for Business configuration; v2 `only_waba_sharing` keeps working until November 16, 2026. No endpoint, payload, or webhook type change.
+
+## October 14, 2026
+
+- [ ] **#484** Direct Send authentication messages now support interactive copy code OTP experiences.
 
 ## October 12, 2026
 
@@ -1351,4 +1360,4 @@
 
 ---
 
-**Progress: 477/484 (98%)**
+**Progress: 477/487 (98%)**
