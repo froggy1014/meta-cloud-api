@@ -97,6 +97,16 @@ const ARG_OVERRIDES: Record<string, () => unknown[]> = {
             },
         },
     ],
+    'messages.interactiveOtp': () => [
+        {
+            to: DUMMY_ID,
+            body: {
+                type: 'button',
+                body: { text: 'Your verification code is 123456.' },
+                action: { buttons: [{ type: 'otp', otp: { code: '123456', otp_type: 'copy_code' } }] },
+            },
+        },
+    ],
     'threadControl.pass': () => [{ to: DUMMY_ID }],
     'threadControl.release': () => [{ to: DUMMY_ID }],
     'threadControl.take': () => [{ to: DUMMY_ID }],

@@ -200,6 +200,14 @@ export type TemplateOptimizationSpec = {
      * converting it to the smallest unit.
      */
     bid_amount: number;
+    /**
+     * Per-country bid multipliers keyed by ISO 3166-1 alpha-2 country code
+     * (for example `{ IN: 1.2, MX: 0.8 }`). Meta multiplies `bid_amount` by the
+     * recipient country's value; unlisted countries use `1.0`. Each multiplier
+     * must be greater than 0 and at most 10. Up to 240 entries per template
+     * (raised from 50 on October 19, 2026).
+     */
+    bid_country_multiplier_overrides?: Record<string, number>;
 };
 
 /**

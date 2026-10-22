@@ -12,7 +12,7 @@ Send business-initiated utility and authentication messages through the standard
 Direct Send removes the pre-approved template step from business-initiated messaging. Add a top-level `category` to any supported message and the Cloud API creates or matches a template for you:
 
 - **Utility messages**: Generally available since July 31, 2026
-- **Authentication messages**: Access restricted, text only
+- **Authentication messages**: Access restricted (beta); text, or an interactive OTP copy code button via `client.messages.interactiveOtp` (since October 14, 2026)
 - **Business-named templates**: Pin attribution with `direct_send_config.template_name`
 - **Call on WhatsApp**: Voice call button that lets users tap to call your business
 

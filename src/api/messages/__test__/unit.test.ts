@@ -719,6 +719,54 @@ describe('Messages API - Unit Tests', () => {
             expect(requestBody).not.toHaveProperty('direct_send_config');
         });
 
+        it('should send an OTP copy code button message with authentication category by default', async () => {
+            await whatsApp.messages.interactiveOtp({
+                to: '1234567890',
+                body: {
+                    type: InteractiveTypesEnum.Button,
+                    body: { text: 'Your verification code is 123456.' },
+                    action: {
+                        buttons: [
+                            {
+                                type: 'otp',
+                                otp: {
+                                    code: '123456',
+                                    otp_type: 'copy_code',
+                                    text: 'Copy Code',
+                                    code_expiration_minutes: 10,
+                                },
+                            },
+                        ],
+                    },
+                },
+            });
+
+            const [_, __, ___, body] = mockRequestSend.mock.calls[0];
+
+            expect(JSON.parse(body)).toMatchObject({
+                to: '1234567890',
+                type: 'interactive',
+                category: 'authentication',
+                interactive: {
+                    type: 'button',
+                    body: { text: 'Your verification code is 123456.' },
+                    action: {
+                        buttons: [
+                            {
+                                type: 'otp',
+                                otp: {
+                                    code: '123456',
+                                    otp_type: 'copy_code',
+                                    text: 'Copy Code',
+                                    code_expiration_minutes: 10,
+                                },
+                            },
+                        ],
+                    },
+                },
+            });
+        });
+
         it('should send a voice call button message with utility category by default', async () => {
             await whatsApp.messages.interactiveVoiceCall({
                 to: '1234567890',

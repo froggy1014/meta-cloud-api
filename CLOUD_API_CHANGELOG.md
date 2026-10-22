@@ -12,11 +12,15 @@
 
 ## October 19, 2026
 
-- [ ] **#486** Increased the maximum number of bid_country_multiplier_overrides entries from 50 to 240 per template.
+- [x] **#486** Increased the maximum number of bid_country_multiplier_overrides entries from 50 to 240 per template.
+
+  SDK impact: Added the optional `bid_country_multiplier_overrides?: Record<string, number>` map to `TemplateOptimizationSpec`, so `client.templates.createTemplate` / `updateTemplate` can set per-country bid multipliers inside `optimization_spec` (ISO 3166-1 alpha-2 keys, multipliers greater than 0 and at most 10, up to 240 entries). Documented in [Marketing Messages](docs/marketing-messages.md#max-price-optimization_spec). No endpoint or webhook change.
 
 ## October 16, 2026
 
-- [ ] **#485** Documented the Pix with redirect experience for Brazil order details and payment request CTA messages, selected with the new flow_type field in pix_dynamic_code.
+- [x] **#485** Documented the Pix with redirect experience for Brazil order details and payment request CTA messages, selected with the new flow_type field in pix_dynamic_code.
+
+  SDK impact: Same feature as #483 under Meta's new name — "Pix with redirect" replaces "Pix App-Switch" in the docs, while the field and value (`pix_dynamic_code.flow_type: 'APPSWITCH'`) are unchanged. Updated the `PaymentRequestSetting` JSDoc and [Templates](docs/templates.md#payment-request-cta-templates-brazil-october-5-2026) wording; no type, endpoint, payload, or webhook change.
 - [x] **#483** Documented the Pix App-Switch experience for Brazil order details and payment request CTA messages, selected with the new flow_type field in pix_dynamic_code.
 
   SDK impact: Added optional `flow_type?: 'APPSWITCH' | 'COPYPASTE'` to the send-time `pix_dynamic_code` object on `PaymentRequestSetting`, so `client.messages.template` payment request CTA buttons can select Pix App-Switch (omitted or `COPYPASTE` keeps copy and paste). Documented in [Templates](docs/templates.md#payment-request-cta-templates-brazil-october-5-2026), including the Meta onboarding requirement and the fallback to the Pix code for buyers App-Switch cannot reach. Order details (`review_and_pay`) interactive messages are not typed by the SDK, so the same `pix_dynamic_code.flow_type` there needs no SDK change. Meta documents `flow_type` for sending only, so the template-creation sample `PaymentRequestButtonSetting` is unchanged.
@@ -41,7 +45,9 @@
 
 ## October 14, 2026
 
-- [ ] **#484** Direct Send authentication messages now support interactive copy code OTP experiences.
+- [x] **#484** Direct Send authentication messages now support interactive copy code OTP experiences.
+
+  SDK impact: Added `OtpButtonObject` (`{ type: 'otp', otp: { code, otp_type: 'copy_code', text?, code_expiration_minutes? } }`) to the interactive `action.buttons` union and a `client.messages.interactiveOtp` convenience method that sends the `type: 'button'` interactive message with `category: 'authentication'` by default. Documented in [Direct Send](docs/direct-send.md#notes): exactly one button, the code (4 to 10 ASCII alphanumeric characters) must also appear standalone in `body.text`, label max 25 characters, expiry 1 to 90 minutes (default 10), no business-scoped user IDs, beta by request. No endpoint or webhook change.
 
 ## October 12, 2026
 
@@ -1360,4 +1366,4 @@
 
 ---
 
-**Progress: 477/487 (98%)**
+**Progress: 480/487 (99%)**
