@@ -1,8 +1,12 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-10-20T14:13:14.900Z
+> Updated: 2026-10-23T14:09:32.483Z
 
+
+## October 22, 2026
+
+- [ ] **#487** Added the Embedded Signup display name screen, where business customers choose the display name for their business phone number.
 
 ## October 20, 2026
 
@@ -1366,4 +1370,4 @@
 
 ---
 
-**Progress: 480/487 (99%)**
+**Progress: 480/488 (98%)**
