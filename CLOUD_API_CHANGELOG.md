@@ -1,11 +1,16 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-10-23T14:09:32.483Z
+> Updated: 2026-10-24T13:12:43.464Z
 
+
+## October 30, 2026
+
+- [ ] **#489** Added the service_pricing_policy field to WhatsApp Business accounts.
 
 ## October 22, 2026
 
+- [ ] **#488** Updated the Embedded Signup default flow documentation.
 - [ ] **#487** Added the Embedded Signup display name screen, where business customers choose the display name for their business phone number.
 
 ## October 20, 2026
@@ -1370,4 +1375,4 @@
 
 ---
 
-**Progress: 480/488 (98%)**
+**Progress: 480/490 (98%)**
