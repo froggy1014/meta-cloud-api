@@ -12,7 +12,7 @@ Eligibility (updated October 8, 2026): business portfolios with a messaging limi
 
 ## Notes
 - `category` accepts `'utility'`, `'authentication'`, or `'service'`. Omitting it is equivalent to `'service'` and keeps normal free-form send behavior.
-- `'authentication'` is access restricted, cannot be sent to a business-scoped user ID, and supports text only.
+- `'authentication'` is access restricted (beta by request) and cannot be sent to a business-scoped user ID. It supports text messages and, since October 14, 2026, interactive one-time password (OTP) messages with a copy code button: `type: 'interactive'`, `interactive.type: 'button'`, and exactly one `{ type: 'otp', otp: { code, otp_type: 'copy_code', text?, code_expiration_minutes? } }` button (typed as `OtpButtonObject`). `code` is 4 to 10 ASCII alphanumeric characters and must also appear as a standalone value in `interactive.body.text`; `text` defaults to "Copy Code" (max 25 characters); `code_expiration_minutes` is 1 to 90 and defaults to 10. `client.messages.interactiveOtp` sends it with `category: 'authentication'` by default.
 - Supported utility formats: text, CTA URL buttons, reply buttons, mixed buttons (10 total, max 2 CTA), image/video/document headers, custom TTL, and the voice call button.
 - Not supported: marketing messages, PSTN phone number buttons, address, audio, contacts, location, sticker, and reaction messages.
 - `preview_url` is ignored — Direct Send messages do not render a URL preview.
@@ -49,12 +49,24 @@ await client.messages.interactiveVoiceCall({
     },
   },
 });
+
+await client.messages.interactiveOtp({
+  to: '15551234567',
+  body: {
+    type: InteractiveTypesEnum.Button,
+    body: { text: 'Your verification code is 123456.' },
+    action: {
+      buttons: [{ type: 'otp', otp: { code: '123456', otp_type: 'copy_code', code_expiration_minutes: 10 } }],
+    },
+  },
+});
 ```
 
 ## Example Details
 - `category` is accepted by every `client.messages.*` send method and is serialized as the top-level `category` field.
 - `directSendConfig` maps to `direct_send_config` and is only applied alongside `category`.
 - `interactiveVoiceCall` defaults `category` to `'utility'` because the "Call on WhatsApp" button is a Direct Send–only type.
+- `interactiveOtp` defaults `category` to `'authentication'`; the OTP copy code button is only valid on Direct Send authentication messages, which must contain exactly that one button.
 - The voice call button must be sent on its own — it cannot be combined with CTA URL or reply buttons, and footers are not allowed.
 - `display_text` defaults to "Call on WhatsApp" (max 20 characters); `ttl_minutes` accepts 1–43200 and defaults to 10080 (7 days).
 - Calling must already be enabled on the phone number (`client.calling.updateCallingSettings` with `calling.status: 'ENABLED'`) and the app subscribed to the `calls` webhook field, otherwise the send fails with error `138000`.

@@ -102,9 +102,11 @@ export type PaymentRequestSetting =
           pix_dynamic_code: {
               code: string;
               /**
-               * Pix payment experience. `APPSWITCH` opens the buyer's bank app with the
-               * payment filled in (requires onboarding by Meta); `COPYPASTE` or omitted
-               * keeps the copy and paste experience.
+               * Pix payment experience. `APPSWITCH` is "Pix with redirect" (Meta's name
+               * since October 16, 2026; formerly App-Switch): the buyer picks their bank
+               * inside WhatsApp and authorizes the payment in the bank app (requires
+               * onboarding by Meta). `COPYPASTE` or omitted keeps the copy and paste
+               * experience.
                */
               flow_type?: 'APPSWITCH' | 'COPYPASTE';
           };

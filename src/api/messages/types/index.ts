@@ -17,7 +17,7 @@ export type {
     StatusResponse,
 } from './common';
 export type { ContactObject } from './contact';
-export type { InteractiveObject } from './interactive';
+export type { InteractiveObject, OtpButtonObject } from './interactive';
 export type { LocationObject } from './location';
 export type {
     AudioMediaObject,

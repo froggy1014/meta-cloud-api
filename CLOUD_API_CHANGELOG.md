@@ -1,8 +1,17 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-10-17T12:51:39.011Z
+> Updated: 2026-10-24T13:12:43.464Z
 
+
+## October 30, 2026
+
+- [ ] **#489** Added the service_pricing_policy field to WhatsApp Business accounts.
+
+## October 22, 2026
+
+- [ ] **#488** Updated the Embedded Signup default flow documentation.
+- [ ] **#487** Added the Embedded Signup display name screen, where business customers choose the display name for their business phone number.
 
 ## October 20, 2026
 
@@ -10,8 +19,17 @@
 
   SDK impact: Embedded Signup runs in the partner's front-end onboarding integration, outside this SDK. Documented in [Registration](docs/registration.md#embedded-signup-integrations): v5 and `v5-public-preview` turn WhatsApp Business app onboarding on by default with an opt-out, drop `sessionInfoVersion`, and add `messaging_account_ids`, `primary_waac_ids`, and `is_on_biz_app` to the session info object (a browser `message` event payload, not a Graph API response or webhook). Meta's Versions guide did not list v5 yet when this was applied, so the note is based on the changelog text and points readers to the guide for the `extras` shape. No endpoint, payload, or webhook type change.
 
+## October 19, 2026
+
+- [x] **#486** Increased the maximum number of bid_country_multiplier_overrides entries from 50 to 240 per template.
+
+  SDK impact: Added the optional `bid_country_multiplier_overrides?: Record<string, number>` map to `TemplateOptimizationSpec`, so `client.templates.createTemplate` / `updateTemplate` can set per-country bid multipliers inside `optimization_spec` (ISO 3166-1 alpha-2 keys, multipliers greater than 0 and at most 10, up to 240 entries). Documented in [Marketing Messages](docs/marketing-messages.md#max-price-optimization_spec). No endpoint or webhook change.
+
 ## October 16, 2026
 
+- [x] **#485** Documented the Pix with redirect experience for Brazil order details and payment request CTA messages, selected with the new flow_type field in pix_dynamic_code.
+
+  SDK impact: Same feature as #483 under Meta's new name — "Pix with redirect" replaces "Pix App-Switch" in the docs, while the field and value (`pix_dynamic_code.flow_type: 'APPSWITCH'`) are unchanged. Updated the `PaymentRequestSetting` JSDoc and [Templates](docs/templates.md#payment-request-cta-templates-brazil-october-5-2026) wording; no type, endpoint, payload, or webhook change.
 - [x] **#483** Documented the Pix App-Switch experience for Brazil order details and payment request CTA messages, selected with the new flow_type field in pix_dynamic_code.
 
   SDK impact: Added optional `flow_type?: 'APPSWITCH' | 'COPYPASTE'` to the send-time `pix_dynamic_code` object on `PaymentRequestSetting`, so `client.messages.template` payment request CTA buttons can select Pix App-Switch (omitted or `COPYPASTE` keeps copy and paste). Documented in [Templates](docs/templates.md#payment-request-cta-templates-brazil-october-5-2026), including the Meta onboarding requirement and the fallback to the Pix code for buyers App-Switch cannot reach. Order details (`review_and_pay`) interactive messages are not typed by the SDK, so the same `pix_dynamic_code.flow_type` there needs no SDK change. Meta documents `flow_type` for sending only, so the template-creation sample `PaymentRequestButtonSetting` is unchanged.
@@ -33,6 +51,12 @@
 - [x] **#477** Embedded Signup v2 and v3 are deprecated and served as v4.
 
   SDK impact: Embedded Signup runs in the partner's front-end onboarding integration, outside this SDK. Documented in [Registration](docs/registration.md#embedded-signup-integrations), replacing the earlier v2-only October 8 note: since October 15, 2026, v2, v3, their public previews, and requests with no or an invalid version are served as v4, and features with no v4 equivalent no longer apply; products such as Marketing Messages Lite are chosen in the Facebook Login for Business configuration; v2 `only_waba_sharing` keeps working until November 16, 2026. No endpoint, payload, or webhook type change.
+
+## October 14, 2026
+
+- [x] **#484** Direct Send authentication messages now support interactive copy code OTP experiences.
+
+  SDK impact: Added `OtpButtonObject` (`{ type: 'otp', otp: { code, otp_type: 'copy_code', text?, code_expiration_minutes? } }`) to the interactive `action.buttons` union and a `client.messages.interactiveOtp` convenience method that sends the `type: 'button'` interactive message with `category: 'authentication'` by default. Documented in [Direct Send](docs/direct-send.md#notes): exactly one button, the code (4 to 10 ASCII alphanumeric characters) must also appear standalone in `body.text`, label max 25 characters, expiry 1 to 90 minutes (default 10), no business-scoped user IDs, beta by request. No endpoint or webhook change.
 
 ## October 12, 2026
 
@@ -1351,4 +1375,4 @@
 
 ---
 
-**Progress: 477/484 (98%)**
+**Progress: 480/490 (98%)**
