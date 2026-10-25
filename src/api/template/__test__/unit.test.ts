@@ -323,6 +323,30 @@ describe('Template API - Unit Tests', () => {
         });
     });
 
+    describe('Per-country bid multipliers', () => {
+        it('should send bid_country_multiplier_overrides inside optimization_spec', async () => {
+            await whatsApp.templates.createTemplate({
+                name: 'max_price_template',
+                language: LanguagesEnum.English,
+                category: CategoryEnum.Marketing,
+                optimization_spec: {
+                    bid_strategy: 'LOWEST_COST_WITH_BID_CAP',
+                    bid_amount: 25000,
+                    bid_country_multiplier_overrides: { IN: 1.2, MX: 0.8 },
+                },
+                components: [{ type: 'BODY', text: 'Our summer sale starts today.' }],
+            });
+
+            const [_, __, ___, body] = mockRequestSend.mock.calls[0];
+
+            expect(JSON.parse(body).optimization_spec).toEqual({
+                bid_strategy: 'LOWEST_COST_WITH_BID_CAP',
+                bid_amount: 25000,
+                bid_country_multiplier_overrides: { IN: 1.2, MX: 0.8 },
+            });
+        });
+    });
+
     describe('Max price switching', () => {
         it('should switch an existing template onto max price via updateTemplate', async () => {
             await whatsApp.templates.updateTemplate('template_123', {

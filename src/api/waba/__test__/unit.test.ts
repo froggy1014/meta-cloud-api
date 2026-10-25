@@ -52,6 +52,17 @@ describe('WABA API - Unit Tests', () => {
             expect(endpoint).toContain('id%2Cname%2Cstatus');
         });
 
+        it('should request and return the service_pricing_policy field', async () => {
+            mockRequestSend.mockResolvedValue({ id: 'test_business_id', service_pricing_policy: 'PAID_EXEMPT' });
+
+            const account = await whatsApp.waba.getWabaAccount(['service_pricing_policy']);
+
+            const [method, endpoint] = mockRequestSend.mock.calls[0];
+            expect(method).toBe('GET');
+            expect(endpoint).toBe(`${whatsApp.config.WA_BUSINESS_ACCOUNT_ID}?fields=service_pricing_policy`);
+            expect(account.service_pricing_policy).toBe('PAID_EXEMPT');
+        });
+
         it('should get all WABA subscriptions', async () => {
             mockRequestSend.mockResolvedValue({
                 data: [

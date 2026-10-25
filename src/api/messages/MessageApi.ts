@@ -69,6 +69,7 @@ export type MessagePayloadType<T extends MessageTypesEnum> = T extends MessageTy
  * - {@link MessagesApi.interactiveList | interactiveList} - Send list interactive messages
  * - {@link MessagesApi.interactiveCtaUrl | interactiveCtaUrl} - Send CTA URL interactive messages
  * - {@link MessagesApi.interactiveVoiceCall | interactiveVoiceCall} - Send "Call on WhatsApp" voice call button messages
+ * - {@link MessagesApi.interactiveOtp | interactiveOtp} - Send Direct Send authentication OTP copy code button messages
  * - {@link MessagesApi.interactiveLocationRequest | interactiveLocationRequest} - Send location request messages
  * - {@link MessagesApi.interactiveAddressMessage | interactiveAddressMessage} - Send address message interactive messages
  * - {@link MessagesApi.interactiveReplyButtons | interactiveReplyButtons} - Send reply button interactive messages
@@ -761,6 +762,46 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
         params: m.MessageRequestParams<m.InteractiveObject & { type: InteractiveTypesEnum.VoiceCall | 'voice_call' }>,
     ): Promise<m.MessagesResponse> {
         return this.interactive({ ...params, category: params.category ?? MessageCategoryEnum.Utility });
+    }
+
+    /**
+     * Sends a Direct Send authentication message with a one-time password (OTP)
+     * copy code button, without pre-creating an authentication template.
+     *
+     * The request is always sent with `category: 'authentication'`. The interactive
+     * object must be `type: 'button'` with exactly one `{ type: 'otp' }` button, and
+     * the code must also appear as a standalone value in `body.text`. Authentication
+     * messages cannot be sent to a business-scoped user ID. Direct Send for
+     * authentication is in beta by request.
+     *
+     * @param params - The OTP interactive message parameters
+     * @param params.body - Interactive object with `type: 'button'` and a single `otp` button
+     * @param params.to - Recipient phone number in international format
+     * @param params.directSendConfig - Optional Direct Send template attribution config
+     * @returns A promise resolving to the message response with the sent message ID
+     *
+     * @see {@link https://developers.facebook.com/documentation/business-messaging/whatsapp/direct-send/supported-message-types#interactive-authentication-messages | Direct Send interactive authentication messages}
+     *
+     * @example
+     * ```ts
+     * await client.messages.interactiveOtp({
+     *   body: {
+     *     type: 'button',
+     *     body: { text: 'Your verification code is 123456.' },
+     *     action: {
+     *       buttons: [
+     *         { type: 'otp', otp: { code: '123456', otp_type: 'copy_code', code_expiration_minutes: 10 } },
+     *       ],
+     *     },
+     *   },
+     *   to: '1234567890',
+     * });
+     * ```
+     */
+    async interactiveOtp(
+        params: m.MessageRequestParams<m.InteractiveObject & { type: InteractiveTypesEnum.Button | 'button' }>,
+    ): Promise<m.MessagesResponse> {
+        return this.interactive({ ...params, category: params.category ?? MessageCategoryEnum.Authentication });
     }
 
     /**

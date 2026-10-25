@@ -62,9 +62,31 @@ type ReplyButtonObject = {
     reply: ButtonObject;
 };
 
+/**
+ * One-time password (OTP) copy code button for a Direct Send authentication
+ * message (`category: 'authentication'`, `interactive.type: 'button'`). The
+ * message must carry exactly one button, and `code` must also appear as a
+ * standalone value in `interactive.body.text`.
+ *
+ * @see {@link https://developers.facebook.com/documentation/business-messaging/whatsapp/direct-send/supported-message-types#interactive-authentication-messages | Direct Send interactive authentication messages}
+ */
+export type OtpButtonObject = {
+    type: 'otp';
+    otp: {
+        /** The OTP: 4 to 10 ASCII alphanumeric characters. */
+        code: string;
+        /** Copy code experience. Only `copy_code` is supported. */
+        otp_type: 'copy_code';
+        /** Button label. Defaults to "Copy Code"; maximum 25 characters, no variables, line breaks, URLs, or emoji. */
+        text?: string;
+        /** Code expiration in minutes, 1 to 90. Defaults to 10. */
+        code_expiration_minutes?: number;
+    };
+};
+
 type ActionObject = {
     button?: string;
-    buttons?: ReplyButtonObject[];
+    buttons?: (ReplyButtonObject | OtpButtonObject)[];
     catalog_id?: string;
     product_retailer_id?: string;
     sections?: SectionObject[];
