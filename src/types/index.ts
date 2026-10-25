@@ -274,6 +274,7 @@ export type {
     WabaHealthStatus,
     WabaHealthStatusEntity,
     WabaHealthStatusError,
+    WabaServicePricingPolicy,
     WabaSubscription,
     WabaSubscriptions,
 } from '../api/waba/types';

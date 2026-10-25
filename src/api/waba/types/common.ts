@@ -70,6 +70,13 @@ export enum WabaBusinessVerificationStatus {
 }
 
 /**
+ * Service pricing policy coverage for a WABA (added October 30, 2026).
+ * `PAID_EXEMPT` means the account is covered by the service pricing policy
+ * for eligible governments and non-profits.
+ */
+export type WabaServicePricingPolicy = 'PAID_EXEMPT' | 'REGULAR' | 'UNKNOWN';
+
+/**
  * WABA health status error details
  */
 export interface WabaHealthStatusError {
@@ -121,6 +128,7 @@ export interface WabaAccount {
     primary_funding_id?: string;
     purchase_order_number?: string;
     whatsapp_business_manager_messaging_limit?: string;
+    service_pricing_policy?: WabaServicePricingPolicy;
 }
 
 /**
@@ -148,7 +156,8 @@ export type WabaAccountFields =
     | 'on_behalf_of_business_info'
     | 'primary_funding_id'
     | 'purchase_order_number'
-    | 'whatsapp_business_manager_messaging_limit';
+    | 'whatsapp_business_manager_messaging_limit'
+    | 'service_pricing_policy';
 
 /**
  * Parameter type for specifying which WABA account fields to retrieve

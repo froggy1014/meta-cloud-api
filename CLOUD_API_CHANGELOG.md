@@ -6,12 +6,18 @@
 
 ## October 30, 2026
 
-- [ ] **#489** Added the service_pricing_policy field to WhatsApp Business accounts.
+- [x] **#489** Added the service_pricing_policy field to WhatsApp Business accounts.
+
+  SDK impact: Added `service_pricing_policy?: WabaServicePricingPolicy` (`'PAID_EXEMPT' | 'REGULAR' | 'UNKNOWN'`) to `WabaAccount` and `'service_pricing_policy'` to `WabaAccountFields`, so `client.waba.getWabaAccount(['service_pricing_policy'])` requests and types it. The portfolio-level `client.business.getOwnedWhatsAppBusinessAccounts` / `getClientWhatsAppBusinessAccounts` already accept free-form `fields` and return untyped Graph objects, so they need no change. Documented in [WABA](docs/waba.md#notes), linked to the `pricing.subtype: 'paid_exempt'` status webhook from #475. No endpoint or webhook change.
 
 ## October 22, 2026
 
-- [ ] **#488** Updated the Embedded Signup default flow documentation.
-- [ ] **#487** Added the Embedded Signup display name screen, where business customers choose the display name for their business phone number.
+- [x] **#488** Updated the Embedded Signup default flow documentation.
+
+  SDK impact: Embedded Signup runs in the partner's front-end onboarding integration, outside this SDK. Documented in [Registration](docs/registration.md#embedded-signup-integrations): Meta's Cloud API flow page now describes v4's Phone Number First screen order (phone number addition and verification before asset selection, rollout in progress) and the automatic entry into the Coexistence flow when the number is already on the WhatsApp Business app. No endpoint, payload, or webhook type change.
+- [x] **#487** Added the Embedded Signup display name screen, where business customers choose the display name for their business phone number.
+
+  SDK impact: Front-end Embedded Signup UI only, outside this SDK. Meta later dropped this entry from the changelog RSS feed (October 22 now lists only #488) and the Cloud API flow page does not show a display name screen, so [Registration](docs/registration.md#embedded-signup-integrations) only notes that the screen was announced and should not be relied on until Meta documents it. No endpoint, payload, or webhook type change.
 
 ## October 20, 2026
 
@@ -1375,4 +1381,4 @@
 
 ---
 
-**Progress: 480/490 (98%)**
+**Progress: 483/490 (99%)**

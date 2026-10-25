@@ -12,6 +12,7 @@ Manage WABA metadata and webhook subscriptions.
 ## Notes
 - Use `fields` to select specific WABA properties.
 - Webhook subscriptions require `override_callback_uri` and `verify_token`.
+- Service pricing policy (added October 30, 2026): request the `service_pricing_policy` field to check whether an account is covered by the service pricing policy for eligible governments and non-profits. The value is `'PAID_EXEMPT'`, `'REGULAR'`, or `'UNKNOWN'` (typed as `WabaServicePricingPolicy`). For the accounts a business portfolio owns or manages for clients, pass the same field to `client.business.getOwnedWhatsAppBusinessAccounts(businessId, { fields: ['service_pricing_policy'] })` or `getClientWhatsAppBusinessAccounts`. Covered accounts' free service messages carry `pricing.subtype: 'paid_exempt'` on status webhooks (see [Messages](messages.md)).
 
 ## Example
 ```ts
@@ -29,6 +30,7 @@ const account = await client.waba.getWabaAccount([
   'status',
   'timezone_id',
   'primary_business_location',
+  'service_pricing_policy',
 ]);
 
 const subscriptions = await client.waba.getAllWabaSubscriptions();
