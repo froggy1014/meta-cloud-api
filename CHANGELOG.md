@@ -1,5 +1,12 @@
 # meta-cloud-api
 
+## 3.11.2
+
+### Patch Changes
+
+- eb8d8de: Add Direct Send authentication OTP copy code buttons (`OtpButtonObject` on interactive `action.buttons`, plus `client.messages.interactiveOtp` which defaults `category` to `'authentication'`), and type `bid_country_multiplier_overrides` on `TemplateOptimizationSpec` for per-country max price multipliers (up to 240 entries).
+- eb8d8de: Type the `service_pricing_policy` WABA field (`WabaServicePricingPolicy`: `'PAID_EXEMPT' | 'REGULAR' | 'UNKNOWN'`) on `WabaAccount` and accept it in `getWabaAccount` field lists, to check government and non-profit service pricing coverage.
+
 ## 3.11.1
 
 ### Patch Changes
