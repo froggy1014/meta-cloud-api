@@ -1,7 +1,7 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-10-24T13:12:43.464Z
+> Updated: 2026-10-28T15:51:23.825Z
 
 
 ## October 30, 2026
@@ -9,6 +9,10 @@
 - [x] **#489** Added the service_pricing_policy field to WhatsApp Business accounts.
 
   SDK impact: Added `service_pricing_policy?: WabaServicePricingPolicy` (`'PAID_EXEMPT' | 'REGULAR' | 'UNKNOWN'`) to `WabaAccount` and `'service_pricing_policy'` to `WabaAccountFields`, so `client.waba.getWabaAccount(['service_pricing_policy'])` requests and types it. The portfolio-level `client.business.getOwnedWhatsAppBusinessAccounts` / `getClientWhatsAppBusinessAccounts` already accept free-form `fields` and return untyped Graph objects, so they need no change. Documented in [WABA](docs/waba.md#notes), linked to the `pricing.subtype: 'paid_exempt'` status webhook from #475. No endpoint or webhook change.
+
+## October 27, 2026
+
+- [ ] **#490** Documented Brazil Pix payment status behavior, deprecated default OTP inference for Direct Send text authentication, and deprecated the conversation_analytics field.
 
 ## October 22, 2026
 
@@ -1381,4 +1385,4 @@
 
 ---
 
-**Progress: 483/490 (99%)**
+**Progress: 483/491 (98%)**
