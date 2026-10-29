@@ -49,6 +49,8 @@ export const importConfig = (inputConfig?: WhatsAppConfig) => {
         retry: inputConfig?.retry,
         onRateLimitInfo: inputConfig?.onRateLimitInfo,
         fetch: inputConfig?.fetch,
+        onRequest: inputConfig?.onRequest,
+        onResponse: inputConfig?.onResponse,
     };
 
     return wabaConfig;

@@ -80,6 +80,7 @@ export default class WhatsApp {
             this.config.retry,
             this.config.onRateLimitInfo,
             this.config.fetch,
+            { onRequest: this.config.onRequest, onResponse: this.config.onResponse },
         );
 
         this.blockUsers = new BlockUsersApi(this.config, this.requester);

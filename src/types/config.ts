@@ -1,4 +1,5 @@
 import type { RateLimitInfo } from '../utils/rateLimit';
+
 import { WabaConfigEnum } from './enums';
 
 /**
@@ -62,6 +63,41 @@ export interface RateLimitInfoContext {
 
 /** Callback receiving rate limit information parsed from every response that carries it. */
 export type RateLimitInfoListener = (info: RateLimitInfo, context: RateLimitInfoContext) => void | Promise<void>;
+
+/** Details of an outgoing request passed to {@link WhatsAppConfig.onRequest}. */
+export interface RequestHookContext {
+    /** HTTP method of the request. */
+    method: string;
+    /** Absolute URL the request is sent to. */
+    url: string;
+    /** Request headers. `Authorization` is redacted to `Bearer ***`. */
+    headers: Record<string, string>;
+    /** Request body as handed to `fetch`: a JSON string, a `FormData`, a URL-encoded string, or undefined. */
+    body: BodyInit | undefined;
+    /** 1-based attempt number; above 1 only when a throttled request is retried. */
+    attempt: number;
+}
+
+/** Details of a received response passed to {@link WhatsAppConfig.onResponse}. */
+export interface ResponseHookContext extends RequestHookContext {
+    /** HTTP status code of the response. */
+    statusCode: number;
+    /** Response headers, lower-cased names. */
+    responseHeaders: Record<string, string | string[] | undefined>;
+    /** Milliseconds between sending the request and receiving the response headers. */
+    durationMs: number;
+}
+
+/** Called before every request is sent. */
+export type RequestHook = (context: RequestHookContext) => void | Promise<void>;
+/** Called after every response is received, whatever its status code. */
+export type ResponseHook = (context: ResponseHookContext) => void | Promise<void>;
+
+/** Request lifecycle hooks handed to the requester. */
+export interface RequestHooks {
+    onRequest?: RequestHook;
+    onResponse?: ResponseHook;
+}
 /**
  * Storage used to drop duplicate webhook deliveries. Meta retries deliveries,
  * so the same message or status can arrive more than once.
@@ -124,6 +160,19 @@ export type WhatsAppConfig = {
      * callback are ignored. See also `whatsapp.getLastRateLimitInfo()`.
      */
     onRateLimitInfo?: RateLimitInfoListener;
+    /**
+     * Called before every request is sent, with its method, URL, headers (`Authorization`
+     * redacted), body and attempt number. Awaited, so keep it fast. Errors it throws are
+     * logged and ignored. Useful for request logging, tracing spans and debugging.
+     */
+    onRequest?: RequestHook;
+    /**
+     * Called after every response is received, including error statuses, with the request
+     * details plus `statusCode`, `responseHeaders` and `durationMs`. Awaited; errors it throws
+     * are logged and ignored. Not called when the request fails before a response arrives
+     * (timeout, DNS, proxy refusal); those surface as `WhatsAppNetworkError`.
+     */
+    onResponse?: ResponseHook;
     /**
      * The `fetch` implementation used for every Graph API request. Defaults to the global
      * `fetch`, resolved at call time. Pass your own to route requests through a proxy
@@ -252,4 +301,14 @@ export type WabaConfigType = {
      * Custom fetch implementation. Passed through from WhatsAppConfig.
      */
     fetch?: typeof fetch;
+
+    /**
+     * Request lifecycle hook. Passed through from WhatsAppConfig.
+     */
+    onRequest?: RequestHook;
+
+    /**
+     * Response lifecycle hook. Passed through from WhatsAppConfig.
+     */
+    onResponse?: ResponseHook;
 };
