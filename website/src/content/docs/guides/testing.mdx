@@ -260,6 +260,7 @@ The SDK retries rate-limit errors (`WhatsAppThrottlingError`) with backoff, thre
 ## Tips
 
 - The SDK looks up `globalThis.fetch` on every request, so clients created before `install()` are intercepted too.
+- To intercept a single client instead, skip `install()` and pass `fetch: api.fetch` to `new WhatsApp({ ... })`.
 - Run tests that install the mock serially within a file (the Vitest default); `globalThis.fetch` is shared by the whole worker.
 - For Jest, the same code works in the default `node` environment on Node.js 20+, which provides `fetch`, `Request` and Web Crypto globally.
 - Unit-test pure helpers (`extractMessageText`, `getInteractiveReply`, `isTextMessage`, ...) by passing them `payload.entry[0]?.changes[0]?.value.messages[0]` from a factory.

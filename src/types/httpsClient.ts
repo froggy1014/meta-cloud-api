@@ -15,7 +15,7 @@ export declare class HttpsClientResponseClass {
 }
 
 export declare class HttpsClientClass {
-    constructor();
+    constructor(fetchImpl?: typeof fetch);
     clearSockets: () => boolean;
     sendRequest: (
         host: string,

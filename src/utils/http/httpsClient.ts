@@ -12,8 +12,18 @@ const LIB_NAME = 'HttpsClient';
 const LOGGER = new Logger(LIB_NAME, isDebugEnv());
 
 export default class HttpsClient implements HttpsClientClass {
+    private readonly fetchImpl: typeof fetch | undefined;
+
     /**
-     * Kept for backwards compatibility. Requests go through the global `fetch`,
+     * @param fetchImpl - `fetch` used for every request. When omitted, the global `fetch`
+     * is looked up on each call, so replacing `globalThis.fetch` later still takes effect.
+     */
+    constructor(fetchImpl?: typeof fetch) {
+        this.fetchImpl = fetchImpl;
+    }
+
+    /**
+     * Kept for backwards compatibility. Requests go through `fetch`,
      * which manages its own connection pool, so there is nothing to clear.
      */
     clearSockets(): boolean {
@@ -33,7 +43,8 @@ export default class HttpsClient implements HttpsClientClass {
         const timeoutId = setTimeout(() => controller.abort(), timeout);
 
         try {
-            const response = await fetch(url, {
+            const doFetch = this.fetchImpl ?? globalThis.fetch;
+            const response = await doFetch.call(globalThis, url, {
                 method,
                 headers,
                 body,

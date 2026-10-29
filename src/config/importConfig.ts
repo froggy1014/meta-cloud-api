@@ -48,6 +48,7 @@ export const importConfig = (inputConfig?: WhatsAppConfig) => {
         [WabaConfigEnum.Passphrase]: inputConfig?.passphrase || readEnv('FLOW_API_PASSPHRASE') || '',
         retry: inputConfig?.retry,
         onRateLimitInfo: inputConfig?.onRateLimitInfo,
+        fetch: inputConfig?.fetch,
     };
 
     return wabaConfig;

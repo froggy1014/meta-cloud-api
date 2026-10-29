@@ -125,6 +125,23 @@ export type WhatsAppConfig = {
      */
     onRateLimitInfo?: RateLimitInfoListener;
     /**
+     * The `fetch` implementation used for every Graph API request. Defaults to the global
+     * `fetch`, resolved at call time. Pass your own to route requests through a proxy
+     * (for example `undici`'s `ProxyAgent`), to add tracing, or to answer requests in tests.
+     *
+     * @example
+     * ```typescript
+     * import { ProxyAgent } from 'undici';
+     *
+     * const dispatcher = new ProxyAgent('http://proxy.internal:8080');
+     * const wa = new WhatsApp({
+     *     accessToken: '...',
+     *     fetch: (input, init) => fetch(input, { ...init, dispatcher }),
+     * });
+     * ```
+     */
+    fetch?: typeof fetch;
+    /**
      * Reject webhook POSTs whose `X-Hub-Signature-256` header is not a valid
      * HMAC-SHA256 of the raw body keyed with `appSecret`. Requires `appSecret`.
      *
@@ -230,4 +247,9 @@ export type WabaConfigType = {
      * Rate limit header listener. Passed through from WhatsAppConfig.
      */
     onRateLimitInfo?: RateLimitInfoListener;
+
+    /**
+     * Custom fetch implementation. Passed through from WhatsAppConfig.
+     */
+    fetch?: typeof fetch;
 };
