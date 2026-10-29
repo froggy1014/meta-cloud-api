@@ -1,7 +1,7 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-10-28T15:51:23.825Z
+> Updated: 2026-10-29T15:58:19.723Z
 
 
 ## October 30, 2026
@@ -9,6 +9,10 @@
 - [x] **#489** Added the service_pricing_policy field to WhatsApp Business accounts.
 
   SDK impact: Added `service_pricing_policy?: WabaServicePricingPolicy` (`'PAID_EXEMPT' | 'REGULAR' | 'UNKNOWN'`) to `WabaAccount` and `'service_pricing_policy'` to `WabaAccountFields`, so `client.waba.getWabaAccount(['service_pricing_policy'])` requests and types it. The portfolio-level `client.business.getOwnedWhatsAppBusinessAccounts` / `getClientWhatsAppBusinessAccounts` already accept free-form `fields` and return untyped Graph objects, so they need no change. Documented in [WABA](docs/waba.md#notes), linked to the `pricing.subtype: 'paid_exempt'` status webhook from #475. No endpoint or webhook change.
+
+## October 28, 2026
+
+- [ ] **#491** Updated the calling sandbox guide to require the Cloud API and Calling feature and to add the recipient list steps.
 
 ## October 27, 2026
 
@@ -1387,4 +1391,4 @@
 
 ---
 
-**Progress: 484/491 (98%)**
+**Progress: 484/492 (98%)**
