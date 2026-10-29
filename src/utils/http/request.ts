@@ -7,7 +7,7 @@ import {
     GRAPH_API_HOST,
     GRAPH_API_PROTOCOL,
 } from '../../config/defaults';
-import type { RateLimitInfoListener, RetryConfig } from '../../types/config';
+import type { RateLimitInfoListener, RequestHookContext, RequestHooks, RetryConfig } from '../../types/config';
 import type { HttpMethodsEnum } from '../../types/enums';
 import type { RequesterClass, UrlEncodedFormBody } from '../../types/request';
 import {
@@ -42,6 +42,7 @@ export default class Requester implements RequesterClass {
     private retryConfig: RetryConfig | undefined;
     private onRateLimitInfo: RateLimitInfoListener | undefined;
     private lastRateLimitInfo: RateLimitInfo | undefined;
+    private hooks: RequestHooks | undefined;
 
     constructor(
         apiVersion: string,
@@ -52,6 +53,7 @@ export default class Requester implements RequesterClass {
         retryConfig?: RetryConfig,
         onRateLimitInfo?: RateLimitInfoListener,
         fetchImpl?: typeof fetch,
+        hooks?: RequestHooks,
     ) {
         this.client = new HttpsClient(fetchImpl);
         this.host = GRAPH_API_HOST;
@@ -62,6 +64,25 @@ export default class Requester implements RequesterClass {
         this.userAgent = userAgent;
         this.retryConfig = retryConfig;
         this.onRateLimitInfo = onRateLimitInfo;
+        this.hooks = hooks;
+    }
+
+    private async runHook<T>(name: 'onRequest' | 'onResponse', context: T): Promise<void> {
+        const hook = this.hooks?.[name] as ((context: T) => void | Promise<void>) | undefined;
+        if (!hook) return;
+        try {
+            await hook(context);
+        } catch (error) {
+            LOGGER.log(`${name} hook threw: ${error instanceof Error ? error.message : error}`);
+        }
+    }
+
+    private redactHeaders(headers: HeadersInit): Record<string, string> {
+        const redacted: Record<string, string> = {};
+        for (const [key, value] of Object.entries(headers as Record<string, string>)) {
+            redacted[key] = key.toLowerCase() === 'authorization' ? 'Bearer ***' : value;
+        }
+        return redacted;
     }
 
     /**
@@ -179,15 +200,39 @@ export default class Requester implements RequesterClass {
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
             try {
                 const shouldSendBody = method === 'POST' || method === 'PUT' || method === 'DELETE';
+                const requestHeaders = this.buildHeader(effectiveContentType, additionalHeaders);
+                const requestBody: BodyInit | undefined = shouldSendBody ? body : undefined;
 
+                let hookContext: RequestHookContext | undefined;
+                if (this.hooks?.onRequest || this.hooks?.onResponse) {
+                    hookContext = {
+                        method,
+                        url: requestTarget.displayUrl,
+                        headers: this.redactHeaders(requestHeaders),
+                        body: requestBody,
+                        attempt,
+                    };
+                    await this.runHook('onRequest', hookContext);
+                }
+
+                const startedAt = Date.now();
                 const response = await this.client.sendRequest(
                     requestTarget.host,
                     requestTarget.path,
                     method,
-                    this.buildHeader(effectiveContentType, additionalHeaders),
+                    requestHeaders,
                     timeout,
-                    shouldSendBody ? body : undefined,
+                    requestBody,
                 );
+
+                if (hookContext && this.hooks?.onResponse) {
+                    await this.runHook('onResponse', {
+                        ...hookContext,
+                        statusCode: response.statusCode(),
+                        responseHeaders: typeof response.headers === 'function' ? response.headers() : {},
+                        durationMs: Date.now() - startedAt,
+                    });
+                }
 
                 const rateLimit = this.captureRateLimitInfo(response, method, endpoint);
 

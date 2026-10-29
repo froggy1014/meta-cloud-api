@@ -40,6 +40,8 @@ const client = new WhatsApp({
 | `retry` | `RetryConfig` | `undefined` | Automatic retry config for throttling errors |
 | `onRateLimitInfo` | `(info, context) => void` | `undefined` | Called with parsed rate limit headers of every response that has them ([guide](/guides/production-helpers#rate-limit-awareness)) |
 | `fetch` | `typeof fetch` | global `fetch` | Custom fetch for every request: proxies, tracing, test doubles ([below](#custom-fetch-and-proxies)) |
+| `onRequest` | `(context) => void` | `undefined` | Called before every request with method, URL, redacted headers, body and attempt ([below](#request-and-response-hooks)) |
+| `onResponse` | `(context) => void` | `undefined` | Called after every response with status, headers and duration ([below](#request-and-response-hooks)) |
 | `debug` | `boolean` | `false` | Enable debug logging |
 
 ### Full Configuration Example
@@ -245,6 +247,35 @@ const client = new WhatsApp({
 - **Template operations**: Standard timeout (30s) is sufficient
 - **Message sending**: 10-15s timeout is usually enough
 :::
+
+## Request and Response Hooks
+
+Observe every request the SDK makes without wrapping each call. `onRequest` runs before the
+request is sent; `onResponse` runs after the response headers arrive, whatever the status code.
+Both are awaited and errors they throw are logged and ignored, so a failing logger never fails a
+send.
+
+```typescript
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    onRequest: ({ method, url, attempt }) => {
+        console.log(`→ ${method} ${url}${attempt > 1 ? ` (retry ${attempt})` : ''}`);
+    },
+    onResponse: ({ method, url, statusCode, durationMs, responseHeaders }) => {
+        console.log(`← ${statusCode} ${method} ${url} in ${durationMs}ms`, responseHeaders['x-fb-trace-id']);
+    },
+});
+```
+
+The request context carries `method`, `url`, `headers` (with `Authorization` redacted to
+`Bearer ***`), `body` (the JSON string, `FormData` or URL-encoded string handed to `fetch`) and
+`attempt` (above 1 only when a throttled request is retried). The response context adds
+`statusCode`, `responseHeaders` (lower-cased names) and `durationMs`.
+
+`onResponse` is not called when no response arrives (timeout, DNS failure, proxy refusal); those
+requests reject with `WhatsAppNetworkError`. For `X-App-Usage` and `Retry-After` parsing, use
+[`onRateLimitInfo`](/guides/production-helpers#rate-limit-awareness) instead of parsing headers here.
 
 ## Custom Fetch and Proxies
 
