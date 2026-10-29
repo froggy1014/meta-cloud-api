@@ -1,5 +1,13 @@
 # meta-cloud-api
 
+## 3.12.0
+
+### Minor Changes
+
+- 5ae8acb: Add a `fetch` config option so every Graph API request goes through a caller-supplied `fetch`: route traffic through a proxy (for example `undici`'s `ProxyAgent`), add tracing, or intercept a single client in tests with `createMockCloudApi().fetch`. Defaults to the global `fetch`, resolved at call time.
+- 9a77585: Add `onRequest` and `onResponse` config hooks. `onRequest` receives the method, URL, headers (`Authorization` redacted), body and attempt number before each request is sent; `onResponse` receives the same plus `statusCode`, `responseHeaders` and `durationMs` after each response, including error statuses and retried attempts. Hooks are awaited and errors they throw are ignored.
+- c6a25bf: Add text formatting helpers for outgoing message bodies: `bold`, `italic`, `strikethrough`, `inlineCode`, `monospace`, `quote`, `bulletList` and `numberedList` write WhatsApp's markup, keep surrounding whitespace outside the markers and apply inline markers per line. Exported from `meta-cloud-api` and `meta-cloud-api/utils`.
+
 ## 3.11.2
 
 ### Patch Changes
