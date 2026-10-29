@@ -12,7 +12,9 @@
 
 ## October 27, 2026
 
-- [ ] **#490** Documented Brazil Pix payment status behavior, deprecated default OTP inference for Direct Send text authentication, and deprecated the conversation_analytics field.
+- [x] **#490** Documented Brazil Pix payment status behavior, deprecated default OTP inference for Direct Send text authentication, and deprecated the conversation_analytics field.
+
+  SDK impact: Docs only, three parts. (1) Pix: with Pix with redirect (`flow_type: 'APPSWITCH'`) WhatsApp marks the order as paid once the bank completes the payment and, when the order details message has an `order` object, moves it to `completed`; copied-code payments still need your `order_status` with `captured`. Order details/order status interactive messages are untyped in the SDK, so documented in [Templates](docs/templates.md#payment-request-cta-templates-brazil-october-5-2026) next to the #483 `flow_type` note. (2) Direct Send no longer infers an OTP or adds a copy code button for `type: 'text'` authentication messages by default; the copy code path is the explicit `otp.code` already typed by `OtpButtonObject` / `client.messages.interactiveOtp` (#484). Documented in [Direct Send](docs/direct-send.md#notes). (3) The WABA `conversation_analytics` field is unavailable from November 1, 2026; the SDK never typed it (`WabaAccountFields` lacks it), so documented in [WABA](docs/waba.md#notes) with `pricing_analytics` / `analytics` as replacements. No type, endpoint, payload, webhook, or error code change.
 
 ## October 22, 2026
 
@@ -1385,4 +1387,4 @@
 
 ---
 
-**Progress: 483/491 (98%)**
+**Progress: 484/491 (98%)**
