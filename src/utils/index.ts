@@ -67,6 +67,7 @@ export { compareMessageStatus, isMessageStatusAdvance, resolveMessageStatus } fr
 export { objectToQueryString } from './objectToQueryString';
 export type { BusinessUseCaseUsage, RateLimitHeadersInput, RateLimitInfo, RateLimitUsage } from './rateLimit';
 export { parseRateLimitHeaders, parseRetryAfter } from './rateLimit';
+export { bold, bulletList, inlineCode, italic, monospace, numberedList, quote, strikethrough } from './textFormat';
 
 // export { getVersion, getUserAgent } from './version';
 

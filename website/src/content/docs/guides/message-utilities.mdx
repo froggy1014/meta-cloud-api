@@ -1,13 +1,13 @@
 ---
 title: Message Utilities
-description: Type guards, text extraction, and structured data helpers for webhook messages
+description: Type guards, text extraction, structured data helpers for webhook messages, and text formatting for outgoing bodies
 sidebar:
     order: 6
 ---
 
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
-The SDK provides utility functions to simplify working with incoming webhook messages. These include type guards for narrowing message types, a universal text extractor, and structured data extractors for common message fields.
+The SDK provides utility functions to simplify working with incoming webhook messages. These include type guards for narrowing message types, a universal text extractor, and structured data extractors for common message fields. It also ships [text formatting helpers](#text-formatting) for outgoing message bodies.
 
 ## Import
 
@@ -43,6 +43,16 @@ import {
     getContactsInfo,
     getReactionInfo,
     getOrderInfo,
+
+    // Text formatting for outgoing bodies
+    bold,
+    italic,
+    strikethrough,
+    inlineCode,
+    monospace,
+    quote,
+    bulletList,
+    numberedList,
 } from 'meta-cloud-api';
 ```
 
@@ -245,6 +255,40 @@ processor.onOrder(async (whatsapp, { message }) => {
     }
 });
 ```
+
+## Text Formatting
+
+WhatsApp renders a small markup set in text bodies, captions and interactive message text: `*bold*`,
+`_italic_`, `~strikethrough~`, `` `inline code` ``, ```` ```monospace``` ````, `> quote`, `- bullet`
+and `1. numbered` lines. These helpers write the markers for you:
+
+```typescript
+import { bold, bulletList, italic, monospace, quote } from 'meta-cloud-api';
+// or: from 'meta-cloud-api/utils'
+
+await client.messages.text({
+    to,
+    body: [
+        bold('Order #1042 shipped'),
+        '',
+        `Carrier: ${italic('DHL Express')}`,
+        bulletList(['2 × Notebook', '1 × Pen set']),
+        '',
+        quote('Reply STOP to opt out.'),
+        monospace('TRACK-8841-XY'),
+    ].join('\n'),
+});
+```
+
+Rules the helpers follow, matching how WhatsApp parses the markup:
+
+- Inline markers (`bold`, `italic`, `strikethrough`, `inlineCode`) must touch the text, so leading and trailing whitespace stays outside: `bold('  Hi ')` is `'  *Hi* '`.
+- Inline markers cannot span a line break, so those helpers mark each line separately: `bold('a\nb')` is `'*a*\n*b*'`.
+- Empty or whitespace-only input is returned unchanged.
+- Helpers nest: `bold(italic('Hi'))` is `'*_Hi_*'`.
+- `monospace` wraps the whole text in triple backticks and may span lines. `quote` prefixes every line with `> `. `bulletList` and `numberedList` take an array and join items with newlines.
+
+Formatting is not supported in template components; the markup is sent literally there.
 
 ## Practical Example
 
