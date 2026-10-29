@@ -51,8 +51,9 @@ export default class Requester implements RequesterClass {
         userAgent: string,
         retryConfig?: RetryConfig,
         onRateLimitInfo?: RateLimitInfoListener,
+        fetchImpl?: typeof fetch,
     ) {
-        this.client = new HttpsClient();
+        this.client = new HttpsClient(fetchImpl);
         this.host = GRAPH_API_HOST;
         this.apiVersion = this.normalizeApiVersion(apiVersion);
         this.phoneNumberId = phoneNumberId;

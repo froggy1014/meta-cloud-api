@@ -79,6 +79,7 @@ export default class WhatsApp {
             this.getUserAgent(),
             this.config.retry,
             this.config.onRateLimitInfo,
+            this.config.fetch,
         );
 
         this.blockUsers = new BlockUsersApi(this.config, this.requester);

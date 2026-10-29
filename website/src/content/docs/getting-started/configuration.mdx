@@ -39,6 +39,7 @@ const client = new WhatsApp({
 | `requestTimeout` | `number` | `undefined` | Request timeout in milliseconds |
 | `retry` | `RetryConfig` | `undefined` | Automatic retry config for throttling errors |
 | `onRateLimitInfo` | `(info, context) => void` | `undefined` | Called with parsed rate limit headers of every response that has them ([guide](/guides/production-helpers#rate-limit-awareness)) |
+| `fetch` | `typeof fetch` | global `fetch` | Custom fetch for every request: proxies, tracing, test doubles ([below](#custom-fetch-and-proxies)) |
 | `debug` | `boolean` | `false` | Enable debug logging |
 
 ### Full Configuration Example
@@ -243,6 +244,34 @@ const client = new WhatsApp({
 - **Media uploads**: Use higher timeout (60s+) for large files
 - **Template operations**: Standard timeout (30s) is sufficient
 - **Message sending**: 10-15s timeout is usually enough
+:::
+
+## Custom Fetch and Proxies
+
+Every request goes through `fetch`. By default the SDK looks up `globalThis.fetch` on each call.
+Pass your own `fetch` to send requests through a proxy, wrap them in tracing, or answer them in
+tests without touching the global:
+
+```typescript
+import { ProxyAgent } from 'undici';
+
+const dispatcher = new ProxyAgent('http://proxy.internal:8080');
+
+const client = new WhatsApp({
+    accessToken: process.env.CLOUD_API_ACCESS_TOKEN!,
+    phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID),
+    fetch: (input, init) => fetch(input, { ...init, dispatcher } as RequestInit),
+});
+```
+
+The SDK calls it as `fetch(url, { method, headers, body, signal })`, with the `Authorization`
+header already set and `signal` tied to `requestTimeout`. Media downloads from `lookaside.fbsbx.com`
+use the same function. Return a standard `Response`; the SDK reads `status`, `headers` and the body
+from it.
+
+:::tip[Testing]
+`createMockCloudApi()` from `meta-cloud-api/testing` exposes `mock.fetch`, so `new WhatsApp({ ..., fetch: mock.fetch })`
+intercepts one client without replacing `globalThis.fetch`.
 :::
 
 ## API Version Configuration
