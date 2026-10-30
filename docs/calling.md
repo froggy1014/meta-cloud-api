@@ -33,6 +33,16 @@ processor.onAccountUpdate(async (_wa, { value }) => {
 
 `AccountUpdateValue['phone_number']` is optional, and `RestrictionType` covers the documented calling restrictions: `RESTRICTED_BIZ_INITIATED_AND_USER_INITIATED_CALLING`, `RESTRICTED_BUSINESS_INITIATED_CALLING`, `RESTRICTED_USER_INITIATED_CALLING`, and `RESTRICTED_USER_INITIATED_CALLING_CALL_BUTTON_HIDDEN`. See Meta's [account_update reference](https://developers.facebook.com/documentation/business-messaging/whatsapp/webhooks/reference/account_update/).
 
+## Testing with a calling sandbox account (October 28, 2026)
+Meta updated its [calling sandbox guide](https://developers.facebook.com/documentation/business-messaging/whatsapp/calling/sandbox/) on October 28, 2026. Sandbox accounts are available to Tech Partners only.
+
+- Claim the sandbox account with the **Cloud API and Calling** feature (App Dashboard > WhatsApp > Partner Tools > Claim a sandbox account). An account claimed with another feature has no calling setup, and you can hold only one sandbox account at a time, so delete it and claim again. If the option is missing, the calling sandbox is not enabled for your business yet.
+- The sandbox test phone number only exchanges messages and calls with numbers on its recipient list (up to 5, managed under Partner Tools > Add a recipient phone number). Add your test device before sending messages or testing business-initiated or user-initiated calls.
+- Messages and business-initiated calls to a number off the list fail with error `131030` (`Recipient phone number not in allowed list`). The SDK already maps `131030` to `WhatsAppSendMessageError`, including when it comes back from `client.calling.initiateCall(...)`.
+- Point the client at the sandbox WABA ID, test phone number ID, and sandbox token, then enable calling with `client.calling.updateCallingSettings({ calling: { status: 'ENABLED', ... } })` as in the example below.
+
+Guide change only; no SDK endpoint, payload, webhook, or error code change.
+
 ## Sharing one phone number across providers
 Meta updated its Calling integration guidance and FAQ on September 16, 2026 to recommend the **new WhatsApp account model** — [Multi-Solution Conversations (MSC)](https://developers.facebook.com/documentation/business-messaging/whatsapp/solution-providers/multi-solution-conversations) — when a business uses one Solution Partner for messaging and another for calling on the same phone number. The older pattern of pointing two apps at one WABA is no longer the recommended path; the third-party voice provider pattern (a calling vendor behind a single partner, no Meta app of its own) remains a separate option and still forbids PSTN on any leg of the call.
 
