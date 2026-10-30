@@ -12,7 +12,9 @@
 
 ## October 28, 2026
 
-- [ ] **#491** Updated the calling sandbox guide to require the Cloud API and Calling feature and to add the recipient list steps.
+- [x] **#491** Updated the calling sandbox guide to require the Cloud API and Calling feature and to add the recipient list steps.
+
+  SDK impact: Docs only. Sandbox setup happens in the App Dashboard: claim the sandbox account with the **Cloud API and Calling** feature, and add the test device to the sandbox test number's recipient list (up to 5 numbers) before testing messages or calls. Messages and business-initiated calls to numbers off the list return error `131030`, which `isMetaError.ts` already lists in `SEND_MESSAGE_ERROR_CODES`, so it surfaces as `WhatsAppSendMessageError` from `client.messages.*` and `client.calling.initiateCall`. Documented in [Calling](docs/calling.md#testing-with-a-calling-sandbox-account-october-28-2026). No endpoint, payload, webhook, or error code change.
 
 ## October 27, 2026
 
@@ -1391,4 +1393,4 @@
 
 ---
 
-**Progress: 484/492 (98%)**
+**Progress: 485/492 (98%)**
