@@ -12,7 +12,9 @@
 
 ## October 29, 2026
 
-- [ ] **#492** Removed an outdated daily call initiation limit from the business-initiated calling guide.
+- [x] **#492** Removed an outdated daily call initiation limit from the business-initiated calling guide.
+
+  SDK impact: Docs only. Meta deleted the outdated statement that each business phone number can initiate only 10,000 calls per 24 hours; the SDK never encoded that cap (no client-side throttle or limit constant in `client.calling.initiateCall`), and Meta notes the correction does not change other calling limits. Documented in [Calling](docs/calling.md#notes). No endpoint, payload, webhook, or error code change.
 
 ## October 28, 2026
 
@@ -1397,4 +1399,4 @@
 
 ---
 
-**Progress: 485/493 (98%)**
+**Progress: 486/493 (98%)**
