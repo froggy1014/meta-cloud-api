@@ -1,11 +1,16 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-10-30T15:44:49.837Z
+> Updated: 2026-11-03T16:56:02.061Z
 
+
+## November 2, 2026
+
+- [ ] **#495** Calling API requests now accept a Messaging account, so you can name the Messaging account a call belongs to.
 
 ## October 30, 2026
 
+- [ ] **#494** Added WebP as a supported image type for Cloud API image messages.
 - [x] **#489** Added the service_pricing_policy field to WhatsApp Business accounts.
 
   SDK impact: Added `service_pricing_policy?: WabaServicePricingPolicy` (`'PAID_EXEMPT' | 'REGULAR' | 'UNKNOWN'`) to `WabaAccount` and `'service_pricing_policy'` to `WabaAccountFields`, so `client.waba.getWabaAccount(['service_pricing_policy'])` requests and types it. The portfolio-level `client.business.getOwnedWhatsAppBusinessAccounts` / `getClientWhatsAppBusinessAccounts` already accept free-form `fields` and return untyped Graph objects, so they need no change. Documented in [WABA](docs/waba.md#notes), linked to the `pricing.subtype: 'paid_exempt'` status webhook from #475. No endpoint or webhook change.
@@ -78,6 +83,7 @@
 
 ## October 14, 2026
 
+- [ ] **#493** Direct Send authentication messages now support interactive copy code, one-tap autofill, and zero-tap OTP experiences.
 - [x] **#484** Direct Send authentication messages now support interactive copy code OTP experiences.
 
   SDK impact: Added `OtpButtonObject` (`{ type: 'otp', otp: { code, otp_type: 'copy_code', text?, code_expiration_minutes? } }`) to the interactive `action.buttons` union and a `client.messages.interactiveOtp` convenience method that sends the `type: 'button'` interactive message with `category: 'authentication'` by default. Documented in [Direct Send](docs/direct-send.md#notes): exactly one button, the code (4 to 10 ASCII alphanumeric characters) must also appear standalone in `body.text`, label max 25 characters, expiry 1 to 90 minutes (default 10), no business-scoped user IDs, beta by request. No endpoint or webhook change.
@@ -1399,4 +1405,4 @@
 
 ---
 
-**Progress: 486/493 (98%)**
+**Progress: 486/496 (98%)**
