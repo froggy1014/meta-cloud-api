@@ -1,11 +1,20 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-10-30T15:44:49.837Z
+> Updated: 2026-11-03T16:56:02.061Z
 
+
+## November 2, 2026
+
+- [x] **#495** Calling API requests now accept a Messaging account, so you can name the Messaging account a call belongs to.
+
+  SDK impact: Added optional `messaging_account_id?: string` to `InitiateCallRequest`, `PreAcceptCallRequest`, `AcceptCallRequest`, `RejectCallRequest`, and `TerminateCallRequest`, so `client.calling.initiateCall` / `preAcceptCall` / `acceptCall` / `rejectCall` / `terminateCall` send it in the `POST /{PHONE_NUMBER_ID}/calls` body when set and omit it otherwise. Meta asks for it whenever the token has messaging access to more than one Messaging account on the number, with the same value on every request for a call. Documented in [Calling](docs/calling.md#notes). No new endpoint, webhook, or error code; Meta's reference points to calling error codes without naming a new one.
 
 ## October 30, 2026
 
+- [x] **#494** Added WebP as a supported image type for Cloud API image messages.
+
+  SDK impact: Added `Webp = 'image/webp'` to `ImageMediaTypesEnum` and the `ImageMediaTypes` constant, and updated the `client.messages.image` and `MediaApi` JSDoc tables. `ImageMediaObject` (`id` / `link`) and `uploadMedia` already accepted any MIME type, so no request shape changes. Only static WebP is accepted (5 MB); Meta transcodes it to JPEG and rejects animated WebP, undecodable files, and images over 4,096 pixels on an edge. Documented in [Media](docs/media.md#notes). No endpoint, webhook, or error code change.
 - [x] **#489** Added the service_pricing_policy field to WhatsApp Business accounts.
 
   SDK impact: Added `service_pricing_policy?: WabaServicePricingPolicy` (`'PAID_EXEMPT' | 'REGULAR' | 'UNKNOWN'`) to `WabaAccount` and `'service_pricing_policy'` to `WabaAccountFields`, so `client.waba.getWabaAccount(['service_pricing_policy'])` requests and types it. The portfolio-level `client.business.getOwnedWhatsAppBusinessAccounts` / `getClientWhatsAppBusinessAccounts` already accept free-form `fields` and return untyped Graph objects, so they need no change. Documented in [WABA](docs/waba.md#notes), linked to the `pricing.subtype: 'paid_exempt'` status webhook from #475. No endpoint or webhook change.
@@ -78,6 +87,9 @@
 
 ## October 14, 2026
 
+- [x] **#493** Direct Send authentication messages now support interactive copy code, one-tap autofill, and zero-tap OTP experiences.
+
+  SDK impact: Meta expanded the October 14 entry (#484, copy code only). `OtpButtonObject.otp` is now a union of `OtpCopyCodeParams` (`otp_type: 'copy_code'`), `OtpOneTapParams` (`'one_tap'`, required `supported_apps`, optional `autofill_text`), and `OtpZeroTapParams` (`'zero_tap'`, same plus required `zero_tap_terms_accepted: true`), with `OtpSupportedApp` (`{ package_name, signature_hash }`, 1 to 5 apps). The types keep `autofill_text`, `supported_apps`, and `zero_tap_terms_accepted` off copy code and the terms flag off one-tap, matching Meta's rule that a stray flag is rejected. All are exported from `meta-cloud-api/types`. `client.messages.interactiveOtp` sends all three unchanged with `category: 'authentication'`. Rejections use error `131009`, already mapped. Documented in [Direct Send](docs/direct-send.md#notes). No endpoint or webhook change.
 - [x] **#484** Direct Send authentication messages now support interactive copy code OTP experiences.
 
   SDK impact: Added `OtpButtonObject` (`{ type: 'otp', otp: { code, otp_type: 'copy_code', text?, code_expiration_minutes? } }`) to the interactive `action.buttons` union and a `client.messages.interactiveOtp` convenience method that sends the `type: 'button'` interactive message with `category: 'authentication'` by default. Documented in [Direct Send](docs/direct-send.md#notes): exactly one button, the code (4 to 10 ASCII alphanumeric characters) must also appear standalone in `body.text`, label max 25 characters, expiry 1 to 90 minutes (default 10), no business-scoped user IDs, beta by request. No endpoint or webhook change.
@@ -1399,4 +1411,4 @@
 
 ---
 
-**Progress: 486/493 (98%)**
+**Progress: 489/496 (99%)**

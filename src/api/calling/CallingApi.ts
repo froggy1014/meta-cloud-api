@@ -100,6 +100,7 @@ export default class CallingApi extends BaseAPI implements calling.CallingClass 
      * @param params - The call initiation parameters.
      * @param params.to - The recipient's WhatsApp phone number.
      * @param params.session - The call session configuration.
+     * @param params.messaging_account_id - Optional Messaging account placing the call (required when the token reaches more than one).
      * @param params.biz_opaque_callback_data - Optional opaque data passed back in webhooks.
      * @param params.recording - Optional per-call recording configuration.
      * @param params.transcription - Optional per-call transcription configuration.
@@ -117,11 +118,13 @@ export default class CallingApi extends BaseAPI implements calling.CallingClass 
             to: string;
             action: calling.CallAction;
             session: calling.CallSession;
+            messaging_account_id?: string;
             biz_opaque_callback_data?: string;
             recording?: calling.CallRecordingConfig;
             transcription?: calling.CallTranscriptionConfig;
         };
 
+        if (params.messaging_account_id) body.messaging_account_id = params.messaging_account_id;
         if (params.biz_opaque_callback_data) {
             body.biz_opaque_callback_data = params.biz_opaque_callback_data;
         }
@@ -141,6 +144,7 @@ export default class CallingApi extends BaseAPI implements calling.CallingClass 
      *
      * @param params - The pre-accept request parameters.
      * @param params.call_id - The ID of the call to pre-accept.
+     * @param params.messaging_account_id - Optional Messaging account handling the call; send the same value on every request for the call.
      * @param params.session - Optional session configuration for the call.
      * @returns The call action response confirming the pre-accept.
      * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/calling/reference/
@@ -155,9 +159,11 @@ export default class CallingApi extends BaseAPI implements calling.CallingClass 
             call_id: string;
             action: calling.CallAction;
             session?: calling.CallSession;
+            messaging_account_id?: string;
         };
 
         if (params.session) body.session = params.session;
+        if (params.messaging_account_id) body.messaging_account_id = params.messaging_account_id;
 
         return this.sendJson(
             HttpMethodsEnum.Post,
@@ -172,6 +178,7 @@ export default class CallingApi extends BaseAPI implements calling.CallingClass 
      *
      * @param params - The accept request parameters.
      * @param params.call_id - The ID of the call to accept.
+     * @param params.messaging_account_id - Optional Messaging account handling the call; send the same value on every request for the call.
      * @param params.session - Optional session configuration for the call.
      * @param params.biz_opaque_callback_data - Optional opaque data passed back in webhooks.
      * @param params.recording - Optional per-call recording configuration.
@@ -189,12 +196,14 @@ export default class CallingApi extends BaseAPI implements calling.CallingClass 
             call_id: string;
             action: calling.CallAction;
             session?: calling.CallSession;
+            messaging_account_id?: string;
             biz_opaque_callback_data?: string;
             recording?: calling.CallRecordingConfig;
             transcription?: calling.CallTranscriptionConfig;
         };
 
         if (params.session) body.session = params.session;
+        if (params.messaging_account_id) body.messaging_account_id = params.messaging_account_id;
         if (params.biz_opaque_callback_data) {
             body.biz_opaque_callback_data = params.biz_opaque_callback_data;
         }
@@ -214,6 +223,7 @@ export default class CallingApi extends BaseAPI implements calling.CallingClass 
      *
      * @param params - The reject request parameters.
      * @param params.call_id - The ID of the call to reject.
+     * @param params.messaging_account_id - Optional Messaging account handling the call; send the same value on every request for the call.
      * @returns The call action response confirming rejection.
      * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/calling/reference/
      */
@@ -222,6 +232,7 @@ export default class CallingApi extends BaseAPI implements calling.CallingClass 
             messaging_product: WHATSAPP_MESSAGING_PRODUCT,
             call_id: params.call_id,
             action: 'reject',
+            ...(params.messaging_account_id ? { messaging_account_id: params.messaging_account_id } : {}),
         };
 
         return this.sendJson(
@@ -237,6 +248,7 @@ export default class CallingApi extends BaseAPI implements calling.CallingClass 
      *
      * @param params - The terminate request parameters.
      * @param params.call_id - The ID of the call to terminate.
+     * @param params.messaging_account_id - Optional Messaging account handling the call; send the same value on every request for the call.
      * @returns The call action response confirming termination.
      * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/calling/reference/
      */
@@ -245,6 +257,7 @@ export default class CallingApi extends BaseAPI implements calling.CallingClass 
             messaging_product: WHATSAPP_MESSAGING_PRODUCT,
             call_id: params.call_id,
             action: 'terminate',
+            ...(params.messaging_account_id ? { messaging_account_id: params.messaging_account_id } : {}),
         };
 
         return this.sendJson(

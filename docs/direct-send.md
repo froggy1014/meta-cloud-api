@@ -13,6 +13,7 @@ Eligibility (updated October 8, 2026): business portfolios with a messaging limi
 ## Notes
 - `category` accepts `'utility'`, `'authentication'`, or `'service'`. Omitting it is equivalent to `'service'` and keeps normal free-form send behavior.
 - `'authentication'` is access restricted (beta by request) and cannot be sent to a business-scoped user ID. It supports text messages and, since October 14, 2026, interactive one-time password (OTP) messages with a copy code button: `type: 'interactive'`, `interactive.type: 'button'`, and exactly one `{ type: 'otp', otp: { code, otp_type: 'copy_code', text?, code_expiration_minutes? } }` button (typed as `OtpButtonObject`). `code` is 4 to 10 ASCII alphanumeric characters and must also appear as a standalone value in `interactive.body.text`; `text` defaults to "Copy Code" (max 25 characters); `code_expiration_minutes` is 1 to 90 and defaults to 10. `client.messages.interactiveOtp` sends it with `category: 'authentication'` by default.
+- One-tap autofill and zero-tap (October 14, 2026 entry, expanded): the OTP button's `otp_type` also accepts `'one_tap'` and `'zero_tap'` (typed as `OtpOneTapParams` / `OtpZeroTapParams`; copy code is `OtpCopyCodeParams`). Both require `supported_apps`: 1 to 5 `{ package_name, signature_hash }` Android apps (`OtpSupportedApp`; unique package names, max 224 characters with at least two dot-separated segments; hash exactly 11 characters of letters, numbers, `+`, `/`, `=`). Both accept an optional `autofill_text` (defaults to "Autofill", max 25 characters), which must be omitted for copy code. `zero_tap` also requires `zero_tap_terms_accepted: true`, your business's per-request affirmation of the WhatsApp Business Platform terms and that users expect automatic code retrieval; it is never inferred. Missing, `false`, or `null` on zero-tap, or any occurrence on copy code or one-tap, returns HTTP 400 error `131009` (already in `WHATSAPP_ERROR_CODES`). One-tap falls back to copy code on ineligible devices; zero-tap falls back to one-tap, then copy code. Do not send a Zero Tap OTP URL through a `cta_url` button. Android app setup and the OTP Android SDK are covered by Meta's [one-tap](https://developers.facebook.com/documentation/business-messaging/whatsapp/templates/authentication-templates/autofill-button-authentication-templates) and [zero-tap](https://developers.facebook.com/documentation/business-messaging/whatsapp/templates/authentication-templates/zero-tap-authentication-templates) guides.
 - Text authentication messages no longer get an OTP copy code button by default (deprecated October 27, 2026): Direct Send does not infer an OTP from a `type: 'text'` body or add a copy code button automatically. To show a copy code button, send an interactive OTP message (`client.messages.interactiveOtp`) and pass the code explicitly in `otp.code`. Plain text authentication messages still send, without the button.
 - Supported utility formats: text, CTA URL buttons, reply buttons, mixed buttons (10 total, max 2 CTA), image/video/document headers, custom TTL, and the voice call button.
 - Not supported: marketing messages, PSTN phone number buttons, address, audio, contacts, location, sticker, and reaction messages.
@@ -61,13 +62,34 @@ await client.messages.interactiveOtp({
     },
   },
 });
+
+await client.messages.interactiveOtp({
+  to: '15551234567',
+  body: {
+    type: InteractiveTypesEnum.Button,
+    body: { text: 'Your verification code is 123456.' },
+    action: {
+      buttons: [
+        {
+          type: 'otp',
+          otp: {
+            code: '123456',
+            otp_type: 'zero_tap',
+            zero_tap_terms_accepted: true,
+            supported_apps: [{ package_name: 'com.example.app', signature_hash: 'K8a/AINcGX7' }],
+          },
+        },
+      ],
+    },
+  },
+});
 ```
 
 ## Example Details
 - `category` is accepted by every `client.messages.*` send method and is serialized as the top-level `category` field.
 - `directSendConfig` maps to `direct_send_config` and is only applied alongside `category`.
 - `interactiveVoiceCall` defaults `category` to `'utility'` because the "Call on WhatsApp" button is a Direct Send–only type.
-- `interactiveOtp` defaults `category` to `'authentication'`; the OTP copy code button is only valid on Direct Send authentication messages, which must contain exactly that one button.
+- `interactiveOtp` defaults `category` to `'authentication'`; the OTP button (copy code, one-tap, or zero-tap) is only valid on Direct Send authentication messages, which must contain exactly that one button.
 - The voice call button must be sent on its own — it cannot be combined with CTA URL or reply buttons, and footers are not allowed.
 - `display_text` defaults to "Call on WhatsApp" (max 20 characters); `ttl_minutes` accepts 1–43200 and defaults to 10080 (7 days).
 - Calling must already be enabled on the phone number (`client.calling.updateCallingSettings` with `calling.status: 'ENABLED'`) and the app subscribed to the `calls` webhook field, otherwise the send fails with error `138000`.

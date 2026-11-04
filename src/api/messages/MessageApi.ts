@@ -69,7 +69,7 @@ export type MessagePayloadType<T extends MessageTypesEnum> = T extends MessageTy
  * - {@link MessagesApi.interactiveList | interactiveList} - Send list interactive messages
  * - {@link MessagesApi.interactiveCtaUrl | interactiveCtaUrl} - Send CTA URL interactive messages
  * - {@link MessagesApi.interactiveVoiceCall | interactiveVoiceCall} - Send "Call on WhatsApp" voice call button messages
- * - {@link MessagesApi.interactiveOtp | interactiveOtp} - Send Direct Send authentication OTP copy code button messages
+ * - {@link MessagesApi.interactiveOtp | interactiveOtp} - Send Direct Send authentication OTP button messages (copy code, one-tap autofill, zero-tap)
  * - {@link MessagesApi.interactiveLocationRequest | interactiveLocationRequest} - Send location request messages
  * - {@link MessagesApi.interactiveAddressMessage | interactiveAddressMessage} - Send address message interactive messages
  * - {@link MessagesApi.interactiveReplyButtons | interactiveReplyButtons} - Send reply button interactive messages
@@ -299,7 +299,8 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * Sends an image message via the WhatsApp Cloud API.
      *
      * Images can be specified by media ID or public URL.
-     * Supported formats: image/jpeg, image/png. Maximum file size: 5 MB.
+     * Supported formats: image/jpeg, image/png, and static image/webp (transcoded to
+     * JPEG; animated WebP and images over 4,096 px on an edge are rejected). Maximum file size: 5 MB.
      *
      * @param params - The image message parameters
      * @param params.body - Image media object containing `id` or `link`, and optional `caption`
@@ -766,7 +767,12 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
 
     /**
      * Sends a Direct Send authentication message with a one-time password (OTP)
-     * copy code button, without pre-creating an authentication template.
+     * button (copy code, one-tap autofill, or zero-tap), without pre-creating an
+     * authentication template.
+     *
+     * `otp_type: 'one_tap'` and `'zero_tap'` require `supported_apps` (1 to 5 Android
+     * apps); `'zero_tap'` also requires `zero_tap_terms_accepted: true`, which must be
+     * omitted for the other types (error 131009 otherwise).
      *
      * The request is always sent with `category: 'authentication'`. The interactive
      * object must be `type: 'button'` with exactly one `{ type: 'otp' }` button, and
@@ -791,6 +797,28 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      *     action: {
      *       buttons: [
      *         { type: 'otp', otp: { code: '123456', otp_type: 'copy_code', code_expiration_minutes: 10 } },
+     *       ],
+     *     },
+     *   },
+     *   to: '1234567890',
+     * });
+     *
+     * // Zero-tap with one-tap and copy code fallback
+     * await client.messages.interactiveOtp({
+     *   body: {
+     *     type: 'button',
+     *     body: { text: 'Your verification code is 123456.' },
+     *     action: {
+     *       buttons: [
+     *         {
+     *           type: 'otp',
+     *           otp: {
+     *             code: '123456',
+     *             otp_type: 'zero_tap',
+     *             zero_tap_terms_accepted: true,
+     *             supported_apps: [{ package_name: 'com.example.app', signature_hash: 'K8a/AINcGX7' }],
+     *           },
+     *         },
      *       ],
      *     },
      *   },

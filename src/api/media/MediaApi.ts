@@ -31,7 +31,7 @@ import type * as media from './types';
  * |------|-----------|----------|
  * | Audio | audio/aac, audio/mp4, audio/mpeg, audio/amr, audio/ogg | 16 MB |
  * | Document | Various (PDF, DOC, DOCX, PPT, XLS, etc.) | 100 MB |
- * | Image | image/jpeg, image/png | 5 MB |
+ * | Image | image/jpeg, image/png, image/webp (static) | 5 MB |
  * | Sticker | image/webp | 100 KB (animated), 500 KB (static) |
  * | Video | video/mp4, video/3gp | 16 MB |
  *

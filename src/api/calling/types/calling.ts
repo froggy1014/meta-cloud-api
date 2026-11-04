@@ -149,7 +149,17 @@ export type CallTranscriptionConfig = {
     announcement_language?: CallAnnouncementLanguage;
 };
 
-export type InitiateCallRequest = {
+/**
+ * ID of the Messaging account handling the call. Include it when the access
+ * token has messaging access to more than one Messaging account on the business
+ * phone number, and send the same value on every request for a call.
+ * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/account-model-evolution/messaging#calling-api
+ */
+type MessagingAccountIdParam = {
+    messaging_account_id?: string;
+};
+
+export type InitiateCallRequest = MessagingAccountIdParam & {
     to: string;
     session: CallSession;
     biz_opaque_callback_data?: string;
@@ -157,12 +167,12 @@ export type InitiateCallRequest = {
     transcription?: CallTranscriptionConfig;
 };
 
-export type PreAcceptCallRequest = {
+export type PreAcceptCallRequest = MessagingAccountIdParam & {
     call_id: string;
     session?: CallSession;
 };
 
-export type AcceptCallRequest = {
+export type AcceptCallRequest = MessagingAccountIdParam & {
     call_id: string;
     session?: CallSession;
     biz_opaque_callback_data?: string;
@@ -170,11 +180,11 @@ export type AcceptCallRequest = {
     transcription?: CallTranscriptionConfig;
 };
 
-export type RejectCallRequest = {
+export type RejectCallRequest = MessagingAccountIdParam & {
     call_id: string;
 };
 
-export type TerminateCallRequest = {
+export type TerminateCallRequest = MessagingAccountIdParam & {
     call_id: string;
 };
 

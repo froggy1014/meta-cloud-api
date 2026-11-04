@@ -767,6 +767,87 @@ describe('Messages API - Unit Tests', () => {
             });
         });
 
+        it('should send one-tap and zero-tap OTP button messages', async () => {
+            const supported_apps = [{ package_name: 'com.example.app', signature_hash: 'K8a/AINcGX7' }];
+            await whatsApp.messages.interactiveOtp({
+                to: '1234567890',
+                body: {
+                    type: InteractiveTypesEnum.Button,
+                    body: { text: 'Your verification code is 123456.' },
+                    action: {
+                        buttons: [
+                            {
+                                type: 'otp',
+                                otp: {
+                                    code: '123456',
+                                    otp_type: 'one_tap',
+                                    autofill_text: 'Autofill',
+                                    supported_apps,
+                                },
+                            },
+                        ],
+                    },
+                },
+            });
+            await whatsApp.messages.interactiveOtp({
+                to: '1234567890',
+                body: {
+                    type: InteractiveTypesEnum.Button,
+                    body: { text: 'Your verification code is 123456.' },
+                    action: {
+                        buttons: [
+                            {
+                                type: 'otp',
+                                otp: {
+                                    code: '123456',
+                                    otp_type: 'zero_tap',
+                                    zero_tap_terms_accepted: true,
+                                    supported_apps,
+                                },
+                            },
+                        ],
+                    },
+                },
+            });
+
+            const [oneTap, zeroTap] = mockRequestSend.mock.calls.map((call: unknown[]) =>
+                JSON.parse(call[3] as string),
+            );
+
+            expect(oneTap).toMatchObject({
+                category: 'authentication',
+                interactive: {
+                    action: {
+                        buttons: [
+                            {
+                                type: 'otp',
+                                otp: { code: '123456', otp_type: 'one_tap', autofill_text: 'Autofill', supported_apps },
+                            },
+                        ],
+                    },
+                },
+            });
+            expect(oneTap.interactive.action.buttons[0].otp).not.toHaveProperty('zero_tap_terms_accepted');
+            expect(zeroTap).toMatchObject({
+                category: 'authentication',
+                interactive: {
+                    action: {
+                        buttons: [
+                            {
+                                type: 'otp',
+                                otp: {
+                                    code: '123456',
+                                    otp_type: 'zero_tap',
+                                    zero_tap_terms_accepted: true,
+                                    supported_apps,
+                                },
+                            },
+                        ],
+                    },
+                },
+            });
+        });
+
         it('should send a voice call button message with utility category by default', async () => {
             await whatsApp.messages.interactiveVoiceCall({
                 to: '1234567890',

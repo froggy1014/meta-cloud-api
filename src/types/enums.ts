@@ -164,6 +164,8 @@ export enum StickerMediaTypesEnum {
 export enum ImageMediaTypesEnum {
     Jpeg = 'image/jpeg',
     Png = 'image/png',
+    /** Static WebP only; transcoded to JPEG. Animated WebP is rejected. */
+    Webp = 'image/webp',
 }
 
 export enum DocumentMediaTypesEnum {

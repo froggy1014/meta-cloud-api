@@ -101,4 +101,38 @@ describe('Calling API - Unit Tests', () => {
             recording: { status: 'ENABLED', purpose: 'Quality assurance', announcement_language: 'en' },
         });
     });
+
+    it('sends messaging_account_id on every call action when provided', async () => {
+        const messaging_account_id = '1234567890';
+        await whatsApp.calling.initiateCall({
+            to: '14085551234',
+            session: { sdp_type: 'offer', sdp: 'v=0' },
+            messaging_account_id,
+        });
+        await whatsApp.calling.preAcceptCall({ call_id: 'wacid.123', messaging_account_id });
+        await whatsApp.calling.acceptCall({ call_id: 'wacid.123', messaging_account_id });
+        await whatsApp.calling.rejectCall({ call_id: 'wacid.123', messaging_account_id });
+        await whatsApp.calling.terminateCall({ call_id: 'wacid.123', messaging_account_id });
+
+        const bodies = mockRequestSend.mock.calls.map((call: unknown[]) => JSON.parse(call[3] as string));
+        expect(bodies.map((b: { action: string }) => b.action)).toEqual([
+            'connect',
+            'pre_accept',
+            'accept',
+            'reject',
+            'terminate',
+        ]);
+        for (const b of bodies) {
+            expect(b.messaging_account_id).toBe(messaging_account_id);
+        }
+    });
+
+    it('omits messaging_account_id when not provided', async () => {
+        await whatsApp.calling.rejectCall({ call_id: 'wacid.123' });
+        await whatsApp.calling.terminateCall({ call_id: 'wacid.123' });
+
+        for (const call of mockRequestSend.mock.calls) {
+            expect(JSON.parse(call[3])).not.toHaveProperty('messaging_account_id');
+        }
+    });
 });
