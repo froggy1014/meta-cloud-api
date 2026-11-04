@@ -1,8 +1,12 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-11-03T16:56:02.061Z
+> Updated: 2026-11-04T16:58:56.521Z
 
+
+## November 3, 2026
+
+- [ ] **#497** Added conversation routing guidance and restored default numeric OTP inference for Direct Send text authentication.
 
 ## November 2, 2026
 
@@ -21,6 +25,7 @@
 
 ## October 29, 2026
 
+- [ ] **#496** Added guidance for pausing and resuming marketing campaigns.
 - [x] **#492** Removed an outdated daily call initiation limit from the business-initiated calling guide.
 
   SDK impact: Docs only. Meta deleted the outdated statement that each business phone number can initiate only 10,000 calls per 24 hours; the SDK never encoded that cap (no client-side throttle or limit constant in `client.calling.initiateCall`), and Meta notes the correction does not change other calling limits. Documented in [Calling](docs/calling.md#notes). No endpoint, payload, webhook, or error code change.
@@ -1411,4 +1416,4 @@
 
 ---
 
-**Progress: 489/496 (99%)**
+**Progress: 489/498 (98%)**
