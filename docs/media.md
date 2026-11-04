@@ -13,6 +13,7 @@ Upload media once and reuse the returned media ID in messages. You can also quer
 - Uploads use `multipart/form-data` with `file`, `type`, and `messaging_product`.
 - `uploadMedia` accepts a `File`, `Blob`, `Uint8Array` (including `Buffer`), `ArrayBuffer`, or web `ReadableStream<Uint8Array>` on every runtime. Pass `{ type, filename? }` unless the input is a `Blob`/`File` with a type. `uploadMedia(file, 'whatsapp')` still works.
 - A `ReadableStream` is read fully into memory first: Meta needs a multipart body and `fetch` only takes `Blob` parts in `FormData`. Peak memory can exceed the file size because buffering and multipart encoding may allocate copies.
+- Image types (October 30, 2026): image messages accept `image/jpeg`, `image/png`, and static `image/webp` (`ImageMediaTypesEnum.Webp`), each up to 5 MB. Meta transcodes a WebP image to JPEG; animated WebP, files that don't decode as valid WebP, and images over 4,096 pixels on an edge are rejected. WebP still also works as a sticker (`client.messages.sticker`). Upload with `client.media.uploadMedia(file, { type: 'image/webp' })` and send with `client.messages.image({ body: { id } })`, or pass a `link`.
 - Download uses the `url` from `getMediaById`.
 - Delete requires the media ID, not the URL.
 

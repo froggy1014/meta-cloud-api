@@ -168,6 +168,8 @@ export type StickerMediaTypesType = (typeof StickerMediaTypes)[keyof typeof Stic
 export const ImageMediaTypes = {
     Jpeg: 'image/jpeg',
     Png: 'image/png',
+    /** Static WebP only; transcoded to JPEG. Animated WebP is rejected. */
+    Webp: 'image/webp',
 } as const;
 export type ImageMediaTypesType = (typeof ImageMediaTypes)[keyof typeof ImageMediaTypes];
 

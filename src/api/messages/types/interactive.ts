@@ -63,25 +63,73 @@ type ReplyButtonObject = {
 };
 
 /**
- * One-time password (OTP) copy code button for a Direct Send authentication
- * message (`category: 'authentication'`, `interactive.type: 'button'`). The
- * message must carry exactly one button, and `code` must also appear as a
- * standalone value in `interactive.body.text`.
+ * Android app that can receive the code for one-tap autofill and zero-tap OTP
+ * experiences.
+ */
+export type OtpSupportedApp = {
+    /** Android package name. Maximum 224 characters, at least two dot-separated segments. */
+    package_name: string;
+    /** App signing-key hash: exactly 11 characters of letters, numbers, `+`, `/`, or `=`. */
+    signature_hash: string;
+};
+
+type OtpButtonBase = {
+    /** The OTP: 4 to 10 ASCII alphanumeric characters. Must also appear standalone in `interactive.body.text`. */
+    code: string;
+    /** Copy code button label. Defaults to "Copy Code"; maximum 25 characters, no variables, line breaks, URLs, or emoji. */
+    text?: string;
+    /** Code expiration in minutes, 1 to 90. Defaults to 10. */
+    code_expiration_minutes?: number;
+};
+
+/** Copy code: a button that copies the code to the clipboard. */
+export type OtpCopyCodeParams = OtpButtonBase & {
+    otp_type: 'copy_code';
+};
+
+/**
+ * One-tap autofill: on eligible Android devices, tapping the button opens the app
+ * and delivers the code. Falls back to a copy code button.
+ */
+export type OtpOneTapParams = OtpButtonBase & {
+    otp_type: 'one_tap';
+    /** Autofill button label. Defaults to "Autofill"; maximum 25 characters. */
+    autofill_text?: string;
+    /** One to five Android apps (unique `package_name`) that can receive the code. */
+    supported_apps: OtpSupportedApp[];
+};
+
+/**
+ * Zero-tap: on eligible Android devices, broadcasts the code to the app without a
+ * button tap. Falls back to one-tap autofill, then copy code.
+ */
+export type OtpZeroTapParams = OtpButtonBase & {
+    otp_type: 'zero_tap';
+    /**
+     * The business's affirmation that its zero-tap use is subject to the WhatsApp
+     * Terms for WhatsApp Business Platform and that users expect automatic code
+     * retrieval. Must be `true` on every zero-tap request; missing, `false`, or
+     * `null` is rejected with error 131009.
+     */
+    zero_tap_terms_accepted: true;
+    /** Autofill button label. Defaults to "Autofill"; maximum 25 characters. */
+    autofill_text?: string;
+    /** One to five Android apps (unique `package_name`) that can receive the code. */
+    supported_apps: OtpSupportedApp[];
+};
+
+/**
+ * One-time password (OTP) button for a Direct Send authentication message
+ * (`category: 'authentication'`, `interactive.type: 'button'`). The message must
+ * carry exactly one button, and `code` must also appear as a standalone value in
+ * `interactive.body.text`. `otp_type` selects copy code, one-tap autofill, or
+ * zero-tap; `zero_tap_terms_accepted` is only allowed (and required) for zero-tap.
  *
  * @see {@link https://developers.facebook.com/documentation/business-messaging/whatsapp/direct-send/supported-message-types#interactive-authentication-messages | Direct Send interactive authentication messages}
  */
 export type OtpButtonObject = {
     type: 'otp';
-    otp: {
-        /** The OTP: 4 to 10 ASCII alphanumeric characters. */
-        code: string;
-        /** Copy code experience. Only `copy_code` is supported. */
-        otp_type: 'copy_code';
-        /** Button label. Defaults to "Copy Code"; maximum 25 characters, no variables, line breaks, URLs, or emoji. */
-        text?: string;
-        /** Code expiration in minutes, 1 to 90. Defaults to 10. */
-        code_expiration_minutes?: number;
-    };
+    otp: OtpCopyCodeParams | OtpOneTapParams | OtpZeroTapParams;
 };
 
 type ActionObject = {
