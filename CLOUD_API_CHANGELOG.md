@@ -1,8 +1,14 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-11-03T16:56:02.061Z
+> Updated: 2026-11-04T16:58:56.521Z
 
+
+## November 3, 2026
+
+- [x] **#497** Added conversation routing guidance and restored default numeric OTP inference for Direct Send text authentication.
+
+  SDK impact: Docs only, two parts. (1) Conversation Routing: Meta added *Create an alternate routing group* (one shared configuration of primary responders, escalation partner, and standby visibility applied to selected phone numbers, overriding the account default; needs at least two numbers; selecting all numbers replaces account routing and deletes the group) and clarified that when an effective configuration exists with more than one partner or direct integration, enabling Meta Business Agent returns *Conversation routing setup required* and needs an explicit routing choice in Meta Business Suite without replacing existing routing. Configuration is UI-only (no public API), so documented in [Conversation Routing](docs/conversation-routing.md#alternate-routing-group-november-3-2026); `threadControl`, `onStandby`, and `onMessagingHandovers` are unchanged. (2) Direct Send again infers a numeric OTP from `type: 'text'` authentication messages and adds a copy code button by default (exactly one 4–6-digit number, else exactly one 4+-digit number), unless inference is disabled for the sending business, reversing the #490 deprecation. The disable switch is an account setting with no documented API field, and explicit `otp.code` buttons (`client.messages.interactiveOtp`) are unchanged, so the [Direct Send](docs/direct-send.md#notes) note was rewritten. No type, endpoint, payload, webhook, or error code change.
 
 ## November 2, 2026
 
@@ -21,6 +27,9 @@
 
 ## October 29, 2026
 
+- [x] **#496** Added guidance for pausing and resuming marketing campaigns.
+
+  SDK impact: Docs only. Messaging campaigns (beta, Meta Business Suite) can be paused and resumed from the campaign insights page or the Campaigns table Off/On switch while the campaign has not completed; resuming does not bypass template review, and a published campaign can only have its name, maximum price, and budget edited. Meta documents no Cloud API endpoint for campaigns, so no SDK method was added. Documented in [Marketing Messages](docs/marketing-messages.md#pause-and-resume-marketing-campaigns-october-29-2026).
 - [x] **#492** Removed an outdated daily call initiation limit from the business-initiated calling guide.
 
   SDK impact: Docs only. Meta deleted the outdated statement that each business phone number can initiate only 10,000 calls per 24 hours; the SDK never encoded that cap (no client-side throttle or limit constant in `client.calling.initiateCall`), and Meta notes the correction does not change other calling limits. Documented in [Calling](docs/calling.md#notes). No endpoint, payload, webhook, or error code change.
@@ -1411,4 +1420,4 @@
 
 ---
 
-**Progress: 489/496 (99%)**
+**Progress: 491/498 (99%)**
