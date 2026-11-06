@@ -1,8 +1,12 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-11-04T16:58:56.521Z
+> Updated: 2026-11-06T16:40:06.060Z
 
+
+## November 4, 2026
+
+- [ ] **#498** Documented business-scoped user ID (BSUID) and username fields across webhook references and APIs, and sending messages to a BSUID.
 
 ## November 3, 2026
 
@@ -1420,4 +1424,4 @@
 
 ---
 
-**Progress: 491/498 (99%)**
+**Progress: 491/499 (98%)**
