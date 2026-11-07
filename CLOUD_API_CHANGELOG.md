@@ -1,8 +1,12 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-11-06T16:40:06.060Z
+> Updated: 2026-11-07T15:34:23.492Z
 
+
+## November 6, 2026
+
+- [ ] **#499** Added quality-based business-initiated calling with permanent permissions and calling limits.
 
 ## November 4, 2026
 
@@ -1424,4 +1428,4 @@
 
 ---
 
-**Progress: 491/499 (98%)**
+**Progress: 491/500 (98%)**
