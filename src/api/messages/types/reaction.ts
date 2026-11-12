@@ -14,6 +14,8 @@ export type ReactionMessageRequestBody = MessageRequestBody<MessageTypesEnum.Rea
 export interface ReactionParams {
     messageId: string;
     emoji: string;
-    to: string;
+    to?: string;
+    /** Business-scoped user ID (BSUID) or parent BSUID; `to` takes precedence when both are set. */
+    recipient?: string;
     recipientType?: MessageRecipientType;
 }

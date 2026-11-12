@@ -57,6 +57,26 @@ describe('Messages API - Unit Tests', () => {
             });
         });
 
+        it('should send text message to a BSUID without a phone number', async () => {
+            await whatsApp.messages.text({ recipient: 'US.13491208655302741918', body: 'Hi' });
+
+            const [, , , body] = mockRequestSend.mock.calls[0];
+            const requestBody = JSON.parse(body);
+            expect(requestBody.recipient).toBe('US.13491208655302741918');
+            expect(requestBody).not.toHaveProperty('to');
+        });
+
+        it('should send both to and recipient when both are provided', async () => {
+            await whatsApp.messages.text({ to: '1234567890', recipient: 'US.13491208655302741918', body: 'Hi' });
+
+            const [, , , body] = mockRequestSend.mock.calls[0];
+            expect(JSON.parse(body)).toMatchObject({ to: '1234567890', recipient: 'US.13491208655302741918' });
+        });
+
+        it('should reject a message with neither to nor recipient', async () => {
+            await expect(whatsApp.messages.text({ body: 'Hi' })).rejects.toThrow('recipient');
+        });
+
         it('should send text message with correct schema', async () => {
             const textParams = {
                 to: '1234567890',

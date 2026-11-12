@@ -45,6 +45,39 @@ describe('Calling API - Unit Tests', () => {
         expect(endpoint).toBe(`${whatsApp.requester.phoneNumberId}/call_permissions?user_wa_id=12345`);
     });
 
+    it('gets call permissions by BSUID', async () => {
+        await whatsApp.calling.getCallPermissions({ recipient: 'US.13491208655302741918' });
+
+        const [method, endpoint] = mockRequestSend.mock.calls[0];
+        expect(method).toBe('GET');
+        expect(endpoint).toBe(`${whatsApp.requester.phoneNumberId}/call_permissions?recipient=US.13491208655302741918`);
+    });
+
+    it('rejects call permission lookups without a user identifier', async () => {
+        await expect(whatsApp.calling.getCallPermissions({})).rejects.toThrow('userWaId');
+    });
+
+    it('initiates a call to a BSUID without a phone number', async () => {
+        await whatsApp.calling.initiateCall({
+            recipient: 'US.13491208655302741918',
+            session: { sdp_type: 'offer', sdp: 'v=0' },
+        });
+
+        const [, , , body] = mockRequestSend.mock.calls[0];
+        expect(JSON.parse(body)).toEqual({
+            messaging_product: 'whatsapp',
+            recipient: 'US.13491208655302741918',
+            action: 'connect',
+            session: { sdp_type: 'offer', sdp: 'v=0' },
+        });
+    });
+
+    it('rejects initiating a call without to or recipient', async () => {
+        await expect(whatsApp.calling.initiateCall({ session: { sdp_type: 'offer', sdp: 'v=0' } })).rejects.toThrow(
+            'recipient',
+        );
+    });
+
     it('initiates a call', async () => {
         await whatsApp.calling.initiateCall({
             to: '14085551234',

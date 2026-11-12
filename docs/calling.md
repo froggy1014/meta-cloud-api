@@ -6,7 +6,7 @@ Configure calling, check permissions, and control call sessions.
 ## Endpoints
 - POST /{PHONE_NUMBER_ID}/settings
 - GET /{PHONE_NUMBER_ID}/settings?fields&include_sip_credentials
-- GET /{PHONE_NUMBER_ID}/call_permissions?user_wa_id
+- GET /{PHONE_NUMBER_ID}/call_permissions?user_wa_id | recipient
 - POST /{PHONE_NUMBER_ID}/calls
 
 ## Notes
@@ -21,6 +21,16 @@ Configure calling, check permissions, and control call sessions.
 - Business-initiated call volume (corrected October 29, 2026): Meta removed the outdated statement that each business phone number can initiate only 10,000 calls per 24 hours from its [Business-initiated calls guide](https://developers.facebook.com/documentation/business-messaging/whatsapp/calling/business-initiated-calls/). There is no per-number 24-hour cap on `client.calling.initiateCall(...)` to plan around; the other calling limits, such as the per business + WhatsApp user pair limits on call permission requests and business-initiated calls, are unchanged. Documentation correction only; no SDK endpoint, payload, webhook, or error code change.
 - Messaging account per call (November 2, 2026): a business phone number can have more than one Messaging account. Every call action (`initiateCall`, `preAcceptCall`, `acceptCall`, `rejectCall`, `terminateCall`) accepts an optional `messaging_account_id`, sent in the `POST /{PHONE_NUMBER_ID}/calls` body. Include it whenever the access token has messaging access to more than one Messaging account on the number, and send the same value on every request for a call; requests from a different Messaging account for a call another one is already handling aren't processed, and omitting it when the token reaches several accounts can be rejected. With access to exactly one, Meta picks it for you. See Meta's [Managing messaging accounts](https://developers.facebook.com/documentation/business-messaging/whatsapp/account-model-evolution/messaging#calling-api).
 - Calling API rate cards effective **October 1, 2026** (published September 11, 2026) span 16 currencies. Bangladesh, Iraq, Kazakhstan, Kuwait, Morocco, Nepal, Oman, Sri Lanka, and Ukraine leave their "Rest of" pricing region and become standalone entries; each keeps the rate of the region it leaves, so calling rates themselves do not change. Rate cards are billing data only — no SDK endpoint, payload, or webhook change. See Meta's [Calling pricing](https://developers.facebook.com/documentation/business-messaging/whatsapp/calling/pricing/).
+
+## Quality-based business-initiated calling (November 6, 2026)
+- Limited availability: eligible business phone numbers in Colombia and Mexico are enrolled automatically when the Calling API is enabled; existing eligible numbers are migrated. You can call a user without prior approval unless they declined permanent call permission or revoked a previous grant. Existing permissions stay valid; only permanent permission applies (no temporary or callback permissions).
+- `getCallPermissions` returns `permission.status: 'permanent'` when no permission is stored on these numbers. That is the default callable state, not an explicit user approval. A declined permission still returns `'no_permission'`.
+- Calls to users without approved permission count toward a rolling 24-hour tier limit per phone number: `CALLING_TIER_NO_ACCESS`, `CALLING_TIER_1K` (starting tier), `CALLING_TIER_15K`, `CALLING_TIER_UNLIMITED`. Meta upgrades tiers automatically. Exceeding the limit returns error `138037` (`WhatsAppCallingError`); wait for attempts to leave the 24-hour window. Poor calling quality can temporarily restrict business-initiated calling.
+- Tier increases arrive on the `account_update` webhook as `event: 'CALLING_TIER_UPDATE'` with `phone_number` and `calling_limit_info: { current_limit, previous_limit }` (typed as `CallingLimitInfo`).
+
+## Business-scoped user IDs (November 4, 2026)
+- `client.calling.initiateCall({ recipient: 'US.1349...', session })` and `client.calling.getCallPermissions({ recipient })` accept a BSUID or parent BSUID instead of a phone number. `to` is optional when `recipient` is set; if both are set, `to` takes precedence. The SDK throws if neither is provided.
+- Call webhooks can omit the phone number when the user has a username: `to`, `wa_id` are optional, and entries add `to_user_id`, `to_parent_user_id`, `recipient_user_id`, `recipient_parent_user_id`, and `contacts[].parent_user_id`. See [Business-scoped user IDs](https://developers.facebook.com/documentation/business-messaging/whatsapp/business-phone-numbers/business-scoped-user-ids).
 
 ## Per-number account restrictions (October 2, 2026)
 Meta documented the `phone_number` field on the `account_update` webhook on October 2, 2026. It carries the business display phone number (for example `15550783881`) and appears only on events about a single business phone number, such as `ACCOUNT_VIOLATION` and calling-related `ACCOUNT_RESTRICTION` events; WABA-wide events omit it. Use it to tell which number on a multi-number WABA lost calling capability.

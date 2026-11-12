@@ -76,6 +76,12 @@ describe('WhatsApp error mapping', () => {
         expect(error).toBeInstanceOf(WhatsAppCallingError);
     });
 
+    it('maps business-initiated calling limit error 138037 as a calling error', () => {
+        expect(isWhatsAppErrorCode(138037)).toBe(true);
+        const error = createWhatsAppApiError(buildError(138037));
+        expect(error).toBeInstanceOf(WhatsAppCallingError);
+    });
+
     it('maps group errors', () => {
         const error = createWhatsAppApiError(buildError(131020));
         expect(error).toBeInstanceOf(WhatsAppGroupError);

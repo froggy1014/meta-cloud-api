@@ -80,12 +80,19 @@ export default class CallingApi extends BaseAPI implements calling.CallingClass 
      * Get calling permissions for a specific WhatsApp user.
      *
      * @param params - The request parameters.
-     * @param params.userWaId - The WhatsApp ID of the user to check permissions for.
+     * @param params.userWaId - The WhatsApp ID of the user to check permissions for. Required unless `recipient` is set.
+     * @param params.recipient - The user's business-scoped user ID (BSUID) or parent BSUID, used instead of `userWaId`.
      * @returns The call permissions for the specified user.
      * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/calling/reference/
      */
-    async getCallPermissions(params: { userWaId: string }): Promise<calling.CallPermissionsResponse> {
-        const queryParams = objectToQueryString({ user_wa_id: params.userWaId });
+    async getCallPermissions(params: calling.GetCallPermissionsParams): Promise<calling.CallPermissionsResponse> {
+        if (!params.userWaId && !params.recipient) {
+            throw new Error('Either `userWaId` or `recipient` (BSUID) is required.');
+        }
+        const queryParams = objectToQueryString({
+            ...(params.userWaId ? { user_wa_id: params.userWaId } : {}),
+            ...(params.recipient ? { recipient: params.recipient } : {}),
+        });
         return this.sendJson(
             HttpMethodsEnum.Get,
             `${this.config[WabaConfigEnum.PhoneNumberId]}/call_permissions${queryParams}`,
@@ -98,7 +105,8 @@ export default class CallingApi extends BaseAPI implements calling.CallingClass 
      * Initiate an outbound call to a WhatsApp user.
      *
      * @param params - The call initiation parameters.
-     * @param params.to - The recipient's WhatsApp phone number.
+     * @param params.to - The recipient's WhatsApp phone number. Required unless `recipient` is set.
+     * @param params.recipient - The recipient's business-scoped user ID (BSUID) or parent BSUID. `to` takes precedence when both are set.
      * @param params.session - The call session configuration.
      * @param params.messaging_account_id - Optional Messaging account placing the call (required when the token reaches more than one).
      * @param params.biz_opaque_callback_data - Optional opaque data passed back in webhooks.
@@ -108,14 +116,17 @@ export default class CallingApi extends BaseAPI implements calling.CallingClass 
      * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/calling/reference/
      */
     async initiateCall(params: calling.InitiateCallRequest): Promise<calling.InitiateCallResponse> {
+        if (!params.to && !params.recipient) {
+            throw new Error('Either `to` (phone number) or `recipient` (BSUID) is required.');
+        }
         const body = {
             messaging_product: WHATSAPP_MESSAGING_PRODUCT,
-            to: params.to,
             action: 'connect',
             session: params.session,
         } as {
             messaging_product: 'whatsapp';
-            to: string;
+            to?: string;
+            recipient?: string;
             action: calling.CallAction;
             session: calling.CallSession;
             messaging_account_id?: string;
@@ -124,6 +135,8 @@ export default class CallingApi extends BaseAPI implements calling.CallingClass 
             transcription?: calling.CallTranscriptionConfig;
         };
 
+        if (params.to) body.to = params.to;
+        if (params.recipient) body.recipient = params.recipient;
         if (params.messaging_account_id) body.messaging_account_id = params.messaging_account_id;
         if (params.biz_opaque_callback_data) {
             body.biz_opaque_callback_data = params.biz_opaque_callback_data;

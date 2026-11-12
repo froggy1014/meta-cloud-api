@@ -11,6 +11,7 @@ Send text, media, template, interactive, and reaction messages through the Cloud
 - `to` must be an E.164 formatted number string.
 - `type` must match the body key (e.g., `type: "text"` with a `text` object).
 - Use `context.message_id` to reply to a specific message.
+- Send to a business-scoped user ID (November 4, 2026): pass `recipient: 'US.1349...'` (BSUID or parent BSUID) instead of, or with, `to`. `to` is optional when `recipient` is set and takes precedence if both are given; the SDK throws if neither is provided. Applies to every `client.messages.*` send method including `reaction`. Responses may carry `user_id` / `parent_user_id` in `contacts`.
 - Add `category: 'utility' | 'authentication'` to send business-initiated messages without a pre-approved template. See [Direct Send](./direct-send.md).
 - `client.messages.markAsRead({ messageId })` also marks group messages as read (October 15, 2026): pass the `message.id` from the group's `messages` webhook. Unlike 1:1 chats, marking a group message as read does **not** mark earlier messages in that group as read, so mark each group message individually. See Meta's [Mark a group message as read](https://developers.facebook.com/documentation/business-messaging/whatsapp/messages/mark-message-as-read#mark-a-group-message-as-read).
 

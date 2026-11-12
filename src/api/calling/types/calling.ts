@@ -81,6 +81,15 @@ export type CallPermissionAction = {
     limits?: CallPermissionLimit[];
 };
 
+/**
+ * Identify the WhatsApp user by phone number (`userWaId`) or BSUID (`recipient`).
+ * At least one is required.
+ */
+export type GetCallPermissionsParams = {
+    userWaId?: string;
+    recipient?: string;
+};
+
 export type CallPermissionsResponse = {
     messaging_product: 'whatsapp';
     permission: CallPermission;
@@ -160,7 +169,10 @@ type MessagingAccountIdParam = {
 };
 
 export type InitiateCallRequest = MessagingAccountIdParam & {
-    to: string;
+    /** Callee phone number. Required unless `recipient` is provided; takes precedence when both are set. */
+    to?: string;
+    /** Callee business-scoped user ID (BSUID) or parent BSUID. Use instead of, or in addition to, `to`. */
+    recipient?: string;
     session: CallSession;
     biz_opaque_callback_data?: string;
     recording?: CallRecordingConfig;
@@ -204,7 +216,7 @@ export interface CallingClass {
         fields?: string[] | string;
         include_sip_credentials?: boolean;
     }): Promise<CallingSettingsResponse>;
-    getCallPermissions(params: { userWaId: string }): Promise<CallPermissionsResponse>;
+    getCallPermissions(params: GetCallPermissionsParams): Promise<CallPermissionsResponse>;
     initiateCall(params: InitiateCallRequest): Promise<InitiateCallResponse>;
     preAcceptCall(params: PreAcceptCallRequest): Promise<CallActionResponse>;
     acceptCall(params: AcceptCallRequest): Promise<CallActionResponse>;
