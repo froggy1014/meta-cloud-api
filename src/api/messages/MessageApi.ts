@@ -106,10 +106,11 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      *
      * @param type - The type of message to send (e.g., text, image, template)
      * @param payload - The message payload object matching the specified type
-     * @param to - The recipient's phone number in international format (e.g., "1234567890")
+     * @param to - The recipient's phone number in international format (e.g., "1234567890"). Optional when `recipient` is set.
      * @param replyMessageId - Optional message ID to reply to, setting the message context
      * @param recipientType - Whether `to` addresses an individual or a group
      * @param directSend - Optional Direct Send options (`category` and `directSendConfig`)
+     * @param recipient - Optional business-scoped user ID (BSUID) or parent BSUID. Use instead of, or with, `to`; `to` takes precedence when both are set.
      * @returns The formatted request body ready to be serialized and sent
      *
      * @see {@link https://developers.facebook.com/docs/whatsapp/cloud-api/reference/messages | Messages API Reference}
@@ -127,19 +128,22 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
     bodyBuilder<T extends MessageTypesEnum>(
         type: T,
         payload: MessagePayloadType<T>,
-        to: string,
+        to: string | undefined,
         replyMessageId?: string,
         recipientType: m.MessageRecipientType = 'individual',
         directSend?: m.DirectSendOptions,
+        recipient?: string,
     ) {
-        if (recipientType === 'individual') assertPhoneNumber(to);
+        if (!to && !recipient) throw new Error('Either `to` (phone number) or `recipient` (BSUID) is required.');
+        if (to && recipientType === 'individual') assertPhoneNumber(to);
         const body: m.MessageRequestBody<T> = {
             messaging_product: WHATSAPP_MESSAGING_PRODUCT,
             recipient_type: recipientType,
-            to,
             type,
             [type]: payload,
         };
+        if (to) body.to = to;
+        if (recipient) body.recipient = recipient;
 
         if (replyMessageId) body.context = { message_id: replyMessageId };
         if (directSend?.category) body.category = directSend.category;
@@ -208,13 +212,21 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * ```
      */
     async audio(params: m.MessageRequestParams<m.AudioMediaObject>): Promise<m.MessagesResponse> {
-        const { body, to, replyMessageId, recipientType, category, directSendConfig } = params;
+        const { body, to, recipient, replyMessageId, recipientType, category, directSendConfig } = params;
         return this.send(
             JSON.stringify(
-                this.bodyBuilder(MessageTypesEnum.Audio, body, to, replyMessageId, recipientType, {
-                    category,
-                    directSendConfig,
-                }),
+                this.bodyBuilder(
+                    MessageTypesEnum.Audio,
+                    body,
+                    to,
+                    replyMessageId,
+                    recipientType,
+                    {
+                        category,
+                        directSendConfig,
+                    },
+                    recipient,
+                ),
             ),
         );
     }
@@ -245,13 +257,21 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * ```
      */
     async contacts(params: m.MessageRequestParams<m.ContactObject[]>): Promise<m.MessagesResponse> {
-        const { body, to, replyMessageId, recipientType, category, directSendConfig } = params;
+        const { body, to, recipient, replyMessageId, recipientType, category, directSendConfig } = params;
         return this.send(
             JSON.stringify(
-                this.bodyBuilder(MessageTypesEnum.Contacts, body, to, replyMessageId, recipientType, {
-                    category,
-                    directSendConfig,
-                }),
+                this.bodyBuilder(
+                    MessageTypesEnum.Contacts,
+                    body,
+                    to,
+                    replyMessageId,
+                    recipientType,
+                    {
+                        category,
+                        directSendConfig,
+                    },
+                    recipient,
+                ),
             ),
         );
     }
@@ -284,13 +304,21 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * ```
      */
     async document(params: m.MessageRequestParams<m.DocumentMediaObject>): Promise<m.MessagesResponse> {
-        const { body, to, replyMessageId, recipientType, category, directSendConfig } = params;
+        const { body, to, recipient, replyMessageId, recipientType, category, directSendConfig } = params;
         return this.send(
             JSON.stringify(
-                this.bodyBuilder(MessageTypesEnum.Document, body, to, replyMessageId, recipientType, {
-                    category,
-                    directSendConfig,
-                }),
+                this.bodyBuilder(
+                    MessageTypesEnum.Document,
+                    body,
+                    to,
+                    replyMessageId,
+                    recipientType,
+                    {
+                        category,
+                        directSendConfig,
+                    },
+                    recipient,
+                ),
             ),
         );
     }
@@ -319,13 +347,21 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * ```
      */
     async image(params: m.MessageRequestParams<m.ImageMediaObject>): Promise<m.MessagesResponse> {
-        const { body, to, replyMessageId, recipientType, category, directSendConfig } = params;
+        const { body, to, recipient, replyMessageId, recipientType, category, directSendConfig } = params;
         return this.send(
             JSON.stringify(
-                this.bodyBuilder(MessageTypesEnum.Image, body, to, replyMessageId, recipientType, {
-                    category,
-                    directSendConfig,
-                }),
+                this.bodyBuilder(
+                    MessageTypesEnum.Image,
+                    body,
+                    to,
+                    replyMessageId,
+                    recipientType,
+                    {
+                        category,
+                        directSendConfig,
+                    },
+                    recipient,
+                ),
             ),
         );
     }
@@ -363,13 +399,21 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * ```
      */
     async interactive(params: m.MessageRequestParams<m.InteractiveObject>): Promise<m.MessagesResponse> {
-        const { body, to, replyMessageId, recipientType, category, directSendConfig } = params;
+        const { body, to, recipient, replyMessageId, recipientType, category, directSendConfig } = params;
         return this.send(
             JSON.stringify(
-                this.bodyBuilder(MessageTypesEnum.Interactive, body, to, replyMessageId, recipientType, {
-                    category,
-                    directSendConfig,
-                }),
+                this.bodyBuilder(
+                    MessageTypesEnum.Interactive,
+                    body,
+                    to,
+                    replyMessageId,
+                    recipientType,
+                    {
+                        category,
+                        directSendConfig,
+                    },
+                    recipient,
+                ),
             ),
         );
     }
@@ -401,13 +445,21 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * ```
      */
     async location(params: m.MessageRequestParams<m.LocationObject>): Promise<m.MessagesResponse> {
-        const { body, to, replyMessageId, recipientType, category, directSendConfig } = params;
+        const { body, to, recipient, replyMessageId, recipientType, category, directSendConfig } = params;
         return this.send(
             JSON.stringify(
-                this.bodyBuilder(MessageTypesEnum.Location, body, to, replyMessageId, recipientType, {
-                    category,
-                    directSendConfig,
-                }),
+                this.bodyBuilder(
+                    MessageTypesEnum.Location,
+                    body,
+                    to,
+                    replyMessageId,
+                    recipientType,
+                    {
+                        category,
+                        directSendConfig,
+                    },
+                    recipient,
+                ),
             ),
         );
     }
@@ -435,13 +487,21 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * ```
      */
     async sticker(params: m.MessageRequestParams<m.StickerMediaObject>): Promise<m.MessagesResponse> {
-        const { body, to, replyMessageId, recipientType, category, directSendConfig } = params;
+        const { body, to, recipient, replyMessageId, recipientType, category, directSendConfig } = params;
         return this.send(
             JSON.stringify(
-                this.bodyBuilder(MessageTypesEnum.Sticker, body, to, replyMessageId, recipientType, {
-                    category,
-                    directSendConfig,
-                }),
+                this.bodyBuilder(
+                    MessageTypesEnum.Sticker,
+                    body,
+                    to,
+                    replyMessageId,
+                    recipientType,
+                    {
+                        category,
+                        directSendConfig,
+                    },
+                    recipient,
+                ),
             ),
         );
     }
@@ -478,13 +538,21 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
     async template(
         params: m.MessageRequestParams<m.MessageTemplateObject<ComponentTypesEnum>>,
     ): Promise<m.MessagesResponse> {
-        const { body, to, replyMessageId, recipientType, category, directSendConfig } = params;
+        const { body, to, recipient, replyMessageId, recipientType, category, directSendConfig } = params;
         return this.send(
             JSON.stringify(
-                this.bodyBuilder(MessageTypesEnum.Template, body, to, replyMessageId, recipientType, {
-                    category,
-                    directSendConfig,
-                }),
+                this.bodyBuilder(
+                    MessageTypesEnum.Template,
+                    body,
+                    to,
+                    replyMessageId,
+                    recipientType,
+                    {
+                        category,
+                        directSendConfig,
+                    },
+                    recipient,
+                ),
             ),
         );
     }
@@ -517,7 +585,7 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * ```
      */
     async text(params: m.TextMessageParams): Promise<m.MessagesResponse> {
-        const { body, to, replyMessageId, previewUrl, recipientType, category, directSendConfig } = params;
+        const { body, to, recipient, replyMessageId, previewUrl, recipientType, category, directSendConfig } = params;
 
         // Handle both string and TextObject types
         const textPayload: m.TextObject =
@@ -527,10 +595,18 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
 
         return this.send(
             JSON.stringify(
-                this.bodyBuilder(MessageTypesEnum.Text, textPayload, to, replyMessageId, recipientType, {
-                    category,
-                    directSendConfig,
-                }),
+                this.bodyBuilder(
+                    MessageTypesEnum.Text,
+                    textPayload,
+                    to,
+                    replyMessageId,
+                    recipientType,
+                    {
+                        category,
+                        directSendConfig,
+                    },
+                    recipient,
+                ),
             ),
         );
     }
@@ -559,13 +635,21 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
      * ```
      */
     async video(params: m.MessageRequestParams<m.VideoMediaObject>): Promise<m.MessagesResponse> {
-        const { body, to, replyMessageId, recipientType, category, directSendConfig } = params;
+        const { body, to, recipient, replyMessageId, recipientType, category, directSendConfig } = params;
         return this.send(
             JSON.stringify(
-                this.bodyBuilder(MessageTypesEnum.Video, body, to, replyMessageId, recipientType, {
-                    category,
-                    directSendConfig,
-                }),
+                this.bodyBuilder(
+                    MessageTypesEnum.Video,
+                    body,
+                    to,
+                    replyMessageId,
+                    recipientType,
+                    {
+                        category,
+                        directSendConfig,
+                    },
+                    recipient,
+                ),
             ),
         );
     }
@@ -1052,6 +1136,8 @@ export default class MessagesApi extends BaseAPI implements m.MessagesClass {
                     params.to,
                     undefined,
                     params.recipientType,
+                    undefined,
+                    params.recipient,
                 ),
             ),
         );

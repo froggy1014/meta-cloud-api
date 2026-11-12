@@ -1,8 +1,20 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-11-04T16:58:56.521Z
+> Updated: 2026-11-07T15:34:23.492Z
 
+
+## November 6, 2026
+
+- [x] **#499** Added quality-based business-initiated calling with permanent permissions and calling limits.
+
+  SDK impact: Error `138037` (business-initiated calling limit reached) added to the known error codes and mapped to `WhatsAppCallingError`. `account_update` webhook gains `CALLING_TIER_UPDATE` with typed `calling_limit_info` (`CallingLimitInfo`, `CallingLimitTier`). `getCallPermissions` can now return `permanent` as the default state on quality-based numbers; documented in [Calling](docs/calling.md#quality-based-business-initiated-calling-november-6-2026). Availability is limited (Colombia, Mexico); no new endpoint.
+
+## November 4, 2026
+
+- [x] **#498** Documented business-scoped user ID (BSUID) and username fields across webhook references and APIs, and sending messages to a BSUID.
+
+  SDK impact: Most webhook BSUID/username fields were already typed. Added the missing pieces: every `client.messages.*` send method (and `reaction`) accepts `recipient` (BSUID or parent BSUID) with `to` now optional; `client.calling.initiateCall` and `getCallPermissions` accept `recipient`; call webhook types add `to_user_id`, `to_parent_user_id`, `recipient_user_id`, `recipient_parent_user_id`, `contacts[].parent_user_id` and make `to` / `wa_id` optional. Not verified: BSUID `recipient` on other endpoints in the full reference (e.g. block users, typing indicator), which this change does not cover.
 
 ## November 3, 2026
 
@@ -1420,4 +1432,4 @@
 
 ---
 
-**Progress: 491/498 (99%)**
+**Progress: 493/500 (99%)**

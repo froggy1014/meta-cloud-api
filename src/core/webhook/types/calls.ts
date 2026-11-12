@@ -118,8 +118,12 @@ export interface CallEntry {
     timestamp: number;
 
     // --- connect / call_created events ---
-    /** Callee of the call (Page ID) — present on connect / call_created */
+    /** Callee of the call (Page ID) — present on connect / call_created. May be omitted when the user has a username and the phone number is hidden. */
     to?: string;
+    /** BSUID of the callee (business-initiated calls) */
+    to_user_id?: string;
+    /** Parent BSUID of the callee, only when parent BSUIDs are enabled */
+    to_parent_user_id?: string;
     /** Caller of the call (PSID) — present on connect / call_created */
     from?: string;
     /** Whether the call was business- or user-initiated — present on connect */
@@ -134,6 +138,10 @@ export interface CallEntry {
     // --- call_status event (business-initiated only) ---
     /** PSID of the consumer — present on call_status */
     recipient_id?: string;
+    /** BSUID of the callee — present on call_status */
+    recipient_user_id?: string;
+    /** Parent BSUID of the callee, only when parent BSUIDs are enabled — present on call_status */
+    recipient_parent_user_id?: string;
     /** Ringing or accepted — present on call_status */
     call_status?: CallStatusValue;
 
@@ -171,10 +179,12 @@ export interface CallContact {
         /** Business-scoped username, when Meta includes it */
         username?: string;
     };
-    /** WhatsApp ID of the caller */
-    wa_id: string;
+    /** WhatsApp ID of the caller. May be omitted when the user has a username and the phone number is hidden. */
+    wa_id?: string;
     /** Business-scoped user ID, when Meta includes it */
     user_id?: string;
+    /** Parent business-scoped user ID, only when parent BSUIDs are enabled */
+    parent_user_id?: string;
 }
 
 export interface CallsValue {

@@ -18,6 +18,7 @@ export type AccountUpdateEvent =
     | 'ACCOUNT_VIOLATION' // WABA violated Meta policies or terms; see violation_info
     | 'AD_ACCOUNT_LINKED' // WABA onboarded onto MM API and partner given access to ad accounts
     | 'AUTH_INTL_PRICE_ELIGIBILITY_UPDATE' // WABA is eligible for authentication-international rates
+    | 'CALLING_TIER_UPDATE' // A business phone number moved up a business-initiated calling tier; see phone_number, calling_limit_info
     | 'BUSINESS_PRIMARY_LOCATION_COUNTRY_UPDATE' // WABA's primary business location was set; see country
     | 'DISABLED_UPDATE' // WABA banned or reinstated; see ban_info
     | 'MM_LITE_TERMS_SIGNED' // WABA accepted the MM API for WhatsApp terms of service
@@ -127,6 +128,19 @@ export interface AuthInternationalRateEligibility {
     }>;
 }
 
+/** Business-initiated calling tier for quality-based calling */
+export type CallingLimitTier =
+    | 'CALLING_TIER_NO_ACCESS'
+    | 'CALLING_TIER_1K'
+    | 'CALLING_TIER_15K'
+    | 'CALLING_TIER_UNLIMITED';
+
+/** Present on CALLING_TIER_UPDATE events */
+export interface CallingLimitInfo {
+    current_limit: CallingLimitTier;
+    previous_limit: CallingLimitTier;
+}
+
 /** Present on VOLUME_BASED_PRICING_TIER_UPDATE events */
 export interface VolumeTierInfo {
     /** Unix timestamp of the tier update */
@@ -185,6 +199,8 @@ export interface AccountUpdateValue {
     waba_info?: AccountUpdateWabaInfo;
     /** Present on AUTH_INTL_PRICE_ELIGIBILITY_UPDATE events */
     auth_international_rate_eligibility?: AuthInternationalRateEligibility;
+    /** Present on CALLING_TIER_UPDATE events */
+    calling_limit_info?: CallingLimitInfo;
     /** Present on VOLUME_BASED_PRICING_TIER_UPDATE events */
     volume_tier_info?: VolumeTierInfo;
     /** Present on PARTNER_REMOVED events where business used WhatsApp Business app + Cloud API */

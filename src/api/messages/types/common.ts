@@ -70,7 +70,10 @@ export type DirectSendOptions = {
 
 export type MessageRequestBody<T extends MessageTypesEnum> = GeneralMessageBody & {
     recipient_type?: MessageRecipientType;
-    to: string;
+    /** Recipient phone number. Optional when `recipient` (BSUID) is provided. */
+    to?: string;
+    /** Business-scoped user ID (BSUID) or parent BSUID. `to` takes precedence when both are set. */
+    recipient?: string;
     context?: ConTextObject;
     type?: T;
     category?: DirectSendCategory;
@@ -80,7 +83,14 @@ export type MessageRequestBody<T extends MessageTypesEnum> = GeneralMessageBody 
 // Request Parameter Interfaces
 export interface MessageRequestParams<T> {
     body: T;
-    to: string;
+    /** Recipient phone number. Required unless `recipient` is provided. */
+    to?: string;
+    /**
+     * Business-scoped user ID (BSUID) or parent BSUID of the recipient. Use instead of,
+     * or in addition to, `to`; if both are set, `to` takes precedence.
+     * @see https://developers.facebook.com/documentation/business-messaging/whatsapp/business-phone-numbers/business-scoped-user-ids
+     */
+    recipient?: string;
     recipientType?: MessageRecipientType;
     replyMessageId?: string;
     /**
