@@ -1,8 +1,12 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-11-07T15:34:23.492Z
+> Updated: 2026-11-12T17:29:07.746Z
 
+
+## November 11, 2026
+
+- [ ] **#500** Removed the manual onboarding requirement for Pix with redirect. Embedded Signup v4-public-preview and v5-public-preview now show the display name screen to all business customers.
 
 ## November 6, 2026
 
@@ -1432,4 +1436,4 @@
 
 ---
 
-**Progress: 493/500 (99%)**
+**Progress: 493/501 (98%)**
