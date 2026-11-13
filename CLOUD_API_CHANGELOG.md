@@ -1,12 +1,24 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-11-12T17:29:07.746Z
+> Updated: 2026-11-13T17:03:42.890Z
 
+
+## November 13, 2026
+
+- [ ] **#503** Added localized business verification, starting with a limited test of Alipay verification in WhatsApp Manager for businesses registered in mainland China.
+
+## November 12, 2026
+
+- [ ] **#502** Added the call_permission_mode calling setting to opt in to or out of quality-based business-initiated calling.
 
 ## November 11, 2026
 
 - [ ] **#500** Removed the manual onboarding requirement for Pix with redirect. Embedded Signup v4-public-preview and v5-public-preview now show the display name screen to all business customers.
+
+## November 10, 2026
+
+- [ ] **#501** Updated the Tech Partner upgrade guide for Partnership Home and renamed Solution Partners to Technology Partners with the Reseller add-on.
 
 ## November 6, 2026
 
@@ -1436,4 +1448,4 @@
 
 ---
 
-**Progress: 493/501 (98%)**
+**Progress: 493/504 (98%)**
