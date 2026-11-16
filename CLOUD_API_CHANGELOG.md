@@ -1,8 +1,12 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-11-13T17:03:42.890Z
+> Updated: 2026-11-16T19:27:31.004Z
 
+
+## November 16, 2026
+
+- [ ] **#504** Added more specific Embedded Signup error codes for phone number, verification code, and WhatsApp Business app number errors.
 
 ## November 13, 2026
 
@@ -1448,4 +1452,4 @@
 
 ---
 
-**Progress: 493/504 (98%)**
+**Progress: 493/505 (98%)**
