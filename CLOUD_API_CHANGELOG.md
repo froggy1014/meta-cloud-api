@@ -1,7 +1,7 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-11-16T19:27:31.004Z
+> Updated: 2026-11-18T17:54:34.369Z
 
 
 ## November 16, 2026
@@ -44,6 +44,7 @@
 
 ## November 2, 2026
 
+- [ ] **#505** Calling API requests and SIP calls now accept a Messaging account, so you can name the Messaging account a call belongs to.
 - [x] **#495** Calling API requests now accept a Messaging account, so you can name the Messaging account a call belongs to.
 
   SDK impact: Added optional `messaging_account_id?: string` to `InitiateCallRequest`, `PreAcceptCallRequest`, `AcceptCallRequest`, `RejectCallRequest`, and `TerminateCallRequest`, so `client.calling.initiateCall` / `preAcceptCall` / `acceptCall` / `rejectCall` / `terminateCall` send it in the `POST /{PHONE_NUMBER_ID}/calls` body when set and omit it otherwise. Meta asks for it whenever the token has messaging access to more than one Messaging account on the number, with the same value on every request for a call. Documented in [Calling](docs/calling.md#notes). No new endpoint, webhook, or error code; Meta's reference points to calling error codes without naming a new one.
@@ -1452,4 +1453,4 @@
 
 ---
 
-**Progress: 493/505 (98%)**
+**Progress: 493/506 (97%)**
