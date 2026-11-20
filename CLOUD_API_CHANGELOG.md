@@ -1,8 +1,24 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-11-18T17:54:34.369Z
+> Updated: 2026-11-20T17:40:13.354Z
 
+
+## November 20, 2026
+
+- [ ] **#509** Announced an upcoming error code change.
+
+## November 19, 2026
+
+- [ ] **#508** Added the calling quality rating for business phone numbers and the CALLING_QUALITY_UPDATE account_update webhook event.
+
+## November 18, 2026
+
+- [ ] **#507** Added a free_tier value to the subtype field in the pricing object of status messages webhooks.
+
+## November 17, 2026
+
+- [ ] **#506** Added Embedded Signup error codes for later steps, such as phone number limits, verification codes, WhatsApp Business app connection, account setup, and saving.
 
 ## November 16, 2026
 
@@ -1453,4 +1469,4 @@
 
 ---
 
-**Progress: 493/506 (97%)**
+**Progress: 493/510 (97%)**
