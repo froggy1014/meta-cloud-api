@@ -1,8 +1,44 @@
 # WhatsApp Business Platform API — Changelog Tracker
 
 > Source: https://developers.facebook.com/documentation/business-messaging/whatsapp/changelog
-> Updated: 2026-11-07T15:34:23.492Z
+> Updated: 2026-11-20T17:40:13.354Z
 
+
+## November 20, 2026
+
+- [ ] **#509** Announced an upcoming error code change.
+
+## November 19, 2026
+
+- [ ] **#508** Added the calling quality rating for business phone numbers and the CALLING_QUALITY_UPDATE account_update webhook event.
+
+## November 18, 2026
+
+- [ ] **#507** Added a free_tier value to the subtype field in the pricing object of status messages webhooks.
+
+## November 17, 2026
+
+- [ ] **#506** Added Embedded Signup error codes for later steps, such as phone number limits, verification codes, WhatsApp Business app connection, account setup, and saving.
+
+## November 16, 2026
+
+- [ ] **#504** Added more specific Embedded Signup error codes for phone number, verification code, and WhatsApp Business app number errors.
+
+## November 13, 2026
+
+- [ ] **#503** Added localized business verification, starting with a limited test of Alipay verification in WhatsApp Manager for businesses registered in mainland China.
+
+## November 12, 2026
+
+- [ ] **#502** Added the call_permission_mode calling setting to opt in to or out of quality-based business-initiated calling.
+
+## November 11, 2026
+
+- [ ] **#500** Removed the manual onboarding requirement for Pix with redirect. Embedded Signup v4-public-preview and v5-public-preview now show the display name screen to all business customers.
+
+## November 10, 2026
+
+- [ ] **#501** Updated the Tech Partner upgrade guide for Partnership Home and renamed Solution Partners to Technology Partners with the Reseller add-on.
 
 ## November 6, 2026
 
@@ -24,6 +60,7 @@
 
 ## November 2, 2026
 
+- [ ] **#505** Calling API requests and SIP calls now accept a Messaging account, so you can name the Messaging account a call belongs to.
 - [x] **#495** Calling API requests now accept a Messaging account, so you can name the Messaging account a call belongs to.
 
   SDK impact: Added optional `messaging_account_id?: string` to `InitiateCallRequest`, `PreAcceptCallRequest`, `AcceptCallRequest`, `RejectCallRequest`, and `TerminateCallRequest`, so `client.calling.initiateCall` / `preAcceptCall` / `acceptCall` / `rejectCall` / `terminateCall` send it in the `POST /{PHONE_NUMBER_ID}/calls` body when set and omit it otherwise. Meta asks for it whenever the token has messaging access to more than one Messaging account on the number, with the same value on every request for a call. Documented in [Calling](docs/calling.md#notes). No new endpoint, webhook, or error code; Meta's reference points to calling error codes without naming a new one.
@@ -1432,4 +1469,4 @@
 
 ---
 
-**Progress: 493/500 (99%)**
+**Progress: 493/510 (97%)**
