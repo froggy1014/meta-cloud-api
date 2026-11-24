@@ -43,12 +43,14 @@ Meta Business Agent message analytics (documented September 28, 2026): non-templ
 
 Service message exemptions (documented September 29, 2026): from October 1, 2026 a **reaction message** is the only service message type that stays free for every business, and reactions do not count toward the 1,000 free monthly service messages per business phone number. Separately, **eligible governments and non-profits** keep service messages free beyond the monthly free tier from October 1, 2026 through December 31, 2027 — government departments and agencies, inter-governmental organizations, and community non-profits (public health, crisis response, disaster relief, non-partisan civic engagement). For organizations Meta has already identified as eligible the policy applies from 12am on October 1, 2026 in the WhatsApp Business account's timezone; AI Providers are charged under their own policy instead. Eligibility is decided by Meta, not set through the API. Exempt deliveries keep `pricing.type: 'free_customer_service'` (or `'free_group_customer_service'` for groups), so `type` alone does not identify them.
 
-Government and non-profit exemption subtype (October 12, 2026): status webhooks now carry an optional `pricing.subtype`, typed on `StatusWebhook['pricing']`. It is `'paid_exempt'` only on service messages that are free because the organization is eligible for the government and non-profit policy, and absent on every other status, including ordinary free-tier service deliveries:
+Government and non-profit exemption subtype (October 12, 2026): status webhooks now carry an optional `pricing.subtype`, typed on `StatusWebhook['pricing']`. It is `'paid_exempt'` on service messages that are free because the organization is eligible for the government and non-profit policy. Since November 18, 2026 it is also `'free_tier'` on service messages that are free because they were delivered within the business phone number's free tier of monthly service messages. It is absent on every other status:
 
 ```ts
 Whatsapp.processor.onStatus((_wa, { status }) => {
     if (status.pricing?.subtype === 'paid_exempt') {
         // Free under the eligible governments and non-profits policy
+    } else if (status.pricing?.subtype === 'free_tier') {
+        // Free within the monthly free tier of service messages
     }
 });
 ```

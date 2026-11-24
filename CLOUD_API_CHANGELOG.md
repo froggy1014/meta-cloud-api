@@ -6,39 +6,57 @@
 
 ## November 20, 2026
 
-- [ ] **#509** Announced an upcoming error code change.
+- [x] **#509** Announced an upcoming error code change.
+
+  SDK impact: Added `131066` (marketing message not delivered for template quality or max price) to `WHATSAPP_ERROR_CODES` and `SEND_MESSAGE_ERROR_CODES`, so it maps to `WhatsAppSendMessageError`. Meta starts returning it in place of `131049` for those cases in February 2027; `131049` stays for healthy-ecosystem non-delivery. Documented in [Marketing Messages](docs/marketing-messages.md#notes).
 
 ## November 19, 2026
 
-- [ ] **#508** Added the calling quality rating for business phone numbers and the CALLING_QUALITY_UPDATE account_update webhook event.
+- [x] **#508** Added the calling quality rating for business phone numbers and the CALLING_QUALITY_UPDATE account_update webhook event.
+
+  SDK impact: Added `calling_quality_rating?: CallingQualityRating` (`'GREEN' | 'YELLOW' | 'RED'`) to `PhoneNumberResponse` and `calling_quality_rating` to `PhoneNumberField`, so `client.phoneNumbers.getPhoneNumberById('calling_quality_rating')` is typed. Added the `CALLING_QUALITY_UPDATE` `account_update` event and `calling_quality_info: { current_rating, previous_rating }` (`CallingQualityInfo`) on `AccountUpdateValue`; Meta includes it only when the app has `whatsapp_business_management`. Documented in [Calling](docs/calling.md#notes) and [Phone Numbers](docs/phone-numbers.md#notes).
 
 ## November 18, 2026
 
-- [ ] **#507** Added a free_tier value to the subtype field in the pricing object of status messages webhooks.
+- [x] **#507** Added a free_tier value to the subtype field in the pricing object of status messages webhooks.
+
+  SDK impact: Widened `StatusWebhook['pricing'].subtype` to `'paid_exempt' | 'free_tier'`; `free_tier` marks service messages free within the number's monthly free tier. Documented in [Messages](docs/messages.md).
 
 ## November 17, 2026
 
-- [ ] **#506** Added Embedded Signup error codes for later steps, such as phone number limits, verification codes, WhatsApp Business app connection, account setup, and saving.
+- [x] **#506** Added Embedded Signup error codes for later steps, such as phone number limits, verification codes, WhatsApp Business app connection, account setup, and saving.
+
+  SDK impact: Docs only. Embedded Signup errors surface in the browser-side integration, not in Graph API responses the SDK parses, so no error mapping was added. Documented in [Registration](docs/registration.md).
 
 ## November 16, 2026
 
-- [ ] **#504** Added more specific Embedded Signup error codes for phone number, verification code, and WhatsApp Business app number errors.
+- [x] **#504** Added more specific Embedded Signup error codes for phone number, verification code, and WhatsApp Business app number errors.
+
+  SDK impact: Docs only. Same as #506: new Embedded Signup error codes (for example `3441069`/`3441070` replacing `2494064`) are client-side; no SDK change. Documented in [Registration](docs/registration.md).
 
 ## November 13, 2026
 
-- [ ] **#503** Added localized business verification, starting with a limited test of Alipay verification in WhatsApp Manager for businesses registered in mainland China.
+- [x] **#503** Added localized business verification, starting with a limited test of Alipay verification in WhatsApp Manager for businesses registered in mainland China.
+
+  SDK impact: Docs only. Alipay verification in WhatsApp Manager is a limited test with no API or webhook. Noted in [Registration](docs/registration.md).
 
 ## November 12, 2026
 
-- [ ] **#502** Added the call_permission_mode calling setting to opt in to or out of quality-based business-initiated calling.
+- [x] **#502** Added the call_permission_mode calling setting to opt in to or out of quality-based business-initiated calling.
+
+  SDK impact: Added `CallPermissionMode` (`'ALLOW_APPROVED_PERMISSION_ONLY' | 'ALLOW_UNLESS_PERMISSION_REVOKED'`) and optional `call_permission_mode` on `CallingSettings`, so `updateCallingSettings` sends it and `getCallingSettings` types it. Added error `138039` (not eligible or recently restricted for calling quality) to `CALLING_ERROR_CODES` and `WHATSAPP_ERROR_CODES`. Added optional `call_permission_mode` to `AccountSettingsCallingConfig`; the `account_settings_update` reference page did not load, so that payload placement is unverified and should be confirmed by a person. Documented in [Calling](docs/calling.md#notes).
 
 ## November 11, 2026
 
-- [ ] **#500** Removed the manual onboarding requirement for Pix with redirect. Embedded Signup v4-public-preview and v5-public-preview now show the display name screen to all business customers.
+- [x] **#500** Removed the manual onboarding requirement for Pix with redirect. Embedded Signup v4-public-preview and v5-public-preview now show the display name screen to all business customers.
+
+  SDK impact: Docs only. Pix with redirect no longer needs manual onboarding, and Embedded Signup `v4-public-preview` / `v5-public-preview` show the display name screen to all customers. Updated [Templates](docs/templates.md) and [Registration](docs/registration.md).
 
 ## November 10, 2026
 
-- [ ] **#501** Updated the Tech Partner upgrade guide for Partnership Home and renamed Solution Partners to Technology Partners with the Reseller add-on.
+- [x] **#501** Updated the Tech Partner upgrade guide for Partnership Home and renamed Solution Partners to Technology Partners with the Reseller add-on.
+
+  SDK impact: Docs only. Partnership Home replaces the Partner Portal and Solution Partners are renamed Technology Partners with the Reseller add-on; no API surface. Noted in [Registration](docs/registration.md).
 
 ## November 6, 2026
 
@@ -60,7 +78,9 @@
 
 ## November 2, 2026
 
-- [ ] **#505** Calling API requests and SIP calls now accept a Messaging account, so you can name the Messaging account a call belongs to.
+- [x] **#505** Calling API requests and SIP calls now accept a Messaging account, so you can name the Messaging account a call belongs to.
+
+  SDK impact: Docs only. Duplicate of #495 for the Calling API body field (already implemented); adds the `x-wa-meta-messaging-account-id` SIP header, which is set in the SIP stack, not the SDK. Documented in [Calling](docs/calling.md#notes).
 - [x] **#495** Calling API requests now accept a Messaging account, so you can name the Messaging account a call belongs to.
 
   SDK impact: Added optional `messaging_account_id?: string` to `InitiateCallRequest`, `PreAcceptCallRequest`, `AcceptCallRequest`, `RejectCallRequest`, and `TerminateCallRequest`, so `client.calling.initiateCall` / `preAcceptCall` / `acceptCall` / `rejectCall` / `terminateCall` send it in the `POST /{PHONE_NUMBER_ID}/calls` body when set and omit it otherwise. Meta asks for it whenever the token has messaging access to more than one Messaging account on the number, with the same value on every request for a call. Documented in [Calling](docs/calling.md#notes). No new endpoint, webhook, or error code; Meta's reference points to calling error codes without naming a new one.
@@ -1469,4 +1489,4 @@
 
 ---
 
-**Progress: 493/510 (97%)**
+**Progress: 503/510 (99%)**

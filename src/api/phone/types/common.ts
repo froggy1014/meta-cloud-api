@@ -4,6 +4,8 @@ import type { Paging, ResponseSuccess } from '../../../types/request';
 
 export type QualityRating = 'GREEN' | 'YELLOW' | 'RED' | 'NA' | 'UNKNOWN';
 
+export type CallingQualityRating = 'GREEN' | 'YELLOW' | 'RED';
+
 export type AccountMode = 'LIVE' | 'SANDBOX';
 
 export type CodeVerificationStatus =
@@ -73,6 +75,7 @@ export type PhoneNumberField =
     | 'display_phone_number'
     | 'id'
     | 'quality_rating'
+    | 'calling_quality_rating'
     | 'verified_name'
     | 'account_mode'
     | 'certificate'
@@ -192,6 +195,12 @@ export type PhoneNumberResponse = {
     display_phone_number: string;
     id: string;
     quality_rating: QualityRating;
+    /**
+     * Calling quality rating for numbers that make business-initiated calls (Nov 19, 2026).
+     * Separate from `quality_rating`. Omitted for numbers without enough business-initiated
+     * calls to be rated.
+     */
+    calling_quality_rating?: CallingQualityRating;
     verified_name: string;
     account_mode?: AccountMode;
     certificate?: string;

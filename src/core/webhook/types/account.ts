@@ -1,3 +1,5 @@
+import type { CallingQualityRating } from '../../../api/phone/types/common';
+
 // ============================================================================
 // Account Update Webhook Types
 // @see https://developers.facebook.com/documentation/business-messaging/whatsapp/webhooks/reference/account_update
@@ -18,6 +20,7 @@ export type AccountUpdateEvent =
     | 'ACCOUNT_VIOLATION' // WABA violated Meta policies or terms; see violation_info
     | 'AD_ACCOUNT_LINKED' // WABA onboarded onto MM API and partner given access to ad accounts
     | 'AUTH_INTL_PRICE_ELIGIBILITY_UPDATE' // WABA is eligible for authentication-international rates
+    | 'CALLING_QUALITY_UPDATE' // A business phone number's calling quality rating changed; see calling_quality_info
     | 'CALLING_TIER_UPDATE' // A business phone number moved up a business-initiated calling tier; see phone_number, calling_limit_info
     | 'BUSINESS_PRIMARY_LOCATION_COUNTRY_UPDATE' // WABA's primary business location was set; see country
     | 'DISABLED_UPDATE' // WABA banned or reinstated; see ban_info
@@ -135,6 +138,15 @@ export type CallingLimitTier =
     | 'CALLING_TIER_15K'
     | 'CALLING_TIER_UNLIMITED';
 
+/**
+ * Present on CALLING_QUALITY_UPDATE events, only when your app has
+ * `whatsapp_business_management` for the account.
+ */
+export interface CallingQualityInfo {
+    current_rating: CallingQualityRating;
+    previous_rating: CallingQualityRating;
+}
+
 /** Present on CALLING_TIER_UPDATE events */
 export interface CallingLimitInfo {
     current_limit: CallingLimitTier;
@@ -201,6 +213,8 @@ export interface AccountUpdateValue {
     auth_international_rate_eligibility?: AuthInternationalRateEligibility;
     /** Present on CALLING_TIER_UPDATE events */
     calling_limit_info?: CallingLimitInfo;
+    /** Present on CALLING_QUALITY_UPDATE events (requires `whatsapp_business_management`) */
+    calling_quality_info?: CallingQualityInfo;
     /** Present on VOLUME_BASED_PRICING_TIER_UPDATE events */
     volume_tier_info?: VolumeTierInfo;
     /** Present on PARTNER_REMOVED events where business used WhatsApp Business app + Cloud API */
@@ -311,6 +325,12 @@ export interface AccountSettingsCallingConfig {
     call_icon_visibility?: string;
     /** Status of callback permission */
     callback_permission_status?: 'ENABLED' | 'DISABLED' | string;
+    /**
+     * Business-initiated call permission mode (Nov 12, 2026). Meta's changelog says mode changes
+     * arrive on this webhook; the exact payload location was not confirmed, so it is typed on the
+     * calling settings object that settings GET uses.
+     */
+    call_permission_mode?: 'ALLOW_APPROVED_PERMISSION_ONLY' | 'ALLOW_UNLESS_PERMISSION_REVOKED' | string;
     /** Call hours configuration */
     call_hours?: { status: 'ENABLED' | 'DISABLED' | string };
     /** SIP (Session Initiation Protocol) configuration */
