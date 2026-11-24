@@ -34,6 +34,16 @@ describe('PhoneNumber API - Unit Tests', () => {
             expect(body).toBeNull();
         });
 
+        it('requests calling_quality_rating through the fields parameter', async () => {
+            mockRequestSend.mockResolvedValue({ id: 'phone_123', calling_quality_rating: 'YELLOW' });
+
+            const result = await whatsApp.phoneNumbers.getPhoneNumberById('calling_quality_rating');
+
+            const [, endpoint] = mockRequestSend.mock.calls[0];
+            expect(endpoint).toBe(`${whatsApp.requester.phoneNumberId}?fields=calling_quality_rating`);
+            expect(result.calling_quality_rating).toBe('YELLOW');
+        });
+
         it('should get phone number by ID with fields parameter', async () => {
             const fields = 'display_phone_number,verified_name,quality_rating';
 

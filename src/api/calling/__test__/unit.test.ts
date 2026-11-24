@@ -27,6 +27,19 @@ describe('Calling API - Unit Tests', () => {
         expect(JSON.parse(body)).toEqual({ calling: { status: 'ENABLED', call_icon_visibility: 'DEFAULT' } });
     });
 
+    it('sends call_permission_mode when opting in to quality-based calling', async () => {
+        await whatsApp.calling.updateCallingSettings({
+            calling: { status: 'ENABLED', call_permission_mode: 'ALLOW_UNLESS_PERMISSION_REVOKED' },
+        });
+
+        const [method, endpoint, _, body] = mockRequestSend.mock.calls[0];
+        expect(method).toBe('POST');
+        expect(endpoint).toBe(`${whatsApp.requester.phoneNumberId}/settings`);
+        expect(JSON.parse(body)).toEqual({
+            calling: { status: 'ENABLED', call_permission_mode: 'ALLOW_UNLESS_PERMISSION_REVOKED' },
+        });
+    });
+
     it('gets calling settings with params', async () => {
         await whatsApp.calling.getCallingSettings({ fields: ['calling'], include_sip_credentials: true });
 

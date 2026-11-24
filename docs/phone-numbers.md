@@ -33,6 +33,7 @@ Retrieve phone number details, request verification codes, configure conversatio
 - Official Business Account application payloads support the website fields Meta publishes in the OpenAPI examples and schema: `website_url` and `business_website_url`.
 - Verification `code_method` is `SMS` or `VOICE`.
 - Conversational automation supports welcome messages, prompts, and commands.
+- Calling quality rating (November 19, 2026): request `calling_quality_rating` through the `fields` parameter (for example `client.phoneNumbers.getPhoneNumberById('calling_quality_rating')`). Values are `GREEN`, `YELLOW`, or `RED`; the field is separate from `quality_rating` and is omitted for numbers that have not made enough business-initiated calls to be rated. Needs `whatsapp_business_management`. Rating transitions arrive as `CALLING_QUALITY_UPDATE` events on the `account_update` webhook (see [Calling](calling.md)).
 
 ## Example
 ```ts

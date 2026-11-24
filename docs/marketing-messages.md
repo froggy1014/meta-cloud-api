@@ -85,6 +85,7 @@ Messaging campaigns (beta in Meta Business Suite) can be paused and resumed afte
 - `sendTemplateMessage` accepts `bid_spec: { per_message_bid_multiplier }` — a positive float applied to the template's `bid_amount` for that one send, so the max price changes without editing the template. Default is `1`.
 - `1.5` raises the effective max price by 50% (template `bid_amount` 2000 becomes 3000 for that message); `0.5` halves it.
 - The send call keeps Meta's `bid_spec` object name even though template create/update moved to `optimization_spec`. Meta flags the message-level multiplier as subject to change during the beta.
+- Error code change (announced November 20, 2026): starting February 2027, Meta returns `131066` instead of `131049` when a marketing message is not delivered because of template quality or, for max price templates, price. `131049` keeps meaning the message was not delivered to support a healthy messaging experience. The SDK maps `131066` to `WhatsAppSendMessageError` ahead of time, so handle both codes in retry logic. Raising template quality or the max price can improve later sends but does not guarantee delivery.
 
 ## Example
 ```ts

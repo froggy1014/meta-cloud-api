@@ -315,4 +315,89 @@ describe('WebhookProcessor', () => {
             expect(handler.mock.lastCall?.[1].value.phone_number).toBe('15550783881');
         });
     });
+
+    // Changelog entry #508
+    describe('account_update CALLING_QUALITY_UPDATE', () => {
+        it('passes calling_quality_info through to the handler', async () => {
+            const processor = createProcessor();
+            const handler = vi.fn();
+            processor.onAccountUpdate(handler);
+
+            const value: AccountUpdateValue = {
+                phone_number: '16315555555',
+                event: 'CALLING_QUALITY_UPDATE',
+                calling_quality_info: { current_rating: 'RED', previous_rating: 'YELLOW' },
+            };
+
+            await processor.processWebhook(
+                new Request('https://example.com/webhook', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        object: 'whatsapp_business_account',
+                        entry: [{ id: '102290129340398', changes: [{ field: 'account_update', value }] }],
+                    }),
+                }),
+            );
+
+            expect(handler).toHaveBeenCalledTimes(1);
+            expect(handler.mock.lastCall?.[1].value.calling_quality_info).toEqual({
+                current_rating: 'RED',
+                previous_rating: 'YELLOW',
+            });
+        });
+    });
+
+    // Changelog entry #507
+    describe('status pricing free_tier subtype', () => {
+        it('passes the free_tier pricing subtype through to the status handler', async () => {
+            const processor = createProcessor();
+            const handler = vi.fn();
+            processor.onStatus(handler);
+
+            const status: StatusWebhook = {
+                id: 'wamid.TEST',
+                status: 'delivered',
+                timestamp: '1760227200',
+                recipient_id: '15551234567',
+                pricing: {
+                    billable: false,
+                    pricing_model: 'PMP',
+                    category: 'service',
+                    type: 'free_customer_service',
+                    subtype: 'free_tier',
+                },
+            };
+
+            await processor.processWebhook(
+                new Request('https://example.com/webhook', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        object: 'whatsapp_business_account',
+                        entry: [
+                            {
+                                id: 'WABA_ID',
+                                changes: [
+                                    {
+                                        field: 'messages',
+                                        value: {
+                                            messaging_product: 'whatsapp',
+                                            metadata: {
+                                                display_phone_number: '15550000000',
+                                                phone_number_id: '123456789',
+                                            },
+                                            statuses: [status],
+                                        },
+                                    },
+                                ],
+                            },
+                        ],
+                    }),
+                }),
+            );
+
+            expect(handler.mock.lastCall?.[1].status.pricing?.subtype).toBe('free_tier');
+        });
+    });
 });

@@ -10,6 +10,7 @@ import type { ResponseSuccess } from '../../../types/request';
 export type CallingStatus = 'ENABLED' | 'DISABLED';
 export type CallIconVisibility = 'DEFAULT' | 'DISABLE_ALL';
 export type CallbackPermissionStatus = 'ENABLED' | 'DISABLED';
+export type CallPermissionMode = 'ALLOW_APPROVED_PERMISSION_ONLY' | 'ALLOW_UNLESS_PERMISSION_REVOKED';
 export type CallHoursStatus = 'ENABLED' | 'DISABLED';
 export type SipStatus = 'ENABLED' | 'DISABLED';
 
@@ -51,6 +52,8 @@ export type CallingSettings = {
     call_icon_visibility?: CallIconVisibility;
     call_hours?: CallHours;
     callback_permission_status?: CallbackPermissionStatus;
+    /** Opt in to or out of quality-based business-initiated calling. Existing mode is kept when omitted. */
+    call_permission_mode?: CallPermissionMode;
     sip?: SipSettings;
 };
 

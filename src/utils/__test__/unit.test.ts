@@ -82,6 +82,18 @@ describe('WhatsApp error mapping', () => {
         expect(error).toBeInstanceOf(WhatsAppCallingError);
     });
 
+    it('maps quality-based calling opt-in error 138039 as a calling error', () => {
+        expect(isWhatsAppErrorCode(138039)).toBe(true);
+        const error = createWhatsAppApiError(buildError(138039));
+        expect(error).toBeInstanceOf(WhatsAppCallingError);
+    });
+
+    it('maps marketing template quality error 131066 as a send message error', () => {
+        expect(isWhatsAppErrorCode(131066)).toBe(true);
+        const error = createWhatsAppApiError(buildError(131066));
+        expect(error).toBeInstanceOf(WhatsAppSendMessageError);
+    });
+
     it('maps group errors', () => {
         const error = createWhatsAppApiError(buildError(131020));
         expect(error).toBeInstanceOf(WhatsAppGroupError);

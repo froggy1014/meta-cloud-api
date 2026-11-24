@@ -75,16 +75,18 @@ export interface StatusWebhook {
         type: 'regular' | 'free_customer_service' | 'free_entry_point' | 'free_group_customer_service';
         /**
          * Pricing subtype (added October 12, 2026). Only included for service
-         * messages that are free because the organization is eligible for the
-         * pricing policy for eligible governments and non-profits:
+         * service messages that are free:
          * - `paid_exempt` — the service message is free under that policy.
          *
-         * Absent on every other status, including ordinary free-tier service
-         * deliveries.
+         * - `free_tier` — the service message is free because it was delivered within
+         *   the business phone number's free tier of monthly service messages
+         *   (added November 18, 2026).
+         *
+         * Absent on every other status.
          *
          * @see {@link https://developers.facebook.com/documentation/business-messaging/whatsapp/pricing#service-pricing-policy-for-eligible-governments-and-non-profits | Pricing policy for eligible governments and non-profits}
          */
-        subtype?: 'paid_exempt';
+        subtype?: 'paid_exempt' | 'free_tier';
         /**
          * Pricing category (rate) applied if billable.
          *
