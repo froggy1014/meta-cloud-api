@@ -1,5 +1,12 @@
 # nextjs-app-router-example
 
+## 0.1.33
+
+### Patch Changes
+
+- Updated dependencies [ba7cf6e]
+  - meta-cloud-api@3.14.0
+
 ## 0.1.32
 
 ### Patch Changes

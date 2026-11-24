@@ -1,5 +1,12 @@
 # meta-cloud-api-express-production
 
+## 1.0.33
+
+### Patch Changes
+
+- Updated dependencies [ba7cf6e]
+  - meta-cloud-api@3.14.0
+
 ## 1.0.32
 
 ### Patch Changes
